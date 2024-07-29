@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user }} Alive?</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+    <div class="card">
+        <a style="font-size: 2em;"><ruby>似<rt>sǐ</rt></ruby>了吗?</a>
+
+        <div style="height: 20px;"></div>
+
+        <a>wyf9's Status:<br><a id="status" style="font-size: 1.2em;">Updating...</a></a>
+        <br>
+        <!-- <a id="additional-info" style="font-size: 1em;"></a> -->
+
+        <div style="height: 50px;"></div>
+
+
+
+        <div style="height: 10px;"></div>
+        <a>你可以通过这个页面知晓 {{ user }} 的在线状态。
+            <br>
+            <a href="{{ repo }}" target="_blank" style="color: rgb(0, 255, 0);">
+                GitHub Repo
+            </a>
+        </a>
+    </div>
+    <script src="assets/query.js"></script>
+</body>
+
+</html>
