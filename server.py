@@ -2,18 +2,28 @@
 # coding: utf-8
 import utils as u
 from data import data as data_init
-from flask import Flask as flask
-import json
-from flask import request, url_for, redirect, flash
+from flask import Flask, render_template, request, url_for, redirect, flash
 from markupsafe import escape
-DEBUG = True
+import json
+
 d = data_init()
-app = flask(__name__)
+app = Flask(__name__)
 
 
-@app.route('/hello')
-def hello():
-    return 'Hello world'
+@app.route('/')
+def index():
+    d.load()
+    ot = d.data['other']
+    stat = d.data['status_list'][d.data['status']]
+    return render_template('index.html',
+        user=ot['user'],
+        learn_more=ot['learn_more'],
+        repo=ot['repo'],
+        status_name=stat['name'],
+        status_desc=stat['desc'],
+        status_color=stat['color'],
+        more_text=ot['more_text']
+    )
 
 
 @app.route('/query')
@@ -55,8 +65,8 @@ def set():
             status = int(status)
         except:
             return reterr(
-                code = 'bad request',
-                message = "argument 'status' must be a number"
+                code='bad request',
+                message="argument 'status' must be a number"
             )
         secret = escape(request.args.get("secret"))
         u.info(f'req: status: {status}, secret: "{secret}"')
@@ -71,20 +81,20 @@ def set():
             return u.format_dict(ret)
         else:
             return reterr(
-                code = 'not authorized',
-                message = 'invaild secret'
+                code='not authorized',
+                message='invaild secret'
             )
     else:
         return reterr(
-            code = 'bad request',
-            message = 'only support GET request now'
+            code='bad request',
+            message='only support GET request now'
         )
-    
 
 
 if __name__ == '__main__':
+    d.load()
     app.run(
-        host='0.0.0.0',
-        port=3010,
-        debug=DEBUG
+        host=d.data['host'],
+        port=d.data['port'],
+        debug=d.data['debug']
     )

@@ -29,6 +29,8 @@ body {
     text-align: center;
 }
 
+/* 以下为各种状态的颜色 */
+
 .sleeping {
     color: gray;
 }

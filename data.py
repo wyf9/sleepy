@@ -9,18 +9,29 @@ def initJson():
     try:
         jsonData = {
             'version': 1,
+            'debug': False,
+            'host': '0.0.0.0',
+            'port': 9010,
             'secret': '',
             'status': 0,
             'status_list': [
                 {
-                    'status': 0,
-                    'name': '在线'
+                    'name': '活着',
+                    'desc': '目前在线，可以通过任何可用的联系方式联系本人。',
+                    'color': 'awake'
                 },
                 {
-                    'status': 1,
-                    'name': '不在线'
+                    'name': '似了',
+                    'desc': '睡似了或其他原因不在线，紧急情况请使用电话联系。',
+                    'color': 'sleeping'
                 }
-            ]
+            ],
+            'other': {
+                'user': 'User',
+                'learn_more': 'GitHub Repo',
+                'repo': 'https://github.com/wyf9/sleepy',
+                'more_text': ''
+            }
         }
 
         with open('data.json', 'w+', encoding='utf-8') as file:
