@@ -40,10 +40,12 @@ python3 server.py
 
 确定无报错后使用 Ctrl+C 退出, 并编辑目录下生成的 `data.json` 文件 (实例请查看 `example.jsonc`)
 
-4. 启动程序
+4. 启动程序即可
 
 ```shell
 python3 server.py
 ```
-
+<!--
 > 如是在家庭内网等环境部署，可以试试 Cloudflare Tunnel (演示站使用的方案) ~~仅是觉得稳定推荐，勿喷~~
+> 速度过慢可尝试 [优选ip](https://github.com/XIU2/CloudflareSpeedTest)
+-->
