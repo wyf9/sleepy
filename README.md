@@ -36,15 +36,35 @@ cd sleepy
 python3 server.py
 ```
 
-如果不出意外，会提示: `[Warning] [YYYY-MM-DD hh:mm:ss] data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置 (实例请 [查看 `example.jsonc`](./example.jsonc) )
+如果不出意外，会提示: `[Warning] [YYYY-MM-DD hh:mm:ss] data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
 
-4. 启动程序即可
+## 使用
+
+有两种启动方式:
+
+- 直接启动
 
 ```shell
 python3 server.py
 ```
 
-## 使用
+- 简易启动器
+
+```shell
+python3 start.py
+```
+
+相比直接启动, 启动器可实现在服务器退出后自动重启
+
+<details>
+<summary>点击展开</summary>
+
+```shell
+
+```
+
+</details>
+
 
 默认服务 http 端口: `9010`
 
@@ -120,6 +140,6 @@ Fork 后可自行更改代码以实现更多功能
 
 ## 关于
 
-本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site here](https://maao.cc/sleepy/), 并部分借鉴了前端代码。
+本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并部分借鉴了前端代码。
 
 如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new).
