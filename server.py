@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 # ---
 
+
 def reterr(code, message):
     ret = {
         'success': False,
@@ -20,6 +21,7 @@ def reterr(code, message):
     u.error(f'{code} - {message}')
     return u.format_dict(ret)
 
+
 def get_ip(req):
     ip1 = req.remote_addr
     try:
@@ -28,10 +30,13 @@ def get_ip(req):
         ip2 = None
     return ip1, ip2
 
+
 def showip(req, msg):
     ip1, ip2 = get_ip(req)
     u.infon(f'- Conn: {ip1} / {ip2} : {msg}')
+
 # ---
+
 
 @app.route('/')
 def index():
@@ -39,7 +44,8 @@ def index():
     showip(request, '/')
     ot = d.data['other']
     stat = d.data['status_list'][d.data['status']]
-    return render_template('index.html',
+    return render_template(
+        'index.html',
         user=ot['user'],
         learn_more=ot['learn_more'],
         repo=ot['repo'],
@@ -105,6 +111,7 @@ def set():
             code='bad request',
             message='only support GET request now'
         )
+
 
 @app.route('/set/<secret>/<int:status>')
 def set_path(secret, status):
