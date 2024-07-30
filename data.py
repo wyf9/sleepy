@@ -8,7 +8,7 @@ from jsonc_parser.parser import JsoncParser as jsonp
 
 def initJson():
     try:
-        jsonData = jsonp.parse_file('example.jsonc')
+        jsonData = jsonp.parse_file('example.jsonc', encoding='utf-8')
         with open('data.json', 'w+', encoding='utf-8') as file:
             json.dump(jsonData, file, indent=4, ensure_ascii=False)
     except:

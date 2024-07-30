@@ -1,0 +1,20 @@
+# Builder script
+project_manifest.json
+build.py
+
+# __pycache__ folder
+**/__pycache__
+
+# Tools for docs
+compile_docs.py
+**/docs_templates
+
+# Test files
+test.py
+test.json
+test.jsonc
+
+# Distribution folders
+/build
+/dist
+/*.egg-info
