@@ -22,6 +22,6 @@
         "user": "User", // 你的名字
         "learn_more": "GitHub Repo", // 更多信息链接的提示, 默认为 github repo
         "repo": "https://github.com/wyf9/sleepy", // 更多信息链接的目标, 可填存储库链接
-        "more_text": "" // 内容将在状态信息和 "你可以知晓..." 中间插入 (不转义)
+        "more_text": "" // 内容将在状态信息和 "你可以通过这个页面知晓..." 中间插入 (不转义)
     }
 }

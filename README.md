@@ -1,10 +1,8 @@
 # sleepy
 
-Are you online/sleeping? / 个人在线状态监测
+Are you sleeping?
 
 灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site here](https://maao.cc/sleepy/), 并部分借鉴了代码。
-
-> 文档尚未完成
 
 如有 Bug / 建议 请 [issue](https://github.com/wyf9/sleepy/issues/new)
 
@@ -27,7 +25,7 @@ cd sleepy
 ./install_lib.sh
 # or:
 .\install_lib.bat
-# 也可自行安装: See requirements.txt
+# 也可自行安装: pip install -r requirements.txt
 ```
 
 3. 编辑配置文件
@@ -38,9 +36,9 @@ cd sleepy
 python3 server.py
 ```
 
-确定无报错后使用 Ctrl+C 退出, 并编辑目录下生成的 `data.json` 文件 (实例请查看 `example.jsonc`)
+如果不出意外，会提示: `[Warning] [YYYY-MM-DD hh:mm:ss] data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置 (实例请 [查看 `example.jsonc`](./example.jsonc) )
 
-4. 启动程序即可
+1. 启动程序即可
 
 ```shell
 python3 server.py
