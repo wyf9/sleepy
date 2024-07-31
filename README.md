@@ -78,7 +78,31 @@ python3 start.py
 <summary>点击展开</summary>
 
 ```shell
-
+Server path: /mnt/usb16/dev/wyf9/sleepy/server.py
+Starting server #1
+ * Serving Flask app 'server'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment.rUse a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:9010
+ * Running on http://192.168.1.20:9010
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 114-514-191
+^C#1 exited with code 2
+waiting 5s
+Starting server #2
+ * Serving Flask app 'server'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:9010
+ * Running on http://192.168.1.20:9010
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 114-514-191
 ```
 
 </details>
