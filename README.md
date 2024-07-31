@@ -72,10 +72,11 @@ python3 start.py
 | -------------------------------------- | ------------------- |
 | `/`                                    | 显示主页            |
 | `/query`                               | 获取状态            |
+| `/get/status_list`                     | 获取可用状态列表    |
 | `/set?secret=<secret>&status=<status>` | 设置状态 (url 参数) |
 | `/set/<secret>/<status>`               | 设置状态 (路径)     |
 
-> 以下是三个接口的解释
+> 以下是 4 个接口的解释
 
 1. `/query`:
 
@@ -95,7 +96,33 @@ python3 start.py
 }
 ```
 
-2. `/set?secret=<secret>&status=<status>`
+2. `/get/status_list`
+
+获取可用状态的列表 (无需鉴权)
+
+返回 json:
+
+```jsonc
+[
+    {
+        "id": 0, // 索引，取决于配置文件中的有无
+        "name": "活着", // 状态名称
+        "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
+        "color": "awake" // 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
+    }, 
+    {
+        "id": 1, 
+        "name": "似了", 
+        "desc": "睡似了或其他原因不在线，紧急情况请使用电话联系。", 
+        "color": "sleeping"
+    }, 
+    // 以此类推
+]
+```
+
+> 就是返回 `data.json` 中的 `status_list` 字段
+
+3. `/set?secret=<secret>&status=<status>`
 
 设置当前状态
 
@@ -127,7 +154,7 @@ python3 start.py
 }
 ```
 
-3. `/set/<secret>/<status>`
+4. `/set/<secret>/<status>`
 
 同上 `2.`, 唯一的不同是 url 格式
 

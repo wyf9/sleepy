@@ -76,9 +76,14 @@ def query():
     }
     return u.format_dict(ret)
 
+@app.route('/get/status_list')
+def get_status_list():
+    showip(request, '/get/status_list')
+    stlst = d.dget('status_list')
+    return u.format_dict(stlst)
 
 @app.route('/set', methods=['GET', 'POST'])
-def set():
+def set_normal():
     showip(request, '/set')
     if request.method == "GET":
         status = escape(request.args.get("status"))
