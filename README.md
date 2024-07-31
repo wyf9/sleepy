@@ -4,7 +4,25 @@ Are you sleeping?
 
 一个查看个人在线状态的 Flask 网站，让他人能知道你不在而不是故意吊他/她
 
-[演示站](https://sleepy.wyf9.top) / [部署](#部署) / [使用](#使用) / [关于](#关于)
+[演示](#preview) / [部署](#部署) / [使用](#使用) / [关于](#关于)
+
+> ver: `1.0`, configver: `1`
+
+## Preview
+
+演示站: [Here](https://sleepy.wyf9.top)
+
+网页:
+
+![web-1](img/web-1.png)
+
+![web-2](img/web-2.png)
+
+服务器:
+
+![server-1](img/server-1.png)
+
+> ↑ 使用的 ssh 工具: WindTerm
 
 ## 部署
 
