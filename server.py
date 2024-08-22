@@ -43,7 +43,14 @@ def index():
     d.load()
     showip(request, '/')
     ot = d.data['other']
-    stat = d.data['status_list'][d.data['status']]
+    try:
+        stat = d.data['status_list'][d.data['status']]
+    except:
+        stat = {
+            'name': '未知',
+            'desc': '未知的标识符，可能是配置问题。',
+            'color': 'error'
+        }
     return render_template(
         'index.html',
         user=ot['user'],
