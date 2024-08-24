@@ -15,7 +15,7 @@ body, html {
 
 body {
     /* 背景图设置 */
-    background: url('https://ghsrc.wyf9.top/img13.jpg') no-repeat center center fixed;
+    background: url('{{ bg }}') no-repeat center center fixed;
     background-size: cover;
     display: flex;
     justify-content: center;

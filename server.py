@@ -2,7 +2,7 @@
 # coding: utf-8
 import utils as u
 from data import data as data_init
-from flask import Flask, render_template, request, url_for, redirect, flash
+from flask import Flask, render_template, request, url_for, redirect, flash, make_response
 from markupsafe import escape
 import json
 
@@ -63,6 +63,17 @@ def index():
     )
 
 
+@app.route('/style.css')
+def style():
+    response = make_response(render_template(
+        'style.css',
+        bg=d.data['other']['background']
+    ))
+    response.mimetype = 'text/html'
+    response.headers['Content-Type'] = 'text/css; charset=utf-8'
+    return response
+
+
 @app.route('/query')
 def query():
     d.load()
@@ -83,11 +94,13 @@ def query():
     }
     return u.format_dict(ret)
 
+
 @app.route('/get/status_list')
 def get_status_list():
     showip(request, '/get/status_list')
     stlst = d.dget('status_list')
     return u.format_dict(stlst)
+
 
 @app.route('/set', methods=['GET', 'POST'])
 def set_normal():

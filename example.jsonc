@@ -11,7 +11,7 @@
             "id": 0, // 与索引相同，非必须，仅为方便查看 (建议加上)
             "name": "活着", // 状态名称
             "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
-            "color": "awake" // 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类, 可自行前往修改
+            "color": "awake" // 状态颜色, 对应 templates/style.css 中的 .sleeping .awake 等类, 可自行前往修改
         },
         { // status: 1
             "id": 1,
@@ -23,6 +23,7 @@
     ],
     "other": { // 其他配置, 如网页上的信息
         "user": "User", // 你的名字
+        "background": "https://ghsrc.wyf9.top/img13.jpg", // 背景图片 url
         "learn_more": "GitHub Repo", // 更多信息链接的提示, 默认为 github repo
         "repo": "https://github.com/wyf9/sleepy", // 更多信息链接的目标, 可填存储库链接
         "more_text": "" // 内容将在状态信息和 "你可以通过这个页面知晓..." 中间插入 (不转义)
