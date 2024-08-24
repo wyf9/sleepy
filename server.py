@@ -69,7 +69,7 @@ def style():
         'style.css',
         bg=d.data['other']['background']
     ))
-    response.mimetype = 'text/html'
+    response.mimetype = 'text/css'
     response.headers['Content-Type'] = 'text/css; charset=utf-8'
     return response
 
