@@ -2,7 +2,7 @@
 # coding: utf-8
 import utils as u
 from data import data as data_init
-from flask import Flask, render_template, request, url_for, redirect, flash
+from flask import Flask, render_template, request, url_for, redirect, flash, make_response
 from markupsafe import escape
 import json
 
@@ -22,20 +22,14 @@ def reterr(code, message):
     return u.format_dict(ret)
 
 
-def get_ip(req):
+def showip(req, msg):
     ip1 = req.remote_addr
     try:
         ip2 = req.headers['X-Forwarded-For']
+        u.infon(f'- Request: {ip1} / {ip2} : {msg}')
     except:
         ip2 = None
-    return ip1, ip2
-
-
-def showip(req, msg):
-    ip1, ip2 = get_ip(req)
-    u.infon(f'- Conn: {ip1} / {ip2} : {msg}')
-
-# ---
+        u.infon(f'- Request: {ip1} : {msg}')
 
 
 @app.route('/')
@@ -43,7 +37,14 @@ def index():
     d.load()
     showip(request, '/')
     ot = d.data['other']
-    stat = d.data['status_list'][d.data['status']]
+    try:
+        stat = d.data['status_list'][d.data['status']]
+    except:
+        stat = {
+            'name': '未知',
+            'desc': '未知的标识符，可能是配置问题。',
+            'color': 'error'
+        }
     return render_template(
         'index.html',
         user=ot['user'],
@@ -54,6 +55,17 @@ def index():
         status_color=stat['color'],
         more_text=ot['more_text']
     )
+
+
+@app.route('/style.css')
+def style_css():
+    response = make_response(render_template(
+        'style.css',
+        bg=d.data['other']['background'],
+        alpha=d.data['other']['alpha']
+    ))
+    response.mimetype = 'text/css'
+    return response
 
 
 @app.route('/query')
@@ -76,11 +88,13 @@ def query():
     }
     return u.format_dict(ret)
 
+
 @app.route('/get/status_list')
 def get_status_list():
     showip(request, '/get/status_list')
     stlst = d.dget('status_list')
     return u.format_dict(stlst)
+
 
 @app.route('/set', methods=['GET', 'POST'])
 def set_normal():

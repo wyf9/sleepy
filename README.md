@@ -6,7 +6,7 @@ Are you sleeping?
 
 [演示](#preview) / [部署](#部署) / [使用](#使用) / [关于](#关于)
 
-> ver: `1.0`, configver: `1`
+> ver: `2.0`, configver: `2`
 
 ## Preview
 
@@ -33,7 +33,7 @@ Are you sleeping?
 ```shell
 git clone https://github.com/wyf9/sleepy.git
 # or ssh:
-git clone git@github.com:wyf9/sleepy.git
+# git clone git@github.com:wyf9/sleepy.git
 ```
 
 2. 安装依赖
@@ -42,8 +42,9 @@ git clone git@github.com:wyf9/sleepy.git
 cd sleepy
 ./install_lib.sh
 # or windows:
-.\install_lib.bat
+# .\install_lib.bat
 # 也可自行安装: pip install -r requirements.txt
+# 其实只有 FLask (目前)
 ```
 
 3. 编辑配置文件
@@ -78,7 +79,31 @@ python3 start.py
 <summary>点击展开</summary>
 
 ```shell
-
+Server path: /mnt/usb16/dev/wyf9/sleepy/server.py
+Starting server #1
+ * Serving Flask app 'server'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment.rUse a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:9010
+ * Running on http://192.168.1.20:9010
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 114-514-191
+^C#1 exited with code 2
+waiting 5s
+Starting server #2
+ * Serving Flask app 'server'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:9010
+ * Running on http://192.168.1.20:9010
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 114-514-191
 ```
 
 </details>
@@ -138,7 +163,7 @@ python3 start.py
 ]
 ```
 
-> 就是返回 `data.json` 中的 `status_list` 字段
+> 就是返回 `data.json` 中的 `status_list` 列表
 
 3. `/set?secret=<secret>&status=<status>`
 
@@ -150,14 +175,14 @@ python3 start.py
 返回 json:
 
 ```jsonc
-// 1. 设置成功
+// 1. 成功
 {
     "success": true, // 请求是否成功
     "code": "OK", // 返回代码
     "set_to": 0 // 设置到的状态码
 }
 
-// 2. 失败 - 未验证
+// 2. 失败 - 鉴权失败 (密钥错误)
 {
     "success": false, // 请求是否成功
     "code": "not authorized", // 返回代码
@@ -174,17 +199,10 @@ python3 start.py
 
 4. `/set/<secret>/<status>`
 
-同上 `2.`, 唯一的不同是 url 格式
-
-### 个性化
-
-Fork 后可自行更改代码以实现更多功能
-
-- 站点图标: `static/favicon.ico`
-- 背景图: `static/style.css` 注释处
+同上 `3.`, 唯一的不同是 url 格式
 
 ## 关于
 
-本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并部分借鉴了前端代码。
+本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分~~借鉴了前端代码。在此十分感谢。
 
 如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new).
