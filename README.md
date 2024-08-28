@@ -6,7 +6,7 @@ Are you sleeping?
 
 [演示](#preview) / [部署](#部署) / [使用](#使用) / [关于](#关于)
 
-> ver: `1.0`, configver: `1`
+> ver: `2.0`, configver: `2`
 
 ## Preview
 
@@ -33,7 +33,7 @@ Are you sleeping?
 ```shell
 git clone https://github.com/wyf9/sleepy.git
 # or ssh:
-git clone git@github.com:wyf9/sleepy.git
+# git clone git@github.com:wyf9/sleepy.git
 ```
 
 2. 安装依赖
@@ -42,8 +42,9 @@ git clone git@github.com:wyf9/sleepy.git
 cd sleepy
 ./install_lib.sh
 # or windows:
-.\install_lib.bat
+# .\install_lib.bat
 # 也可自行安装: pip install -r requirements.txt
+# 其实只有 FLask (目前)
 ```
 
 3. 编辑配置文件
@@ -200,15 +201,8 @@ Press CTRL+C to quit
 
 同上 `3.`, 唯一的不同是 url 格式
 
-### 个性化
-
-Fork 后可自行更改代码以实现更多功能
-
-- 站点图标: `static/favicon.ico`
-- 背景图: ~~`static/style.css` 注释处~~ 见配置项
-
 ## 关于
 
-本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分~~借鉴了前端代码。
+本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分~~借鉴了前端代码。在此十分感谢。
 
 如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new).
