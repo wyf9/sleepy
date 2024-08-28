@@ -162,7 +162,7 @@ Press CTRL+C to quit
 ]
 ```
 
-> 就是返回 `data.json` 中的 `status_list` 字段
+> 就是返回 `data.json` 中的 `status_list` 列表
 
 3. `/set?secret=<secret>&status=<status>`
 
@@ -174,14 +174,14 @@ Press CTRL+C to quit
 返回 json:
 
 ```jsonc
-// 1. 设置成功
+// 1. 成功
 {
     "success": true, // 请求是否成功
     "code": "OK", // 返回代码
     "set_to": 0 // 设置到的状态码
 }
 
-// 2. 失败 - 未验证
+// 2. 失败 - 鉴权失败 (密钥错误)
 {
     "success": false, // 请求是否成功
     "code": "not authorized", // 返回代码
@@ -198,17 +198,17 @@ Press CTRL+C to quit
 
 4. `/set/<secret>/<status>`
 
-同上 `2.`, 唯一的不同是 url 格式
+同上 `3.`, 唯一的不同是 url 格式
 
 ### 个性化
 
 Fork 后可自行更改代码以实现更多功能
 
 - 站点图标: `static/favicon.ico`
-- 背景图: `static/style.css` 注释处
+- 背景图: ~~`static/style.css` 注释处~~ 见配置项
 
 ## 关于
 
-本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并部分借鉴了前端代码。
+本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分~~借鉴了前端代码。
 
 如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new).

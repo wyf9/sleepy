@@ -22,20 +22,14 @@ def reterr(code, message):
     return u.format_dict(ret)
 
 
-def get_ip(req):
+def showip(req, msg):
     ip1 = req.remote_addr
     try:
         ip2 = req.headers['X-Forwarded-For']
+        u.infon(f'- Request: {ip1} / {ip2} : {msg}')
     except:
         ip2 = None
-    return ip1, ip2
-
-
-def showip(req, msg):
-    ip1, ip2 = get_ip(req)
-    u.infon(f'- Conn: {ip1} / {ip2} : {msg}')
-
-# ---
+        u.infon(f'- Request: {ip1} : {msg}')
 
 
 @app.route('/')
@@ -64,13 +58,13 @@ def index():
 
 
 @app.route('/style.css')
-def style():
+def style_css():
     response = make_response(render_template(
         'style.css',
-        bg=d.data['other']['background']
+        bg=d.data['other']['background'],
+        alpha=d.data['other']['alpha']
     ))
     response.mimetype = 'text/css'
-    response.headers['Content-Type'] = 'text/css; charset=utf-8'
     return response
 
 
