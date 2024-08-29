@@ -203,10 +203,10 @@ Press CTRL+C to quit
 
 ## 客户端示例
 
-在 `example/` 目录下
+在 `example/` 目录下, 可参考
 
 ## 关于
 
-本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分~~借鉴了前端代码。在此十分感谢。
+本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
 如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new).
