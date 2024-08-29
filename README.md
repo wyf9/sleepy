@@ -201,6 +201,10 @@ Press CTRL+C to quit
 
 同上 `3.`, 唯一的不同是 url 格式
 
+## 客户端示例
+
+在 `example/` 目录下
+
 ## 关于
 
 本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分~~借鉴了前端代码。在此十分感谢。
