@@ -4,9 +4,9 @@ Are you sleeping?
 
 一个查看个人在线状态的 Flask 网站，让他人能知道你不在而不是故意吊他/她
 
-[演示](#preview) / [部署](#部署) / [使用](#使用) / [关于](#关于)
+[**演示**](#preview) / [**部署**](#部署) / [**使用**](#使用) / [**关于**](#关于)
 
-> ver: `2.0`, configver: `2`
+<!-- > ver: `2.0`, configver: `2` -->
 
 ## Preview
 
@@ -37,9 +37,9 @@ Are you sleeping?
 
 ---
 
-理论上全平台通用, 安装了 Python 即可 *(开发环境: Debian linux)*
+理论上全平台通用, 安装了 Python >= **3.6** 即可
 
-1. Clone 本仓库 (建议先 Fork)
+1. Clone 本仓库 (建议先 Fork / Use this template)
 
 ```shell
 git clone https://github.com/wyf9/sleepy.git
@@ -55,7 +55,7 @@ cd sleepy
 # or windows:
 # .\install_lib.bat
 # 也可自行安装: pip install -r requirements.txt
-# 其实只有 FLask (目前)
+# 其实只有 Flask (目前)
 ```
 
 3. 编辑配置文件
@@ -66,7 +66,7 @@ cd sleepy
 python3 server.py
 ```
 
-如果不出意外，会提示: `[Warning] [YYYY-MM-DD hh:mm:ss] data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
+如果不出意外，会提示: `data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
 
 ## 使用
 
@@ -84,7 +84,7 @@ python3 server.py
 python3 start.py
 ```
 
-相比直接启动, 启动器可实现在服务器退出后自动重启
+相比直接启动, 启动器可实现在服务器退出 *(如开启 debug 后更改时自动保存导致有语法错误)* 后自动重启
 
 <details>
 <summary>点击展开</summary>
@@ -129,8 +129,6 @@ Press CTRL+C to quit
 | `/get/status_list`                     | 获取可用状态列表    |
 | `/set?secret=<secret>&status=<status>` | 设置状态 (url 参数) |
 | `/set/<secret>/<status>`               | 设置状态 (路径)     |
-
-> 以下是 4 个接口的解释
 
 1. `/query`:
 
@@ -193,7 +191,7 @@ Press CTRL+C to quit
     "set_to": 0 // 设置到的状态码
 }
 
-// 2. 失败 - 鉴权失败 (密钥错误)
+// 2. 失败 - 密钥错误
 {
     "success": false, // 请求是否成功
     "code": "not authorized", // 返回代码
@@ -214,10 +212,10 @@ Press CTRL+C to quit
 
 ## 客户端示例
 
-在 `example/` 目录下, 可参考
+在 `_example/` 目录下, 可参考
 
 ## 关于
 
 本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
-如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new).
+如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new) or [More contact](https://wyf9.top/#/contact).
