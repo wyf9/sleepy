@@ -73,7 +73,7 @@ def query():
     d.load()
     showip(request, '/query')
     st = d.data['status']
-    stlst = d.data['status_list']
+    # stlst = d.data['status_list']
     try:
         stinfo = d.data['status_list'][st]
     except:
@@ -96,39 +96,33 @@ def get_status_list():
     return u.format_dict(stlst)
 
 
-@app.route('/set', methods=['GET', 'POST'])
+@app.route('/set')
 def set_normal():
     showip(request, '/set')
-    if request.method == "GET":
-        status = escape(request.args.get("status"))
-        try:
-            status = int(status)
-        except:
-            return reterr(
-                code='bad request',
-                message="argument 'status' must be a number"
-            )
-        secret = escape(request.args.get("secret"))
-        u.info(f'status: {status}, secret: "{secret}"')
-        secret_real = d.dget('secret')
-        if secret == secret_real:
-            d.dset('status', status)
-            u.info('set success')
-            ret = {
-                'success': True,
-                'code': 'OK',
-                'set_to': status
-            }
-            return u.format_dict(ret)
-        else:
-            return reterr(
-                code='not authorized',
-                message='invaild secret'
-            )
-    else:
+    status = escape(request.args.get("status"))
+    try:
+        status = int(status)
+    except:
         return reterr(
             code='bad request',
-            message='only support GET request now'
+            message="argument 'status' must be a number"
+        )
+    secret = escape(request.args.get("secret"))
+    u.info(f'status: {status}, secret: "{secret}"')
+    secret_real = d.dget('secret')
+    if secret == secret_real:
+        d.dset('status', status)
+        u.info('set success')
+        ret = {
+            'success': True,
+            'code': 'OK',
+            'set_to': status
+        }
+        return u.format_dict(ret)
+    else:
+        return reterr(
+            code='not authorized',
+            message='invaild secret'
         )
 
 

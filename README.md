@@ -1,6 +1,6 @@
 # sleepy
 
-Are you sleeping?
+> Are you sleeping?
 
 一个查看个人在线状态的 Flask 网站，让他人能知道你不在而不是故意吊他/她
 
@@ -22,8 +22,6 @@ Are you sleeping?
 
 ![server-1](img/server-1.png)
 
-> ↑ 使用的 ssh 工具: WindTerm
-
 ## 部署
 
 > [!WARNING]
@@ -31,7 +29,7 @@ Are you sleeping?
 
 - 使用模板创建: [link here](https://github.com/new?template_name=sleepy&template_owner=wyf9) or 直接选择右上角的 `Use this template`:
 
-![use template](image.png)
+![use this template](img/use-this-template.png)
 
 进入 repo 创建页, 即可选择仓库类型为 `Private`.
 
@@ -66,7 +64,7 @@ cd sleepy
 python3 server.py
 ```
 
-如果不出意外，会提示: `data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
+如果不出意外，会提示: `data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置并重新运行即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
 
 ## 使用
 
