@@ -26,6 +26,17 @@ Are you sleeping?
 
 ## 部署
 
+> [!WARNING]
+> 如果要创建自用的 repo 而不是贡献此仓库, 建议使用模板创建而非直接 Fork (Fork 不能设置私有, 意味着 *他人可以看到你的配置信息, **包括 `secret`***)
+
+- 使用模板创建: [link here](https://github.com/new?template_name=sleepy&template_owner=wyf9) or 直接选择右上角的 `Use this template`:
+
+![use template](image.png)
+
+进入 repo 创建页, 即可选择仓库类型为 `Private`.
+
+---
+
 理论上全平台通用, 安装了 Python 即可 *(开发环境: Debian linux)*
 
 1. Clone 本仓库 (建议先 Fork)
