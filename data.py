@@ -11,6 +11,8 @@ def initJson():
         jsonData = jsonp.parse_file('example.jsonc', encoding='utf-8')
         with open('data.json', 'w+', encoding='utf-8') as file:
             json.dump(jsonData, file, indent=4, ensure_ascii=False)
+        u.info('Generated new config file (data.json), please edit and re-run this program.')
+        u.info('Example: example.jsonc / Online: https://github.com/wyf9/sleepy/blob/main/example.jsonc')
     except:
         u.error('Create data.json failed')
         raise

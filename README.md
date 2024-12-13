@@ -1,5 +1,12 @@
 # sleepy
 
+> [!TIP]
+> 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支)
+
+TODOs:
+- 设备使用状态
+- 网页使用 api 请求，并实现定时刷新
+
 > Are you sleeping?
 
 一个查看个人在线状态的 Flask 网站，让他人能知道你不在而不是故意吊他/她
@@ -12,28 +19,7 @@
 
 演示站: [Here](https://sleepy.wyf9.top)
 
-网页:
-
-![web-1](img/web-1.png)
-
-![web-2](img/web-2.png)
-
-服务器:
-
-![server-1](img/server-1.png)
-
 ## 部署
-
-> [!WARNING]
-> 如果要创建自用的 repo 而不是贡献此仓库, 建议使用模板创建而非直接 Fork (Fork 不能设置私有, 意味着 *他人可以看到你的配置信息, **包括 `secret`***)
-
-- 使用模板创建: [link here](https://github.com/new?template_name=sleepy&template_owner=wyf9) or 直接选择右上角的 `Use this template`:
-
-![use this template](img/use-this-template.png)
-
-进入 repo 创建页, 即可选择仓库类型为 `Private`.
-
----
 
 理论上全平台通用, 安装了 Python >= **3.6** 即可
 
@@ -41,19 +27,12 @@
 
 ```shell
 git clone https://github.com/wyf9/sleepy.git
-# or ssh:
-# git clone git@github.com:wyf9/sleepy.git
 ```
 
 2. 安装依赖
 
 ```shell
-cd sleepy
-./install_lib.sh
-# or windows:
-# .\install_lib.bat
-# 也可自行安装: pip install -r requirements.txt
-# 其实只有 Flask (目前)
+pip install flask
 ```
 
 3. 编辑配置文件
@@ -64,7 +43,7 @@ cd sleepy
 python3 server.py
 ```
 
-如果不出意外，会提示: `data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置并重新运行即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
+如果不出意外，会提示: `data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置后重新启动即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
 
 ## 使用
 
@@ -82,38 +61,7 @@ python3 server.py
 python3 start.py
 ```
 
-相比直接启动, 启动器可实现在服务器退出 *(如开启 debug 后更改时自动保存导致有语法错误)* 后自动重启
-
-<details>
-<summary>点击展开</summary>
-
-```shell
-Server path: /mnt/usb16/dev/wyf9/sleepy/server.py
-Starting server #1
- * Serving Flask app 'server'
- * Debug mode: on
-WARNING: This is a development server. Do not use it in a production deployment.rUse a production WSGI server instead.
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:9010
- * Running on http://192.168.1.20:9010
-Press CTRL+C to quit
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 114-514-191
-^C#1 exited with code 2
-waiting 5s
-Starting server #2
- * Serving Flask app 'server'
- * Debug mode: on
-WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:9010
- * Running on http://192.168.1.20:9010
-Press CTRL+C to quit
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 114-514-191
-```
+相比直接启动, 启动器可在服务器退出后自动重启 (方便开发)
 
 </details>
 
@@ -206,7 +154,7 @@ Press CTRL+C to quit
 
 4. `/set/<secret>/<status>`
 
-同上 `3.`, 唯一的不同是 url 格式
+同上 `3.`.
 
 ## 客户端示例
 
@@ -214,6 +162,8 @@ Press CTRL+C to quit
 
 ## 关于
 
-本项目灵感由 Bilibili UP @ [WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
+本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
-如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new) or [More contact](https://wyf9.top/#/contact).
+感谢 [@1812z](https://github.com/1812z) 的 B 站视频~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
+
+如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
