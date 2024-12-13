@@ -6,11 +6,13 @@ function update() {
                 const statusElement = document.getElementById('status');
                 statusElement.textContent = data.info.name;
                 document.getElementById('additional-info').textContent = data.info.desc;
+                last_status = statusElement.classList.item(0);
+                statusElement.classList.remove(last_status);
                 statusElement.classList.add(data.info.color);
             }
         })
         .catch(error => console.error('Error:', error));
-    }
+}
 
 update(); // 首次获取数据
 

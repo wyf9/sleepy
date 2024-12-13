@@ -36,25 +36,24 @@ def showip(req, msg):
 def index():
     d.load()
     showip(request, '/')
-    other = d.data['other']
+    ot = d.data['other']
     try:
-        status = d.data['status_list'][d.data['status']]
+        stat = d.data['status_list'][d.data['status']]
     except:
-        status = {
-            'id': -1,
+        stat = {
             'name': '未知',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
     return render_template(
         'index.html',
-        user=other['user'],
-        learn_more=other['learn_more'],
-        repo=other['repo'],
-        status_name=status['name'],
-        status_desc=status['desc'],
-        status_color=status['color'],
-        more_text=other['more_text']
+        user=ot['user'],
+        learn_more=ot['learn_more'],
+        repo=ot['repo'],
+        status_name=stat['name'],
+        status_desc=stat['desc'],
+        status_color=stat['color'],
+        more_text=ot['more_text']
     )
 
 
@@ -79,8 +78,10 @@ def query():
         stinfo = d.data['status_list'][st]
     except:
         stinfo = {
-            'status': st,
-            'name': '未知'
+            'id': -1,
+            'name': '未知',
+            'desc': '未知的标识符，可能是配置问题。',
+            'color': 'error'
         }
     ret = {
         'success': True,
