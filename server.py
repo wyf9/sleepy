@@ -2,9 +2,10 @@
 # coding: utf-8
 import utils as u
 from data import data as data_init
-from flask import Flask, render_template, request, url_for, redirect, flash, make_response
+from flask import Flask, render_template, request, make_response
+# from flask import Flask, render_template, request, url_for, redirect, flash, make_response
 from markupsafe import escape
-import json
+# import json
 
 d = data_init()
 app = Flask(__name__)
@@ -57,6 +58,14 @@ def index():
     )
 
 
+@app.route('/get.js')
+def get_js():
+    return render_template(
+        'get.js',
+        interval=d.data['refresh']
+    )
+
+
 @app.route('/style.css')
 def style_css():
     response = make_response(render_template(
@@ -86,7 +95,8 @@ def query():
     ret = {
         'success': True,
         'status': st,
-        'info': stinfo
+        'info': stinfo,
+        'refresh': d.data['refresh']
     }
     return u.format_dict(ret)
 

@@ -24,4 +24,4 @@
   * Name: `refresh`
   * Upper: None
   * Type: Number
-  * Desc: 控制网页自动刷新时间 (秒), `0` 为不刷新
+  * Desc: 控制网页自动刷新时间 (毫秒), `0` 为不刷新

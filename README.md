@@ -2,9 +2,10 @@
 
 > [!TIP]
 > 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支)
+> 还是先睡觉把(
 
 TODOs:
-- [ ] 网页使用 api 请求，并实现定时刷新
+- [x] 网页使用 api 请求，并实现定时刷新
 - [ ] 设备使用状态
 - [ ] 更好的客户端示例
 
@@ -21,6 +22,8 @@ TODOs:
 演示站: [Here](https://sleepy.wyf9.top)
 
 ## 部署
+
+> 从旧版本更新? 请看 [data.json 更新记录](./data_json_update.md)
 
 理论上全平台通用, 安装了 Python >= **3.6** 即可
 
@@ -64,22 +67,21 @@ python3 start.py
 
 相比直接启动, 启动器可在服务器退出后自动重启 (方便开发)
 
-</details>
-
-
-默认服务 http 端口: `9010`
+默认服务 http 端口: `9010` (可在 `data.py` 中修改)
 
 | 路径                                   | 作用                |
 | -------------------------------------- | ------------------- |
-| `/`                                    | 显示主页            |
-| `/query`                               | 获取状态            |
-| `/get/status_list`                     | 获取可用状态列表    |
+| `/`                                    | *显示主页*          |
+| `/query`                               | *获取状态*          |
+| `/get/status_list`                     | *获取可用状态列表*  |
 | `/set?secret=<secret>&status=<status>` | 设置状态 (url 参数) |
 | `/set/<secret>/<status>`               | 设置状态 (路径)     |
 
 1. `/query`:
 
-获取当前的状态 (无需鉴权)
+获取当前的状态
+
+* 无需鉴权
 
 返回 json:
 
@@ -91,13 +93,16 @@ python3 start.py
         "name": "活着", // 状态名称
         "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
         "color": "awake"// 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
-    }
+    },
+    "refresh": 5000 // 刷新时间 (ms)
 }
 ```
 
 2. `/get/status_list`
 
-获取可用状态的列表 (无需鉴权)
+获取可用状态的列表
+
+* 无需鉴权
 
 返回 json:
 
@@ -155,7 +160,7 @@ python3 start.py
 
 4. `/set/<secret>/<status>`
 
-同上 `3.`.
+同上 `3.`
 
 ## 客户端示例
 
@@ -165,6 +170,6 @@ python3 start.py
 
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
-感谢 [@1812z](https://github.com/1812z) 的 B 站视频~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
+感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
 
 如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.

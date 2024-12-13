@@ -21,6 +21,7 @@
         }
         // 还可添加更多，以此类推
     ],
+    "refresh": 5000, // 刷新状态的时间 (毫秒)
     "other": { // 其他配置 (网页上的信息)
         "user": "User", // 你的名字
         "background": "https://imgapi.siiway.top/image", // 背景图片 url
@@ -28,8 +29,7 @@
         "alpha": 0.85, // 卡片不透明度设置 (0 ~ 1), 0 为完全透明, 1 为完全不透明
         "learn_more": "GitHub Repo", // 更多信息链接的提示, 默认为 github repo
         "repo": "https://github.com/wyf9/sleepy", // 更多信息链接的目标, 可填存储库链接
-        "more_text": "", // 内容将在状态信息和 "你可以通过这个页面知晓..." 中间插入 (不转义)
+        "more_text": "" // 内容将在状态信息和 "你可以通过这个页面知晓..." 中间插入 (不转义)
         // ps: 可以在这里放你联系方式的链接
-        "refresh": 5 // 刷新状态的时间 (秒)
     }
 }
