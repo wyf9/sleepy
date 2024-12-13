@@ -4,8 +4,9 @@
 > 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支)
 
 TODOs:
-- 设备使用状态
-- 网页使用 api 请求，并实现定时刷新
+- [ ] 网页使用 api 请求，并实现定时刷新
+- [ ] 设备使用状态
+- [ ] 更好的客户端示例
 
 > Are you sleeping?
 

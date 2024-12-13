@@ -3,6 +3,7 @@
 
 '''
 一个 python 命令行示例
+depend: requests
 by @wyf9
 '''
 
@@ -12,10 +13,12 @@ global server
 
 # 密钥
 SECRET = 'YourSecret'
-# 服务列表, 末尾不加 `/`
-SERVER_LIST = ['https://example.com',
-               'http://192.168.114.114',
-               'http://192.168.191.191:9810']
+# 服务器列表, 末尾不加 `/`
+SERVER_LIST = [
+    'https://example.com',
+    'http://192.168.114.114',
+    'http://192.168.191.191:9810'
+]
 # 请求重试次数
 RETRY = 3
 
@@ -72,8 +75,7 @@ def main():
     print('\n---\nStatus now:')
     stnow = loadjson(f'{server}/query')
     try:
-        print(f'success: [{stnow["success"]}], status: [{stnow["status"]}], info_name: [{
-              stnow["info"]["name"]}], info_desc: [{stnow["info"]["desc"]}], info_color: [{stnow["info"]["color"]}]')
+        print(f'success: [{stnow["success"]}], status: [{stnow["status"]}], info_name: [{stnow["info"]["name"]}], info_desc: [{stnow["info"]["desc"]}], info_color: [{stnow["info"]["color"]}]')
     except KeyError:
         print(f'RawData: {stnow}')
 
@@ -94,8 +96,7 @@ def main():
     '''
     ret = loadjson(f'{server}/set/{SECRET}/{st}')
     try:
-        print(
-            f'success: [{ret["success"]}], code: [{ret["code"]}], set_to: [{ret["set_to"]}]')
+        print(f'success: [{ret["success"]}], code: [{ret["code"]}], set_to: [{ret["set_to"]}]')
     except:
         print(f'RawData: {ret}')
     input('\n---\nPress Enter to exit.')
