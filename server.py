@@ -203,7 +203,9 @@ def device_set():
     - Method: **POST**
     '''
     showip(request, '/device_set')
+    print(request.data)
     req = request.get_json()
+    print(req)
     try:
         secret = req['secret']
         device_id = req['id']
@@ -223,8 +225,10 @@ def device_set():
             'using': device_using,
             'app_name': app_name
         }
-        devices['last_updated'] = ...
+        devices['last_updated'] = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S') # i don't think i need to add a config to control the timezone, just keep Asia/Shanghai~
+        d.save()
         u.info(f'set device {device_id} success')
+    return
 
 
 @app.route('/device/clear')
