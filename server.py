@@ -6,27 +6,13 @@ from flask import Flask, render_template, request, make_response
 # from flask import Flask, render_template, request, url_for, redirect, flash, make_response
 from markupsafe import escape
 # import json
+from datetime import datetime
+import pytz
 
 d = data_init()
 app = Flask(__name__)
 
 # --- Functions
-
-
-def reterr(code: int, message: str) -> str:
-    '''
-    返回错误信息 json
-
-    :param code: 代码
-    :param message: 消息
-    '''
-    ret = {
-        'success': False,
-        'code': code,
-        'message': message
-    }
-    u.error(f'{code} - {message}')
-    return u.format_dict(ret)
 
 
 def showip(req, msg):
@@ -51,6 +37,7 @@ def showip(req, msg):
 def index():
     '''
     根目录返回 html
+    - Method: **GET**
     '''
     d.load()
     showip(request, '/')
@@ -79,6 +66,7 @@ def index():
 def get_js():
     '''
     /get.js
+    - Method: **GET**
     '''
     return render_template(
         'get.js',
@@ -90,6 +78,7 @@ def get_js():
 def style_css():
     '''
     /style.css
+    - Method: **GET**
     '''
     response = make_response(render_template(
         'style.css',
@@ -99,7 +88,7 @@ def style_css():
     response.mimetype = 'text/css'
     return response
 
-# --- API
+# --- Basic API (GET)
 
 
 @app.route('/query')
@@ -107,6 +96,7 @@ def query():
     '''
     获取当前状态
     - 无需鉴权
+    - Method: **GET**
     '''
     d.load()
     showip(request, '/query')
@@ -135,6 +125,7 @@ def get_status_list():
     '''
     获取 `status_list`
     - 无需鉴权
+    - Method: **GET**
     '''
     showip(request, '/get/status_list')
     stlst = d.dget('status_list')
@@ -146,13 +137,14 @@ def set_normal():
     '''
     普通的 set 设置状态
     - http[s]://<your-domain>[:your-port]/set?secret=<your-secret>&status=<a-number>
+    - Method: **GET**
     '''
     showip(request, '/set')
     status = escape(request.args.get("status"))
     try:
         status = int(status)
     except:
-        return reterr(
+        return u.reterr(
             code='bad request',
             message="argument 'status' must be a number"
         )
@@ -169,7 +161,7 @@ def set_normal():
         }
         return u.format_dict(ret)
     else:
-        return reterr(
+        return u.reterr(
             code='not authorized',
             message='invaild secret'
         )
@@ -180,6 +172,7 @@ def set_path(secret, status):
     '''
     set 设置状态, 但参数直接写路径里
     - http[s]://<your-domain>[:your-port]/set/<your-secret>/<a-number>
+    - Method: **GET**
     '''
     showip(request, f'/set/{secret}/{status}')
     secret = escape(secret)
@@ -195,12 +188,54 @@ def set_path(secret, status):
         }
         return u.format_dict(ret)
     else:
-        return reterr(
+        return u.reterr(
             code='not authorized',
             message='invaild secret'
         )
 
+# --- Device status API
 
+
+@app.route('/device/set', methods=['POST'])
+def device_set():
+    '''
+    设置单个设备的信息/打开应用
+    - Method: **POST**
+    '''
+    showip(request, '/device_set')
+    req = request.get_json()
+    try:
+        secret = req['secret']
+        device_id = req['id']
+        device_show_name = req['show_name']
+        device_using = req['using']
+        app_name = req['app_name']
+    except:
+        return u.reterr(
+            code='bad request',
+            message='missing param'
+        )
+    secret_real = d.dget('secret')
+    if secret == secret_real:
+        devices: dict = d.dget('device_status')
+        devices[device_id] = {
+            'show_name': device_show_name,
+            'using': device_using,
+            'app_name': app_name
+        }
+        devices['last_updated'] = ...
+        u.info(f'set device {device_id} success')
+
+
+@app.route('/device/clear')
+def clear_device():
+    '''
+    清除所有设备状态
+    - Method: **GET**
+    '''
+
+
+# --- End
 if __name__ == '__main__':
     d.load()
     app.run(  # 启↗动↘

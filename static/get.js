@@ -10,12 +10,12 @@ async function update() {
         const statusElement = document.getElementById('status');
         // --- show updating
         statusElement.textContent = '[更新中...]';
-        document.getElementById('additional-info').textContent = '正在更新状态, 请稍候...';
+        document.getElementById('additional-info').innerHTML = '正在更新状态, 请稍候...<br/>\n长时间无反应? 试试 <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>';
         last_status = statusElement.classList.item(0);
         statusElement.classList.remove(last_status);
         statusElement.classList.add('sleeping');
         // fetch data
-        fetch(url + 'query')
+        fetch(url + 'query', { timeout: 10000 })
             .then(response => response.json())
             .then(async (data) => {
                 console.log(data);

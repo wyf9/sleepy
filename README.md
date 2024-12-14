@@ -6,7 +6,7 @@
 
 TODOs:
 - [x] 网页使用 api 请求，并实现定时刷新
-- [ ] 设备使用状态
+- [ ] **设备使用状态**
 - [ ] 更好的客户端示例
 
 > Are you sleeping?
@@ -67,20 +67,27 @@ python3 start.py
 
 相比直接启动, 启动器可在服务器退出后自动重启 (方便开发)
 
-默认服务 http 端口: `9010` (可在 `data.py` 中修改)
+默认服务 http 端口: `9010` *(可在 `data.py` 中修改)*
 
-| 路径                                   | 作用                |
-| -------------------------------------- | ------------------- |
-| `/`                                    | *显示主页*          |
-| `/query`                               | *获取状态*          |
-| `/get/status_list`                     | *获取可用状态列表*  |
-| `/set?secret=<secret>&status=<status>` | 设置状态 (url 参数) |
-| `/set/<secret>/<status>`               | 设置状态 (路径)     |
+> 倾斜项表示无需传入任何参数
 
-1. `/query`:
+|     | 路径                                                | 方法   | 作用                                   |
+| --- | --------------------------------------------------- | ------ | -------------------------------------- |
+| 0   | *`/`*                                               | `GET`  | *显示主页*                             |
+| 1   | *`/query`*                                          | `GET`  | *获取状态*                             |
+| 2   | *`/get/status_list`*                                | `GET`  | *获取可用状态列表*                     |
+| 3   | `/set?secret=<secret>&status=<status>`              | `GET`  | 设置状态 (url 参数)                    |
+| 4   | `/set/<secret>/<status>`                            | `GET`  | 设置状态 (路径)                        |
+| 5   | `/device/set`                                       | `POST` | *[new]* 设置单设备状态 (名称/打开应用) |
+| 6   | `/device/remove?secret=<secret>&name=<device_name>` | `GET`  | *[new]* 移除单个设备的状态             |
+| 7   | `/device/clear?secret=<secret>`                     | `GET`  | *[new]* 清除所有设备的状态             |
+
+
+### 1. `/query`
 
 获取当前的状态
 
+* Method: GET
 * 无需鉴权
 
 返回 json:
@@ -98,10 +105,11 @@ python3 start.py
 }
 ```
 
-2. `/get/status_list`
+### 2. `/get/status_list`
 
 获取可用状态的列表
 
+* Method: GET
 * 无需鉴权
 
 返回 json:
@@ -126,9 +134,11 @@ python3 start.py
 
 > 就是返回 `data.json` 中的 `status_list` 列表
 
-3. `/set?secret=<secret>&status=<status>`
+### 3. `/set?secret=<secret>&status=<status>`
 
 设置当前状态
+
+* Method: GET
 
 - `<secret>`: 在 `data.json` 中配置的 `secret`
 - `<status>`: 状态码 *(`int`)*
@@ -158,9 +168,47 @@ python3 start.py
 }
 ```
 
-4. `/set/<secret>/<status>`
+### 4. `/set/<secret>/<status>`
 
-同上 `3.`
+参数同上 `3.`
+
+* Method: GET
+
+### 5. `/device/set`
+
+设置单个设备的状态
+
+* Method: POST
+
+请求体:
+
+```json
+{
+    "secret": "MySecretCannotGuess", // 密钥
+    "id": "device-1", // 设备标识符
+    "show_name": "MyDevice1", // 显示名称
+    "using": true, // 是否正在使用
+    "app_name": "VSCode" // 正在使用应用的名称
+}
+```
+
+
+### 6. `/device/remove?secret=<secret>&name=<device_name>`
+
+移除单个设备的状态
+
+* Method: GET
+
+- `<secret>`: 在 `data.json` 中配置的 `secret`
+- `<device_name>`: 设备标识符
+
+### 7. `/device/clear?secret=<secret>`
+
+清除所有设备的状态
+
+* Method: GET
+
+- `<secret>`: 在 `data.json` 中配置的 `secret`
 
 ## 客户端示例
 

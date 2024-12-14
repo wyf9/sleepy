@@ -43,3 +43,5 @@ body {
 .error {
     color: red;
 }
+
+/* 不建议删除上面的 .sleeping .awake .error 三个默认颜色 */
