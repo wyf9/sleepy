@@ -11,7 +11,7 @@ import pytz
 
 d = data_init()
 app = Flask(__name__)
-
+timezone = 'Asia/Shanghai'
 # --- Functions
 
 
@@ -154,12 +154,11 @@ def set_normal():
     if secret == secret_real:
         d.dset('status', status)
         u.info('set success')
-        ret = {
+        return u.format_dict({
             'success': True,
             'code': 'OK',
             'set_to': status
-        }
-        return u.format_dict(ret)
+        })
     else:
         return u.reterr(
             code='not authorized',
@@ -174,7 +173,7 @@ def set_path(secret, status):
     - http[s]://<your-domain>[:your-port]/set/<your-secret>/<a-number>
     - Method: **GET**
     '''
-    showip(request, f'/set/{secret}/{status}')
+    showip(request, '/set/<secret>/<status>')
     secret = escape(secret)
     u.info(f'status: {status}, secret: "{secret}"')
     secret_real = d.dget('secret')
@@ -225,10 +224,50 @@ def device_set():
             'using': device_using,
             'app_name': app_name
         }
-        devices['last_updated'] = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S') # i don't think i need to add a config to control the timezone, just keep Asia/Shanghai~
+        devices['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
         d.save()
         u.info(f'set device {device_id} success')
-    return
+    else:
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
+    return u.format_dict({
+        'success': True,
+        'code': 'OK'
+    })
+
+
+@app.route('/device/remove')
+def remove_device():
+    '''
+    移除单个设备的状态
+    - Method: **GET**
+    '''
+    showip(request, '/device/remove')
+    device_id = escape(request.args.get("id"))
+    secret = escape(request.args.get('secret'))
+    secret_real = d.dget('secret')
+    if secret == secret_real:
+        try:
+            d.load()
+            del d.data['device_status'][device_id]
+            d.data['device_status']['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.save()
+        except KeyError:
+            return u.reterr(
+                code='not found',
+                message='cannot find item'
+            )
+    else:
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
+    return u.format_dict({
+        'success': True,
+        'code': 'OK'
+    })
 
 
 @app.route('/device/clear')
@@ -237,6 +276,30 @@ def clear_device():
     清除所有设备状态
     - Method: **GET**
     '''
+    showip(request, '/device/clear')
+    secret = escape(request.args.get('secret'))
+    secret_real = d.dget('secret')
+    if secret == secret_real:
+        try:
+            d.load()
+            d.data['device_status'] = {
+                'last_updated': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            }
+            d.save()
+        except KeyError:
+            return u.reterr(
+                code='not found',
+                message='cannot find device item'
+            )
+    else:
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
+    return u.format_dict({
+        'success': True,
+        'code': 'OK'
+    })
 
 
 # --- End

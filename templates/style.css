@@ -13,6 +13,10 @@ body, html {
     overflow: hidden;
 }
 
+a {
+    text-decoration: none;
+}
+
 body {
     /* 背景图设置 */
     background: url('{{ bg }}') no-repeat center center fixed;

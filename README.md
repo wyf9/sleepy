@@ -2,20 +2,20 @@
 
 > [!TIP]
 > 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支)
-> 还是先睡觉把(
 
 TODOs:
 - [x] 网页使用 api 请求，并实现定时刷新
-- [ ] **设备使用状态**
+- [ ] 设备使用状态
 - [ ] 更好的客户端示例
+- [ ] 修改数据保存方法
+  - 拆分 `config.json` (只读) 和 `data.json`
+  - 定时写入 `data.json`
 
 > Are you sleeping?
 
 一个查看个人在线状态的 Flask 网站，让他人能知道你不在而不是故意吊他/她
 
 [**演示**](#preview) / [**部署**](#部署) / [**使用**](#使用) / [**关于**](#关于)
-
-<!-- > ver: `2.0`, configver: `2` -->
 
 ## Preview
 
@@ -47,7 +47,7 @@ pip install flask
 python3 server.py
 ```
 
-如果不出意外，会提示: `data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置后重新启动即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
+如果不出意外，会提示: `data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置后重新运行即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
 
 ## 使用
 
@@ -69,18 +69,18 @@ python3 start.py
 
 默认服务 http 端口: `9010` *(可在 `data.py` 中修改)*
 
-> 倾斜项表示无需传入任何参数
+> 斜体项表示无需传入任何参数
 
-|     | 路径                                                | 方法   | 作用                                   |
-| --- | --------------------------------------------------- | ------ | -------------------------------------- |
-| 0   | *`/`*                                               | `GET`  | *显示主页*                             |
-| 1   | *`/query`*                                          | `GET`  | *获取状态*                             |
-| 2   | *`/get/status_list`*                                | `GET`  | *获取可用状态列表*                     |
-| 3   | `/set?secret=<secret>&status=<status>`              | `GET`  | 设置状态 (url 参数)                    |
-| 4   | `/set/<secret>/<status>`                            | `GET`  | 设置状态 (路径)                        |
-| 5   | `/device/set`                                       | `POST` | *[new]* 设置单设备状态 (名称/打开应用) |
-| 6   | `/device/remove?secret=<secret>&name=<device_name>` | `GET`  | *[new]* 移除单个设备的状态             |
-| 7   | `/device/clear?secret=<secret>`                     | `GET`  | *[new]* 清除所有设备的状态             |
+|     | 路径                                                | 方法   | 作用                                       |
+| --- | --------------------------------------------------- | ------ | ------------------------------------------ |
+| 0   | *`/`*                                               | `GET`  | *显示主页*                                 |
+| 1   | *`/query`*                                          | `GET`  | *获取状态*                                 |
+| 2   | *`/get/status_list`*                                | `GET`  | *获取可用状态列表*                         |
+| 3   | `/set?secret=<secret>&status=<status>`              | `GET`  | 设置状态 (url 参数)                        |
+| 4   | `/set/<secret>/<status>`                            | `GET`  | 设置状态 (路径)                            |
+| 5   | `/device/set`                                       | `POST` | *[new]* 设置单个设备的状态 (名称/打开应用) |
+| 6   | `/device/remove?secret=<secret>&name=<device_name>` | `GET`  | *[new]* 移除单个设备的状态                 |
+| 7   | `/device/clear?secret=<secret>`                     | `GET`  | *[new]* 清除所有设备的状态                 |
 
 
 ### 1. `/query`
@@ -192,15 +192,14 @@ python3 start.py
 }
 ```
 
-
-### 6. `/device/remove?secret=<secret>&name=<device_name>`
+### 6. `/device/remove?secret=<secret>&id=<device_id>`
 
 移除单个设备的状态
 
 * Method: GET
 
 - `<secret>`: 在 `data.json` 中配置的 `secret`
-- `<device_name>`: 设备标识符
+- `<device_id>`: 设备标识符
 
 ### 7. `/device/clear?secret=<secret>`
 
