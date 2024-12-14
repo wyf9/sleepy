@@ -8,8 +8,10 @@ import pytz
 
 import utils as u
 from config import config as config_init
+from data import data as data_init
 
 c = config_init()
+d = data_init()
 app = Flask(__name__)
 timezone = 'Asia/Shanghai'
 
@@ -17,7 +19,7 @@ timezone = 'Asia/Shanghai'
 # --- Functions
 
 
-def showip(req, msg):
+def showip(req: Flask.request_class, msg):
     '''
     在日志中显示 ip
 
@@ -42,11 +44,10 @@ def index():
     根目录返回 html
     - Method: **GET**
     '''
-    c.load()
     showip(request, '/')
     ot = c.config['other']
     try:
-        stat = c.config['status_list'][c.config['status']]
+        stat = c.config['status_list'][d.data['status']]
     except:
         stat = {
             'name': '未知',
@@ -102,10 +103,8 @@ def query():
     - 无需鉴权
     - Method: **GET**
     '''
-    c.load()
     showip(request, '/query')
-    st = c.config['status']
-    # stlst = d.data['status_list']
+    st = d.data['status']
     try:
         stinfo = c.config['status_list'][st]
     except:
@@ -124,14 +123,14 @@ def query():
     return u.format_dict(ret)
 
 
-@app.route('/get/status_list')
+@app.route('/status_list')
 def get_status_list():
     '''
     获取 `status_list`
     - 无需鉴权
     - Method: **GET**
     '''
-    showip(request, '/get/status_list')
+    showip(request, '/status_list')
     stlst = c.get('status_list')
     return u.format_dict(stlst)
 
@@ -153,11 +152,9 @@ def set_normal():
             message="argument 'status' must be a number"
         )
     secret = escape(request.args.get("secret"))
-    u.info(f'status: {status}, secret: "{secret}"')
     secret_real = c.get('secret')
     if secret == secret_real:
-        c.dset('status', status)
-        u.info('set success')
+        d.dset('status', status)
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -179,11 +176,9 @@ def set_path(secret, status):
     '''
     showip(request, '/set/<secret>/<status>')
     secret = escape(secret)
-    u.info(f'status: {status}, secret: "{secret}"')
     secret_real = c.get('secret')
     if secret == secret_real:
-        c.dset('status', status)
-        u.info('set success')
+        d.dset('status', status)
         ret = {
             'success': True,
             'code': 'OK',
@@ -223,15 +218,13 @@ def device_set():
         )
     secret_real = c.get('secret')
     if secret == secret_real:
-        devices: dict = c.get('device_status')
+        devices: dict = d.dget('device_status')
         devices[device_id] = {
             'show_name': device_show_name,
             'using': device_using,
             'app_name': app_name
         }
         devices['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
-        c.save()
-        u.info(f'set device {device_id} success')
     else:
         return u.reterr(
             code='not authorized',
@@ -255,10 +248,8 @@ def remove_device():
     secret_real = c.get('secret')
     if secret == secret_real:
         try:
-            c.load()
-            del c.config['device_status'][device_id]
-            c.config['device_status']['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
-            c.save()
+            del d.data['device_status'][device_id]
+            d.data['device_status']['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
         except KeyError:
             return u.reterr(
                 code='not found',
@@ -286,11 +277,9 @@ def clear_device():
     secret_real = c.get('secret')
     if secret == secret_real:
         try:
-            c.load()
-            c.config['device_status'] = {
+            d.data['device_status'] = {
                 'last_updated': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
             }
-            c.save()
         except KeyError:
             return u.reterr(
                 code='not found',
@@ -310,6 +299,7 @@ def clear_device():
 # --- End
 if __name__ == '__main__':
     c.load()
+    d.load()
     app.run(  # 启↗动↘
         host=c.config['host'],
         port=c.config['port'],

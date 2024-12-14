@@ -75,7 +75,7 @@ python3 start.py
 | --- | --------------------------------------------------- | ------ | ------------------------------------------ |
 | 0   | *`/`*                                               | `GET`  | *显示主页*                                 |
 | 1   | *`/query`*                                          | `GET`  | *获取状态*                                 |
-| 2   | *`/get/status_list`*                                | `GET`  | *获取可用状态列表*                         |
+| 2   | *`/status_list`*                                | `GET`  | *获取可用状态列表*                         |
 | 3   | `/set?secret=<secret>&status=<status>`              | `GET`  | 设置状态 (url 参数)                        |
 | 4   | `/set/<secret>/<status>`                            | `GET`  | 设置状态 (路径)                            |
 | 5   | `/device/set`                                       | `POST` | *[new]* 设置单个设备的状态 (名称/打开应用) |
@@ -105,7 +105,7 @@ python3 start.py
 }
 ```
 
-### 2. `/get/status_list`
+### 2. `/status_list`
 
 获取可用状态的列表
 

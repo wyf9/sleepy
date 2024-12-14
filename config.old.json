@@ -1,0 +1,60 @@
+{
+    "version": 2,
+    "debug": true,
+    "host": "::",
+    "port": 9010,
+    "secret": "wyf9114sleepy",
+    "status": 114514,
+    "status_list": [
+        {
+            "id": 0,
+            "name": "活着",
+            "desc": "目前在线，可以通过任何可用的联系方式联系本人。",
+            "color": "awake"
+        },
+        {
+            "id": 1,
+            "name": "似了",
+            "desc": "睡似了或其他原因不在线，请耐心等待。",
+            "color": "sleeping"
+        },
+        {
+            "id": 2,
+            "name": "In Danger",
+            "desc": "可能遇到了一些事情，请不要通过任何有提醒的方式联系。如长时间未变为其他状态，可能是忘记或暂时失联。",
+            "color": "error"
+        },
+        {
+            "id": 3,
+            "name": "失联",
+            "desc": "学生因为各种各样的原因无法使用设备，故失联。可能会保持较长时间。",
+            "color": "sleeping"
+        },
+        {
+            "id": 4,
+            "name": "暂时离开",
+            "desc": "因未知原因暂时离开，持续 5 分钟到 1 小时不等。如长时间未变为其他状态，可能是忘记更新或其他原因。",
+            "color": "sleeping"
+        },
+        {
+            "id": 5,
+            "name": "School",
+            "desc": "正在学校，不可能在线。也可能是失联而无法更新。",
+            "color": "sleeping"
+        },
+        {
+            "id": 6,
+            "name": "睡似了",
+            "desc": "睡似了，请耐心等待起床。也可能是没有更新。",
+            "color": "sleeping"
+        }
+    ],
+    "other": {
+        "user": "wyf9",
+        "background": "https://imgapi.siiway.top/image",
+        "alpha": 0.8,
+        "learn_more": "GitHub Repo",
+        "repo": "https://github.com/wyf9/sleepy",
+        "more_text": "<a href='https://wyf9.top/#/contact' target='_blank' style='color: rgb(0,255,0);'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='vertical-align: middle; width: 1em;'><path d='M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32h82.7L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32H320zM80 32C35.8 32 0 67.8 0 112V432c0 44.2 35.8 80 80 80H400c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32V432c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16H192c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z' /></svg>联系方式</a>"
+    }
+}
