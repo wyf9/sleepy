@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 # coding: utf-8
+
 import os
 import sys
 import time
+
 c = 0
 selfn = sys.argv[0]
 dirn = os.path.dirname(selfn)

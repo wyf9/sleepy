@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import utils as u
-from config import config as config_init
 from flask import Flask, render_template, request, make_response
 from markupsafe import escape
 from datetime import datetime
 import pytz
 
-d = config_init()
+import utils as u
+from config import config as config_init
+
+c = config_init()
 app = Flask(__name__)
 timezone = 'Asia/Shanghai'
 
@@ -41,11 +42,11 @@ def index():
     根目录返回 html
     - Method: **GET**
     '''
-    d.load()
+    c.load()
     showip(request, '/')
-    ot = d.config['other']
+    ot = c.config['other']
     try:
-        stat = d.config['status_list'][d.config['status']]
+        stat = c.config['status_list'][c.config['status']]
     except:
         stat = {
             'name': '未知',
@@ -72,7 +73,7 @@ def get_js():
     '''
     return render_template(
         'get.js',
-        interval=d.config['refresh']
+        interval=c.config['refresh']
     )
 
 
@@ -84,8 +85,8 @@ def style_css():
     '''
     response = make_response(render_template(
         'style.css',
-        bg=d.config['other']['background'],
-        alpha=d.config['other']['alpha']
+        bg=c.config['other']['background'],
+        alpha=c.config['other']['alpha']
     ))
     response.mimetype = 'text/css'
     return response
@@ -101,12 +102,12 @@ def query():
     - 无需鉴权
     - Method: **GET**
     '''
-    d.load()
+    c.load()
     showip(request, '/query')
-    st = d.config['status']
+    st = c.config['status']
     # stlst = d.data['status_list']
     try:
-        stinfo = d.config['status_list'][st]
+        stinfo = c.config['status_list'][st]
     except:
         stinfo = {
             'id': -1,
@@ -118,7 +119,7 @@ def query():
         'success': True,
         'status': st,
         'info': stinfo,
-        'refresh': d.config['refresh']
+        'refresh': c.config['refresh']
     }
     return u.format_dict(ret)
 
@@ -131,7 +132,7 @@ def get_status_list():
     - Method: **GET**
     '''
     showip(request, '/get/status_list')
-    stlst = d.dget('status_list')
+    stlst = c.get('status_list')
     return u.format_dict(stlst)
 
 
@@ -153,9 +154,9 @@ def set_normal():
         )
     secret = escape(request.args.get("secret"))
     u.info(f'status: {status}, secret: "{secret}"')
-    secret_real = d.dget('secret')
+    secret_real = c.get('secret')
     if secret == secret_real:
-        d.dset('status', status)
+        c.dset('status', status)
         u.info('set success')
         return u.format_dict({
             'success': True,
@@ -179,9 +180,9 @@ def set_path(secret, status):
     showip(request, '/set/<secret>/<status>')
     secret = escape(secret)
     u.info(f'status: {status}, secret: "{secret}"')
-    secret_real = d.dget('secret')
+    secret_real = c.get('secret')
     if secret == secret_real:
-        d.dset('status', status)
+        c.dset('status', status)
         u.info('set success')
         ret = {
             'success': True,
@@ -220,16 +221,16 @@ def device_set():
             code='bad request',
             message='missing param'
         )
-    secret_real = d.dget('secret')
+    secret_real = c.get('secret')
     if secret == secret_real:
-        devices: dict = d.dget('device_status')
+        devices: dict = c.get('device_status')
         devices[device_id] = {
             'show_name': device_show_name,
             'using': device_using,
             'app_name': app_name
         }
         devices['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
-        d.save()
+        c.save()
         u.info(f'set device {device_id} success')
     else:
         return u.reterr(
@@ -251,13 +252,13 @@ def remove_device():
     showip(request, '/device/remove')
     device_id = escape(request.args.get("id"))
     secret = escape(request.args.get('secret'))
-    secret_real = d.dget('secret')
+    secret_real = c.get('secret')
     if secret == secret_real:
         try:
-            d.load()
-            del d.config['device_status'][device_id]
-            d.config['device_status']['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
-            d.save()
+            c.load()
+            del c.config['device_status'][device_id]
+            c.config['device_status']['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            c.save()
         except KeyError:
             return u.reterr(
                 code='not found',
@@ -282,14 +283,14 @@ def clear_device():
     '''
     showip(request, '/device/clear')
     secret = escape(request.args.get('secret'))
-    secret_real = d.dget('secret')
+    secret_real = c.get('secret')
     if secret == secret_real:
         try:
-            d.load()
-            d.config['device_status'] = {
+            c.load()
+            c.config['device_status'] = {
                 'last_updated': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
             }
-            d.save()
+            c.save()
         except KeyError:
             return u.reterr(
                 code='not found',
@@ -308,9 +309,9 @@ def clear_device():
 
 # --- End
 if __name__ == '__main__':
-    d.load()
+    c.load()
     app.run(  # 启↗动↘
-        host=d.config['host'],
-        port=d.config['port'],
-        debug=d.config['debug']
+        host=c.config['host'],
+        port=c.config['port'],
+        debug=c.config['debug']
     )

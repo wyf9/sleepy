@@ -1,7 +1,6 @@
 from datetime import datetime
 import json
 from flask import make_response, Response
-# import os
 
 
 def info(log):
