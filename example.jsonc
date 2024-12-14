@@ -1,11 +1,10 @@
 {
-    "version": "2024.12.13.1", // 配置版本号，可在更新时用于确定更改内容
+    "version": "2024.12.14.2", // 配置版本号，可在更新时用于确定更改内容
     // 见: data_json_update.md (Online: https://github.com/wyf9/sleepy/blob/main/data_json_update.md)
     "debug": false, // Flask 服务器的 debug 开关, 无需更改
     "host": "0.0.0.0", // 监听地址, 0.0.0.0 (使用 IPV6: ::) 表示所有
     "port": 9010, // 监听端口, 默认 9010
     "secret": "", // 密钥, 更新状态使用
-    "status": 0, // 目前的状态 (整数), 由应用控制
     "status_list": [ // 状态列表, 索引从 0 开始, 对应上面的 status
         { // status: 0
             "id": 0, // 与索引相同，非必须，仅为方便查看 (建议加上)

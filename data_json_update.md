@@ -1,4 +1,6 @@
-# data.json update
+# config.json update
+
+> 在 [2024.12.14.2](#202412142) 中拆分 `data.json` 为 config 与 data 两部分
 
 ## `version` 字段的说明
 
@@ -6,7 +8,27 @@
 - `yyyy`: 年
 - `mm`: 月
 - `dd`: 日
-- `n`: 本日第 `n` 次提交
+- `n`: 本日第 `n` 次修改
+
+# 2024.12.14.2
+
+```json
+// ...
+    "secret": "xxx",
+    "status": 0, // (1) [REMOVE]
+    "device_status": { // (2) [REMOVE]
+        "last_updated": "2024-12-14 21:10:55" // (2) [REMOVE]
+    }, // (2) [REMOVE]
+    "status_list": [
+// ...
+```
+
+- **Remove** (1)
+  * Name: `status`
+  * Upper: None
+- **Remove** (2)
+  * Name: `device_status`
+  * Upper: None
 
 # 2024.12.14.1
 
@@ -18,7 +40,7 @@
     // ...
 ```
 
-- **(1)**
+- **New** (1)
   * Name: `device_status`
   * Upper: None
   * Type: Dict
@@ -53,7 +75,7 @@
     // ...
 ```
 
-- **(1)**
+- **New** (1)
   * Name: `refresh`
   * Upper: None
   * Type: Number

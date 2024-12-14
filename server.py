@@ -1,17 +1,18 @@
 #!/usr/bin/python3
 # coding: utf-8
+
 import utils as u
-from data import data as data_init
+from config import config as config_init
 from flask import Flask, render_template, request, make_response
-# from flask import Flask, render_template, request, url_for, redirect, flash, make_response
 from markupsafe import escape
-# import json
 from datetime import datetime
 import pytz
 
-d = data_init()
+d = config_init()
 app = Flask(__name__)
 timezone = 'Asia/Shanghai'
+
+
 # --- Functions
 
 
@@ -30,6 +31,7 @@ def showip(req, msg):
         ip2 = None
         u.infon(f'- Request: {ip1} : {msg}')
 
+
 # --- Templates
 
 
@@ -41,9 +43,9 @@ def index():
     '''
     d.load()
     showip(request, '/')
-    ot = d.data['other']
+    ot = d.config['other']
     try:
-        stat = d.data['status_list'][d.data['status']]
+        stat = d.config['status_list'][d.config['status']]
     except:
         stat = {
             'name': '未知',
@@ -70,7 +72,7 @@ def get_js():
     '''
     return render_template(
         'get.js',
-        interval=d.data['refresh']
+        interval=d.config['refresh']
     )
 
 
@@ -82,11 +84,12 @@ def style_css():
     '''
     response = make_response(render_template(
         'style.css',
-        bg=d.data['other']['background'],
-        alpha=d.data['other']['alpha']
+        bg=d.config['other']['background'],
+        alpha=d.config['other']['alpha']
     ))
     response.mimetype = 'text/css'
     return response
+
 
 # --- Basic API (GET)
 
@@ -100,10 +103,10 @@ def query():
     '''
     d.load()
     showip(request, '/query')
-    st = d.data['status']
+    st = d.config['status']
     # stlst = d.data['status_list']
     try:
-        stinfo = d.data['status_list'][st]
+        stinfo = d.config['status_list'][st]
     except:
         stinfo = {
             'id': -1,
@@ -115,7 +118,7 @@ def query():
         'success': True,
         'status': st,
         'info': stinfo,
-        'refresh': d.data['refresh']
+        'refresh': d.config['refresh']
     }
     return u.format_dict(ret)
 
@@ -192,6 +195,7 @@ def set_path(secret, status):
             message='invaild secret'
         )
 
+
 # --- Device status API
 
 
@@ -251,8 +255,8 @@ def remove_device():
     if secret == secret_real:
         try:
             d.load()
-            del d.data['device_status'][device_id]
-            d.data['device_status']['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            del d.config['device_status'][device_id]
+            d.config['device_status']['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
             d.save()
         except KeyError:
             return u.reterr(
@@ -282,7 +286,7 @@ def clear_device():
     if secret == secret_real:
         try:
             d.load()
-            d.data['device_status'] = {
+            d.config['device_status'] = {
                 'last_updated': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
             }
             d.save()
@@ -306,7 +310,7 @@ def clear_device():
 if __name__ == '__main__':
     d.load()
     app.run(  # 启↗动↘
-        host=d.data['host'],
-        port=d.data['port'],
-        debug=d.data['debug']
+        host=d.config['host'],
+        port=d.config['port'],
+        debug=d.config['debug']
     )
