@@ -7,7 +7,7 @@ TODOs:
 - [x] 网页使用 api 请求，并实现定时刷新
 - [ ] 设备使用状态
 - [ ] 更好的客户端示例
-- [ ] **修改数据保存方法** (#3)
+- [x] **修改数据保存方法** (https://github.com/wyf9/sleepy/issues/3)
   - 拆分 `config.json` (只读) 和 `data.json`
   - 定时写入 `data.json`
 
@@ -75,12 +75,13 @@ python3 start.py
 | --- | --------------------------------------------------- | ------ | ------------------------------------------ |
 | 0   | *`/`*                                               | `GET`  | *显示主页*                                 |
 | 1   | *`/query`*                                          | `GET`  | *获取状态*                                 |
-| 2   | *`/status_list`*                                | `GET`  | *获取可用状态列表*                         |
+| 2   | *`/status_list`*                                    | `GET`  | *获取可用状态列表*                         |
 | 3   | `/set?secret=<secret>&status=<status>`              | `GET`  | 设置状态 (url 参数)                        |
 | 4   | `/set/<secret>/<status>`                            | `GET`  | 设置状态 (路径)                            |
 | 5   | `/device/set`                                       | `POST` | *[new]* 设置单个设备的状态 (名称/打开应用) |
 | 6   | `/device/remove?secret=<secret>&name=<device_name>` | `GET`  | *[new]* 移除单个设备的状态                 |
 | 7   | `/device/clear?secret=<secret>`                     | `GET`  | *[new]* 清除所有设备的状态                 |
+| 8   | `/reload_config?secret=<secret>`                    | `GET`  | *[new]* 重载配置                           |
 
 
 ### 1. `/query`
@@ -204,6 +205,14 @@ python3 start.py
 ### 7. `/device/clear?secret=<secret>`
 
 清除所有设备的状态
+
+* Method: GET
+
+- `<secret>`: 在 `data.json` 中配置的 `secret`
+
+### 8. `/reload_config?secret=<secret>`
+
+重新从 `config.json` 加载配置
 
 * Method: GET
 
