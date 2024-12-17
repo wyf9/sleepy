@@ -1,28 +1,41 @@
 # sleepy
 
-> [!TIP]
-> 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支)
-
-TODOs:
-- [ ] 网页使用 api 请求，并实现定时刷新
-- [ ] 设备使用状态
-- [ ] 更好的客户端示例
-
-> Are you sleeping?
-
 一个查看个人在线状态的 Flask 网站，让他人能知道你不在而不是故意吊他/她
 
-[**演示**](#preview) / [**部署**](#部署) / [**使用**](#使用) / [**关于**](#关于)
+[**功能**](#功能) / [**TODO**](#todo) / [**演示**](#preview-功能) / [**部署**](#部署) / [**使用**](#使用) / [**关于**](#关于)
 
-<!-- > ver: `2.0`, configver: `2` -->
+## 功能
 
-## Preview
+- 自行设置在线状态
+- 实时更新设备打开应用(名称) *(未完成)*
+- 美观的展示页面 [见 [Preview](#preview)]
 
-演示站: [Here](https://sleepy.wyf9.top)
+### TODO
+
+- [x] 网页使用 api 请求，并实现定时刷新
+- [ ] 设备使用状态 (仅完成 api)
+- [ ] 更好的客户端示例
+- [x] **修改数据保存方法** (https://github.com/wyf9/sleepy/issues/3)
+  - 拆分 `config.json` (只读) 和 `data.json`
+  - 定时写入 `data.json`
+
+> [!TIP]
+> 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支) <br/>
+> 因上学原因, 可能放缓更新 <br/>
+> 最新开发进度/完整 TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)
+
+### Preview
+
+演示站 (稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
+
+开发预览 (*不保证在线*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
 ## 部署
 
-理论上全平台通用, 安装了 Python >= **3.6** 即可
+> 从旧版本更新? 请看 [config.json 更新记录](./data_json_update.md) <br/>
+> *配置文件已从 `data.json` 更名为 `config.json`*
+
+理论上全平台通用, 安装了 Python >= **3.6** 即可 (建议: **3.10+**)
 
 1. Clone 本仓库 (建议先 Fork / Use this template)
 
@@ -33,7 +46,7 @@ git clone https://github.com/wyf9/sleepy.git
 2. 安装依赖
 
 ```shell
-pip install flask
+pip install flask pytz
 ```
 
 3. 编辑配置文件
@@ -44,7 +57,7 @@ pip install flask
 python3 server.py
 ```
 
-如果不出意外，会提示: `data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置后重新启动即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
+如果不出意外，会提示: `config.json not exist, creating`，同时目录下出现 `config.json` 文件，编辑该文件中的配置后重新运行即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
 
 ## 使用
 
@@ -64,22 +77,29 @@ python3 start.py
 
 相比直接启动, 启动器可在服务器退出后自动重启 (方便开发)
 
-</details>
+默认服务 http 端口: `9010` *(可在 `config.json` 中修改)*
+
+> 斜体项表示无需传入任何参数
+
+|     | 路径                                                | 方法   | 作用                                       |
+| --- | --------------------------------------------------- | ------ | ------------------------------------------ |
+| 0   | *`/`*                                               | `GET`  | *显示主页*                                 |
+| 1   | *`/query`*                                          | `GET`  | *获取状态*                                 |
+| 2   | *`/status_list`*                                    | `GET`  | *获取可用状态列表*                         |
+| 3   | `/set?secret=<secret>&status=<status>`              | `GET`  | 设置状态 (url 参数)                        |
+| 4   | `/set/<secret>/<status>`                            | `GET`  | 设置状态 (路径)                            |
+| 5   | `/device/set`                                       | `POST` | *[new]* 设置单个设备的状态 (名称/打开应用) |
+| 6   | `/device/remove?secret=<secret>&name=<device_name>` | `GET`  | *[new]* 移除单个设备的状态                 |
+| 7   | `/device/clear?secret=<secret>`                     | `GET`  | *[new]* 清除所有设备的状态                 |
+| 8   | `/reload_config?secret=<secret>`                    | `GET`  | *[new]* 重载配置                           |
 
 
-默认服务 http 端口: `9010`
+### 1. `/query`
 
-| 路径                                   | 作用                |
-| -------------------------------------- | ------------------- |
-| `/`                                    | 显示主页            |
-| `/query`                               | 获取状态            |
-| `/get/status_list`                     | 获取可用状态列表    |
-| `/set?secret=<secret>&status=<status>` | 设置状态 (url 参数) |
-| `/set/<secret>/<status>`               | 设置状态 (路径)     |
+获取当前的状态
 
-1. `/query`:
-
-获取当前的状态 (无需鉴权)
+* Method: GET
+* 无需鉴权
 
 返回 json:
 
@@ -91,13 +111,18 @@ python3 start.py
         "name": "活着", // 状态名称
         "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
         "color": "awake"// 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
-    }
+    },
+    "refresh": 5000 // 刷新时间 (ms)
 }
 ```
 
-2. `/get/status_list`
+### 2. `/status_list`
 
-获取可用状态的列表 (无需鉴权)
+获取可用状态的列表
+
+* Method: GET
+* 无需鉴权
+* Alias: `/get/status_list` *(兼容旧版本)*
 
 返回 json:
 
@@ -119,13 +144,15 @@ python3 start.py
 ]
 ```
 
-> 就是返回 `data.json` 中的 `status_list` 列表
+> 就是返回 `config.json` 中的 `status_list` 列表
 
-3. `/set?secret=<secret>&status=<status>`
+### 3. `/set?secret=<secret>&status=<status>`
 
 设置当前状态
 
-- `<secret>`: 在 `data.json` 中配置的 `secret`
+* Method: GET
+
+- `<secret>`: 在 `config.json` 中配置的 `secret`
 - `<status>`: 状态码 *(`int`)*
 
 返回 json:
@@ -153,9 +180,54 @@ python3 start.py
 }
 ```
 
-4. `/set/<secret>/<status>`
+### 4. `/set/<secret>/<status>`
 
-同上 `3.`.
+参数同上 `3.`
+
+* Method: GET
+
+### 5. `/device/set`
+
+设置单个设备的状态
+
+* Method: POST
+
+请求体:
+
+```json
+{
+    "secret": "MySecretCannotGuess", // 密钥
+    "id": "device-1", // 设备标识符
+    "show_name": "MyDevice1", // 显示名称
+    "using": true, // 是否正在使用
+    "app_name": "VSCode" // 正在使用应用的名称
+}
+```
+
+### 6. `/device/remove?secret=<secret>&id=<device_id>`
+
+移除单个设备的状态
+
+* Method: GET
+
+- `<secret>`: 在 `config.json` 中配置的 `secret`
+- `<device_id>`: 设备标识符
+
+### 7. `/device/clear?secret=<secret>`
+
+清除所有设备的状态
+
+* Method: GET
+
+- `<secret>`: 在 `config.json` 中配置的 `secret`
+
+### 8. `/reload_config?secret=<secret>`
+
+重新从 `config.json` 加载配置
+
+* Method: GET
+
+- `<secret>`: 在 `config.json` 中配置的 `secret`
 
 ## 客户端示例
 
@@ -165,6 +237,6 @@ python3 start.py
 
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
-感谢 [@1812z](https://github.com/1812z) 的 B 站视频~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
+感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
 
 如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.

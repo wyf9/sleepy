@@ -13,6 +13,10 @@ body, html {
     overflow: hidden;
 }
 
+a {
+    text-decoration: none;
+}
+
 body {
     /* 背景图设置 */
     background: url('{{ bg }}') no-repeat center center fixed;
@@ -43,3 +47,5 @@ body {
 .error {
     color: red;
 }
+
+/* 不建议删除上面的 .sleeping .awake .error 三个默认颜色 */
