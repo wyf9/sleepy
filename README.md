@@ -1,31 +1,41 @@
 # sleepy
 
-> [!TIP]
-> 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支)
+一个查看个人在线状态的 Flask 网站，让他人能知道你不在而不是故意吊他/她
 
-TODOs:
+[**功能**](#功能) / [**TODO**](#todo) / [**演示**](#preview-功能) / [**部署**](#部署) / [**使用**](#使用) / [**关于**](#关于)
+
+## 功能
+
+- 自行设置在线状态
+- 实时更新设备打开应用(名称) *(未完成)*
+- 美观的展示页面 [见 [Preview](#preview)]
+
+### TODO
+
 - [x] 网页使用 api 请求，并实现定时刷新
-- [ ] 设备使用状态
+- [ ] 设备使用状态 (仅完成 api)
 - [ ] 更好的客户端示例
 - [x] **修改数据保存方法** (https://github.com/wyf9/sleepy/issues/3)
   - 拆分 `config.json` (只读) 和 `data.json`
   - 定时写入 `data.json`
 
-> Are you sleeping?
+> [!TIP]
+> 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支) <br/>
+> 因上学原因, 可能放缓更新 <br/>
+> 最新开发进度/完整 TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)
 
-一个查看个人在线状态的 Flask 网站，让他人能知道你不在而不是故意吊他/她
+### Preview
 
-[**演示**](#preview) / [**部署**](#部署) / [**使用**](#使用) / [**关于**](#关于)
+演示站 (稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
-## Preview
-
-演示站: [Here](https://sleepy.wyf9.top)
+开发预览 (*不保证在线*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
 ## 部署
 
-> 从旧版本更新? 请看 [data.json 更新记录](./data_json_update.md)
+> 从旧版本更新? 请看 [config.json 更新记录](./data_json_update.md) <br/>
+> *配置文件已从 `data.json` 更名为 `config.json`*
 
-理论上全平台通用, 安装了 Python >= **3.6** 即可
+理论上全平台通用, 安装了 Python >= **3.6** 即可 (建议: **3.10+**)
 
 1. Clone 本仓库 (建议先 Fork / Use this template)
 
@@ -47,7 +57,7 @@ pip install flask pytz
 python3 server.py
 ```
 
-如果不出意外，会提示: `data.json not exist, creating`，同时目录下出现 `data.json` 文件，编辑该文件中的配置后重新运行即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
+如果不出意外，会提示: `config.json not exist, creating`，同时目录下出现 `config.json` 文件，编辑该文件中的配置后重新运行即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
 
 ## 使用
 
@@ -67,7 +77,7 @@ python3 start.py
 
 相比直接启动, 启动器可在服务器退出后自动重启 (方便开发)
 
-默认服务 http 端口: `9010` *(可在 `data.py` 中修改)*
+默认服务 http 端口: `9010` *(可在 `config.json` 中修改)*
 
 > 斜体项表示无需传入任何参数
 
@@ -112,6 +122,7 @@ python3 start.py
 
 * Method: GET
 * 无需鉴权
+* Alias: `/get/status_list` *(兼容旧版本)*
 
 返回 json:
 
@@ -133,7 +144,7 @@ python3 start.py
 ]
 ```
 
-> 就是返回 `data.json` 中的 `status_list` 列表
+> 就是返回 `config.json` 中的 `status_list` 列表
 
 ### 3. `/set?secret=<secret>&status=<status>`
 
@@ -141,7 +152,7 @@ python3 start.py
 
 * Method: GET
 
-- `<secret>`: 在 `data.json` 中配置的 `secret`
+- `<secret>`: 在 `config.json` 中配置的 `secret`
 - `<status>`: 状态码 *(`int`)*
 
 返回 json:
@@ -199,7 +210,7 @@ python3 start.py
 
 * Method: GET
 
-- `<secret>`: 在 `data.json` 中配置的 `secret`
+- `<secret>`: 在 `config.json` 中配置的 `secret`
 - `<device_id>`: 设备标识符
 
 ### 7. `/device/clear?secret=<secret>`
@@ -208,7 +219,7 @@ python3 start.py
 
 * Method: GET
 
-- `<secret>`: 在 `data.json` 中配置的 `secret`
+- `<secret>`: 在 `config.json` 中配置的 `secret`
 
 ### 8. `/reload_config?secret=<secret>`
 
@@ -216,7 +227,7 @@ python3 start.py
 
 * Method: GET
 
-- `<secret>`: 在 `data.json` 中配置的 `secret`
+- `<secret>`: 在 `config.json` 中配置的 `secret`
 
 ## 客户端示例
 
