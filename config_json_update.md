@@ -12,7 +12,7 @@
 
 # 2024.12.14.2
 
-```json
+```jsonc
 // ...
     "secret": "xxx",
     "status": 0, // (1) [REMOVE]
@@ -32,7 +32,7 @@
 
 # 2024.12.14.1
 
-```json
+```jsonc
     // ...
     "status": 0,
     "device_status": {}, // (1) [New]
@@ -46,7 +46,7 @@
   * Type: Dict
   * Desc: 存储各个设备的状态 (见下)
 
-```json
+```jsonc
 // device_status example
 "device_status": {
     "desktop-3ee05kd": { // 设备名称 (标识符)
@@ -65,7 +65,7 @@
 
 ## 2024.12.13.1
 
-```json
+```jsonc
 // ...
 
     // ...

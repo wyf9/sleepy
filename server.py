@@ -123,6 +123,7 @@ def query():
     return u.format_dict(ret)
 
 
+@app.route('/get/status_list') # 兼容旧版
 @app.route('/status_list')
 def get_status_list():
     '''
