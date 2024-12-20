@@ -81,17 +81,17 @@ python3 start.py
 
 > 斜体项表示无需传入任何参数
 
-|     | 路径                                                | 方法   | 作用                                       |
-| --- | --------------------------------------------------- | ------ | ------------------------------------------ |
-| 0   | *`/`*                                               | `GET`  | *显示主页*                                 |
-| 1   | *`/query`*                                          | `GET`  | *获取状态*                                 |
-| 2   | *`/status_list`*                                    | `GET`  | *获取可用状态列表*                         |
-| 3   | `/set?secret=<secret>&status=<status>`              | `GET`  | 设置状态 (url 参数)                        |
-| 4   | `/set/<secret>/<status>`                            | `GET`  | 设置状态 (路径)                            |
-| 5   | `/device/set`                                       | `POST` | *[new]* 设置单个设备的状态 (名称/打开应用) |
-| 6   | `/device/remove?secret=<secret>&name=<device_name>` | `GET`  | *[new]* 移除单个设备的状态                 |
-| 7   | `/device/clear?secret=<secret>`                     | `GET`  | *[new]* 清除所有设备的状态                 |
-| 8   | `/reload_config?secret=<secret>`                    | `GET`  | *[new]* 重载配置                           |
+|     | 路径                                                | 方法           | 作用                                       |
+| --- | --------------------------------------------------- | -------------- | ------------------------------------------ |
+| 0   | *`/`*                                               | `GET`          | *显示主页*                                 |
+| 1   | *`/query`*                                          | `GET`          | *获取状态*                                 |
+| 2   | *`/status_list`*                                    | `GET`          | *获取可用状态列表*                         |
+| 3   | `/set?secret=<secret>&status=<status>`              | `GET`          | 设置状态 (url 参数)                        |
+| 4   | `/set/<secret>/<status>`                            | `GET`          | 设置状态 (路径)                            |
+| 5   | `/device/set`                                       | `GET` / `POST` | *[new]* 设置单个设备的状态 (名称/打开应用) |
+| 6   | `/device/remove?secret=<secret>&name=<device_name>` | `GET`          | *[new]* 移除单个设备的状态                 |
+| 7   | `/device/clear?secret=<secret>`                     | `GET`          | *[new]* 清除所有设备的状态                 |
+| 8   | `/reload_config?secret=<secret>`                    | `GET`          | *[new]* 重载配置                           |
 
 
 ### 1. `/query`
@@ -190,7 +190,22 @@ python3 start.py
 
 设置单个设备的状态
 
-* Method: POST
+* Method: GET / POST
+
+#### GET
+
+> [!WARNING]
+> 使用 url params 传递参数在某些情况下 *(如内容包含特殊符号)* 可能导致非预期行为, 此处更建议使用 POST
+
+> `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>`
+
+- `<secret>`: 在 `config.json` 中配置的 `secret`
+- `<id>`: 设备标识符
+- `<show_name>`: 显示名称
+- `<using>`: 是否正在使用
+- `<app_name>`: 正在使用应用的名称
+
+#### POST
 
 请求体:
 
