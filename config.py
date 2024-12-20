@@ -27,6 +27,7 @@ class config:
     config 类, 负责配置调用
     可用 `.config['xxx']` 直接调取数据 (加载后)
     '''
+    config: dict
 
     def __init__(self):
         if not os.path.exists('config.json'):

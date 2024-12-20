@@ -93,7 +93,7 @@ def style_css():
     return response
 
 
-# --- Basic API (GET)
+# --- Status API
 
 
 @app.route('/query')
@@ -123,7 +123,7 @@ def query():
     return u.format_dict(ret)
 
 
-@app.route('/get/status_list') # 兼容旧版
+@app.route('/get/status_list')  # 兼容旧版
 @app.route('/status_list')
 def get_status_list():
     '''
@@ -193,7 +193,7 @@ def set_path(secret, status):
         )
 
 
-# --- Device status API
+# --- Device API
 
 
 @app.route('/device/set', methods=['POST'])
@@ -225,7 +225,7 @@ def device_set():
             'using': device_using,
             'app_name': app_name
         }
-        devices['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
     else:
         return u.reterr(
             code='not authorized',
@@ -295,6 +295,54 @@ def clear_device():
         'success': True,
         'code': 'OK'
     })
+
+
+# --- Storage API
+
+@app.route('/reload_config')
+def reload_config():
+    '''
+    从 `config.json` 重载配置
+    - Method: **GET**
+    '''
+    showip(request, '/reload_config')
+    secret = escape(request.args.get("secret"))
+    secret_real = c.get('secret')
+    if secret == secret_real:
+        c.load()
+        return u.format_dict({
+            'success': True,
+            'code': 'OK',
+            'config': c.config
+        })
+    else:
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
+
+
+@app.route('/save_data')
+def save_data():
+    '''
+    保存内存中的状态信息到 `data.json`
+    - Method: **GET**
+    '''
+    showip(request, '/save_data')
+    secret = escape(request.args.get("secret"))
+    secret_real = c.get('secret')
+    if secret == secret_real:
+        d.load()
+        return u.format_dict({
+            'success': True,
+            'code': 'OK',
+            'data': d.data
+        })
+    else:
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
 
 
 # --- End

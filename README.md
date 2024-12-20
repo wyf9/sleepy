@@ -229,6 +229,14 @@ python3 start.py
 
 - `<secret>`: 在 `config.json` 中配置的 `secret`
 
+### 9. `/save_data?secret=<secret>`
+
+保存内存中的状态信息到 `data.json`
+
+* Method: GET
+
+- `<secret>`: 在 `config.json` 中配置的 `secret`
+
 ## 客户端示例
 
 在 `_example/` 目录下, 可参考

@@ -30,6 +30,8 @@ class data:
     data 类，存储持久化状态
     可用 `.data['xxx']` 直接调取数据 (加载后) *(?)*
     '''
+    data: dict
+    data_check_interval: int
 
     def __init__(self):
         if not os.path.exists('data.json'):
@@ -42,10 +44,8 @@ class data:
             os.remove('data.json')
             initJson()
             self.load()
-        self.timer_thread = threading.Thread(target=self.timer_save, daemon=True)
-        self.timer_thread.start()
 
-    def load(self, ret: bool = False) -> None | dict:
+    def load(self, ret: bool = False) -> dict:
         '''
         加载状态
 
@@ -62,17 +62,6 @@ class data:
         '''
         保存配置
         '''
-        th = threading.Thread(target=self.timer_save, daemon=True)
-        th.start()
-        return th
-
-    def save_thread(self):
-        '''
-        真正保存文件的线程, 由 `save()` 调用
-        '''
-        print('save sleeping 5s...')
-        sleep(5)
-        print('save get up')
         with open('data.json', 'w+', encoding='utf-8') as file:
             json.dump(self.data, file, indent=4, ensure_ascii=False)
 
@@ -89,19 +78,24 @@ class data:
         gotdata = self.data[name]
         return gotdata
 
-    def timer_save(self):
+    def start_timer_check(self, data_check_interval: int = 60):
+        '''
+        使用 threading 启动下面的 `timer_check()`
+
+        :param data_check_interval: 检查间隔 *(秒)*
+        '''
+        self.data_check_interval = data_check_interval
+        self.timer_thread = threading.Thread(target=self.timer_check, daemon=True)
+        self.timer_thread.start()
+
+    def timer_check(self):
         '''
         定时检查更改并自动保存
-        * 默认 3 分钟 (3 * 60s)
+        * 根据 `data_check_interval` 参数调整 sleep() 的秒数
         * 需要使用 threading 启动新线程运行
         '''
-        try:
-            while True:
-                file_data = self.load(ret=True)
-                if file_data != self.data:
-                    u.info('[timer_save] Detected data change, saving')
-                    self.save()
-                sleep(10)#*60)
-        except:
-            u.info('[timer_save] quit thread')
-            return 0
+        while True:
+            sleep(self.data_check_interval)
+            file_data = self.load(ret=True)
+            if file_data != self.data:
+                self.save()
