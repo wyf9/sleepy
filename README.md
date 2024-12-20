@@ -1,6 +1,6 @@
 # sleepy
 
-一个查看个人在线状态的 Flask 网站，让他人能知道你不在而不是故意吊他/她
+一个查看个人在线状态 (并视奸正在使用软件) 的 Flask 网站，让他人能知道你不在而不是故意吊他/她
 
 [**功能**](#功能) / [**TODO**](#todo) / [**演示**](#preview-功能) / [**部署**](#部署) / [**使用**](#使用) / [**关于**](#关于)
 
@@ -22,7 +22,7 @@
 > [!TIP]
 > 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支) <br/>
 > 因上学原因, 可能放缓更新 <br/>
-> 最新开发进度/完整 TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)
+> **最新开发进度/完整 TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)**
 
 ### Preview
 
