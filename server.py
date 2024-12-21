@@ -212,7 +212,7 @@ def device_set():
         except:
             return u.reterr(
                 code='bad request',
-                message='missing param'
+                message='missing param or wrong param type'
             )
         secret = escape(request.args.get('secret'))
         secret_real = c.get('secret')
@@ -307,14 +307,8 @@ def clear_device():
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
-        try:
-            d.data['device_status'] = {}
-            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
-        except KeyError:
-            return u.reterr(
-                code='not found',
-                message='cannot find device item'
-            )
+        d.data['device_status'] = {}
+        d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
     else:
         return u.reterr(
             code='not authorized',

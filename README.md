@@ -20,7 +20,7 @@
   - 定时写入 `data.json`
 
 > [!TIP]
-> 正在加急更新中 (请看 [dev-2024-12-1](https://github.com/wyf9/sleepy/tree/dev-2024-12-1) 分支) <br/>
+> 正在加急更新中 (请看 [dev-2024-12-2](https://github.com/wyf9/sleepy/tree/dev-2024-12-2) 分支) <br/>
 > 因上学原因, 可能放缓更新 <br/>
 > **最新开发进度/完整 TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)**
 
@@ -28,11 +28,11 @@
 
 演示站 (稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
-开发预览 (*不保证在线*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+开发预览 (*不保证可用*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
 ## 部署
 
-> 从旧版本更新? 请看 [config.json 更新记录](./data_json_update.md) <br/>
+> 从旧版本更新? 请看 [config.json 更新记录](./config_json_update.md) <br/>
 > *配置文件已从 `data.json` 更名为 `config.json`*
 
 理论上全平台通用, 安装了 Python >= **3.6** 即可 (建议: **3.10+**)
@@ -63,36 +63,30 @@ python3 server.py
 
 有两种启动方式:
 
-- 直接启动
-
 ```shell
-python3 server.py
+python3 server.py # 直接启动
+python3 start.py # 简易启动器
 ```
-
-- 简易启动器
-
-```shell
-python3 start.py
-```
-
-相比直接启动, 启动器可在服务器退出后自动重启 (方便开发)
 
 默认服务 http 端口: `9010` *(可在 `config.json` 中修改)*
 
+## API
+
 > 斜体项表示无需传入任何参数
 
-|     | 路径                                                | 方法           | 作用                                       |
-| --- | --------------------------------------------------- | -------------- | ------------------------------------------ |
-| 0   | *`/`*                                               | `GET`          | *显示主页*                                 |
-| 1   | *`/query`*                                          | `GET`          | *获取状态*                                 |
-| 2   | *`/status_list`*                                    | `GET`          | *获取可用状态列表*                         |
-| 3   | `/set?secret=<secret>&status=<status>`              | `GET`          | 设置状态 (url 参数)                        |
-| 4   | `/set/<secret>/<status>`                            | `GET`          | 设置状态 (路径)                            |
-| 5   | `/device/set`                                       | `GET` / `POST` | *[new]* 设置单个设备的状态 (名称/打开应用) |
-| 6   | `/device/remove?secret=<secret>&name=<device_name>` | `GET`          | *[new]* 移除单个设备的状态                 |
-| 7   | `/device/clear?secret=<secret>`                     | `GET`          | *[new]* 清除所有设备的状态                 |
-| 8   | `/reload_config?secret=<secret>`                    | `GET`          | *[new]* 重载配置                           |
-
+|     | 路径                                                                                          | 方法   | 作用                          |
+| --- | --------------------------------------------------------------------------------------------- | ------ | ----------------------------- |
+| 0   | *`/`*                                                                                         | `GET`  | *显示主页*                    |
+| 1   | *`/query`*                                                                                    | `GET`  | *获取状态*                    |
+| 2   | *`/status_list`*                                                                              | `GET`  | *获取可用状态列表*            |
+| 3   | `/set?secret=<secret>&status=<status>`                                                        | `GET`  | 设置状态                      |
+|     | `/set/<secret>/<status>`                                                                      | `GET`  | -                             |
+| 4   | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
+|     | `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
+| 5   | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
+| 6   | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
+| 7   | `/reload_config?secret=<secret>`                                                              | `GET`  | *[new]* 重载配置              |
+| 8   | `/save_data?secret=<secret>`                                                                  | `GET`  | *[new]* 保存内存中的状态信息  |
 
 ### 1. `/query`
 
@@ -101,7 +95,7 @@ python3 start.py
 * Method: GET
 * 无需鉴权
 
-返回 json:
+#### Response
 
 ```jsonc
 {
@@ -124,7 +118,7 @@ python3 start.py
 * 无需鉴权
 * Alias: `/get/status_list` *(兼容旧版本)*
 
-返回 json:
+#### Response
 
 ```jsonc
 [
@@ -151,28 +145,31 @@ python3 start.py
 设置当前状态
 
 * Method: GET
+* Alias: `/set/<secret>/<status>` (path param)
+
+#### Params
 
 - `<secret>`: 在 `config.json` 中配置的 `secret`
 - `<status>`: 状态码 *(`int`)*
 
-返回 json:
+#### Response
 
 ```jsonc
-// 1. 成功
+// 成功
 {
     "success": true, // 请求是否成功
     "code": "OK", // 返回代码
     "set_to": 0 // 设置到的状态码
 }
 
-// 2. 失败 - 密钥错误
+// 失败 - 密钥错误
 {
     "success": false, // 请求是否成功
     "code": "not authorized", // 返回代码
     "message": "invaild secret" // 详细信息
 }
 
-// 3. 失败 - 请求无效
+// 失败 - 请求无效
 {
     "success": false, // 请求是否成功
     "code": "bad request", // 返回代码
@@ -180,19 +177,14 @@ python3 start.py
 }
 ```
 
-### 4. `/set/<secret>/<status>`
 
-参数同上 `3.`
-
-* Method: GET
-
-### 5. `/device/set`
+### 4. `/device/set`
 
 设置单个设备的状态
 
 * Method: GET / POST
 
-#### GET
+#### Params (GET)
 
 > [!WARNING]
 > 使用 url params 传递参数在某些情况下 *(如内容包含特殊符号)* 可能导致非预期行为, 此处更建议使用 POST
@@ -205,11 +197,11 @@ python3 start.py
 - `<using>`: 是否正在使用
 - `<app_name>`: 正在使用应用的名称
 
-#### POST
+#### Body (POST)
 
-请求体:
+> `/device/set`
 
-```json
+```jsonc
 {
     "secret": "MySecretCannotGuess", // 密钥
     "id": "device-1", // 设备标识符
@@ -219,38 +211,157 @@ python3 start.py
 }
 ```
 
-### 6. `/device/remove?secret=<secret>&id=<device_id>`
+#### Response
+
+```jsonc
+// 成功
+{
+  "success": true,
+  "code": "OK"
+}
+
+// 失败 - 密钥错误
+{
+    "success": false,
+    "code": "not authorized",
+    "message": "invaild secret"
+}
+
+// 失败 - 缺少参数
+{
+    "success": false,
+    "code": "bad request",
+    "message": "missing param"
+}
+```
+
+### 5. `/device/remove?secret=<secret>&id=<device_id>`
 
 移除单个设备的状态
 
 * Method: GET
 
+#### Params
+
 - `<secret>`: 在 `config.json` 中配置的 `secret`
 - `<device_id>`: 设备标识符
 
-### 7. `/device/clear?secret=<secret>`
+### Response
+
+```jsonc
+// 成功
+{
+    "success": true,
+    "code": "OK"
+}
+
+// 失败 - 不存在 (也不算失败了?)
+{
+    "success": false,
+    "code": "not found",
+    "message": "cannot find item"
+}
+
+// 失败 - 密钥错误
+{
+    "success": false,
+    "code": "not authorized",
+    "message": "invaild secret"
+}
+```
+
+### 6. `/device/clear?secret=<secret>`
 
 清除所有设备的状态
 
 * Method: GET
 
+#### Params
+
 - `<secret>`: 在 `config.json` 中配置的 `secret`
 
-### 8. `/reload_config?secret=<secret>`
+#### Response
+
+```jsonc
+// 成功
+{
+    "success": true,
+    "code": "OK"
+}
+
+// 失败 - 密钥错误
+{
+    "success": false,
+    "code": "not authorized",
+    "message": "invaild secret"
+}
+```
+
+### 7. `/reload_config?secret=<secret>`
 
 重新从 `config.json` 加载配置
 
 * Method: GET
 
+#### Params
+
 - `<secret>`: 在 `config.json` 中配置的 `secret`
 
-### 9. `/save_data?secret=<secret>`
+#### Response
+
+```jsonc
+// 成功
+{
+    "success": true,
+    "code": "OK",
+    "config": { // 你的 config.json 内容
+        "version": "2024.12.20.1",
+        "debug": true,
+        "host": "::",
+        "port": 9010,
+        // ...
+    }
+}
+
+// 失败 - 密钥错误
+{
+    "success": false,
+    "code": "not authorized",
+    "message": "invaild secret"
+}
+```
+
+### 8. `/save_data?secret=<secret>`
 
 保存内存中的状态信息到 `data.json`
 
 * Method: GET
 
+#### Params
+
 - `<secret>`: 在 `config.json` 中配置的 `secret`
+
+#### Response
+
+```jsonc
+// 成功
+{
+    "success": true,
+    "code": "OK",
+    "data": { // data.json 内容
+        "status": 0,
+        "device_status": {},
+        "last_updated": "2024-12-21 13:58:38"
+    }
+}
+
+// 失败 - 密钥错误
+{
+    "success": false,
+    "code": "not authorized",
+    "message": "invaild secret"
+}
+```
 
 ## 客户端示例
 
