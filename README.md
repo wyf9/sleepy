@@ -32,7 +32,7 @@
 
 ## 部署
 
-> 从旧版本更新? 请看 [config.json 更新记录](./config_json_update.md) <br/>
+> 从旧版本更新? 请看 [config.json 更新记录](./doc/config_json_update.md) <br/>
 > *配置文件已从 `data.json` 更名为 `config.json`*
 
 理论上全平台通用, 安装了 Python >= **3.6** 即可 (建议: **3.10+**)
@@ -64,8 +64,10 @@ python3 server.py
 有两种启动方式:
 
 ```shell
-python3 server.py # 直接启动
-python3 start.py # 简易启动器
+# 直接启动
+python3 server.py
+# 简易启动器
+python3 start.py
 ```
 
 默认服务 http 端口: `9010` *(可在 `config.json` 中修改)*
@@ -83,5 +85,7 @@ python3 start.py # 简易启动器
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
+
+推荐阅读: [HelloFlask (Flask 入门教程)](https://tutorial.helloflask.com/)
 
 如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.

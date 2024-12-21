@@ -78,10 +78,10 @@
 
 [Back to # api](#api)
 
-|                 | 路径                                   | 方法  | 作用     |
-| --------------- | -------------------------------------- | ----- | -------- |
-| [1](status-set) | `/set?secret=<secret>&status=<status>` | `GET` | 设置状态 |
-|                 | `/set/<secret>/<status>`               | `GET` | -        |
+|                    | 路径                                   | 方法  | 作用     |
+| ------------------ | -------------------------------------- | ----- | -------- |
+| [Jump](status-set) | `/set?secret=<secret>&status=<status>` | `GET` | 设置状态 |
+|                    | `/set/<secret>/<status>`               | `GET` | -        |
 
 
 ### status-set
@@ -129,12 +129,12 @@
 
 [Back to # api](#api)
 
-|                    | 路径                                                                                          | 方法   | 作用                          |
-| ------------------ | --------------------------------------------------------------------------------------------- | ------ | ----------------------------- |
-| [1](device-set)    | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
-|                    | `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
-| [2](device-remove) | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
-| [3](device-clear)  | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
+|                       | 路径                                                                                          | 方法   | 作用                          |
+| --------------------- | --------------------------------------------------------------------------------------------- | ------ | ----------------------------- |
+| [Jump](device-set)    | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
+|                       | `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
+| [Jump](device-remove) | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
+| [Jump](device-clear)  | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
 
 ### device-set
 
@@ -212,7 +212,7 @@
 - `<secret>`: 在 `config.json` 中配置的 `secret`
 - `<device_id>`: 设备标识符
 
-### Response
+#### Response
 
 ```jsonc
 // 成功
