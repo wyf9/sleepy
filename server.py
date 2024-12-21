@@ -372,7 +372,7 @@ def save_data():
 if __name__ == '__main__':
     c.load()
     d.load()
-    d.start_timer_check(data_check_interval=c.config['data_check_interval'])
+    d.start_timer_check(data_check_interval=c.config['data_check_interval']) # 启动定时保存
     app.run(  # 启↗动↘
         host=c.config['host'],
         port=c.config['port'],

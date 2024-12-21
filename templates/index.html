@@ -9,8 +9,6 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
 
-<!-- url_for('static', filename='') -->
-
 <body>
     <div class="card">
         <a style="font-size: 2em;"><ruby>似<rt>sǐ</rt></ruby>了吗?</a>
@@ -23,7 +21,6 @@
 
         <div style="height: 10px;"></div>
         {{ more_text | safe }}
-        <!-- <a>ps: 如果长时间无响应，可能是你的网络问题，或服务器无法响应等</a> -->
         <div style="height: 40px;"></div>
         <a>你可以通过这个页面视奸 {{ user }}。
             <br>
@@ -37,7 +34,6 @@
             </a>
         </a>
     </div>
-    <!-- <script src="assets/query.js"></script> -->
     <script>
         const statusElement = document.getElementById('status');
         statusElement.classList.add('{{ status_color }}');
