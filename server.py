@@ -118,6 +118,8 @@ def query():
         'success': True,
         'status': st,
         'info': stinfo,
+        'device': d.data['device_status'],
+        'last_updated': d.data['last_updated'],
         'refresh': c.config['refresh']
     }
     return u.format_dict(ret)
@@ -372,7 +374,7 @@ def save_data():
 if __name__ == '__main__':
     c.load()
     d.load()
-    d.start_timer_check(data_check_interval=c.config['data_check_interval']) # 启动定时保存
+    d.start_timer_check(data_check_interval=c.config['data_check_interval'])  # 启动定时保存
     app.run(  # 启↗动↘
         host=c.config['host'],
         port=c.config['port'],
