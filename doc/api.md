@@ -49,7 +49,9 @@
 }
 ```
 
-> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可自行修改: https://github.com/wyf9/sleepy/blob/main/server.py#L16
+> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可自行修改: [`server.py`#`L16`](https://github.com/wyf9/sleepy/blob/main/server.py#L16)
+
+https://github.com/wyf9/sleepy/blob/main/server.py#L16
 
 ### status-list
 

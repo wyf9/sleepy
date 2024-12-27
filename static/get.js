@@ -14,6 +14,7 @@ async function update() {
         last_status = statusElement.classList.item(0);
         statusElement.classList.remove(last_status);
         statusElement.classList.add('sleeping');
+        document.getElementById('device-status').textContent = '[更新设备状态中...]';
         // fetch data
         fetch(url + 'query', { timeout: 10000 })
             .then(response => response.json())
@@ -26,16 +27,14 @@ async function update() {
                     last_status = statusElement.classList.item(0);
                     statusElement.classList.remove(last_status);
                     statusElement.classList.add(data.info.color);
-                    // update device
-                    // for (var i = 0; i < data.device.length; i++) {
-                    //     var device = data.device[i];
-                    //     console.log(device);
-                    // }
+                    // update device device-status
+                    var deviceStatus = '';
                     const devices = Object.values(data.device);
-                    for (let d = 0; i < devices.length; i++) {
-                        console.log(d);
-                        console.log(values[d]);
+                    for (let item of devices) {
+                        console.log(item);
+                        deviceStatus += '';
                     }
+                    document.getElementById('device-status').textContent = deviceStatus;
                     // update refresh time
                     refresh_time = data.refresh;
                 } else {
