@@ -21,6 +21,7 @@
         // 还可添加更多，以此类推
     ],
     "refresh": 5000, // 刷新状态的时间 (毫秒)
+    "data_check_interval": 30, // 多久保存一次 data.json (秒)
     "other": { // 其他配置 (网页上的信息)
         "user": "User", // 你的名字
         "background": "https://imgapi.siiway.top/image", // 背景图片 url
