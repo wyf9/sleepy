@@ -36,6 +36,14 @@
         "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
         "color": "awake"// 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
     },
+    "device": { // 设备列表
+        "device-1": { // 标识符，唯一
+            "show_name": "MyDevice1", // 前台显示名称
+            "using": "false", // 是否正在使用
+            "app_name": "bilibili" // 应用名 (如 using == false 则不使用)
+        }
+    },
+    "last_updated": "2024-12-20 23:51:34",
     "refresh": 5000 // 刷新时间 (ms)
 }
 ```

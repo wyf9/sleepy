@@ -26,6 +26,8 @@ async function update() {
                     last_status = statusElement.classList.item(0);
                     statusElement.classList.remove(last_status);
                     statusElement.classList.add(data.info.color);
+                    // update device
+                    // update refresh time
                     refresh_time = data.refresh;
                 } else {
                     errorinfo = data.info;

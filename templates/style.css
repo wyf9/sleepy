@@ -34,6 +34,26 @@ body {
     text-align: center;
 }
 
+.container {
+    display: flex;
+    flex-direction: column;
+    /* 设置垂直堆叠 */
+    justify-content: space-between;
+    /* 保持两者间距一致 */
+}
+
+/* #test { */
+    /* 为要放到底部的卡片添加特定样式 */
+    /* position: absolute;
+    bottom: 20px; */
+    /* transform: translateX(-50%); */
+    /* 可选：调整背景色、边距等其他属性 */
+    /* background-color: #f0f0f0; */
+    /* 示例背景色 */
+    /* border: 1px solid #ccc;
+    border-radius: 4px; */
+/* } */
+
 /* 以下为各种状态的颜色 */
 
 .sleeping {
