@@ -29,6 +29,7 @@
 
 ```jsonc
 {
+    "time": "2024-12-28 00:21:24", // 请求时服务端时间
     "success": true, // 请求是否成功
     "status": 0, // 获取到的状态码
     "info": { // 对应状态码的信息
@@ -43,10 +44,12 @@
             "app_name": "bilibili" // 应用名 (如 using == false 则不使用)
         }
     },
-    "last_updated": "2024-12-20 23:51:34",
+    "last_updated": "2024-12-20 23:51:34", // 信息上次更新的时间
     "refresh": 5000 // 刷新时间 (ms)
 }
 ```
+
+> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可自行修改: https://github.com/wyf9/sleepy/blob/main/server.py#L16
 
 ### status-list
 

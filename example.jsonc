@@ -25,7 +25,7 @@
     "other": { // 其他配置 (网页上的信息)
         "user": "User", // 你的名字
         "background": "https://imgapi.siiway.top/image", // 背景图片 url
-        // 推荐 repo: wyf01239/imgapi
+        // 推荐 repo: siiway/imgapi
         "alpha": 0.85, // 卡片不透明度设置 (0 ~ 1), 0 为完全透明, 1 为完全不透明
         "learn_more": "GitHub Repo", // 更多信息链接的提示, 默认为 github repo
         "repo": "https://github.com/wyf9/sleepy", // 更多信息链接的目标, 可填存储库链接

@@ -115,6 +115,7 @@ def query():
             'color': 'error'
         }
     ret = {
+        'time': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S'),
         'success': True,
         'status': st,
         'info': stinfo,

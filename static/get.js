@@ -1,4 +1,4 @@
-const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay)); // custom sleep func (only can use in async with await)
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay)); // custom sleep func (only can use in async function with await)
 
 async function update() {
     let refresh_time = 5000;
@@ -27,6 +27,15 @@ async function update() {
                     statusElement.classList.remove(last_status);
                     statusElement.classList.add(data.info.color);
                     // update device
+                    // for (var i = 0; i < data.device.length; i++) {
+                    //     var device = data.device[i];
+                    //     console.log(device);
+                    // }
+                    const devices = Object.values(data.device);
+                    for (let d = 0; i < devices.length; i++) {
+                        console.log(d);
+                        console.log(values[d]);
+                    }
                     // update refresh time
                     refresh_time = data.refresh;
                 } else {
