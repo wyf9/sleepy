@@ -27,14 +27,22 @@ async function update() {
                     last_status = statusElement.classList.item(0);
                     statusElement.classList.remove(last_status);
                     statusElement.classList.add(data.info.color);
-                    // update device device-status
-                    var deviceStatus = '';
+                    // update device status
+                    var deviceStatus = '<hr/>';
                     const devices = Object.values(data.device);
-                    for (let item of devices) {
-                        console.log(item);
-                        deviceStatus += '';
+                    for (let device of devices) {
+                        console.log(device);
+                        if (device.using) {
+                            var device_app = `<a class="awake">${device.app_name}</a>`;
+                        } else {
+                            var device_app = '<a class="sleeping">未在使用</a>';
+                        }
+                        deviceStatus += `${device.show_name}: ${device_app} <br/>`;
                     }
-                    document.getElementById('device-status').textContent = deviceStatus;
+                    if (deviceStatus == '<hr/>') {
+                        deviceStatus = '';
+                    }
+                    document.getElementById('device-status').innerHTML = deviceStatus;
                     // update refresh time
                     refresh_time = data.refresh;
                 } else {
