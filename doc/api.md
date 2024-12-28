@@ -93,7 +93,7 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 
 |                    | 路径                                   | 方法  | 作用     |
 | ------------------ | -------------------------------------- | ----- | -------- |
-| [Jump](status-set) | `/set?secret=<secret>&status=<status>` | `GET` | 设置状态 |
+| [Jump](#status-set) | `/set?secret=<secret>&status=<status>` | `GET` | 设置状态 |
 |                    | `/set/<secret>/<status>`               | `GET` | -        |
 
 
@@ -144,10 +144,10 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 
 |                       | 路径                                                                                          | 方法   | 作用                          |
 | --------------------- | --------------------------------------------------------------------------------------------- | ------ | ----------------------------- |
-| [Jump](device-set)    | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
+| [Jump](#device-set)    | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
 |                       | `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
-| [Jump](device-remove) | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
-| [Jump](device-clear)  | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
+| [Jump](#device-remove) | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
+| [Jump](#device-clear)  | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
 
 ### device-set
 
