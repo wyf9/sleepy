@@ -341,7 +341,6 @@ def reload_config():
         return u.format_dict({
             'success': True,
             'code': 'OK',
-            'config': c.config
         })
     else:
         return u.reterr(

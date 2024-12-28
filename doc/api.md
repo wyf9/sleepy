@@ -309,13 +309,6 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 {
     "success": true,
     "code": "OK",
-    "config": { // 你的 config.json 内容
-        "version": "2024.12.20.1",
-        "debug": true,
-        "host": "::",
-        "port": 9010,
-        // ...
-    }
 }
 
 // 失败 - 密钥错误
