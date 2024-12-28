@@ -3,6 +3,7 @@
 1. [只读接口](#read-only)
 2. [Status 接口](#status)
 3. [Device status 接口](#device)
+4. [Storage 接口](#storage)
 
 ## Read-only
 
@@ -282,6 +283,8 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 ```
 
 ## Storage
+
+[Back to # api](#api)
 
 |                                | 路径                             | 方法  | 作用                 |
 | ------------------------------ | -------------------------------- | ----- | -------------------- |

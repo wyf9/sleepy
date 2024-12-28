@@ -3,7 +3,7 @@
 
 '''
 一个 python 命令行示例
-depend: requests
+依赖: requests
 by @wyf9
 '''
 
@@ -12,7 +12,7 @@ import json
 global server
 
 # 密钥
-SECRET = 'YourSecret'
+SECRET = 'YourSecretCannotGuess'
 SERVER = 'https://example.com'
 # (弃用) 服务器列表, 末尾不加 `/`
 # SERVER_LIST = [
