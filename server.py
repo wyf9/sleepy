@@ -62,7 +62,8 @@ def index():
         status_name=stat['name'],
         status_desc=stat['desc'],
         status_color=stat['color'],
-        more_text=ot['more_text']
+        more_text=ot['more_text'],
+        last_updated=d.data['last_updated']
     )
 
 
@@ -203,7 +204,8 @@ def set_path(secret, status):
 def device_set():
     '''
     设置单个设备的信息/打开应用
-    - Method: **POST**
+    - Method: **GET / POST**
+    - **GET 可能出现 using 参数无效的情况，建议使用 POST**
     '''
     showip(request, '/device_set')
     if request.method == 'GET':
@@ -238,7 +240,7 @@ def device_set():
             secret = req['secret']
             device_id = req['id']
             device_show_name = req['show_name']
-            device_using = req['using']
+            device_using = bool(req['using'])
             app_name = req['app_name']
         except:
             return u.reterr(

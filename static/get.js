@@ -21,13 +21,13 @@ async function update() {
             .then(async (data) => {
                 console.log(data);
                 if (data.success) {
-                    // update status
+                    // update status (status, additional-info)
                     statusElement.textContent = data.info.name;
-                    document.getElementById('additional-info').textContent = data.info.desc;
+                    document.getElementById('additional-info').innerHTML = data.info.desc;
                     last_status = statusElement.classList.item(0);
                     statusElement.classList.remove(last_status);
                     statusElement.classList.add(data.info.color);
-                    // update device status
+                    // update device status (device-status)
                     var deviceStatus = '<hr/>';
                     const devices = Object.values(data.device);
                     for (let device of devices) {
@@ -43,6 +43,8 @@ async function update() {
                         deviceStatus = '';
                     }
                     document.getElementById('device-status').innerHTML = deviceStatus;
+                    // update last update time (last-updated)
+                    document.getElementById('last-updated').textContent = data.last_updated;
                     // update refresh time
                     refresh_time = data.refresh;
                 } else {

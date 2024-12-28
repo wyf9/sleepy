@@ -162,7 +162,8 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 #### Params (GET)
 
 > [!WARNING]
-> 使用 url params 传递参数在某些情况下 *(如内容包含特殊符号)* 可能导致非预期行为, 此处更建议使用 POST
+> 使用 url params 传递参数在某些情况下 *(如内容包含特殊符号)* 可能导致非预期行为, 此处更建议使用 POST <br/>
+> **GET 可能出现 using 参数无效的情况, 原因未知**
 
 > `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>`
 
