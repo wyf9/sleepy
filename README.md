@@ -12,23 +12,27 @@
 
 ### TODO
 
+- [x] **拆分 `config.json` (只读) 和 `data.json`** (https://github.com/wyf9/sleepy/issues/3)
 - [x] 网页使用 api 请求，并实现定时刷新
-- [ ] 设备使用状态 (仅完成 api)
-- [ ] 更好的客户端示例
-- [x] **修改数据保存方法** (https://github.com/wyf9/sleepy/issues/3)
-  - 拆分 `config.json` (只读) 和 `data.json`
-  - 定时写入 `data.json`
+- [x] 设备使用状态
+- [x] Windows 客户端 (Python)
+- [ ] Android 客户端 ([Autox.js](http://doc.autoxjs.com/))
+- [ ] 更多状态存储选项 (如 SQLite)
+- [ ] Metrics API (统计页面访问 / 接口调用次数)
+- [ ] 设备状态尝试 Websocket (=↓)
+- [ ] 设备状态 Heartbeat 机制
 
 > [!TIP]
-> 正在加急更新中 (请看 [dev-2024-12-2](https://github.com/wyf9/sleepy/tree/dev-2024-12-2) 分支) <br/>
+<!-- > 正在加急更新中 (请看 [dev-2024-12-2](https://github.com/wyf9/sleepy/tree/dev-2024-12-2) 分支) <br/> -->
 > 因上学原因, 可能放缓更新 <br/>
-> **最新开发进度/完整 TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)**
+> **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** <br/>
+> 下次更新要等明年啦~
 
 ### Preview
 
 演示站 (稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
-开发预览 (*不保证可用*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+开发预览 (*不保证可用*, 密钥 `wyf9test`): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
 ## 部署
 
@@ -74,7 +78,7 @@ python3 start.py
 
 ## 客户端示例
 
-在 `_example/` 目录下, 可参考
+如果你想直接开始使用，可在 [`/clients`](./client/README.md) 找到客户端 (用于手动更新状态/自动更新设备打开应用)
 
 ## API
 

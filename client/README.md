@@ -56,7 +56,7 @@ DEVICE_SHOW_NAME = 'MyDevice1'
 
 ## Other repos
 
-> Forks 中发现的脚本，可能需要进行修改以与本分支适配
+> Forks 中发现的脚本，可能需要进行修改以与本分支适配, 见 [API #device-set](../doc/api.md#device-set)
 
 - [1812z/sleepy] Android Macrodroid: [(main) `前台应用状态.macro`](https://github.com/1812z/sleepy/blob/main/%E5%89%8D%E5%8F%B0%E5%BA%94%E7%94%A8%E7%8A%B6%E6%80%81.macro)
 - [HBWuChang/sleepy] Android Magisk: [(main) `_example/win.py`](https://github.com/HBWuChang/sleepy/blob/main/_example/win.py) *(详见脚本同目录下 `/magisk`)*
