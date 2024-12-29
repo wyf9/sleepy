@@ -23,10 +23,12 @@
 - [ ] 更多状态存储选项 (如 SQLite)
 
 > [!TIP]
-<!-- > 正在加急更新中 (请看 [dev-2024-12-2](https://github.com/wyf9/sleepy/tree/dev-2024-12-2) 分支) <br/> -->
 > 因上学原因, 可能放缓更新 <br/>
 > **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** <br/>
-> 下次更新要等明年啦~
+> 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
+> 下次更新要等明年啦~ <br/>
+
+<!-- > 正在加急更新中 (请看 [dev-2024-12-2](https://github.com/wyf9/sleepy/tree/dev-2024-12-2) 分支) <br/> -->
 
 ### Preview
 
@@ -91,5 +93,3 @@ python3 start.py
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
 
 推荐阅读: [HelloFlask (Flask 入门教程)](https://tutorial.helloflask.com/)
-
-如有 Bug / 建议, 请 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
