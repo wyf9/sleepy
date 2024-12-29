@@ -7,7 +7,7 @@
 // @author       wyf9
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
-// @connect      *
+// @connect      sleepy.wyf9.top
 // @homepage     https://github.com/wyf9/sleepy
 // @source       https://github.com/wyf9/sleepy/blob/main/client/%E9%A1%B5%E9%9D%A2%E6%A0%87%E9%A2%98%E4%B8%8A%E6%8A%A5%E8%84%9A%E6%9C%AC-2024.12.2.user.js
 // ==/UserScript==
@@ -16,10 +16,11 @@
     'use strict';
 
     // 参数配置开始
-    const API_URL = 'http://example.com/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
+    const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
     const SECRET = '绝对猜不出来的密码'; // 你的 secret
     const ID = '114514'; // 你的设备 id
     const SHOW_NAME = '设备名称'; // 替换为你的设备名称
+    // [!!!] 请在第 10 行 `@connect` 处的域名改为你的服务域名
     // 参数配置结束
 
     // 获取浏览器名称
