@@ -62,7 +62,8 @@ def index():
         status_name=stat['name'],
         status_desc=stat['desc'],
         status_color=stat['color'],
-        more_text=ot['more_text']
+        more_text=ot['more_text'],
+        last_updated=d.data['last_updated']
     )
 
 
@@ -93,7 +94,7 @@ def style_css():
     return response
 
 
-# --- Basic API (GET)
+# --- Status API
 
 
 @app.route('/query')
@@ -115,15 +116,18 @@ def query():
             'color': 'error'
         }
     ret = {
+        'time': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S'),
         'success': True,
         'status': st,
         'info': stinfo,
+        'device': d.data['device_status'],
+        'last_updated': d.data['last_updated'],
         'refresh': c.config['refresh']
     }
     return u.format_dict(ret)
 
 
-@app.route('/get/status_list') # 兼容旧版
+@app.route('/get/status_list')  # 兼容旧版
 @app.route('/status_list')
 def get_status_list():
     '''
@@ -144,7 +148,7 @@ def set_normal():
     - Method: **GET**
     '''
     showip(request, '/set')
-    status = escape(request.args.get("status"))
+    status = escape(request.args.get('status'))
     try:
         status = int(status)
     except:
@@ -152,7 +156,7 @@ def set_normal():
             code='bad request',
             message="argument 'status' must be a number"
         )
-    secret = escape(request.args.get("secret"))
+    secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
         d.dset('status', status)
@@ -193,43 +197,74 @@ def set_path(secret, status):
         )
 
 
-# --- Device status API
+# --- Device API
 
 
-@app.route('/device/set', methods=['POST'])
+@app.route('/device/set', methods=['GET', 'POST'])
 def device_set():
     '''
     设置单个设备的信息/打开应用
-    - Method: **POST**
+    - Method: **GET / POST**
+    - **GET 可能出现 using 参数无效的情况，建议使用 POST**
     '''
     showip(request, '/device_set')
-    print(request.data)
-    req = request.get_json()
-    print(req)
-    try:
-        secret = req['secret']
-        device_id = req['id']
-        device_show_name = req['show_name']
-        device_using = req['using']
-        app_name = req['app_name']
-    except:
-        return u.reterr(
-            code='bad request',
-            message='missing param'
-        )
-    secret_real = c.get('secret')
-    if secret == secret_real:
-        devices: dict = d.dget('device_status')
-        devices[device_id] = {
-            'show_name': device_show_name,
-            'using': device_using,
-            'app_name': app_name
-        }
-        devices['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+    if request.method == 'GET':
+        try:
+            device_id = escape(request.args.get('id'))
+            device_show_name = escape(request.args.get('show_name'))
+            device_using = bool(escape(request.args.get('using')))
+            app_name = escape(request.args.get('app_name'))
+        except:
+            return u.reterr(
+                code='bad request',
+                message='missing param or wrong param type'
+            )
+        secret = escape(request.args.get('secret'))
+        secret_real = c.get('secret')
+        if secret == secret_real:
+            devices: dict = d.dget('device_status')
+            devices[device_id] = {
+                'show_name': device_show_name,
+                'using': device_using,
+                'app_name': app_name
+            }
+            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            return u.reterr(
+                code='not authorized',
+                message='invaild secret'
+            )
+    elif request.method == 'POST':
+        req = request.get_json()
+        try:
+            secret = req['secret']
+            device_id = req['id']
+            device_show_name = req['show_name']
+            device_using = bool(req['using'])
+            app_name = req['app_name']
+        except:
+            return u.reterr(
+                code='bad request',
+                message='missing param'
+            )
+        secret_real = c.get('secret')
+        if secret == secret_real:
+            devices: dict = d.dget('device_status')
+            devices[device_id] = {
+                'show_name': device_show_name,
+                'using': device_using,
+                'app_name': app_name
+            }
+            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            return u.reterr(
+                code='not authorized',
+                message='invaild secret'
+            )
     else:
         return u.reterr(
-            code='not authorized',
-            message='invaild secret'
+            code='invaild request',
+            message='only supports GET and POST method!'
         )
     return u.format_dict({
         'success': True,
@@ -244,13 +279,13 @@ def remove_device():
     - Method: **GET**
     '''
     showip(request, '/device/remove')
-    device_id = escape(request.args.get("id"))
+    device_id = escape(request.args.get('id'))
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
         try:
             del d.data['device_status'][device_id]
-            d.data['device_status']['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
         except KeyError:
             return u.reterr(
                 code='not found',
@@ -277,15 +312,8 @@ def clear_device():
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
-        try:
-            d.data['device_status'] = {
-                'last_updated': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
-            }
-        except KeyError:
-            return u.reterr(
-                code='not found',
-                message='cannot find device item'
-            )
+        d.data['device_status'] = {}
+        d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
     else:
         return u.reterr(
             code='not authorized',
@@ -297,10 +325,58 @@ def clear_device():
     })
 
 
+# --- Storage API
+
+@app.route('/reload_config')
+def reload_config():
+    '''
+    从 `config.json` 重载配置
+    - Method: **GET**
+    '''
+    showip(request, '/reload_config')
+    secret = escape(request.args.get('secret'))
+    secret_real = c.get('secret')
+    if secret == secret_real:
+        c.load()
+        return u.format_dict({
+            'success': True,
+            'code': 'OK',
+        })
+    else:
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
+
+
+@app.route('/save_data')
+def save_data():
+    '''
+    保存内存中的状态信息到 `data.json`
+    - Method: **GET**
+    '''
+    showip(request, '/save_data')
+    secret = escape(request.args.get('secret'))
+    secret_real = c.get('secret')
+    if secret == secret_real:
+        d.save()
+        return u.format_dict({
+            'success': True,
+            'code': 'OK',
+            'data': d.data
+        })
+    else:
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
+
+
 # --- End
 if __name__ == '__main__':
     c.load()
     d.load()
+    d.start_timer_check(data_check_interval=c.config['data_check_interval'])  # 启动定时保存
     app.run(  # 启↗动↘
         host=c.config['host'],
         port=c.config['port'],

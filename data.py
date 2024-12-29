@@ -30,6 +30,8 @@ class data:
     data 类，存储持久化状态
     可用 `.data['xxx']` 直接调取数据 (加载后) *(?)*
     '''
+    data: dict
+    data_check_interval: int
 
     def __init__(self):
         if not os.path.exists('data.json'):
@@ -42,10 +44,8 @@ class data:
             os.remove('data.json')
             initJson()
             self.load()
-        self.timer_thread = threading.Thread(target=self.timer_check)
-        self.timer_thread.start()
 
-    def load(self, ret: bool = False) -> None | dict:
+    def load(self, ret: bool = False) -> dict:
         '''
         加载状态
 
@@ -78,15 +78,24 @@ class data:
         gotdata = self.data[name]
         return gotdata
 
+    def start_timer_check(self, data_check_interval: int = 60):
+        '''
+        使用 threading 启动下面的 `timer_check()`
+
+        :param data_check_interval: 检查间隔 *(秒)*
+        '''
+        self.data_check_interval = data_check_interval
+        self.timer_thread = threading.Thread(target=self.timer_check, daemon=True)
+        self.timer_thread.start()
+
     def timer_check(self):
         '''
         定时检查更改并自动保存
-        * 默认 3 分钟 (3 * 60s)
+        * 根据 `data_check_interval` 参数调整 sleep() 的秒数
         * 需要使用 threading 启动新线程运行
         '''
         while True:
-            sleep(5*60)
+            sleep(self.data_check_interval)
             file_data = self.load(ret=True)
             if file_data != self.data:
-                u.info('Detected data change, saving.')
                 self.save()

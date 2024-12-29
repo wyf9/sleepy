@@ -10,6 +10,23 @@
 - `dd`: 日
 - `n`: 本日第 `n` 次修改
 
+# 2024.12.20.1
+
+```jsonc
+// ...
+    "refresh": 5000,
+    "data_check_interval": 60, // (1) [NEW]
+    "other": {
+// ...
+```
+
+- **New** (1)
+  * Name: `data_check_interval`
+  * Upper: None
+  * Type: int
+  * Desc: 控制多久 *(秒)* 检查一次状态是否与 `data.json` 中的内容有异, 如有则保存
+  * Desc: ps: 设置为 `0` 以禁用保存状态 **(不建议)**
+
 # 2024.12.14.2
 
 ```jsonc

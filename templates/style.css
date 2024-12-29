@@ -34,6 +34,12 @@ body {
     text-align: center;
 }
 
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 /* 以下为各种状态的颜色 */
 
 .sleeping {
