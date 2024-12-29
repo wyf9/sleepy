@@ -6,6 +6,7 @@
   - [CMDConsole](#cmdconsole)
   - [CmdConsoleMuiti](#cmdconsolemuiti)
   - [WinDevice](#windevice)
+  - [BrowserScript](#browserscript)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -53,6 +54,29 @@ DEVICE_SHOW_NAME = 'MyDevice1'
 ```
 
 > PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)**
+
+## [BrowserScript](./页面标题上报脚本-2024.12.2.user.js)
+
+> by: [@nuym](https://github.com/nuym)
+
+在任何支持油猴脚本的浏览器均可使用
+
+- [点击安装 (GitHub raw)](https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2024.12.2.user.js)
+
+- [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2024.12.2.user.js)
+
+> 文件 [L19-L25](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L19-L25) 的配置如下:
+
+```js
+// 参数配置开始
+const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
+const SECRET = '绝对猜不出来的密码'; // 你的 secret
+const ID = '114514'; // 你的设备 id
+const SHOW_NAME = '设备名称'; // 替换为你的设备名称
+// [!!!] 请在第 10 行 `@connect` 处的域名改为你的服务域名
+// 如本示例中域名就应为 sleepy.wyf9.top
+// 参数配置结束
+```
 
 ## Other repos
 

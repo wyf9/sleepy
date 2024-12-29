@@ -1,42 +1,39 @@
 // ==UserScript==
 // @name         页面标题上报脚本
-// @namespace    https://github.com/nuym
-// @version      1.0
-// @description  获取页面标题并上报到指定API（包括浏览器名称）
+// @namespace    sleepy
+// @version      2024.12.2
+// @description  获取页面标题并上报到指定 API (包括浏览器名称) / 请在安装脚本后手动编辑下面的配置
 // @author       nuym
+// @author       wyf9
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
-// @connect      在这里写入你的API_URL
+// @connect      *
+// @homepage     https://github.com/wyf9/sleepy
+// @source       https://github.com/wyf9/sleepy/blob/main/client/%E9%A1%B5%E9%9D%A2%E6%A0%87%E9%A2%98%E4%B8%8A%E6%8A%A5%E8%84%9A%E6%9C%AC-2024.12.2.user.js
 // ==/UserScript==
 
 (function () {
     'use strict';
 
-    // 配置 API 参数
-
-    // 请在@connect 这一行写入你的API_URL
-    // 请在@connect 这一行写入你的API_URL
-    // 请在@connect 这一行写入你的API_URL
-    // 请在@connect 这一行写入你的API_URL
-    // 请在@connect 这一行写入你的API_URL
-
-    const API_URL = 'http://你的网站/device/set'; //你的API
-    const SECRET = '你的secret'; // 你的 secret
-    const ID = '114514';              // 你的设备 id
+    // 参数配置开始
+    const API_URL = 'http://example.com/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
+    const SECRET = '绝对猜不出来的密码'; // 你的 secret
+    const ID = '114514'; // 你的设备 id
     const SHOW_NAME = '设备名称'; // 替换为你的设备名称
+    // 参数配置结束
 
     // 获取浏览器名称
     function getBrowserName() {
         const userAgent = navigator.userAgent;
 
         if (userAgent.includes("Edg")) {
-            return "Microsoft Edge";
+            return "Edge";
         } else if (userAgent.includes("Chrome") && !userAgent.includes("Edg")) {
-            return "Google Chrome";
+            return "Chrome";
         } else if (userAgent.includes("Firefox")) {
-            return "Mozilla Firefox";
+            return "Firefox";
         } else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) {
-            return "Apple Safari";
+            return "Safari";
         } else if (userAgent.includes("Opera") || userAgent.includes("OPR")) {
             return "Opera";
         } else {
@@ -52,7 +49,7 @@
         // 构造 API URL
         const apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=true&app_name=${encodeURIComponent(appName)}`;
 
-        // 使用 GM_xmlhttpRequest 发送请求
+        // 使用 GM_xmlhttpRequest 发送请求 (还是先用 get 吧)
         GM_xmlhttpRequest({
             method: 'GET',
             url: apiUrl,
