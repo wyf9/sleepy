@@ -10,11 +10,21 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
+    /* overflow-x: hidden;
+    overflow-y: hidden; */
+    /* text-overflow: ellipsis; */
+}
+
+#device-status {
+    height: 85%;
+    word-wrap: break-word;
+    overflow-x: scroll;
+    overflow-y: scroll;
 }
 
 a {
     text-decoration: none;
+    /* word-wrap: break-word; */
 }
 
 body {
@@ -38,6 +48,12 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+@media (max-width: 675px) {
+    body {
+        display: unset;
+    }
 }
 
 /* 以下为各种状态的颜色 */

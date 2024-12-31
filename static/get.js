@@ -1,5 +1,12 @@
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay)); // custom sleep func (only can use in async function with await)
 
+function truncateText(text, maxLength) {
+    if (text.length <= maxLength) {
+        return text;
+    }
+    return text.slice(0, maxLength) + '...';
+}
+
 async function update() {
     let refresh_time = 5000;
     let routerIndex = window.location.href.indexOf('?');
@@ -35,7 +42,7 @@ async function update() {
                         for (let device of devices) {
                             console.log(device);
                             if (device.using) {
-                                var device_app = `<a class="awake">${device.app_name}</a>`;
+                                var device_app = `<a class="awake" title="${device.app_name.replace('"', '\'')}" href='javascript:alert("${device.show_name}: \n${device.app_name.replace('"', '\'')}")'>${truncateText(device.app_name, 15)}</a>`;
                             } else {
                                 var device_app = '<a class="sleeping">未在使用</a>';
                             }

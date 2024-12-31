@@ -25,10 +25,8 @@
 > [!TIP]
 > 因上学原因, 可能放缓更新 <br/>
 > **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** <br/>
-> 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
-> 下次更新要等明年啦~ <br/>
-
-<!-- > 正在加急更新中 (请看 [dev-2024-12-2](https://github.com/wyf9/sleepy/tree/dev-2024-12-2) 分支) <br/> -->
+> 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*. <br/>
+> 正在加急更新中 (请看 [dev-2025-1-1](https://github.com/wyf9/sleepy/tree/dev-2025-1-1) 分支)
 
 ### Preview
 

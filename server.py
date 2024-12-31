@@ -19,7 +19,7 @@ timezone = 'Asia/Shanghai'
 # --- Functions
 
 
-def showip(req: Flask.request_class, msg):
+def showip(req: Flask.request_class, msg): # type: ignore
     '''
     在日志中显示 ip
 
