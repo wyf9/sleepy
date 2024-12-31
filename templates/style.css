@@ -4,6 +4,7 @@ WARNING: 不要使用格式化代码 (本文件内) / DON'T USE CODE FORMATTER H
 
 html {
     font-size: 25px;
+    overflow: auto; /* 添加此行 */
 }
 
 rt {
@@ -14,6 +15,7 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
+    overflow: auto; /* 添加此行 */
 }
 
 a {

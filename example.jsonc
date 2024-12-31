@@ -31,6 +31,6 @@
         "repo": "https://github.com/wyf9/sleepy", // 更多信息链接的目标, 默认为存储库链接
         "more_text": "", // 内容将在状态页底部 learn_more 上方插入 (不转义)
         // ps: 可以在这里放你联系方式的链接
-        "device_status_slice": 20 // 设备状态从开头截取多少文字显示 (防止窗口标题过长, 设置为 0 禁用)
+        "device_status_slice": 30 // 设备状态从开头截取多少文字显示 (防止窗口标题过长, 设置为 0 禁用)
     }
 }

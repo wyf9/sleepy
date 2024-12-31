@@ -6,6 +6,7 @@
   - [CMDConsole](#cmdconsole)
   - [CmdConsoleMuiti](#cmdconsolemuiti)
   - [WinDevice](#windevice)
+  - [AutoxjsScript](#autoxjsscript)
   - [BrowserScript](#browserscript)
   - [Other repos](#other-repos)
 
@@ -61,6 +62,27 @@ NOT_USING_NAMES = ['', '搜索', '通知中心', '快速设置', '系统托盘�
 
 > PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)**
 
+## [AutoxjsScript](./autoxjs_device.js)
+
+> by: [@wyf9](https://github.com/wyf9)
+
+使用 [Autox.js](https://github.com/kkevsekk1/AutoX) 编写的安卓自动更新状态脚本
+
+在使用前，请确保**已安装** Autox.js *且*授予**无障碍权限**
+
+> 文件 [L7-L13](https://github.com/wyf9/sleepy/blob/main/client/autoxjs_device.py#L7-L13) 的配置如下：
+
+```js
+// config start
+const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
+const SECRET = '绝对猜不出来的密码'; // 你的 secret
+const ID = 'a-device'; // 你的设备 id, 唯一
+const SHOW_NAME = '一个设备'; // 你的设备名称, 将显示在网页上
+const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
+// config end
+```
+> undone
+
 ## [BrowserScript](./页面标题上报脚本-2024.12.2.user.js)
 
 > by: [@nuym](https://github.com/nuym)
@@ -75,13 +97,13 @@ NOT_USING_NAMES = ['', '搜索', '通知中心', '快速设置', '系统托盘�
 
 ```js
 // 参数配置开始
-    const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
-    const SECRET = '绝对猜不出来的密码'; // 你的 secret
-    const ID = '114514'; // 你的设备 id
-    const SHOW_NAME = '设备名称'; // 替换为你的设备名称
-    const NO_TITLE = 'url'; // 定义页面没有标题时的行为，url: 页面完整地址 / host: 域名 / 其他: 对应值
-    // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名，如此处就应为 sleepy.wyf9.top
-    // 参数配置结束
+const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
+const SECRET = '绝对猜不出来的密码'; // 你的 secret
+const ID = '114514'; // 你的设备 id
+const SHOW_NAME = '设备名称'; // 替换为你的设备名称
+const NO_TITLE = 'url'; // 定义页面没有标题时的行为，url: 页面完整地址 / host: 域名 / 其他: 对应值
+// [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名，如此处就应为 sleepy.wyf9.top
+// 参数配置结束
 ```
 
 ## Other repos
