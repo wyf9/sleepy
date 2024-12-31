@@ -46,11 +46,11 @@ async function update() {
                             console.log(device);
                             if (device.using) {
                                 // replace "xxx" with 'xxx'
-                                var device_show_name = device.show_name.replace('"', '\'');
                                 var device_app_title = device.app_name.replace('"', '\'');
-                                var device_app_alert = device.app_name.replace('"', '\'');
+                                var device_show_name = device.show_name.replace('\'', '"');
+                                var device_app_alert = device.app_name.replace('\'', '"');
                                 // build
-                                var device_app = `<a class="awake" title="${device_app_title}" href=javascript:alert("${device_show_name}: \n${device_app_alert}">${sliceText(device.app_name, data.device_status_slice)}</a>`;
+                                var device_app = `<a class="awake" title="${device_app_title}" href="javascript:alert('${device_show_name}: ${device_app_alert}')">${sliceText(device.app_name, data.device_status_slice)}</a>`;
                             } else {
                                 var device_app = '<a class="sleeping">未在使用</a>';
                             }
