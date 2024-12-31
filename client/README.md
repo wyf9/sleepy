@@ -65,17 +65,17 @@ DEVICE_SHOW_NAME = 'MyDevice1'
 
 - [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2024.12.2.user.js)
 
-> 文件 [L19-L25](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L19-L25) 的配置如下:
+> 文件 [L19-L23](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L19-L25) 的配置如下:
 
 ```js
 // 参数配置开始
-const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
-const SECRET = '绝对猜不出来的密码'; // 你的 secret
-const ID = '114514'; // 你的设备 id
-const SHOW_NAME = '设备名称'; // 替换为你的设备名称
-// [!!!] 请在第 10 行 `@connect` 处的域名改为你的服务域名
-// 如本示例中域名就应为 sleepy.wyf9.top
-// 参数配置结束
+    const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
+    const SECRET = '绝对猜不出来的密码'; // 你的 secret
+    const ID = '114514'; // 你的设备 id
+    const SHOW_NAME = '设备名称'; // 替换为你的设备名称
+    const NO_TITLE = 'url'; // 定义页面没有标题时的行为，url: 页面完整地址 / host: 域名 / 其他: 对应值
+    // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名，如此处就应为 sleepy.wyf9.top
+    // 参数配置结束
 ```
 
 ## Other repos
