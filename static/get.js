@@ -1,7 +1,10 @@
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay)); // custom sleep func (only can use in async function with await)
 
-function truncateText(text, maxLength) {
-    if (text.length <= maxLength) {
+function sliceText(text, maxLength) {
+    // better slice()
+    if (maxLength == 0) { // disabled
+        return text;
+    } else if (text.length <= maxLength) { // shorter than maxLength
         return text;
     }
     return text.slice(0, maxLength) + '...';
@@ -42,7 +45,7 @@ async function update() {
                         for (let device of devices) {
                             console.log(device);
                             if (device.using) {
-                                var device_app = `<a class="awake" title="${device.app_name.replace('"', '\'')}" href='javascript:alert("${device.show_name}: \n${device.app_name.replace('"', '\'')}")'>${truncateText(device.app_name, 15)}</a>`;
+                                var device_app = `<a class="awake" title="${device.app_name.replace('"', '\'')}" href='javascript:alert("${device.show_name}: \n${device.app_name.replace('"', '\'')}")'>${sliceText(device.app_name, data.device_status_slice)}</a>`;
                             } else {
                                 var device_app = '<a class="sleeping">未在使用</a>';
                             }

@@ -1,3 +1,7 @@
+/*
+WARNING: 不要使用格式化代码 (本文件内) / DON'T USE CODE FORMATTER HERE
+*/
+
 html {
     font-size: 25px;
 }
@@ -10,21 +14,10 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
-    /* overflow-x: hidden;
-    overflow-y: hidden; */
-    /* text-overflow: ellipsis; */
-}
-
-#device-status {
-    height: 85%;
-    word-wrap: break-word;
-    overflow-x: scroll;
-    overflow-y: scroll;
 }
 
 a {
     text-decoration: none;
-    /* word-wrap: break-word; */
 }
 
 body {

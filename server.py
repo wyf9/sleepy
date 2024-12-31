@@ -121,6 +121,7 @@ def query():
         'status': st,
         'info': stinfo,
         'device': d.data['device_status'],
+        'device_status_slice': c.config['other']['device_status_slice'],
         'last_updated': d.data['last_updated'],
         'refresh': c.config['refresh']
     }
