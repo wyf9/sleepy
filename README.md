@@ -16,7 +16,7 @@
 - [x] 网页使用 api 请求，并实现定时刷新
 - [x] 设备使用状态
 - [x] Windows 客户端 (Python)
-- [ ] Android 客户端 ([Autox.js](http://doc.autoxjs.com/))
+- [x] Android 客户端 ([Autox.js](http://doc.autoxjs.com/))
 - [ ] Metrics API (统计页面访问 / 接口调用次数)
 - [ ] 设备状态尝试 Websocket (=↓)
 - [ ] 设备状态 Heartbeat 机制
@@ -61,7 +61,7 @@ pip install flask pytz
 python3 server.py
 ```
 
-如果不出意外，会提示: `config.json not exist, creating`，同时目录下出现 `config.json` 文件，编辑该文件中的配置后重新运行即可 (示例请 [查看 `example.jsonc`](./example.jsonc) )
+如果不出意外，会提示: `config.json not exist, creating`，同时目录下出现 `config.json` 文件，编辑该文件中的配置后重新运行即可 ([配置说明]](./example.jsonc) )
 
 ## 使用
 
@@ -74,11 +74,11 @@ python3 server.py
 python3 start.py
 ```
 
-默认服务 http 端口: `9010` *(可在 `config.json` 中修改)*
+默认服务 http 端口: **`9010`** *(可在 `config.json` 中修改)*
 
 ## 客户端示例
 
-如果你想直接开始使用，可在 [`/clients`](./client/README.md) 找到客户端 (用于手动更新状态/自动更新设备打开应用)
+如果你想直接开始使用，可在 [`/client`](./client/README.md) 找到客户端 (用于**手动更新状态**/**自动更新设备打开应用**)
 
 ## API
 
@@ -89,5 +89,3 @@ python3 start.py
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
-
-推荐阅读: [HelloFlask (Flask 入门教程)](https://tutorial.helloflask.com/)
