@@ -1,5 +1,15 @@
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay)); // custom sleep func (only can use in async function with await)
 
+function sliceText(text, maxLength) {
+    // better slice()
+    if (maxLength == 0) { // disabled
+        return text;
+    } else if (text.length <= maxLength) { // shorter than maxLength
+        return text;
+    }
+    return text.slice(0, maxLength) + '...';
+}
+
 async function update() {
     let refresh_time = 5000;
     let routerIndex = window.location.href.indexOf('?');
@@ -35,7 +45,12 @@ async function update() {
                         for (let device of devices) {
                             console.log(device);
                             if (device.using) {
-                                var device_app = `<a class="awake">${device.app_name}</a>`;
+                                // replace "xxx" with 'xxx'
+                                var device_app_title = device.app_name.replace('"', '\\"').replace('\'', '\\\'');
+                                var device_show_name = device.show_name.replace('"', '\\"').replace('\'', '\\\'');
+                                var device_app_alert = device.app_name.replace('"', '\\"').replace('\'', '\\\'');
+                                // build
+                                var device_app = `<a class="awake" title="${device_app_title}" href="javascript:alert('${device_show_name}: ${device_app_alert}')">${sliceText(device.app_name, data.device_status_slice)}</a>`;
                             } else {
                                 var device_app = '<a class="sleeping">未在使用</a>';
                             }

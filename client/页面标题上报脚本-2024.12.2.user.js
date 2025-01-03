@@ -20,8 +20,17 @@
     const SECRET = '绝对猜不出来的密码'; // 你的 secret
     const ID = '114514'; // 你的设备 id
     const SHOW_NAME = '设备名称'; // 替换为你的设备名称
-    // [!!!] 请在第 10 行 `@connect` 处的域名改为你的服务域名
+    const NO_TITLE = 'url'; // 定义页面没有标题时的行为，url: 页面完整地址 / host: 域名 / 其他: 对应值
+    // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名
     // 参数配置结束
+
+    // 替换了 secret 的日志
+    function log(msg) {
+        console.log(msg.replace(SECRET, '[REPLACED]'));
+    }
+    function error(msg) {
+        console.error(msg.replace(SECRET, '[REPLACED]'));
+    }
 
     // 获取浏览器名称
     function getBrowserName() {
@@ -38,14 +47,26 @@
         } else if (userAgent.includes("Opera") || userAgent.includes("OPR")) {
             return "Opera";
         } else {
-            return "Unknown Browser";
+            return "Unknown Browser"; // 欢迎 Issue / PR 添加
         }
     }
 
     // 发送请求函数
     function sendRequest() {
         const browserName = getBrowserName(); // 获取浏览器名称
-        const appName = `${browserName} - ${document.title}`; // 拼接浏览器名称和页面标题
+        var title;
+        if (document.title == '') { // 如没有标题
+            if (NO_TITLE == 'url') {
+                title = window.location.href; // 使用 url
+            } else if (NO_TITLE == 'host') {
+                title = window.location.hostname; // 使用域名
+            } else {
+                title = NO_TITLE; // 使用自定义提示
+            }
+        } else {
+            title = document.title;
+        }
+        const appName = `${browserName} - ${title}`; // 拼接浏览器名称和页面标题
 
         // 构造 API URL
         const apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=true&app_name=${encodeURIComponent(appName)}`;
@@ -55,14 +76,15 @@
             method: 'GET',
             url: apiUrl,
             onload: (response) => {
+                log(`API Response: ${response.responseText}`);
                 if (response.status === 200) {
-                    console.log(`API 请求成功: ${apiUrl}`);
+                    log(`API 请求成功: ${apiUrl}`);
                 } else {
-                    console.error(`API 请求失败: ${response.status} ${response.statusText}`);
+                    error(`API 请求失败: ${response.status} ${response.statusText}`);
                 }
             },
             onerror: (error) => {
-                console.error(`API 请求出错: ${error}`);
+                error(`API 请求出错: ${error}`);
             }
         });
     }

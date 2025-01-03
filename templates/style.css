@@ -1,5 +1,10 @@
+/*
+WARNING: 不要使用格式化代码 (本文件内) / DON'T USE CODE FORMATTER HERE
+*/
+
 html {
     font-size: 25px;
+    overflow: auto; /* 添加此行 */
 }
 
 rt {
@@ -10,7 +15,7 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
+    overflow: auto; /* 添加此行 */
 }
 
 a {
@@ -38,6 +43,12 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+@media (max-width: 675px) {
+    body {
+        display: unset;
+    }
 }
 
 /* 以下为各种状态的颜色 */

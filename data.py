@@ -27,7 +27,7 @@ def initJson():
 
 class data:
     '''
-    data 类，存储持久化状态
+    data 类，存储当前/设备状态
     可用 `.data['xxx']` 直接调取数据 (加载后) *(?)*
     '''
     data: dict
@@ -44,6 +44,8 @@ class data:
             os.remove('data.json')
             initJson()
             self.load()
+
+    # --- Storage functions
 
     def load(self, ret: bool = False) -> dict:
         '''
@@ -78,6 +80,8 @@ class data:
         gotdata = self.data[name]
         return gotdata
 
+    # Timer check - save data
+
     def start_timer_check(self, data_check_interval: int = 60):
         '''
         使用 threading 启动下面的 `timer_check()`
@@ -99,3 +103,6 @@ class data:
             file_data = self.load(ret=True)
             if file_data != self.data:
                 self.save()
+
+    # check device heartbeat
+    # TODO
