@@ -6,8 +6,14 @@
   - [CMDConsole](#cmdconsole)
   - [CmdConsoleMuiti](#cmdconsolemuiti)
   - [WinDevice](#windevice)
+    - [Configure](#configure)
   - [AutoxjsScript](#autoxjsscript)
+    - [Configure](#configure-1)
   - [BrowserScript](#browserscript)
+    - [Configure](#configure-2)
+  - [Homework](#homework)
+    - [Configure](#configure-3)
+    - [Using](#using)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -34,6 +40,8 @@
 在 Windows 上自动更新设备状态
 
 依赖: `requests`, `pywin32`
+
+### Configure
 
 > 文件 [L12-L19](https://github.com/wyf9/sleepy/blob/main/client/win_device.py#L12-L19) 的配置如下：
 
@@ -70,6 +78,8 @@ NOT_USING_NAMES = ['', '搜索', '通知中心', '快速设置', '系统托盘�
 
 在使用前，请确保**已安装** Autox.js *且*授予**无障碍权限**
 
+### Configure
+
 > 文件 [L7-L13](https://github.com/wyf9/sleepy/blob/main/client/autoxjs_device.py#L7-L13) 的配置如下：
 
 ```js
@@ -93,6 +103,8 @@ const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
 
 - [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2024.12.2.user.js)
 
+### Configure
+
 > 文件 [L19-L23](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L19-L25) 的配置如下:
 
 ```js
@@ -106,10 +118,54 @@ const NO_TITLE = 'url'; // 定义页面没有标题时的行为，url: 页面完
 // 参数配置结束
 ```
 
+## [Homework](./homework_device.py)
+
+> by: [@wyf9](https://github.com/wyf9)
+
+一个手动设置设备状态的示例 *(用来展示你的作业进度)*
+
+依赖: `requests`
+
+### Configure
+
+只有两个配置:
+
+- `SERVER`: 服务器地址，末尾不带 `/`，如：`https://sleepy.wyf9.top`
+- `SECRET`: 同名
+
+### Using
+
+脚本提供了两个函数:
+
+- `left(num: int)`: 设置剩余作业的数量 (为 `0` 则移除)
+- `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除)
+
+那么，如何使用这两个函数呢？
+
+1. 直接使用
+
+使用 `python homework_device.py` 直接打开, 并用执行函数 *(`eval()`)* 的方式发送请求，
+
+如：`left(114514)`
+
+> 如何将多个调用写在一行？可用逗号分隔：`left(114513), writing('五 年 中 考 三 年 模 拟')`
+
+2. 其他程序调用
+
+```py
+from time import sleep
+from homework_device import left, writing # import
+
+for i in range(114514, 1, -1):
+    left(i)
+    writing(f'My Homework #{i}')
+    sleep(1145)
+```
+
 ## Other repos
 
-> Forks 中发现的脚本，可能需要进行修改以与本分支适配 (见 [API #device-set](../doc/api.md#device-set))
+> 在功能 / API 实现上有不同，需要进行修改以与本分支适配 (见 [API #device-set](../doc/api.md#device-set))
 
-- [1812z/sleepy] Android Macrodroid: [(main) `前台应用状态.macro`](https://github.com/1812z/sleepy/blob/main/%E5%89%8D%E5%8F%B0%E5%BA%94%E7%94%A8%E7%8A%B6%E6%80%81.macro)
+- [1812z/sleepy] Android [Macrodroid](https://www.bing.com/search?q=Macrodroid%20download): [(main) `前台应用状态.macro`](https://github.com/1812z/sleepy/blob/main/%E5%89%8D%E5%8F%B0%E5%BA%94%E7%94%A8%E7%8A%B6%E6%80%81.macro)
 - [HBWuChang/sleepy] Android Magisk: [(main) `_example/win.py`](https://github.com/HBWuChang/sleepy/blob/main/_example/win.py) *(详见脚本同目录下 `/magisk`)*
 - [HBWuChang/sleepy] Windows Python: [(main) `_example/win.py`](https://github.com/HBWuChang/sleepy/blob/main/_example/win.py)
