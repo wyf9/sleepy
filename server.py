@@ -19,11 +19,11 @@ timezone = 'Asia/Shanghai'
 # --- Functions
 
 
-def showip(req: Flask.request_class, msg): # type: ignore
+def showip(req: request, msg): # type: ignore
     '''
     在日志中显示 ip
 
-    :param req: `Request` 对象, 用于取 ip
+    :param req: `flask.request` 对象, 用于取 ip
     :param msg: 信息
     '''
     ip1 = req.remote_addr

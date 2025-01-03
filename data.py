@@ -45,6 +45,8 @@ class data:
             initJson()
             self.load()
 
+    # --- Storage functions
+
     def load(self, ret: bool = False) -> dict:
         '''
         加载状态
@@ -78,6 +80,8 @@ class data:
         gotdata = self.data[name]
         return gotdata
 
+    # Timer check save
+
     def start_timer_check(self, data_check_interval: int = 60):
         '''
         使用 threading 启动下面的 `timer_check()`
@@ -99,3 +103,5 @@ class data:
             file_data = self.load(ret=True)
             if file_data != self.data:
                 self.save()
+
+    # check device heartbeat

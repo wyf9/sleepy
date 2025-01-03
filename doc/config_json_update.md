@@ -18,7 +18,7 @@
     "other": {
         // ...
         "more_text": "",
-        "device_status_slice": 20 // (1) [NEW]
+        "device_status_slice": 30 // (1) [NEW]
     }
 }
 ```
