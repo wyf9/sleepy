@@ -97,7 +97,7 @@ const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
 
 > by: [@nuym](https://github.com/nuym)
 
-在任何支持油猴脚本的浏览器均可使用
+在任何支持油猴脚本的浏览器均可使用，*据作者↑说是为了解决 Mac 无法获取窗口标题，遂退而求其次获取浏览器页面（有系统就有浏览器，即有用户脚本）*
 
 - [点击安装 (GitHub raw)](https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2024.12.2.user.js)
 
@@ -105,7 +105,7 @@ const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
 
 ### Configure
 
-> 文件 [L19-L23](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L19-L25) 的配置如下:
+> 文件 [L18-L25](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L18-L25) 的配置如下:
 
 ```js
 // 参数配置开始
@@ -113,7 +113,7 @@ const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址
 const SECRET = '绝对猜不出来的密码'; // 你的 secret
 const ID = '114514'; // 你的设备 id
 const SHOW_NAME = '设备名称'; // 替换为你的设备名称
-const NO_TITLE = 'url'; // 定义页面没有标题时的行为，url: 页面完整地址 / host: 域名 / 其他: 对应值
+const NO_TITLE = 'url'; // 定义页面没有标题时的返回，url: 页面的完整 url 地址 / host: 域名 / 其他: 对应值
 // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名，如此处就应为 sleepy.wyf9.top
 // 参数配置结束
 ```
