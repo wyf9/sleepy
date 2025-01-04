@@ -62,7 +62,9 @@ pip install flask pytz
 python3 server.py
 ```
 
-如果不出意外，会提示: `config.json not exist, creating`，同时目录下出现 `config.json` 文件，编辑该文件中的配置后重新运行即可 ([配置说明]](./example.jsonc) )
+如果不出意外，会提示: `config.json not exist, creating`，同时目录下出现 `config.json` 文件，编辑该文件中的配置后重新运行即可
+
+`>>` **[配置示例](./example.jsonc)** `<<` *(`config.json` 从此生成)*
 
 ## 使用
 
@@ -79,7 +81,7 @@ python3 start.py
 
 ## 客户端示例
 
-如果你想直接开始使用，可在 [`/client`](./client/README.md) 找到客户端 (用于**手动更新状态**/**自动更新设备打开应用**)
+如果你想直接开始使用，可在 **[`/client`](./client/README.md)** 找到客户端 (用于**手动更新状态**/**自动更新设备打开应用**)
 
 ## API
 
