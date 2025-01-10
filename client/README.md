@@ -9,11 +9,12 @@
     - [Configure](#configure)
   - [AutoxjsScript](#autoxjsscript)
     - [Configure](#configure-1)
+    - [Using](#using)
   - [BrowserScript](#browserscript)
     - [Configure](#configure-2)
   - [Homework](#homework)
     - [Configure](#configure-3)
-    - [Using](#using)
+    - [Using](#using-1)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -72,7 +73,8 @@ NOT_USING_NAMES = ['', '搜索', '通知中心', '快速设置', '系统托盘�
 
 ## [AutoxjsScript](./autoxjs_device.js)
 
-> by: [@wyf9](https://github.com/wyf9)
+> by: [@wyf9](https://github.com/wyf9) <br/>
+> Co-authored-by: [@NyaOH-Nahida](https://github.com/NyaOH-Nahida)
 
 使用 [Autox.js](https://github.com/kkevsekk1/AutoX) 编写的安卓自动更新状态脚本
 
@@ -91,7 +93,15 @@ const SHOW_NAME = '一个设备'; // 你的设备名称, 将显示在网页上
 const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
 // config end
 ```
-> undone
+
+### Using
+
+启动后可点击 Autox.js 右上角的日志图标查看日志
+
+![image](https://files.catbox.moe/x93248.png)
+
+- 当手机息屏 (应用名返回为空) 时视为未在使用
+- *[+]* 当脚本退出时也会更新状态为未在使用 *(不包括 Autox.js 停止运行)*
 
 ## [BrowserScript](./页面标题上报脚本-2024.12.2.user.js)
 
