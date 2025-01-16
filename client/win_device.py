@@ -9,8 +9,8 @@ from win32gui import GetWindowText, GetForegroundWindow  # type: ignore
 from requests import post
 from datetime import datetime
 from time import sleep
-from sys import stdout
-from io import TextIOWrapper
+import sys
+import io
 
 # --- config start
 SERVER = 'http://localhost:9010'
@@ -19,12 +19,14 @@ DEVICE_ID = 'device-1'
 DEVICE_SHOW_NAME = 'MyDevice1'
 CHECK_INTERVAL = 2
 BYPASS_SAME_REQUEST = True
-ENCODING = 'utf-8'  # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换']  # 当窗口名为其中任意一项时将不更新
+ENCODING = 'gb18030'  # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
+SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher']  # 当窗口名为其中任意一项时将不更新
 NOT_USING_NAMES = ['我们喜欢这张图片，因此我们将它与你共享。']  # 当窗口名为其中任意一项时视为未在使用
 # --- config end
 
-stdout = TextIOWrapper(stdout.buffer, encoding=ENCODING)  # https://stackoverflow.com/a/3218048/28091753
+# buffer = stdout.buffer  # backup
+# stdout = TextIOWrapper(stdout.buffer, encoding=ENCODING)  # https://stackoverflow.com/a/3218048/28091753
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 _print_ = print
 
 
@@ -33,7 +35,11 @@ def print(msg: str, **kwargs):
     修改后的 `print()` 函数，解决不刷新日志的问题
     原: `_print_()`
     '''
-    _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {msg}', flush=True, **kwargs)
+    msg = msg.replace('\u200b', '')
+    try:
+        _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {msg}', flush=True, **kwargs)
+    except Exception as e:
+        _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Log Error: {e}', flush=True)
 
 
 Url = f'{SERVER}/device/set'
@@ -105,4 +111,4 @@ if __name__ == '__main__':
             })
             print(f'Response: {resp.status_code} - {resp.json()}')
         except Exception as e:
-            print(f'Error: {e}')
+            print(f'Exception: {e}')

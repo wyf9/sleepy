@@ -44,7 +44,7 @@
 
 ### Configure
 
-> 文件 [L12-L19](https://github.com/wyf9/sleepy/blob/main/client/win_device.py#L12-L19) 的配置如下：
+> 文件 [L15-L25](https://github.com/wyf9/sleepy/blob/main/client/win_device.py#L15-L20) 的配置如下：
 
 ```py
 # --- config start
@@ -69,7 +69,8 @@ NOT_USING_NAMES = ['', '搜索', '通知中心', '快速设置', '系统托盘�
 # --- config end
 ```
 
-> PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)**
+> PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
+> 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)
 
 ## [AutoxjsScript](./autoxjs_device.js)
 
@@ -115,7 +116,7 @@ const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
 
 ### Configure
 
-> 文件 [L18-L25](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L18-L25) 的配置如下:
+> 文件 [L18-L26](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L18-L26) 的配置如下:
 
 ```js
 // 参数配置开始
@@ -124,6 +125,7 @@ const SECRET = '绝对猜不出来的密码'; // 你的 secret
 const ID = '114514'; // 你的设备 id
 const SHOW_NAME = '设备名称'; // 替换为你的设备名称
 const NO_TITLE = 'url'; // 定义页面没有标题时的返回，url: 页面的完整 url 地址 / host: 域名 / 其他: 对应值
+const PREFIX = true; // 控制是否显示前缀
 // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名，如此处就应为 sleepy.wyf9.top
 // 参数配置结束
 ```
@@ -145,10 +147,19 @@ const NO_TITLE = 'url'; // 定义页面没有标题时的返回，url: 页面的
 
 ### Using
 
-脚本提供了两个函数:
+脚本提供了一些函数:
 
-- `left(num: int)`: 设置剩余作业的数量 (为 `0` 则移除)
-- `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除)
+- `left(num: int)`: 设置剩余作业的数量 (为 `0` 则移除) *[device id: `homework-left`]*
+- `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除) *[device id: `homework-name`]*
+
+
+还有一些扩展函数, 可以调用大部分 API
+- `query()`: 查看当前状态 *(未格式化输出)*
+- `lst()`: 查看可用状态列表 *(未格式化输出)*
+- `status(stat: int)`: 设置状态
+- `device_set(id: str, show_name: str, msg: str, using: bool = True)`: 设备状态设置
+- `device_remove(id: str)`: 移除设备状态
+- `device_clear()`: 清除设备状态
 
 那么，如何使用这两个函数呢？
 
@@ -169,7 +180,7 @@ from homework_device import left, writing # import
 for i in range(114514, 1, -1):
     left(i)
     writing(f'My Homework #{i}')
-    sleep(1145)
+    sleep(11.45)
 ```
 
 ## Other repos

@@ -17,17 +17,17 @@
 - [x] 设备使用状态
 - [x] Windows 客户端 (Python)
 - [x] Android 客户端 ([Autox.js](http://doc.autoxjs.com/))
+- [x] [查看更多客户端 (如浏览器脚本)](./client/README.md)
 - [ ] Metrics API (统计页面访问 / 接口调用次数)
 - [ ] 设备状态尝试 Websocket (=↓)
 - [ ] 设备状态 Heartbeat 机制
 - [ ] 更多状态存储选项 (如 SQLite)
 
 > [!TIP]
-> 因上学原因 ***(临近期末)***, 可能放缓更新 <br/>
 > **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** <br/>
 > 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*. <br/>
+> 正在加急更新中 (请看 [dev-2025-1-2](https://github.com/wyf9/sleepy/tree/dev-2025-1-2) 分支) <br/>
 
-<!-- > 正在加急更新中 (请看 [dev-2025-1-1](https://github.com/wyf9/sleepy/tree/dev-2025-1-1) 分支) -->
 
 ### Preview
 
