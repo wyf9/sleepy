@@ -10,6 +10,25 @@
 - `dd`: 日
 - `n`: 本日第 `n` 次修改
 
+# 2025-01
+
+## 2025.1.16.1
+
+```jsonc
+// ...
+    "port": 9010,
+    "metrics": true, // (1) [NEW]
+    "secret": "nope",
+// ...
+```
+
+- **New** (1)
+  * Name: `metrics`
+  * Upper: None
+  * Type: Boolean
+  * Desc: 控制是否启用 metrics (统计页面访问 / API 调用次数)
+  * Desc: ps: 如禁用, 则无法访问 `/metrics` *(404)*
+
 # 2024-12
 
 ## 2024.12.31.1
