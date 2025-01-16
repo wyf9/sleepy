@@ -36,7 +36,7 @@
     // 获取浏览器名称
     function getBrowserName() {
         // return "MyBrowser"; // 如需自定义浏览器名称可取消注释本行
-        const userAgent = navigator.userAgent;
+        var userAgent = navigator.userAgent;
 
         if (userAgent.includes("Edg")) {
             return "Edge";
@@ -55,7 +55,7 @@
 
     // 发送请求函数
     function sendRequest() {
-        const browserName = getBrowserName(); // 获取浏览器名称
+        var browserName = getBrowserName(); // 获取浏览器名称
         var title;
         if (document.title == '') { // 如没有标题
             if (NO_TITLE == 'url') {
@@ -71,15 +71,15 @@
 
         if (PREFIX) {
             // 显示前缀
-            const appName = `${browserName} - ${title}`;
+            var appName = `${browserName} - ${title}`;
         } else {
             // 不显示前缀
-            const appName = `${title}`;
+            var appName = `${title}`;
         }
         log(`App name: ${appName}`);
 
         // 构造 API URL
-        const apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=true&app_name=${encodeURIComponent(appName)}`;
+        var apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=true&app_name=${encodeURIComponent(appName)}`;
 
         // 使用 GM_xmlhttpRequest 发送请求 (还是先用 get 吧)
         GM_xmlhttpRequest({

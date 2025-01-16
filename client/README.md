@@ -116,7 +116,7 @@ const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
 
 ### Configure
 
-> 文件 [L18-L26](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L18-L26) 的配置如下:
+> 文件 [L18-L25](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L18-L25) 的配置如下:
 
 ```js
 // 参数配置开始
@@ -151,7 +151,6 @@ const PREFIX = true; // 控制是否显示前缀
 
 - `left(num: int)`: 设置剩余作业的数量 (为 `0` 则移除) *[device id: `homework-left`]*
 - `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除) *[device id: `homework-name`]*
-
 
 还有一些扩展函数, 可以调用大部分 API
 - `query()`: 查看当前状态 *(未格式化输出)*
