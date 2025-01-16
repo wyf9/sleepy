@@ -41,6 +41,18 @@ def device_clear():
     resp = requests.get(url=f'{SERVER}/device/clear?secret={SECRET}')
     print(f'[/device/clear] Response: {resp.status_code} - {resp.json()}')
 
+
+def private_mode(private: bool):
+    '''
+    /device/private_mode using GET
+    '''
+    if private:
+        private = 'true'
+    else:
+        private = 'false'
+    resp = requests.get(url=f'{SERVER}/device/private_mode?secret={SECRET}&private={private}')
+    print(f'[/device/clear] Response: {resp.status_code} - {resp.json()}')
+
 # ---
 
 

@@ -69,12 +69,13 @@
             title = document.title;
         }
 
+        var appName;
         if (PREFIX) {
             // 显示前缀
-            var appName = `${browserName} - ${title}`;
+            appName = `${browserName} - ${title}`;
         } else {
             // 不显示前缀
-            var appName = `${title}`;
+            appName = `${title}`;
         }
         log(`App name: ${appName}`);
 

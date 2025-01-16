@@ -144,12 +144,13 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 
 [Back to # api](#api)
 
-|                        | 路径                                                                                          | 方法   | 作用                          |
-| ---------------------- | --------------------------------------------------------------------------------------------- | ------ | ----------------------------- |
-| [Jump](#device-set)    | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
-|                        | `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
-| [Jump](#device-remove) | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
-| [Jump](#device-clear)  | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
+|                              | 路径                                                                                          | 方法   | 作用                          |
+| ---------------------------- | --------------------------------------------------------------------------------------------- | ------ | ----------------------------- |
+| [Jump](#device-set)          | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
+|                              | `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
+| [Jump](#device-remove)       | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
+| [Jump](#device-clear)        | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
+| [Jump](#device-private-mode) | `/device/private_mode?secret=<secret>&private=<isprivate>`                                    | `GET`  | 设置隐私模式                  |
 
 ### device-set
 
@@ -280,6 +281,45 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
     "success": false,
     "code": "not authorized",
     "message": "invaild secret"
+}
+```
+
+### device-private-mode
+
+[Back to ## device](#device)
+
+> `/device/private_mode?secret=<secret>&private=<isprivate>`
+
+设置隐私模式 *(即在 [`/query`](#query) 的返回中设置 `device` 项为空 (`{}`))*
+
+* Method: GET
+
+#### Params
+
+- `<secret>`: 在 `config.json` 中配置的 `secret`
+- `<isprivate>`: bool (仅接受 `true` / `false`), 开关状态
+
+#### Response
+
+```jsonc
+// 成功
+{
+    "success": true,
+    "code": "OK"
+}
+
+// 失败 - 密钥错误
+{
+    "success": false,
+    "code": "not authorized",
+    "message": "invaild secret"
+}
+
+// 失败 - 请求无效
+{
+    "success": false,
+    "code": "invaild request",
+    "message": "\"private\" arg only supports boolean type"
 }
 ```
 

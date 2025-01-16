@@ -16,6 +16,7 @@ def initJson():
         jsonData = {  # 初始 data.json 数据
             'status': 0,
             'device_status': {},
+            'private_mode': False,
             'last_updated': '1970-01-01 08:00:00'
         }
         with open('data.json', 'w+', encoding='utf-8') as file:

@@ -19,7 +19,7 @@ timezone = 'Asia/Shanghai'
 # --- Functions
 
 
-def showip(req: request, msg): # type: ignore
+def showip(req: request, msg):  # type: ignore
     '''
     在日志中显示 ip
 
@@ -115,12 +115,15 @@ def query():
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
+    devicelst = d.data['device_status']
+    if d.data['private_mode']:
+        devicelst = {}
     ret = {
         'time': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S'),
         'success': True,
         'status': st,
         'info': stinfo,
-        'device': d.data['device_status'],
+        'device': devicelst,
         'device_status_slice': c.config['other']['device_status_slice'],
         'last_updated': d.data['last_updated'],
         'refresh': c.config['refresh']
@@ -326,7 +329,38 @@ def clear_device():
     })
 
 
+@app.route('/device/private_mode')
+def private_mode():
+    '''
+    隐私模式, 即不在 /query 中显示设备状态 (仍可正常更新)
+    - Method: **GET**
+    '''
+    showip(request, '/device/private')
+    secret = escape(request.args.get('secret'))
+    secret_real = c.get('secret')
+    if secret == secret_real:
+        private = escape(request.args.get('private'))
+        try:
+            private = bool(private)
+        except:
+            return u.reterr(
+                code='invaild request',
+                message='"private" arg only supports boolean type'
+            )
+        d.data['private_mode'] = private
+        d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
+    return u.format_dict({
+        'success': True,
+        'code': 'OK'
+    })
+
 # --- Storage API
+
 
 @app.route('/reload_config')
 def reload_config():
