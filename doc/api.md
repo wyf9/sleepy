@@ -14,6 +14,7 @@
 |                      | `/`            | `GET` | 显示主页         |
 | [Jump](#query)       | `/query`       | `GET` | 获取状态         |
 | [Jump](#status-list) | `/status_list` | `GET` | 获取可用状态列表 |
+| [Jump](#metrics)     | `/metrics`     | `GET` | 获取统计信息     |
 
 ### query
 
@@ -88,6 +89,27 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 ```
 
 > 就是返回 `config.json` 中的 `status_list` 列表
+
+### metrics
+
+[Back to ## read-only](#read-only)
+
+> `/metrics`
+
+获取统计信息
+
+* Method: GET
+* 无需鉴权
+
+> [!TIP]
+> 本接口较特殊: 如服务器关闭了统计 *(`config.json` 中的 `metrics` 为 `false`)*, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果 <br/>
+> ~~*我也不知道自己怎么想的*~~
+
+#### Response
+
+```json
+
+```
 
 ## Status
 

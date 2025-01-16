@@ -12,6 +12,7 @@ from data import data as data_init
 
 c = config_init()
 d = data_init()
+METRICS_ENABLED = False
 app = Flask(__name__)
 timezone = 'Asia/Shanghai'
 
@@ -21,11 +22,12 @@ timezone = 'Asia/Shanghai'
 
 def showip(req: request, msg):  # type: ignore
     '''
-    在日志中显示 ip
+    在日志中显示 ip, 并记录 metrics 信息
 
     :param req: `flask.request` 对象, 用于取 ip
-    :param msg: 信息
+    :param msg: 信息 (一般是路径, 同时作为 metrics 的项名)
     '''
+    # --- log
     ip1 = req.remote_addr
     try:
         ip2 = req.headers['X-Forwarded-For']
@@ -33,6 +35,9 @@ def showip(req: request, msg):  # type: ignore
     except:
         ip2 = None
         u.infon(f'- Request: {ip1} : {msg}')
+    # --- count
+    if METRICS_ENABLED:
+        d.record_metrics(msg)
 
 
 # --- Templates
@@ -398,8 +403,27 @@ if __name__ == '__main__':
     c.load()
     d.load()
     d.start_timer_check(data_check_interval=c.config['data_check_interval'])  # 启动定时保存
+    # metrics?
+    if c.get('metrics'):
+        u.info('Note: metrics enabled, access /metrics to see your count.')
+        METRICS_ENABLED = True
+        d.metrics_init()
+
+        @app.route('/metrics')
+        # (Special) Metrics API
+        def metrics():
+            '''
+            获取统计信息
+            - Method: **GET**
+            '''
+            showip(request, '/metrics')
+            return d.get_metrics_str()
+
     app.run(  # 启↗动↘
         host=c.config['host'],
         port=c.config['port'],
         debug=c.config['debug']
     )
+    print('Server exited, saving data...')
+    d.save()
+    print('Bye.')

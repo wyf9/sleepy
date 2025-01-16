@@ -42,21 +42,6 @@ class config:
         with open('config.json', 'r', encoding='utf-8') as file:
             self.config = json.load(file)
 
-    # def save(self):
-    #     '''
-    #     保存配置
-    #     '''
-    #     with open('config.json', 'w+', encoding='utf-8') as file:
-    #         json.dump(self.data, file, indent=4, ensure_ascii=False)
-
-    # def dset(self, name, value):
-    #     '''
-    #     设置一个值
-    #     '''
-    #     self.data[name] = value
-    #     with open('config.json', 'w+', encoding='utf-8') as file:
-    #         json.dump(self.data, file, indent=4, ensure_ascii=False)
-
     def get(self, name):
         '''
         读取一个值

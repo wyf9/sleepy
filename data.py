@@ -4,6 +4,7 @@ import json
 import os
 import threading
 from time import sleep
+from datetime import datetime
 
 import utils as u
 
@@ -74,14 +75,94 @@ class data:
         '''
         self.data[name] = value
 
-    def dget(self, name):
+    def dget(self, name, default=None):
         '''
         读取一个值
         '''
-        gotdata = self.data[name]
+        try:
+            gotdata = self.data[name]
+        except KeyError:
+            gotdata = default
         return gotdata
 
-    # Timer check - save data
+    # --- Metrics
+
+    def metrics_init(self):
+        try:
+            metrics = self.data['metrics']
+        except KeyError:
+            u.info('Metrics data init')
+            self.data['metrics'] = {
+                'today_is': '',
+                'month_is': '',
+                'year_is': '',
+                'today': {},
+                'month': {},
+                'year': {},
+                'total': {}
+            }
+            self.record_metrics()
+
+    def get_metrics_str(self):
+        return u.format_dict({
+            'today_is': self.data['metrics']['today_is'],
+            'month_is': self.data['metrics']['month_is'],
+            'year_is': self.data['metrics']['year_is'],
+            'today': self.data['metrics']['today'],
+            'month': self.data['metrics']['month'],
+            'year': self.data['metrics']['year'],
+            'total': self.data['metrics']['total']
+        })
+
+    def record_metrics(self, path: str = None):
+        '''
+        记录调用
+
+        :param path: 访问的路径
+        '''
+        # - get time now
+        now = datetime.now()
+        year_is = str(now.year)
+        month_is = f'{now.year}-{now.month}'
+        today_is = f'{now.year}-{now.month}-{now.day}'
+        # - check time
+        # today
+        if self.data['metrics']['today_is'] != today_is:
+            self.data['metrics']['today_is'] = today_is
+            self.data['metrics']['today'] = {}
+        # this month
+        if self.data['metrics']['month_is'] != month_is:
+            self.data['metrics']['month_is'] = month_is
+            self.data['metrics']['month'] = {}
+        # this year
+        if self.data['metrics']['year_is'] != year_is:
+            self.data['metrics']['year_is'] = year_is
+            self.data['metrics']['year'] = {}
+        # - record num
+        if not path:
+            return 0
+        # today
+        try:
+            self.data['metrics']['today'][path] += 1
+        except KeyError:
+            self.data['metrics']['today'][path] = 1
+        # this month
+        try:
+            self.data['metrics']['month'][path] += 1
+        except KeyError:
+            self.data['metrics']['month'][path] = 1
+        # this year
+        try:
+            self.data['metrics']['year'][path] += 1
+        except KeyError:
+            self.data['metrics']['year'][path] = 1
+        # total
+        try:
+            self.data['metrics']['total'][path] += 1
+        except KeyError:
+            self.data['metrics']['total'][path] = 1
+
+    # --- Timer check - save data
 
     def start_timer_check(self, data_check_interval: int = 60):
         '''
@@ -105,5 +186,5 @@ class data:
             if file_data != self.data:
                 self.save()
 
-    # check device heartbeat
+    # --- check device heartbeat
     # TODO
