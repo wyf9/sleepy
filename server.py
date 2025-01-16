@@ -67,18 +67,6 @@ def index():
     )
 
 
-@app.route('/get.js')
-def get_js():
-    '''
-    /get.js
-    - Method: **GET**
-    '''
-    return render_template(
-        'get.js',
-        interval=c.config['refresh']
-    )
-
-
 @app.route('/style.css')
 def style_css():
     '''
@@ -158,7 +146,7 @@ def set_normal():
     except:
         return u.reterr(
             code='bad request',
-            message="argument 'status' must be a number"
+            message="argument 'status' must be a int number"
         )
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
@@ -209,14 +197,13 @@ def device_set():
     '''
     设置单个设备的信息/打开应用
     - Method: **GET / POST**
-    - **GET 可能出现 using 参数无效的情况，建议使用 POST**
     '''
     showip(request, '/device_set')
     if request.method == 'GET':
         try:
             device_id = escape(request.args.get('id'))
             device_show_name = escape(request.args.get('show_name'))
-            device_using = bool(escape(request.args.get('using')))
+            device_using = u.tobool(escape(request.args.get('using')), throw=True)
             app_name = escape(request.args.get('app_name'))
         except:
             return u.reterr(
@@ -244,7 +231,7 @@ def device_set():
             secret = req['secret']
             device_id = req['id']
             device_show_name = req['show_name']
-            device_using = bool(req['using'])
+            device_using = u.tobool(req['using'], throw=True)
             app_name = req['app_name']
         except:
             return u.reterr(
@@ -340,9 +327,8 @@ def private_mode():
     secret_real = c.get('secret')
     if secret == secret_real:
         private = escape(request.args.get('private'))
-        try:
-            private = bool(private)
-        except:
+        private = u.tobool(private)
+        if private == None:
             return u.reterr(
                 code='invaild request',
                 message='"private" arg only supports boolean type'
