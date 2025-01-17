@@ -21,10 +21,9 @@ def error(log):
 
 def format_dict(dic) -> Response:
     '''
-    列表 -> 格式化 json
-    @param dic: 列表
+    字典 -> Response (内容为格式化 json)
+    @param dic: 字典
     '''
-    # return jsonify(dic, ensure_ascii = False)
     response = make_response(
         json.dumps(dic, indent=4, ensure_ascii=False, sort_keys=False, separators=(', ', ': '))
     )
@@ -87,8 +86,24 @@ def tobool(string: str, throw: bool = False) -> bool:
 
 @property
 def show_404():
-    return '''<!doctype html>
-<html lang=en>
-<title>404 Not Found</title>
-<h1>Not Found</h1>
-<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>''', 404
+    return '<!DOCTYPE HTML>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>', 404
+
+class SleepyException(Exception):
+    '''
+    Custom Exception
+    '''
+
+    def __init__(self, msg = None):
+        if msg:
+            self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+def exception(msg: str):
+    '''
+    抛出 SleepyException
+    
+    :param msg: 错误描述
+    '''
+    raise SleepyException(msg)

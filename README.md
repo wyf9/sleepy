@@ -89,6 +89,10 @@ python3 start.py
 
 见 [Best Practice](./doc/best_practice.md)
 
+## 更新
+
+TODO
+
 ## 关于
 
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。

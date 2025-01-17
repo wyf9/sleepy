@@ -10,12 +10,29 @@ import utils as u
 from config import config as config_init
 from data import data as data_init
 
-c = config_init()
-d = data_init()
-METRICS_ENABLED = False
-app = Flask(__name__)
-timezone = 'Asia/Shanghai'
-
+try:
+    c = config_init()
+    d = data_init()
+    METRICS_ENABLED = False
+    timezone = 'Asia/Shanghai'
+    app = Flask(__name__)
+    c.load()
+    d.load()
+    d.start_timer_check(data_check_interval=c.config['data_check_interval'])  # 启动定时保存
+    # metrics?
+    if c.get('metrics'):
+        u.info('Note: metrics enabled, open /metrics to see your count.')
+        METRICS_ENABLED = True
+        d.metrics_init()
+except KeyboardInterrupt:
+    u.warning('Interrupt init')
+    exit(0)
+except u.SleepyException as e:
+    u.warning(f'==========\n{e}')
+    exit(1)
+except:
+    u.error('Unexpected Error!')
+    raise
 
 # --- Functions
 
@@ -49,7 +66,6 @@ def index():
     根目录返回 html
     - Method: **GET**
     '''
-    showip(request, '/')
     ot = c.config['other']
     try:
         stat = c.config['status_list'][d.data['status']]
@@ -59,6 +75,7 @@ def index():
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
+    showip(request, '/')
     return render_template(
         'index.html',
         user=ot['user'],
@@ -84,10 +101,11 @@ def style_css():
         alpha=c.config['other']['alpha']
     ))
     response.mimetype = 'text/css'
+    showip(request, '/style.css')
     return response
 
 
-# --- Status API
+# --- Read-only
 
 
 @app.route('/query')
@@ -97,7 +115,6 @@ def query():
     - 无需鉴权
     - Method: **GET**
     '''
-    showip(request, '/query')
     st = d.data['status']
     try:
         stinfo = c.config['status_list'][st]
@@ -121,6 +138,7 @@ def query():
         'last_updated': d.data['last_updated'],
         'refresh': c.config['refresh']
     }
+    showip(request, '/query')
     return u.format_dict(ret)
 
 
@@ -132,10 +150,11 @@ def get_status_list():
     - 无需鉴权
     - Method: **GET**
     '''
-    showip(request, '/status_list')
     stlst = c.get('status_list')
+    showip(request, '/status_list')
     return u.format_dict(stlst)
 
+# --- Status API
 
 @app.route('/set')
 def set_normal():
@@ -144,7 +163,6 @@ def set_normal():
     - http[s]://<your-domain>[:your-port]/set?secret=<your-secret>&status=<a-number>
     - Method: **GET**
     '''
-    showip(request, '/set')
     status = escape(request.args.get('status'))
     try:
         status = int(status)
@@ -157,6 +175,7 @@ def set_normal():
     secret_real = c.get('secret')
     if secret == secret_real:
         d.dset('status', status)
+        showip(request, '/set')
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -176,7 +195,6 @@ def set_path(secret, status):
     - http[s]://<your-domain>[:your-port]/set/<your-secret>/<a-number>
     - Method: **GET**
     '''
-    showip(request, '/set')
     secret = escape(secret)
     secret_real = c.get('secret')
     if secret == secret_real:
@@ -186,6 +204,7 @@ def set_path(secret, status):
             'code': 'OK',
             'set_to': status
         }
+        showip(request, '/set')
         return u.format_dict(ret)
     else:
         return u.reterr(
@@ -203,7 +222,6 @@ def device_set():
     设置单个设备的信息/打开应用
     - Method: **GET / POST**
     '''
-    showip(request, '/device/set')
     if request.method == 'GET':
         try:
             device_id = escape(request.args.get('id'))
@@ -261,7 +279,8 @@ def device_set():
         return u.reterr(
             code='invaild request',
             message='only supports GET and POST method!'
-        )
+            )
+    showip(request, '/device/set')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -274,7 +293,6 @@ def remove_device():
     移除单个设备的状态
     - Method: **GET**
     '''
-    showip(request, '/device/remove')
     device_id = escape(request.args.get('id'))
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
@@ -292,6 +310,7 @@ def remove_device():
             code='not authorized',
             message='invaild secret'
         )
+    showip(request, '/device/remove')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -304,7 +323,6 @@ def clear_device():
     清除所有设备状态
     - Method: **GET**
     '''
-    showip(request, '/device/clear')
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
@@ -315,6 +333,7 @@ def clear_device():
             code='not authorized',
             message='invaild secret'
         )
+    showip(request, '/device/clear')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -327,7 +346,6 @@ def private_mode():
     隐私模式, 即不在 /query 中显示设备状态 (仍可正常更新)
     - Method: **GET**
     '''
-    showip(request, '/device/private')
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
@@ -345,6 +363,7 @@ def private_mode():
             code='not authorized',
             message='invaild secret'
         )
+    showip(request, '/device/private_mode')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -359,11 +378,11 @@ def reload_config():
     从 `config.json` 重载配置
     - Method: **GET**
     '''
-    showip(request, '/reload_config')
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
         c.load()
+        showip(request, '/reload_config')
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -381,11 +400,11 @@ def save_data():
     保存内存中的状态信息到 `data.json`
     - Method: **GET**
     '''
-    showip(request, '/save_data')
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
         d.save()
+        showip(request, '/save_data')
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -397,28 +416,21 @@ def save_data():
             message='invaild secret'
         )
 
+# --- (Special) Metrics API
+if METRICS_ENABLED:
+    @app.route('/metrics')
+    def metrics():
+        '''
+        获取统计信息
+        - Method: **GET**
+        '''
+        resp = d.get_metrics_resp()
+        showip(request, '/metrics')
+        return resp
+
 
 # --- End
 if __name__ == '__main__':
-    c.load()
-    d.load()
-    d.start_timer_check(data_check_interval=c.config['data_check_interval'])  # 启动定时保存
-    # metrics?
-    if c.get('metrics'):
-        u.info('Note: metrics enabled, access /metrics to see your count.')
-        METRICS_ENABLED = True
-        d.metrics_init()
-
-        @app.route('/metrics')
-        # (Special) Metrics API
-        def metrics():
-            '''
-            获取统计信息
-            - Method: **GET**
-            '''
-            showip(request, '/metrics')
-            return d.get_metrics_str()
-
     app.run(  # 启↗动↘
         host=c.config['host'],
         port=c.config['port'],

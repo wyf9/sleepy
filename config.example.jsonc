@@ -1,5 +1,5 @@
 {
-    "version": "2025.1.16.1", // 配置版本号，可在更新时用于确定更改内容
+    "version": "2025.1.16.2", // 配置版本号，可在更新时用于确定更改内容
     // 见: data_json_update.md (Online: https://github.com/wyf9/sleepy/blob/main/data_json_update.md)
     "debug": false, // Flask 服务器的 debug 开关, 无需更改
     "host": "0.0.0.0", // 监听地址, 0.0.0.0 (IPV6: ::) 表示所有

@@ -103,7 +103,7 @@ class data:
             }
             self.record_metrics()
 
-    def get_metrics_str(self):
+    def get_metrics_resp(self):
         return u.format_dict({
             'today_is': self.data['metrics']['today_is'],
             'month_is': self.data['metrics']['month_is'],
