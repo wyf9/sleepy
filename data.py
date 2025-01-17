@@ -139,13 +139,21 @@ class data:
 
         :param path: 访问的路径
         '''
-        # - get time now
+        if not path:
+            return
+
+        # get time now
         now = datetime.now()
         year_is = str(now.year)
         month_is = f'{now.year}-{now.month}'
         today_is = f'{now.year}-{now.month}-{now.day}'
+
+        # 调试使用, 请勿取消注释!!!
+        # year_is = '2025'
+        # month_is = '2025-1'
+        # today_is = '2025-1-18'
+
         # - check time
-        # today
         if self.data['metrics']['today_is'] != today_is:
             self.data['metrics']['today_is'] = today_is
             self.data['metrics']['today'] = {}
@@ -157,16 +165,8 @@ class data:
         if self.data['metrics']['year_is'] != year_is:
             self.data['metrics']['year_is'] = year_is
             self.data['metrics']['year'] = {}
+
         # - record num
-        # -----------
-        now = datetime.now()
-        year_is = str(now.year)
-        month_is = f'{now.year}-{now.month}'
-        today_is = f'{now.year}-{now.month}-{now.day}'
-
-        if not path:
-            return
-
         today = self.data['metrics'].setdefault('today', {})
         month = self.data['metrics'].setdefault('month', {})
         year = self.data['metrics'].setdefault('year', {})

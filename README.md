@@ -35,9 +35,6 @@
 
 ## 部署
 
-> 从旧版本更新? 请看 [config.json 更新记录](./doc/config_json_update.md) <br/>
-> *配置文件已从 `data.json` 更名为 `config.json`*
-
 理论上全平台通用, 安装了 Python >= **3.6** 即可 (建议: **3.10+**)
 
 1. Clone 本仓库 (建议先 Fork / Use this template)
@@ -65,6 +62,9 @@ python3 server.py
 `>>` **[配置示例](./example.jsonc)** `<<` *(`config.json` 从此生成)*
 
 ## 使用
+
+> [!IMPORTANT]
+> **使用宝塔面板 (uwsgi) 等部署时，请确定只为本程序分配了 1 个进程 (目前的 data 存储方式是 dict 变量 + 定时保存, 如使用多进程可能导致数据不同步)!!!**
 
 有两种启动方式:
 
