@@ -12,9 +12,8 @@ from data import data as data_init
 
 try:
     c = config_init()
-    d = data_init()
+    d = data_init(c)
     METRICS_ENABLED = False
-    timezone = 'Asia/Shanghai'
     app = Flask(__name__)
     c.load()
     d.load()
@@ -129,7 +128,7 @@ def query():
     if d.data['private_mode']:
         devicelst = {}
     ret = {
-        'time': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S'),
+        'time': datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S'),
         'success': True,
         'status': st,
         'info': stinfo,
@@ -243,7 +242,7 @@ def device_set():
                 'using': device_using,
                 'app_name': app_name
             }
-            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
         else:
             return u.reterr(
                 code='not authorized',
@@ -270,7 +269,7 @@ def device_set():
                 'using': device_using,
                 'app_name': app_name
             }
-            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
         else:
             return u.reterr(
                 code='not authorized',
@@ -300,7 +299,7 @@ def remove_device():
     if secret == secret_real:
         try:
             del d.data['device_status'][device_id]
-            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
         except KeyError:
             return u.reterr(
                 code='not found',
@@ -328,7 +327,7 @@ def clear_device():
     secret_real = c.get('secret')
     if secret == secret_real:
         d.data['device_status'] = {}
-        d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
     else:
         return u.reterr(
             code='not authorized',
@@ -358,7 +357,7 @@ def private_mode():
                 message='"private" arg only supports boolean type'
             )
         d.data['private_mode'] = private
-        d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
     else:
         return u.reterr(
             code='not authorized',

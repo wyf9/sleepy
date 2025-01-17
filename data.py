@@ -5,23 +5,38 @@ import os
 import threading
 from time import sleep
 from datetime import datetime
+import pytz
 
 import utils as u
 from jsonc_parser.parser import JsoncParser
+import config as config_module
 
 
 class data:
     '''
     data 类，存储当前/设备状态
     可用 `.data['xxx']` 直接调取数据 (加载后) *(?)*
+
+    :param config: config class
     '''
     data: dict
     preload_data: dict
     data_check_interval: int = 60
+    c: config_module.config
 
-    def __init__(self):
+    def __init__(self, config: config_module.config):
+        self.c = config
         self.preload_data = JsoncParser.parse_file('data.example.jsonc', encoding='utf-8')
-        if not os.path.exists('data.json'):
+        if os.path.exists('data.json'):
+            try:
+                self.load()
+            except Exception as e:
+                u.warning(f'Error when loading data: {e}, try re-create')
+                os.remove('data.json')
+                self.data = self.preload_data
+                self.save()
+                self.load()
+        else:
             u.info('Could not find data.json, creating.')
             try:
                 self.data = self.preload_data
@@ -29,14 +44,6 @@ class data:
             except:
                 u.error('Create data.json failed')
                 raise
-        try:
-            self.load()
-        except Exception as e:
-            u.warning(f'Error when loading data: {e}, try re-create')
-            os.remove('data.json')
-            self.data = self.preload_data
-            self.save()
-            self.load()
 
     # --- Storage functions
 
@@ -98,18 +105,35 @@ class data:
             }
             self.record_metrics()
 
-    def get_metrics_resp(self):
-        return u.format_dict({
-            'today_is': self.data['metrics']['today_is'],
-            'month_is': self.data['metrics']['month_is'],
-            'year_is': self.data['metrics']['year_is'],
-            'today': self.data['metrics']['today'],
-            'month': self.data['metrics']['month'],
-            'year': self.data['metrics']['year'],
-            'total': self.data['metrics']['total']
-        })
+    def get_metrics_resp(self, json_only: bool = False):
+        now = datetime.now(pytz.timezone(self.c.config['timezone']))
+        if json_only:
+            # 仅用于调试
+            return {
+                'time': f'{now}',
+                'timezone': self.c.config['timezone'],
+                'today_is': self.data['metrics']['today_is'],
+                'month_is': self.data['metrics']['month_is'],
+                'year_is': self.data['metrics']['year_is'],
+                'today': self.data['metrics']['today'],
+                'month': self.data['metrics']['month'],
+                'year': self.data['metrics']['year'],
+                'total': self.data['metrics']['total']
+            }
+        else:
+            return u.format_dict({
+                'time': f'{now}',
+                'timezone': self.c.config['timezone'],
+                'today_is': self.data['metrics']['today_is'],
+                'month_is': self.data['metrics']['month_is'],
+                'year_is': self.data['metrics']['year_is'],
+                'today': self.data['metrics']['today'],
+                'month': self.data['metrics']['month'],
+                'year': self.data['metrics']['year'],
+                'total': self.data['metrics']['total']
+            })
 
-    def record_metrics(self, path: str = None):
+    def record_metrics(self, path: str = None) -> None:
         '''
         记录调用
 
@@ -134,28 +158,24 @@ class data:
             self.data['metrics']['year_is'] = year_is
             self.data['metrics']['year'] = {}
         # - record num
+        # -----------
+        now = datetime.now()
+        year_is = str(now.year)
+        month_is = f'{now.year}-{now.month}'
+        today_is = f'{now.year}-{now.month}-{now.day}'
+
         if not path:
-            return 0
-        # today
-        try:
-            self.data['metrics']['today'][path] += 1
-        except KeyError:
-            self.data['metrics']['today'][path] = 1
-        # this month
-        try:
-            self.data['metrics']['month'][path] += 1
-        except KeyError:
-            self.data['metrics']['month'][path] = 1
-        # this year
-        try:
-            self.data['metrics']['year'][path] += 1
-        except KeyError:
-            self.data['metrics']['year'][path] = 1
-        # total
-        try:
-            self.data['metrics']['total'][path] += 1
-        except KeyError:
-            self.data['metrics']['total'][path] = 1
+            return
+
+        today = self.data['metrics'].setdefault('today', {})
+        month = self.data['metrics'].setdefault('month', {})
+        year = self.data['metrics'].setdefault('year', {})
+        total = self.data['metrics'].setdefault('total', {})
+
+        today[path] = today.get(path, 0) + 1
+        month[path] = month.get(path, 0) + 1
+        year[path] = year.get(path, 0) + 1
+        total[path] = total.get(path, 0) + 1
 
     # --- Timer check - save data
 
@@ -175,6 +195,7 @@ class data:
         * 根据 `data_check_interval` 参数调整 sleep() 的秒数
         * 需要使用 threading 启动新线程运行
         '''
+        u.info(f'[timer_check] started, interval: {self.data_check_interval} seconds.')
         while True:
             sleep(self.data_check_interval)
             file_data = self.load(ret=True)
