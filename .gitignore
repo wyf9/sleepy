@@ -4,3 +4,4 @@ data.*.json
 config.json
 config.*.json
 *.test.*
+*.swp

@@ -176,7 +176,7 @@ def set_path(secret, status):
     - http[s]://<your-domain>[:your-port]/set/<your-secret>/<a-number>
     - Method: **GET**
     '''
-    showip(request, '/set/<secret>/<status>')
+    showip(request, '/set')
     secret = escape(secret)
     secret_real = c.get('secret')
     if secret == secret_real:
@@ -203,7 +203,7 @@ def device_set():
     设置单个设备的信息/打开应用
     - Method: **GET / POST**
     '''
-    showip(request, '/device_set')
+    showip(request, '/device/set')
     if request.method == 'GET':
         try:
             device_id = escape(request.args.get('id'))
