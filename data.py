@@ -7,24 +7,7 @@ from time import sleep
 from datetime import datetime
 
 import utils as u
-
-
-def initJson():
-    '''
-    初始化 (创建 data.json 文件)
-    '''
-    try:
-        jsonData = {  # 初始 data.json 数据
-            'status': 0,
-            'device_status': {},
-            'private_mode': False,
-            'last_updated': '1970-01-01 08:00:00'
-        }
-        with open('data.json', 'w+', encoding='utf-8') as file:
-            json.dump(jsonData, file, indent=4, ensure_ascii=False)
-    except:
-        u.error('Create data.json failed')
-        raise
+from jsonc_parser.parser import JsoncParser
 
 
 class data:
@@ -33,34 +16,46 @@ class data:
     可用 `.data['xxx']` 直接调取数据 (加载后) *(?)*
     '''
     data: dict
-    data_check_interval: int
+    preload_data: dict
+    data_check_interval: int = 60
 
     def __init__(self):
+        self.preload_data = JsoncParser.parse_file('data.example.jsonc', encoding='utf-8')
         if not os.path.exists('data.json'):
             u.info('Could not find data.json, creating.')
-            initJson()
+            try:
+                self.data = self.preload_data
+                self.save()
+            except:
+                u.error('Create data.json failed')
+                raise
         try:
             self.load()
         except Exception as e:
             u.warning(f'Error when loading data: {e}, try re-create')
             os.remove('data.json')
-            initJson()
+            self.data = self.preload_data
+            self.save()
             self.load()
 
     # --- Storage functions
 
-    def load(self, ret: bool = False) -> dict:
+    def load(self, ret: bool = False, preload: dict = {}) -> dict:
         '''
         加载状态
 
         :param ret: 是否返回加载后的 dict (为否则设置 self.data)
+        :param preload: 将会将 data.json 的内容追加到此后
         '''
+        if preload == {}:
+            preload = self.preload_data
         with open('data.json', 'r', encoding='utf-8') as file:
             Data = json.load(file)
+            DATA: dict = {**preload, **Data}
             if ret:
-                return Data
+                return DATA
             else:
-                self.data = Data
+                self.data = DATA
 
     def save(self):
         '''

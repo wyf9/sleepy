@@ -4,7 +4,7 @@ import json
 import os
 
 import utils as u
-from jsonc_parser.parser import JsoncParser as jsonp
+from jsonc_parser.parser import JsoncParser
 
 
 class config:
@@ -15,7 +15,7 @@ class config:
     config: dict
 
     def __init__(self):
-        jsonData = jsonp.parse_file('config.example.jsonc', encoding='utf-8')
+        jsonData = JsoncParser.parse_file('config.example.jsonc', encoding='utf-8')
         if not os.path.exists('config.json'):
             u.warning('config.json not exist, creating')
             try:

@@ -156,6 +156,7 @@ def get_status_list():
 
 # --- Status API
 
+
 @app.route('/set')
 def set_normal():
     '''
@@ -279,7 +280,7 @@ def device_set():
         return u.reterr(
             code='invaild request',
             message='only supports GET and POST method!'
-            )
+        )
     showip(request, '/device/set')
     return u.format_dict({
         'success': True,
@@ -415,6 +416,7 @@ def save_data():
             code='not authorized',
             message='invaild secret'
         )
+
 
 # --- (Special) Metrics API
 if METRICS_ENABLED:
