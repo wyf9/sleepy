@@ -152,17 +152,25 @@ class data:
         # year_is = '2025'
         # month_is = '2025-1'
         # today_is = '2025-1-18'
+        # if now.minute > 31 and now.second > 40:
+        #     print('ok')
+        #     today_is = '2025-1-19'
+        # else:
+        #     print('no')
 
         # - check time
         if self.data['metrics']['today_is'] != today_is:
+            u.info(f'[metrics] today_is changed: {self.data['metrics']['today_is']} -> {today_is}')
             self.data['metrics']['today_is'] = today_is
             self.data['metrics']['today'] = {}
         # this month
         if self.data['metrics']['month_is'] != month_is:
+            u.info(f'[metrics] month_is changed: {self.data['metrics']['month_is']} -> {month_is}')
             self.data['metrics']['month_is'] = month_is
             self.data['metrics']['month'] = {}
         # this year
         if self.data['metrics']['year_is'] != year_is:
+            u.info(f'[metrics] year_is changed: {self.data['metrics']['year_is']} -> {year_is}')
             self.data['metrics']['year_is'] = year_is
             self.data['metrics']['year'] = {}
 
