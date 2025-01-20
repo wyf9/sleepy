@@ -39,7 +39,7 @@
 
 ## Configure
 
-https://github.com/wyf9/sleepy/blob/main/client/cmd_console.py#L14-L21
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console.py#L14-L21
 
 ## Using
 
@@ -53,7 +53,7 @@ https://github.com/wyf9/sleepy/blob/main/client/cmd_console.py#L14-L21
 
 ## Configure
 
-https://github.com/wyf9/sleepy/blob/main/client/cmd_console_multi.py#L14-L21
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console_multi.py#L14-L23
 
 ## Using
 
@@ -69,7 +69,7 @@ https://github.com/wyf9/sleepy/blob/main/client/cmd_console_multi.py#L14-L21
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/main/client/win_device.py#L15-L31
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/win_device.py#L15-L31
 
 > PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
 > 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)
@@ -85,7 +85,7 @@ https://github.com/wyf9/sleepy/blob/main/client/win_device.py#L15-L31
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/main/client/autoxjs_device.py#L7-L13
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/autoxjs_device.js#L8-L14
 
 ### Using
 
@@ -94,7 +94,7 @@ https://github.com/wyf9/sleepy/blob/main/client/autoxjs_device.py#L7-L13
 ![image](https://files.catbox.moe/x93248.png)
 
 - 当手机息屏 (应用名返回为空) 时视为未在使用
-- *[+]* 当脚本退出时也会更新状态为未在使用 *(不包括 Autox.js 停止运行)*
+- 当脚本退出时也会更新状态为未在使用 *(不包括 Autox.js 直接停止运行)*
 
 ## [BrowserScript](./页面标题上报脚本-2024.12.2.user.js)
 
@@ -108,7 +108,7 @@ https://github.com/wyf9/sleepy/blob/main/client/autoxjs_device.py#L7-L13
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L18-L26
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/页面标题上报脚本-2024.12.2.user.js#L18-L26
 
 ## [Homework](./homework_device.py)
 
@@ -196,11 +196,11 @@ python="C:\Program Files\Python312\python.exe"
 
 1. 基本服务
 
-https://github.com/wyf9/sleepy/blob/main/client/mc_script.py#L16-L24
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L16-L24
 
 2. `app_name` 格式
 
-https://github.com/wyf9/sleepy/blob/main/client/mc_script.py#L116
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L116
 
 ### Using
 

@@ -47,7 +47,7 @@ class data:
 
     # --- Storage functions
 
-    def load(self, ret: bool = False, preload: dict = {}) -> dict:
+    def load(self, ret: bool = False, preload: dict = {}, error_count: int = 3) -> dict:
         '''
         加载状态
 
@@ -56,13 +56,20 @@ class data:
         '''
         if preload == {}:
             preload = self.preload_data
-        with open('data.json', 'r', encoding='utf-8') as file:
-            Data = json.load(file)
-            DATA: dict = {**preload, **Data}
-            if ret:
-                return DATA
-            else:
-                self.data = DATA
+        try:
+            if not os.path.exists('data.json'):
+                u.warning('data.json not exist, try re-create')
+                self.data = self.preload_data
+                self.save()
+            with open('data.json', 'r', encoding='utf-8') as file:
+                Data = json.load(file)
+                DATA: dict = {**preload, **Data}
+                if ret:
+                    return DATA
+                else:
+                    self.data = DATA
+        except:
+            u.warning('Load data error: {e}, retrying')
 
     def save(self):
         '''
@@ -206,9 +213,12 @@ class data:
         u.info(f'[timer_check] started, interval: {self.data_check_interval} seconds.')
         while True:
             sleep(self.data_check_interval)
-            file_data = self.load(ret=True)
-            if file_data != self.data:
-                self.save()
+            try:
+                file_data = self.load(ret=True)
+                if file_data != self.data:
+                    self.save()
+            except Exception as e:
+                u.warning(f'[timer_check] Error: {e}, retrying.')
 
     # --- check device heartbeat
     # TODO
