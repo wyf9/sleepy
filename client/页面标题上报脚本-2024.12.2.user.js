@@ -20,9 +20,9 @@
     const SECRET = '绝对猜不出来的密码'; // 你的 secret
     const ID = '114514'; // 你的设备 id
     const SHOW_NAME = '设备名称'; // 替换为你的设备名称
-    const NO_TITLE = 'url'; // 定义页面没有标题时的行为，url: 页面完整地址 / host: 域名 / 其他: 对应值
+    const NO_TITLE = 'url'; // 定义页面没有标题时的返回，url: 页面的完整 url 地址 / host: 域名 / 其他: 对应值
     const PREFIX = true; // 控制是否显示前缀
-    // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名
+    // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名，如此处就应为 sleepy.wyf9.top
     // 参数配置结束
 
     // 替换了 secret 的日志

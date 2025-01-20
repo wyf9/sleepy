@@ -6,11 +6,11 @@ Co-authored-by: NyaOH-Nahida - 新增捕捉退出事件，将退出脚本状态�
 */
 
 // config start
-const API_URL = 'https://example.com/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
-const SECRET = '绝对猜不出来的密钥'; // 你的 secret
-const ID = '设备ID'; // 你的设备 id
-const SHOW_NAME = '设备名称'; // 你的设备名称
-const CHECK_INTERVAL = '2000'; // 检查间隔 (毫秒)
+const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
+const SECRET = '绝对猜不出来的密码'; // 你的 secret
+const ID = 'a-device'; // 你的设备 id, 唯一
+const SHOW_NAME = '一个设备'; // 你的设备名称, 将显示在网页上
+const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
 // config end
 
 auto.waitFor(); // 等待无障碍

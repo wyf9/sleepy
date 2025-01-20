@@ -13,11 +13,17 @@ import sys
 import io
 
 # --- config start
+# 服务地址, 末尾同样不带 /
 SERVER = 'http://localhost:9010'
+# 密钥
 SECRET = 'wyf9test'
+# 设备标识符，唯一 (它也会被包含在 api 返回中, 不要包含敏感数据)
 DEVICE_ID = 'device-1'
+# 前台显示名称
 DEVICE_SHOW_NAME = 'MyDevice1'
+# 检查间隔，以秒为单位
 CHECK_INTERVAL = 2
+# 是否忽略重复请求，即窗口未改变时不发送请求
 BYPASS_SAME_REQUEST = True
 ENCODING = 'gb18030'  # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
 SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher']  # 当窗口名为其中任意一项时将不更新

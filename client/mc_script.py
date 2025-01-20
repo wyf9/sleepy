@@ -18,7 +18,7 @@ SERVER = 'https://sleepy.example.com'  # 服务器地址, 末尾不带 /
 SECRET = 'this_is_a_strong_key'  # 密钥
 DEVICE_ID = 'device-1'  # 设备 id, 唯一
 DEVICE_SHOW_NAME = 'MyDevice1'  # 设备前台显示名称
-CHECK_INTERVAL = 2  # 监测间隔 (秒)
+CHECK_INTERVAL = 10  # 监测间隔 (秒)
 BYPASS_SAME_REQUEST = True  # 是否忽略相同请求
 DEBUG = False  # 调试模式, 开启以获得更多输出
 # --- config end
