@@ -419,4 +419,11 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
     "code": "not authorized",
     "message": "invaild secret"
 }
+
+// 失败 - 保存出错
+{
+    "success": false,
+    "code": "exception",
+    "message": "..." // 报错内容
+}
 ```

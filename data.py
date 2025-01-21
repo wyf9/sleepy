@@ -214,7 +214,10 @@ class data:
         while True:
             sleep(self.data_check_interval)
             try:
-                file_data = self.load(ret=True)
+                try:
+                    file_data = self.load(ret=True)
+                except Exception as e:
+                    file_data = {}
                 if file_data != self.data:
                     self.save()
             except Exception as e:

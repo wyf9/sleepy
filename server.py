@@ -403,8 +403,14 @@ def save_data():
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
-        d.save()
         showip(request, '/save_data')
+        try:
+            d.save()
+        except Exception as e:
+            return u.reterr(
+                code='exception',
+                message=f'{e}'
+            )
         return u.format_dict({
             'success': True,
             'code': 'OK',
