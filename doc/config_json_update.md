@@ -10,6 +10,42 @@
 - `dd`: 日
 - `n`: 本日第 `n` 次修改
 
+# 2025-01
+
+## 2025.1.18.1
+
+```jsonc
+// ...
+    "port": 9010,
+    "timezone": "Asia/Shanghai", // (1) [NEW]
+    "metrics": true,
+// ...
+```
+
+- **New** (1)
+  * Name: `timezone`
+  * Upper: None
+  * Type: `str`
+  * Desc: 控制时区 (用于网页 / API 返回中的日期时间和 metrics 跨日计算)
+  * Desc: 北京时间即为 `Asia/Shanghai` 或 `Asia/Chongqing` (***不是 `Beijing`!!!***), 一般情况下无需更改
+
+## 2025.1.16.1
+
+```jsonc
+// ...
+    "port": 9010,
+    "metrics": true, // (1) [NEW]
+    "secret": "nope",
+// ...
+```
+
+- **New** (1)
+  * Name: `metrics`
+  * Upper: None
+  * Type: `bool`
+  * Desc: 控制是否启用 metrics (统计页面访问 / API 调用次数)
+  * Desc: ps: 如禁用, 则无法访问 `/metrics` *(404)*
+
 # 2024-12
 
 ## 2024.12.31.1
@@ -26,7 +62,7 @@
 - **New** (1)
   * Name: `device_status_slice`
   * Upper: `other`
-  * Type: int
+  * Type: `int`
   * Desc: 控制设备状态从开头截取多少文字显示 (防止窗口标题过长影响页面)
   * Desc: ps: 设置为 `0` 以禁用
 
@@ -43,7 +79,7 @@
 - **New** (1)
   * Name: `data_check_interval`
   * Upper: None
-  * Type: int
+  * Type: `int`
   * Desc: 控制多久 *(秒)* 检查一次状态是否与 `data.json` 中的内容有异, 如有则保存
   * Desc: ps: 设置为 `0` 以禁用保存状态 **(不建议)**
 
@@ -80,8 +116,9 @@
 - **New** (1)
   * Name: `device_status`
   * Upper: None
-  * Type: Dict
+  * Type: `dict`
   * Desc: 存储各个设备的状态 (见下)
+  * *Desc: 不用看了，当天就删了*
 
 ```jsonc
 // device_status example
@@ -107,7 +144,7 @@
 
     // ...
     ],
-    "refresh": 5, // (1) [New]
+    "refresh": 5000, // (1) [New]
     "other": {
     // ...
 ```
@@ -115,5 +152,5 @@
 - **New** (1)
   * Name: `refresh`
   * Upper: None
-  * Type: Number
+  * Type: `int`
   * Desc: 控制网页自动刷新时间 (毫秒), `0` 为不刷新

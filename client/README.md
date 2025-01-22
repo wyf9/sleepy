@@ -4,17 +4,26 @@
 
 - [/client](#client)
   - [CMDConsole](#cmdconsole)
-  - [CmdConsoleMuiti](#cmdconsolemuiti)
+  - [Configure](#configure)
+  - [Using](#using)
+  - [CmdConsoleMulti](#cmdconsolemulti)
+  - [Configure](#configure-1)
+  - [Using](#using-1)
   - [WinDevice](#windevice)
-    - [Configure](#configure)
-  - [AutoxjsScript](#autoxjsscript)
-    - [Configure](#configure-1)
-    - [Using](#using)
-  - [BrowserScript](#browserscript)
     - [Configure](#configure-2)
-  - [Homework](#homework)
+  - [AutoxjsScript](#autoxjsscript)
     - [Configure](#configure-3)
-    - [Using](#using-1)
+    - [Using](#using-2)
+  - [BrowserScript](#browserscript)
+    - [Configure](#configure-4)
+  - [Homework](#homework)
+    - [Configure](#configure-5)
+    - [Using](#using-3)
+  - [Minecraft script](#minecraft-script)
+    - [Minescript](#minescript)
+    - [Configure](#configure-6)
+    - [Using](#using-4)
+    - [Autorun](#autorun)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -28,11 +37,27 @@
 
 依赖: `requests`
 
-## [CmdConsoleMuiti](./cmd_console_muiti.py)
+## Configure
+
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console.py#L14-L21
+
+## Using
+
+启动脚本, 按照提示操作即可
+
+## [CmdConsoleMulti](./cmd_console_multi.py)
 
 > by: [@wyf9](https://github.com/wyf9)
 
 [CMDConsole](#cmdconsole) 的旧版本 (可选择多个服务)
+
+## Configure
+
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console_multi.py#L14-L23
+
+## Using
+
+同上, 多了一步选择服务
 
 ## [WinDevice](./win_device.py)
 
@@ -44,37 +69,15 @@
 
 ### Configure
 
-> 文件 [L12-L19](https://github.com/wyf9/sleepy/blob/main/client/win_device.py#L12-L19) 的配置如下：
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/win_device.py#L15-L31
 
-```py
-# --- config start
-# 服务地址, 末尾同样不带 /
-SERVER = 'http://localhost:9010'
-# 密钥
-SECRET = 'wyf9test'
-# 设备标识符，唯一 (它也会被包含在 api 返回中, 不要包含敏感数据)
-DEVICE_ID = 'device-1'
-# 前台显示名称
-DEVICE_SHOW_NAME = 'MyDevice1'
-# 检查间隔，以秒为单位
-CHECK_INTERVAL = 2
-# 是否忽略重复请求，即窗口未改变时不发送请求
-BYPASS_SAME_REQUEST = True
-# 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-ENCODING = 'utf-8'
-# 当窗口名为其中任意一项时将不更新
-SPECIAL_NAMES = ['新通知']
-# 当窗口名为其中任意一项时视为未在使用
-NOT_USING_NAMES = ['', '搜索', '通知中心', '快速设置', '系统托盘溢出窗口。', '我们喜欢这张图片，因此我们将它与你共享。', 'Flow.Launcher']
-# --- config end
-```
-
-> PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)**
+> PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
+> 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)
 
 ## [AutoxjsScript](./autoxjs_device.js)
 
 > by: [@wyf9](https://github.com/wyf9) <br/>
-> Co-authored-by: [@NyaOH-Nahida](https://github.com/NyaOH-Nahida)
+> **Co-authored-by**: [@NyaOH-Nahida](https://github.com/NyaOH-Nahida)
 
 使用 [Autox.js](https://github.com/kkevsekk1/AutoX) 编写的安卓自动更新状态脚本
 
@@ -82,17 +85,7 @@ NOT_USING_NAMES = ['', '搜索', '通知中心', '快速设置', '系统托盘�
 
 ### Configure
 
-> 文件 [L7-L13](https://github.com/wyf9/sleepy/blob/main/client/autoxjs_device.py#L7-L13) 的配置如下：
-
-```js
-// config start
-const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
-const SECRET = '绝对猜不出来的密码'; // 你的 secret
-const ID = 'a-device'; // 你的设备 id, 唯一
-const SHOW_NAME = '一个设备'; // 你的设备名称, 将显示在网页上
-const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
-// config end
-```
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/autoxjs_device.js#L8-L14
 
 ### Using
 
@@ -101,7 +94,7 @@ const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
 ![image](https://files.catbox.moe/x93248.png)
 
 - 当手机息屏 (应用名返回为空) 时视为未在使用
-- *[+]* 当脚本退出时也会更新状态为未在使用 *(不包括 Autox.js 停止运行)*
+- 当脚本退出时也会更新状态为未在使用 *(不包括 Autox.js 直接停止运行)*
 
 ## [BrowserScript](./页面标题上报脚本-2024.12.2.user.js)
 
@@ -115,18 +108,7 @@ const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
 
 ### Configure
 
-> 文件 [L18-L25](https://github.com/wyf9/sleepy/blob/main/client/页面标题上报脚本-2024.12.2.user.js#L18-L25) 的配置如下:
-
-```js
-// 参数配置开始
-const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
-const SECRET = '绝对猜不出来的密码'; // 你的 secret
-const ID = '114514'; // 你的设备 id
-const SHOW_NAME = '设备名称'; // 替换为你的设备名称
-const NO_TITLE = 'url'; // 定义页面没有标题时的返回，url: 页面的完整 url 地址 / host: 域名 / 其他: 对应值
-// [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名，如此处就应为 sleepy.wyf9.top
-// 参数配置结束
-```
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/页面标题上报脚本-2024.12.2.user.js#L18-L26
 
 ## [Homework](./homework_device.py)
 
@@ -145,10 +127,18 @@ const NO_TITLE = 'url'; // 定义页面没有标题时的返回，url: 页面的
 
 ### Using
 
-脚本提供了两个函数:
+脚本提供了一些函数:
 
-- `left(num: int)`: 设置剩余作业的数量 (为 `0` 则移除)
-- `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除)
+- `left(num: int)`: 设置剩余作业的数量 (为 `0` 则移除) *[device id: `homework-left`]*
+- `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除) *[device id: `homework-name`]*
+
+还有一些扩展函数, 可以调用大部分 API
+- `query()`: 查看当前状态 *(未格式化输出)*
+- `lst()`: 查看可用状态列表 *(未格式化输出)*
+- `status(stat: int)`: 设置状态
+- `device_set(id: str, show_name: str, msg: str, using: bool = True)`: 设备状态设置
+- `device_remove(id: str)`: 移除设备状态
+- `device_clear()`: 清除设备状态
 
 那么，如何使用这两个函数呢？
 
@@ -169,7 +159,61 @@ from homework_device import left, writing # import
 for i in range(114514, 1, -1):
     left(i)
     writing(f'My Homework #{i}')
-    sleep(1145)
+    sleep(11.45)
+```
+
+## [Minecraft script](./mc_script.py)
+
+> by: [@wyf9](https://github.com/wyf9)
+
+依赖: `requests`
+
+一个使用 Minescript mod 在 Minecraft Java 版中上报游戏内信息的脚本
+
+### Minescript
+
+在使用前, 你需要下载 Minescript mod:
+
+Links: [MCMod.cn](https://www.mcmod.cn/class/7594.html) / [Modrinth](https://modrinth.com/mod/minescript) / [Repo](https://github.com/maxuser0/minescript)
+
+> 也可在各大启动器的 Modrinth 源中直接下载
+
+在下载并启动一次后, 打开 `.minecraft/versions/你的版本/minescript/` 目录, 并进行两个操作:
+
+1. 新建 `config.txt`, 内容:
+
+```txt
+# Lines starting with "#" are ignored.
+# 替换为你的 Python 可执行程序路径
+python="C:\Program Files\Python312\python.exe"
+```
+
+2. 将 [`mc_script.py`](./mc_script.py) 复制到此目录, 并改名为 `sleepy.py` (也可为其他名字)
+
+### Configure
+
+需要配置两处:
+
+1. 基本服务
+
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L16-L24
+
+2. `app_name` 格式
+
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L116
+
+### Using
+
+配置完成后重启 Minecraft 进入游戏, 按 `T` *(默认键位, 可能不同)* 打开聊天栏, 并输入: `\sleepy` **(即上面重命名后的文件名去掉 `.py` 后缀)* 回车启动
+
+停止: `\sleepy stop`
+
+### Autorun
+
+也可以配置自启, 只需在 `config.txt` 中新增一行:
+
+```txt
+autorun[*]=eval 'execute("\\sleepy")'
 ```
 
 ## Other repos

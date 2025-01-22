@@ -11,17 +11,14 @@ import requests
 import json
 global server
 
+# --- config start
 # 密钥
 SECRET = 'YourSecretCannotGuess'
+# 服务地址, 末尾不加 `/`
 SERVER = 'https://example.com'
-# (弃用) 服务器列表, 末尾不加 `/`
-# SERVER_LIST = [
-#     'https://example.com',
-#     'http://192.168.114.114',
-#     'http://192.168.191.191:9810'
-# ]
 # 请求重试次数
 RETRY = 3
+# --- config end
 
 
 def get(url):
@@ -53,25 +50,25 @@ def loadjson(url):
 
 
 def main():
-#     print('\n---\nSelect Server:')
-#     serverlst_show = ''
-#     for n1 in range(len(SERVER_LIST)):
-#         n = n1 + 1
-#         serverlst_show += f'    {n}. {SERVER_LIST[n1]}\n'
-#     print(f'''
-#     0. Quit
-# {serverlst_show}''')
-#     while True:
-#         try:
-#             inp = int(input('> '))
-#             if inp == 0:
-#                 return 0
-#             else:
-#                 server = SERVER_LIST[inp - 1]
-#                 print(f'Selected server: {server}')
-#                 break
-#         except:
-#             print('invaild input')
+    #     print('\n---\nSelect Server:')
+    #     serverlst_show = ''
+    #     for n1 in range(len(SERVER_LIST)):
+    #         n = n1 + 1
+    #         serverlst_show += f'    {n}. {SERVER_LIST[n1]}\n'
+    #     print(f'''
+    #     0. Quit
+    # {serverlst_show}''')
+    #     while True:
+    #         try:
+    #             inp = int(input('> '))
+    #             if inp == 0:
+    #                 return 0
+    #             else:
+    #                 server = SERVER_LIST[inp - 1]
+    #                 print(f'Selected server: {server}')
+    #                 break
+    #         except:
+    #             print('invaild input')
 
     print('\n---\nStatus now:')
     stnow = loadjson(f'{SERVER}/query')

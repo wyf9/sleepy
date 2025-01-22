@@ -10,22 +10,40 @@ import utils as u
 from config import config as config_init
 from data import data as data_init
 
-c = config_init()
-d = data_init()
-app = Flask(__name__)
-timezone = 'Asia/Shanghai'
-
+try:
+    c = config_init()
+    d = data_init(c)
+    METRICS_ENABLED = False
+    app = Flask(__name__)
+    c.load()
+    d.load()
+    d.start_timer_check(data_check_interval=c.config['data_check_interval'])  # 启动定时保存
+    # metrics?
+    if c.get('metrics'):
+        u.info('Note: metrics enabled, open /metrics to see your count.')
+        METRICS_ENABLED = True
+        d.metrics_init()
+except KeyboardInterrupt:
+    u.warning('Interrupt init')
+    exit(0)
+except u.SleepyException as e:
+    u.warning(f'==========\n{e}')
+    exit(1)
+except:
+    u.error('Unexpected Error!')
+    raise
 
 # --- Functions
 
 
-def showip(req: request, msg): # type: ignore
+def showip(req: request, msg):  # type: ignore
     '''
-    在日志中显示 ip
+    在日志中显示 ip, 并记录 metrics 信息
 
     :param req: `flask.request` 对象, 用于取 ip
-    :param msg: 信息
+    :param msg: 信息 (一般是路径, 同时作为 metrics 的项名)
     '''
+    # --- log
     ip1 = req.remote_addr
     try:
         ip2 = req.headers['X-Forwarded-For']
@@ -33,6 +51,9 @@ def showip(req: request, msg): # type: ignore
     except:
         ip2 = None
         u.infon(f'- Request: {ip1} : {msg}')
+    # --- count
+    if METRICS_ENABLED:
+        d.record_metrics(msg)
 
 
 # --- Templates
@@ -44,7 +65,6 @@ def index():
     根目录返回 html
     - Method: **GET**
     '''
-    showip(request, '/')
     ot = c.config['other']
     try:
         stat = c.config['status_list'][d.data['status']]
@@ -54,6 +74,7 @@ def index():
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
+    showip(request, '/')
     return render_template(
         'index.html',
         user=ot['user'],
@@ -64,18 +85,6 @@ def index():
         status_color=stat['color'],
         more_text=ot['more_text'],
         last_updated=d.data['last_updated']
-    )
-
-
-@app.route('/get.js')
-def get_js():
-    '''
-    /get.js
-    - Method: **GET**
-    '''
-    return render_template(
-        'get.js',
-        interval=c.config['refresh']
     )
 
 
@@ -91,10 +100,11 @@ def style_css():
         alpha=c.config['other']['alpha']
     ))
     response.mimetype = 'text/css'
+    showip(request, '/style.css')
     return response
 
 
-# --- Status API
+# --- Read-only
 
 
 @app.route('/query')
@@ -104,7 +114,6 @@ def query():
     - 无需鉴权
     - Method: **GET**
     '''
-    showip(request, '/query')
     st = d.data['status']
     try:
         stinfo = c.config['status_list'][st]
@@ -115,16 +124,20 @@ def query():
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
+    devicelst = d.data['device_status']
+    if d.data['private_mode']:
+        devicelst = {}
     ret = {
-        'time': datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S'),
+        'time': datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S'),
         'success': True,
         'status': st,
         'info': stinfo,
-        'device': d.data['device_status'],
+        'device': devicelst,
         'device_status_slice': c.config['other']['device_status_slice'],
         'last_updated': d.data['last_updated'],
         'refresh': c.config['refresh']
     }
+    showip(request, '/query')
     return u.format_dict(ret)
 
 
@@ -136,9 +149,11 @@ def get_status_list():
     - 无需鉴权
     - Method: **GET**
     '''
-    showip(request, '/status_list')
     stlst = c.get('status_list')
+    showip(request, '/status_list')
     return u.format_dict(stlst)
+
+# --- Status API
 
 
 @app.route('/set')
@@ -148,19 +163,19 @@ def set_normal():
     - http[s]://<your-domain>[:your-port]/set?secret=<your-secret>&status=<a-number>
     - Method: **GET**
     '''
-    showip(request, '/set')
     status = escape(request.args.get('status'))
     try:
         status = int(status)
     except:
         return u.reterr(
             code='bad request',
-            message="argument 'status' must be a number"
+            message="argument 'status' must be a int number"
         )
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
         d.dset('status', status)
+        showip(request, '/set')
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -180,7 +195,6 @@ def set_path(secret, status):
     - http[s]://<your-domain>[:your-port]/set/<your-secret>/<a-number>
     - Method: **GET**
     '''
-    showip(request, '/set/<secret>/<status>')
     secret = escape(secret)
     secret_real = c.get('secret')
     if secret == secret_real:
@@ -190,6 +204,7 @@ def set_path(secret, status):
             'code': 'OK',
             'set_to': status
         }
+        showip(request, '/set')
         return u.format_dict(ret)
     else:
         return u.reterr(
@@ -206,14 +221,12 @@ def device_set():
     '''
     设置单个设备的信息/打开应用
     - Method: **GET / POST**
-    - **GET 可能出现 using 参数无效的情况，建议使用 POST**
     '''
-    showip(request, '/device_set')
     if request.method == 'GET':
         try:
             device_id = escape(request.args.get('id'))
             device_show_name = escape(request.args.get('show_name'))
-            device_using = bool(escape(request.args.get('using')))
+            device_using = u.tobool(escape(request.args.get('using')), throw=True)
             app_name = escape(request.args.get('app_name'))
         except:
             return u.reterr(
@@ -229,7 +242,7 @@ def device_set():
                 'using': device_using,
                 'app_name': app_name
             }
-            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
         else:
             return u.reterr(
                 code='not authorized',
@@ -241,7 +254,7 @@ def device_set():
             secret = req['secret']
             device_id = req['id']
             device_show_name = req['show_name']
-            device_using = bool(req['using'])
+            device_using = u.tobool(req['using'], throw=True)
             app_name = req['app_name']
         except:
             return u.reterr(
@@ -256,7 +269,7 @@ def device_set():
                 'using': device_using,
                 'app_name': app_name
             }
-            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
         else:
             return u.reterr(
                 code='not authorized',
@@ -267,6 +280,7 @@ def device_set():
             code='invaild request',
             message='only supports GET and POST method!'
         )
+    showip(request, '/device/set')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -279,14 +293,13 @@ def remove_device():
     移除单个设备的状态
     - Method: **GET**
     '''
-    showip(request, '/device/remove')
     device_id = escape(request.args.get('id'))
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
         try:
             del d.data['device_status'][device_id]
-            d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
         except KeyError:
             return u.reterr(
                 code='not found',
@@ -297,6 +310,7 @@ def remove_device():
             code='not authorized',
             message='invaild secret'
         )
+    showip(request, '/device/remove')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -309,24 +323,54 @@ def clear_device():
     清除所有设备状态
     - Method: **GET**
     '''
-    showip(request, '/device/clear')
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
         d.data['device_status'] = {}
-        d.data['last_updated'] = datetime.now(pytz.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
     else:
         return u.reterr(
             code='not authorized',
             message='invaild secret'
         )
+    showip(request, '/device/clear')
     return u.format_dict({
         'success': True,
         'code': 'OK'
     })
 
 
+@app.route('/device/private_mode')
+def private_mode():
+    '''
+    隐私模式, 即不在 /query 中显示设备状态 (仍可正常更新)
+    - Method: **GET**
+    '''
+    secret = escape(request.args.get('secret'))
+    secret_real = c.get('secret')
+    if secret == secret_real:
+        private = escape(request.args.get('private'))
+        private = u.tobool(private)
+        if private == None:
+            return u.reterr(
+                code='invaild request',
+                message='"private" arg only supports boolean type'
+            )
+        d.data['private_mode'] = private
+        d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
+    showip(request, '/device/private_mode')
+    return u.format_dict({
+        'success': True,
+        'code': 'OK'
+    })
+
 # --- Storage API
+
 
 @app.route('/reload_config')
 def reload_config():
@@ -334,11 +378,11 @@ def reload_config():
     从 `config.json` 重载配置
     - Method: **GET**
     '''
-    showip(request, '/reload_config')
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
         c.load()
+        showip(request, '/reload_config')
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -356,11 +400,17 @@ def save_data():
     保存内存中的状态信息到 `data.json`
     - Method: **GET**
     '''
-    showip(request, '/save_data')
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')
     if secret == secret_real:
-        d.save()
+        showip(request, '/save_data')
+        try:
+            d.save()
+        except Exception as e:
+            return u.reterr(
+                code='exception',
+                message=f'{e}'
+            )
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -373,13 +423,26 @@ def save_data():
         )
 
 
+# --- (Special) Metrics API
+if METRICS_ENABLED:
+    @app.route('/metrics')
+    def metrics():
+        '''
+        获取统计信息
+        - Method: **GET**
+        '''
+        resp = d.get_metrics_resp()
+        showip(request, '/metrics')
+        return resp
+
+
 # --- End
 if __name__ == '__main__':
-    c.load()
-    d.load()
-    d.start_timer_check(data_check_interval=c.config['data_check_interval'])  # 启动定时保存
     app.run(  # 启↗动↘
         host=c.config['host'],
         port=c.config['port'],
         debug=c.config['debug']
     )
+    print('Server exited, saving data...')
+    d.save()
+    print('Bye.')

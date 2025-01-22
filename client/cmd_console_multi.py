@@ -11,6 +11,7 @@ import requests
 import json
 global server
 
+# --- config start
 # 密钥
 SECRET = '11451419-1981-0114-5141-919810114514'
 # 服务列表, 末尾不加 `/`
@@ -19,6 +20,7 @@ SERVER_LIST = ['https://sleepy.wyf9.top',
                'http://127.0.0.1:9010']
 # 请求重试次数
 RETRY = 3
+# --- config end
 
 
 def get(url):

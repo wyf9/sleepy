@@ -14,6 +14,7 @@
 |                      | `/`            | `GET` | 显示主页         |
 | [Jump](#query)       | `/query`       | `GET` | 获取状态         |
 | [Jump](#status-list) | `/status_list` | `GET` | 获取可用状态列表 |
+| [Jump](#metrics)     | `/metrics`     | `GET` | 获取统计信息     |
 
 ### query
 
@@ -51,9 +52,7 @@
 }
 ```
 
-> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可自行修改: [`server.py`#`L16`](https://github.com/wyf9/sleepy/blob/main/server.py#L16)
-
-https://github.com/wyf9/sleepy/blob/main/server.py#L16
+> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可在 config.json 中修改
 
 ### status-list
 
@@ -88,6 +87,62 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 ```
 
 > 就是返回 `config.json` 中的 `status_list` 列表
+
+### metrics
+
+[Back to ## read-only](#read-only)
+
+> `/metrics`
+
+获取统计信息
+
+* Method: GET
+* 无需鉴权
+
+> [!TIP]
+> 本接口较特殊: 如服务器关闭了统计 *(`config.json` 中的 `metrics` 为 `false`)*, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果 <br/>
+> ~~*我也不知道自己怎么想的*~~
+
+> 在需要鉴权的路由中，鉴权通过才会计入统计
+
+> [!WARNING]
+> 目前 data.py 逻辑可能存在问题，会导致 metrics 数据无故被清空，原因未知
+
+#### Response
+
+```json
+{
+    "time": "2025-01-22 08:40:48.564728+08:00", // 服务端时间
+    "timezone": "Asia/Shanghai", // 时区
+    "today_is": "2025-1-22", // 今日日期
+    "month_is": "2025-1", // 今日月份
+    "year_is": "2025", // 今日年份
+    "today": { // 今天的数据
+        "/device/set": 18,
+        "/": 2, 
+        "/style.css": 1, 
+        "/query": 2
+    }, 
+    "month": { // 今月的数据
+        "/device/set": 18, 
+        "/": 2, 
+        "/style.css": 1, 
+        "/query": 2
+    }, 
+    "year": { // 今年的数据
+        "/device/set": 18, 
+        "/": 2, 
+        "/style.css": 1, 
+        "/query": 2
+    }, 
+    "total": { // 总统计数据，不清除
+        "/device/set": 18, 
+        "/": 2, 
+        "/style.css": 1, 
+        "/query": 2
+    }
+}
+```
 
 ## Status
 
@@ -144,12 +199,13 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 
 [Back to # api](#api)
 
-|                        | 路径                                                                                          | 方法   | 作用                          |
-| ---------------------- | --------------------------------------------------------------------------------------------- | ------ | ----------------------------- |
-| [Jump](#device-set)    | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
-|                        | `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
-| [Jump](#device-remove) | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
-| [Jump](#device-clear)  | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
+|                              | 路径                                                                                          | 方法   | 作用                          |
+| ---------------------------- | --------------------------------------------------------------------------------------------- | ------ | ----------------------------- |
+| [Jump](#device-set)          | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
+|                              | `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
+| [Jump](#device-remove)       | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
+| [Jump](#device-clear)        | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
+| [Jump](#device-private-mode) | `/device/private_mode?secret=<secret>&private=<isprivate>`                                    | `GET`  | 设置隐私模式                  |
 
 ### device-set
 
@@ -164,8 +220,7 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 #### Params (GET)
 
 > [!WARNING]
-> 使用 url params 传递参数在某些情况下 *(如内容包含特殊符号)* 可能导致非预期行为, 此处更建议使用 POST <br/>
-> **GET 可能出现 using 参数无效的情况, 原因未知**
+> 使用 url params 传递参数在某些情况下 *(如内容包含特殊符号)* 可能导致非预期行为, 此处更建议使用 POST
 
 > `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>`
 
@@ -283,6 +338,45 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 }
 ```
 
+### device-private-mode
+
+[Back to ## device](#device)
+
+> `/device/private_mode?secret=<secret>&private=<isprivate>`
+
+设置隐私模式 *(即在 [`/query`](#query) 的返回中设置 `device` 项为空 (`{}`))*
+
+* Method: GET
+
+#### Params
+
+- `<secret>`: 在 `config.json` 中配置的 `secret`
+- `<isprivate>`: bool (仅接受 `true` / `false`), 开关状态
+
+#### Response
+
+```jsonc
+// 成功
+{
+    "success": true,
+    "code": "OK"
+}
+
+// 失败 - 密钥错误
+{
+    "success": false,
+    "code": "not authorized",
+    "message": "invaild secret"
+}
+
+// 失败 - 请求无效
+{
+    "success": false,
+    "code": "invaild request",
+    "message": "\"private\" arg only supports boolean type"
+}
+```
+
 ## Storage
 
 [Back to # api](#api)
@@ -356,5 +450,12 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
     "success": false,
     "code": "not authorized",
     "message": "invaild secret"
+}
+
+// 失败 - 保存出错
+{
+    "success": false,
+    "code": "exception",
+    "message": "..." // 报错内容
 }
 ```

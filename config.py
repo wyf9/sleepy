@@ -4,22 +4,7 @@ import json
 import os
 
 import utils as u
-from jsonc_parser.parser import JsoncParser as jsonp
-
-
-def initJson():
-    '''
-    初始化配置 (从 example.jsonc 加载)
-    '''
-    try:
-        jsonData = jsonp.parse_file('example.jsonc', encoding='utf-8')
-        with open('config.json', 'w+', encoding='utf-8') as file:
-            json.dump(jsonData, file, indent=4, ensure_ascii=False)
-        u.info('Generated new config file (config.json), please edit and re-run this program.')
-        u.info('Example: example.jsonc / Online: https://github.com/wyf9/sleepy/blob/main/example.jsonc')
-    except:
-        u.error('Create config.json failed')
-        raise
+from jsonc_parser.parser import JsoncParser
 
 
 class config:
@@ -30,10 +15,19 @@ class config:
     config: dict
 
     def __init__(self):
+        jsonData = JsoncParser.parse_file('config.example.jsonc', encoding='utf-8')
         if not os.path.exists('config.json'):
             u.warning('config.json not exist, creating')
-            initJson()
+            try:
+                with open('config.json', 'w+', encoding='utf-8') as file:
+                    json.dump(jsonData, file, indent=4, ensure_ascii=False)
+                u.exception('Generated new config file (config.json), please edit it and re-run this program.')
+            except Exception as e:
+                u.error(f'Create config.json failed: {e}')
+                raise
         self.load()
+        if self.config['version'] != jsonData['version']:
+            u.exception(f'Config fotmat updated ({self.config["version"]} -> {jsonData["version"]}), please change your config.json\nExample see: config.example.json')
 
     def load(self):
         '''
@@ -41,21 +35,6 @@ class config:
         '''
         with open('config.json', 'r', encoding='utf-8') as file:
             self.config = json.load(file)
-
-    # def save(self):
-    #     '''
-    #     保存配置
-    #     '''
-    #     with open('config.json', 'w+', encoding='utf-8') as file:
-    #         json.dump(self.data, file, indent=4, ensure_ascii=False)
-
-    # def dset(self, name, value):
-    #     '''
-    #     设置一个值
-    #     '''
-    #     self.data[name] = value
-    #     with open('config.json', 'w+', encoding='utf-8') as file:
-    #         json.dump(self.data, file, indent=4, ensure_ascii=False)
 
     def get(self, name):
         '''

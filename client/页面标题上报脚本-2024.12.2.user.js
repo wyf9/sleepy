@@ -20,8 +20,9 @@
     const SECRET = '绝对猜不出来的密码'; // 你的 secret
     const ID = '114514'; // 你的设备 id
     const SHOW_NAME = '设备名称'; // 替换为你的设备名称
-    const NO_TITLE = 'url'; // 定义页面没有标题时的行为，url: 页面完整地址 / host: 域名 / 其他: 对应值
-    // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名
+    const NO_TITLE = 'url'; // 定义页面没有标题时的返回，url: 页面的完整 url 地址 / host: 域名 / 其他: 对应值
+    const PREFIX = true; // 控制是否显示前缀
+    // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名，如此处就应为 sleepy.wyf9.top
     // 参数配置结束
 
     // 替换了 secret 的日志
@@ -34,7 +35,8 @@
 
     // 获取浏览器名称
     function getBrowserName() {
-        const userAgent = navigator.userAgent;
+        // return "MyBrowser"; // 如需自定义浏览器名称可取消注释本行
+        var userAgent = navigator.userAgent;
 
         if (userAgent.includes("Edg")) {
             return "Edge";
@@ -53,7 +55,7 @@
 
     // 发送请求函数
     function sendRequest() {
-        const browserName = getBrowserName(); // 获取浏览器名称
+        var browserName = getBrowserName(); // 获取浏览器名称
         var title;
         if (document.title == '') { // 如没有标题
             if (NO_TITLE == 'url') {
@@ -66,10 +68,19 @@
         } else {
             title = document.title;
         }
-        const appName = `${browserName} - ${title}`; // 拼接浏览器名称和页面标题
+
+        var appName;
+        if (PREFIX) {
+            // 显示前缀
+            appName = `${browserName} - ${title}`;
+        } else {
+            // 不显示前缀
+            appName = `${title}`;
+        }
+        log(`App name: ${appName}`);
 
         // 构造 API URL
-        const apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=true&app_name=${encodeURIComponent(appName)}`;
+        var apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=true&app_name=${encodeURIComponent(appName)}`;
 
         // 使用 GM_xmlhttpRequest 发送请求 (还是先用 get 吧)
         GM_xmlhttpRequest({

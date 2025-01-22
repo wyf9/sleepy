@@ -17,17 +17,14 @@
 - [x] 设备使用状态
 - [x] Windows 客户端 (Python)
 - [x] Android 客户端 ([Autox.js](http://doc.autoxjs.com/))
-- [ ] Metrics API (统计页面访问 / 接口调用次数)
-- [ ] 设备状态尝试 Websocket (=↓)
+- [x] [查看更多客户端 (如浏览器脚本)](./client/README.md)
+- [x] Metrics API (统计页面访问 / 接口调用次数)
 - [ ] 设备状态 Heartbeat 机制
 - [ ] 更多状态存储选项 (如 SQLite)
 
 > [!TIP]
-> 因上学原因 ***(临近期末)***, 可能放缓更新 <br/>
 > **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** <br/>
-> 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*. <br/>
-
-<!-- > 正在加急更新中 (请看 [dev-2025-1-1](https://github.com/wyf9/sleepy/tree/dev-2025-1-1) 分支) -->
+> 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
 
 ### Preview
 
@@ -36,9 +33,6 @@
 开发预览 (*不保证可用*, 密钥 `wyf9test`): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
 ## 部署
-
-> 从旧版本更新? 请看 [config.json 更新记录](./doc/config_json_update.md) <br/>
-> *配置文件已从 `data.json` 更名为 `config.json`*
 
 理论上全平台通用, 安装了 Python >= **3.6** 即可 (建议: **3.10+**)
 
@@ -68,6 +62,9 @@ python3 server.py
 
 ## 使用
 
+> [!IMPORTANT]
+> **使用宝塔面板 (uwsgi) 等部署时，请确定只为本程序分配了 1 个进程, 如设置多个服务进程可能导致数据不同步!!!**
+
 有两种启动方式:
 
 ```shell
@@ -86,6 +83,14 @@ python3 start.py
 ## API
 
 详细的 API 文档见 [doc/api.md](./doc/api.md).
+
+## 优化站点
+
+见 [Best Practice](./doc/best_practice.md)
+
+## 更新
+
+TODO
 
 ## 关于
 
