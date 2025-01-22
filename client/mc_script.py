@@ -1,18 +1,18 @@
 # coding: utf-8
 '''
 mc_script.py
-食用 Minescript 获取 MC 游戏中信息
+
+使用 Minescript 获取 MC 游戏中信息
 by: @wyf9
 依赖: requests, minescript (MOD)
-ps: 日志乱码属 Minescript 正常现象, 解决方法未知
 '''
 
 # 不要使用格式化!!! 会打乱顺序!!!
 import time
-from requests import post
 from system.lib import minescript as mc  # type: ignore / 写好记得把 system 前面的 . 去掉, 否则会报错
-import sys
-sys.path.append(r'C:\Users\wyf01\AppData\Roaming\Python\Python312\site-packages')  # 如提示找不到库, 在此将你的 site-packages 目录添加至局部 PATH
+# import sys
+# sys.path.append(r'C:\Users\wyf01\AppData\Roaming\Python\Python312\site-packages')  # 如提示找不到库, 在此将你的 site-packages 目录添加至局部 PATH
+from requests import post
 
 # --- config start
 SERVER = 'https://sleepy.example.com'  # 服务器地址, 末尾不带 /

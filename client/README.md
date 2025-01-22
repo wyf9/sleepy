@@ -172,13 +172,13 @@ for i in range(114514, 1, -1):
 
 ### Minescript
 
-在使用前, 你需要给自己的客户端下载 Minescript mod (以及在系统中安装 Python 和 `requests` 库)
+在使用前, 你需要下载 Minescript mod:
 
 Links: [MCMod.cn](https://www.mcmod.cn/class/7594.html) / [Modrinth](https://modrinth.com/mod/minescript) / [Repo](https://github.com/maxuser0/minescript)
 
-> 应也可在各大启动器的 Modrinth 源中直接下载
+> 也可在各大启动器的 Modrinth 源中直接下载
 
-在下载并启动一次后, 打开 `.minecraft\versions\你的版本\minescript\` 目录, 并进行两个操作:
+在下载并启动一次后, 打开 `.minecraft/versions/你的版本/minescript/` 目录, 并进行两个操作:
 
 1. 新建 `config.txt`, 内容:
 
@@ -204,7 +204,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### Using
 
-配置完成后重启 Minecraft 进入游戏, 按 `T` *(默认键位, 可能不同)* 打开聊天栏, 并输入: `\sleepy` **(即上面重命名后的文件名去钓掉 `.py` 后缀)* 回车启动
+配置完成后重启 Minecraft 进入游戏, 按 `T` *(默认键位, 可能不同)* 打开聊天栏, 并输入: `\sleepy` **(即上面重命名后的文件名去掉 `.py` 后缀)* 回车启动
 
 停止: `\sleepy stop`
 
