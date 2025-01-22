@@ -19,11 +19,14 @@
   - [Homework](#homework)
     - [Configure](#configure-5)
     - [Using](#using-3)
-  - [Minecraft script](#minecraft-script)
+  - [MinecraftScript](#minecraftscript)
     - [Minescript](#minescript)
     - [Configure](#configure-6)
     - [Using](#using-4)
     - [Autorun](#autorun)
+  - [LinuxScript](#linuxscript)
+    - [Configure](#configure-7)
+    - [Using](#using-5)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -162,7 +165,7 @@ for i in range(114514, 1, -1):
     sleep(11.45)
 ```
 
-## [Minecraft script](./mc_script.py)
+## [MinecraftScript](./mc_script.py)
 
 > by: [@wyf9](https://github.com/wyf9)
 
@@ -215,6 +218,24 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 ```txt
 autorun[*]=eval 'execute("\\sleepy")'
 ```
+
+## [LinuxScript](./linux_device.py)
+
+> by: [@RikkaNaa](https://github.com/RikkaNaa)
+
+仅适用于 Linux KDE 桌面环境，且需要系统安装 [kdotool](https://github.com/jinliu/kdotool)
+
+如获取失败则视为未在使用，[变量计时参考](https://github.com/RikkaNaa/sleepy/commit/9d5b4fc2014b725df24304beaa9439a5eb07099b)
+
+### Configure
+
+https://github.com/wyf9/sleepy/blob/3bd99f7ad51e667ca8c8dc3db5431d5832a9e089/client/linux_device.py#L17-L27
+
+### Using
+
+可自行配置本脚本的自启动
+
+> 当进程接收到 `SIGTERM` 信号时将会发送未在使用请求
 
 ## Other repos
 

@@ -12,6 +12,7 @@ from time import sleep
 from sys import stdout
 from io import TextIOWrapper
 import subprocess
+import signal
 
 
 # --- config start
@@ -39,6 +40,9 @@ def print(msg: str, **kwargs):
 
 
 def get_active_window_title():
+    '''
+    获取窗口标题, 如检测失败则为 `[FAILED]`
+    '''
     # window_title = subprocess.check_output(["kdotool", "getactivewindow", "getwindowname"]).strip()
     # return window_title.decode()
     result = subprocess.run(["kdotool", "getactivewindow", "getwindowname"], capture_output=True, text=True)
@@ -49,11 +53,15 @@ def get_active_window_title():
         print(f'Return code isn\'t 0: {result.returncode}!')
         return '[FAILED]'
 
+
 Url = f'{SERVER}/device/set'
 last_window = ''
 
 
 def do_update():
+    '''
+    进行更新
+    '''
     global last_window
     window = get_active_window_title()
     print(f'--- Window: `{window}`')
@@ -94,7 +102,37 @@ def do_update():
     last_window = window
 
 
+def interrupt_req():
+    '''
+    在中断时发送 未在使用 请求
+    '''
+    try:
+        resp = post(url=Url, json={
+            'secret': SECRET,
+            'id': DEVICE_ID,
+            'show_name': DEVICE_SHOW_NAME,
+            'using': False,
+            'app_name': f'{e}'
+        }, headers={
+            'Content-Type': 'application/json'
+        })
+        print(f'Response: {resp.status_code} - {resp.json()}')
+    except Exception as e:
+        print(f'Error: {e}')
+
+
+def sigterm_handler(signum, frame):
+    '''
+    处理 SIGTERM
+    '''
+    print('SIGTERM received')
+    interrupt_req()
+
+
 def main():
+    '''
+    主循环
+    '''
     while True:
         do_update()
         sleep(CHECK_INTERVAL)
@@ -102,20 +140,9 @@ def main():
 
 if __name__ == '__main__':
     try:
+        signal.signal(signal.SIGTERM, sigterm_handler)  # 注册 handler
         main()
     except KeyboardInterrupt as e:
         # 如果中断则发送未在使用
         print(f'Interrupt: {e}')
-        try:
-            resp = post(url=Url, json={
-                'secret': SECRET,
-                'id': DEVICE_ID,
-                'show_name': DEVICE_SHOW_NAME,
-                'using': False,
-                'app_name': f'{e}'
-            }, headers={
-                'Content-Type': 'application/json'
-            })
-            print(f'Response: {resp.status_code} - {resp.json()}')
-        except Exception as e:
-            print(f'Error: {e}')
+        interrupt_req()
