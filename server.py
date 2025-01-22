@@ -169,7 +169,7 @@ def set_normal():
     except:
         return u.reterr(
             code='bad request',
-            message="argument 'status' must be a int number"
+            message="argument 'status' must be int"
         )
     secret = escape(request.args.get('secret'))
     secret_real = c.get('secret')

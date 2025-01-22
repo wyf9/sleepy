@@ -21,7 +21,7 @@ def error(log):
 
 def format_dict(dic) -> Response:
     '''
-    字典 -> Response (内容为格式化 json)
+    字典 -> Response (内容为格式化后的 json 文本)
     @param dic: 字典
     '''
     response = make_response(
