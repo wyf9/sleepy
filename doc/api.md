@@ -52,9 +52,7 @@
 }
 ```
 
-> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可自行修改: [`server.py`#`L16`](https://github.com/wyf9/sleepy/blob/main/server.py#L16)
-
-https://github.com/wyf9/sleepy/blob/main/server.py#L16
+> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可在 config.json 中修改
 
 ### status-list
 
@@ -105,10 +103,45 @@ https://github.com/wyf9/sleepy/blob/main/server.py#L16
 > 本接口较特殊: 如服务器关闭了统计 *(`config.json` 中的 `metrics` 为 `false`)*, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果 <br/>
 > ~~*我也不知道自己怎么想的*~~
 
+> 在需要鉴权的路由中，鉴权通过才会计入统计
+
+> [!WARNING]
+> 目前 data.py 逻辑可能存在问题，会导致 metrics 数据无故被清空，原因未知
+
 #### Response
 
 ```json
-
+{
+    "time": "2025-01-22 08:40:48.564728+08:00", // 服务端时间
+    "timezone": "Asia/Shanghai", // 时区
+    "today_is": "2025-1-22", // 今日日期
+    "month_is": "2025-1", // 今日月份
+    "year_is": "2025", // 今日年份
+    "today": { // 今天的数据
+        "/device/set": 18,
+        "/": 2, 
+        "/style.css": 1, 
+        "/query": 2
+    }, 
+    "month": { // 今月的数据
+        "/device/set": 18, 
+        "/": 2, 
+        "/style.css": 1, 
+        "/query": 2
+    }, 
+    "year": { // 今年的数据
+        "/device/set": 18, 
+        "/": 2, 
+        "/style.css": 1, 
+        "/query": 2
+    }, 
+    "total": { // 总统计数据，不清除
+        "/device/set": 18, 
+        "/": 2, 
+        "/style.css": 1, 
+        "/query": 2
+    }
+}
 ```
 
 ## Status
