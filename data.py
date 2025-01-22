@@ -47,7 +47,7 @@ class data:
 
     # --- Storage functions
 
-    def load(self, ret: bool = False, preload: dict = {}, error_count: int = 3) -> dict:
+    def load(self, ret: bool = False, preload: dict = {}, error_count: int = 5) -> dict:
         '''
         加载状态
 
@@ -68,8 +68,13 @@ class data:
                     return DATA
                 else:
                     self.data = DATA
-        except:
-            u.warning('Load data error: {e}, retrying')
+        except Exception as e:
+            if error_count > 0:
+                u.warning(f'Load data error: {e}, retrying')
+                self.load(error_count=error_count-1)
+            else:
+                u.error(f'Load data error: {e}, reached max retry count!')
+                raise
 
     def save(self):
         '''

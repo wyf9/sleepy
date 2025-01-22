@@ -10,7 +10,7 @@ by: @wyf9
 # 不要使用格式化!!! 会打乱顺序!!!
 import time
 from system.lib import minescript as mc  # type: ignore / 写好记得把 system 前面的 . 去掉, 否则会报错
-# import sys
+import sys
 # sys.path.append(r'C:\Users\wyf01\AppData\Roaming\Python\Python312\site-packages')  # 如提示找不到库, 在此将你的 site-packages 目录添加至局部 PATH
 from requests import post
 
