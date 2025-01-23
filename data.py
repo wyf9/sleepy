@@ -155,7 +155,7 @@ class data:
             return
 
         # get time now
-        now = datetime.now()
+        now = datetime.now(pytz.timezone(self.c.config['timezone']))
         year_is = str(now.year)
         month_is = f'{now.year}-{now.month}'
         today_is = f'{now.year}-{now.month}-{now.day}'
@@ -172,17 +172,17 @@ class data:
 
         # - check time
         if self.data['metrics']['today_is'] != today_is:
-            u.info(f'[metrics] today_is changed: {self.data['metrics']['today_is']} -> {today_is}')
+            u.info(f'[metrics] today_is changed: {self.data["metrics"]["today_is"]} -> {today_is}')
             self.data['metrics']['today_is'] = today_is
             self.data['metrics']['today'] = {}
         # this month
         if self.data['metrics']['month_is'] != month_is:
-            u.info(f'[metrics] month_is changed: {self.data['metrics']['month_is']} -> {month_is}')
+            u.info(f'[metrics] month_is changed: {self.data["metrics"]["month_is"]} -> {month_is}')
             self.data['metrics']['month_is'] = month_is
             self.data['metrics']['month'] = {}
         # this year
         if self.data['metrics']['year_is'] != year_is:
-            u.info(f'[metrics] year_is changed: {self.data['metrics']['year_is']} -> {year_is}')
+            u.info(f'[metrics] year_is changed: {self.data["metrics"]["year_is"]} -> {year_is}')
             self.data['metrics']['year_is'] = year_is
             self.data['metrics']['year'] = {}
 
