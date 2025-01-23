@@ -9,7 +9,7 @@ by: @RikkaNaa
 from requests import post
 from datetime import datetime
 from time import sleep
-from sys import stdout
+from sys import stdout,exit
 from io import TextIOWrapper
 import subprocess
 import signal
@@ -112,7 +112,7 @@ def interrupt_req():
             'id': DEVICE_ID,
             'show_name': DEVICE_SHOW_NAME,
             'using': False,
-            'app_name': f'{e}'
+            'app_name': 'Kill or Shutdown'
         }, headers={
             'Content-Type': 'application/json'
         })
@@ -127,6 +127,7 @@ def sigterm_handler(signum, frame):
     '''
     print('SIGTERM received')
     interrupt_req()
+    exit(0)
 
 
 def main():
