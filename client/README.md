@@ -27,6 +27,9 @@
   - [LinuxScriptKDE](#linuxscriptkde)
     - [Configure](#configure-7)
     - [Using](#using-5)
+  - [LinuxScriptHyprland](#linuxscripthyprland)
+    - [Configure](#configure-8)
+    - [Using](#using-6)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -223,19 +226,35 @@ autorun[*]=eval 'execute("\\sleepy")'
 
 > by: [@RikkaNaa](https://github.com/RikkaNaa)
 
-仅适用于 Linux KDE 桌面环境，且需要系统安装 [kdotool](https://github.com/jinliu/kdotool)
+适用于 Linux KDE 桌面环境，且需要系统安装 [kdotool](https://github.com/jinliu/kdotool)
 
 如获取失败则视为未在使用，[变量计时参考](https://github.com/RikkaNaa/sleepy/commit/9d5b4fc2014b725df24304beaa9439a5eb07099b)
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/3bd99f7ad51e667ca8c8dc3db5431d5832a9e089/client/linux_device.py#L17-L27
+https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_kde.py#L17-L27
 
 ### Using
 
 可自行配置本脚本的自启动
 
 > 当进程接收到 `SIGTERM` 信号时将会发送未在使用请求
+
+## [LinuxScriptHyprland](./linux_device_hyprland.sh)
+
+> by: [@inoryxin](https://github.com/inoryxin)
+
+适用于 Linux Hyprland 桌面环境，无需任何依赖，开箱即用
+
+### Configure
+
+https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_hyprland.sh#L7-L12
+
+### Using
+
+直接启动即可
+
+> 开机自启可自行在 `hyprland.conf` 中配置
 
 ## Other repos
 
