@@ -1,6 +1,6 @@
 # coding: utf-8
 '''
-linux_device.py
+linux_device_kde.py
 在 Linux (KDE) 上获取窗口名称
 by: @RikkaNaa
 依赖: kdotool, requests
@@ -9,7 +9,7 @@ by: @RikkaNaa
 from requests import post
 from datetime import datetime
 from time import sleep
-from sys import stdout,exit
+from sys import stdout, exit
 from io import TextIOWrapper
 import subprocess
 import signal

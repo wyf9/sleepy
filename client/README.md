@@ -24,7 +24,7 @@
     - [Configure](#configure-6)
     - [Using](#using-4)
     - [Autorun](#autorun)
-  - [LinuxScript](#linuxscript)
+  - [LinuxScriptKDE](#linuxscriptkde)
     - [Configure](#configure-7)
     - [Using](#using-5)
   - [Other repos](#other-repos)
@@ -219,7 +219,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 autorun[*]=eval 'execute("\\sleepy")'
 ```
 
-## [LinuxScript](./linux_device.py)
+## [LinuxScriptKDE](./linux_device_kde.py)
 
 > by: [@RikkaNaa](https://github.com/RikkaNaa)
 
