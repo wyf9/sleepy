@@ -31,7 +31,7 @@ ENCODING = 'gb18030'
 SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher']
 # 当窗口标题为其中任意一项时视为未在使用
 NOT_USING_NAMES = ['我们喜欢这张图片，因此我们将它与你共享。']
-# 是否反转窗口标题，以此让应用名显示在最前
+# 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
 REVERSE_APP_NAME = False
 # --- config end
 
@@ -46,7 +46,7 @@ def print(msg: str, **kwargs):
     修改后的 `print()` 函数，解决不刷新日志的问题
     原: `_print_()`
     '''
-    msg = msg.replace('\u200b', '')
+    msg = str(msg).replace('\u200b', '')
     try:
         _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {msg}', flush=True, **kwargs)
     except Exception as e:
@@ -60,10 +60,8 @@ def reverse_app_name(name: str) -> str:
     After: Visual Studio Code - dev - win_device.py
     '''
     lst = name.split(' - ')
-    print(lst)
     new = []
     for i in lst:
-        print(i)
         new = [i] + new
     return ' - '.join(new)
 
