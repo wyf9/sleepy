@@ -25,9 +25,14 @@ DEVICE_SHOW_NAME = 'MyDevice1'
 CHECK_INTERVAL = 2
 # 是否忽略重复请求，即窗口未改变时不发送请求
 BYPASS_SAME_REQUEST = True
-ENCODING = 'gb18030'  # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher']  # 当窗口名为其中任意一项时将不更新
-NOT_USING_NAMES = ['我们喜欢这张图片，因此我们将它与你共享。']  # 当窗口名为其中任意一项时视为未在使用
+# 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
+ENCODING = 'gb18030'
+# 当窗口标题为其中任意一项时将不更新
+SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher']
+# 当窗口标题为其中任意一项时视为未在使用
+NOT_USING_NAMES = ['我们喜欢这张图片，因此我们将它与你共享。']
+# 是否反转窗口标题，以此让应用名显示在最前
+REVERSE_APP_NAME = False
 # --- config end
 
 # buffer = stdout.buffer  # backup
@@ -46,6 +51,21 @@ def print(msg: str, **kwargs):
         _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {msg}', flush=True, **kwargs)
     except Exception as e:
         _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Log Error: {e}', flush=True)
+
+
+def reverse_app_name(name: str) -> str:
+    '''
+    反转应用名称 (将末尾的应用名提前)
+    如 Before: win_device.py - dev - Visual Studio Code
+    After: Visual Studio Code - dev - win_device.py
+    '''
+    lst = name.split(' - ')
+    print(lst)
+    new = []
+    for i in lst:
+        print(i)
+        new = [i] + new
+    return ' - '.join(new)
 
 
 Url = f'{SERVER}/device/set'
@@ -74,6 +94,11 @@ def do_update():
         if i == window:
             print(f'* not using: `{i}`')
             using = False
+
+    # 反转名称
+    if REVERSE_APP_NAME:
+        window = reverse_app_name(window)
+        print(f'Reversed: `{i}`')
 
     # POST to api
     print(f'POST {Url}')
