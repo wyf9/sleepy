@@ -83,15 +83,19 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 ## [AutoxjsScript](./autoxjs_device.js)
 
 > by: [@wyf9](https://github.com/wyf9) <br/>
-> **Co-authored-by**: [@NyaOH-Nahida](https://github.com/NyaOH-Nahida)
+> Co-authored-by: [@NyaOH-Nahida](https://github.com/NyaOH-Nahida)
 
-使用 [Autox.js](https://github.com/kkevsekk1/AutoX) 编写的安卓自动更新状态脚本
+使用 [(Archive) Autox.js](https://web.archive.org/*/https://github.com/kkevsekk1/AutoX) 编写的安卓自动更新状态脚本
+
+> [!WARNING]
+> Autox.js 已删库，RIP <br/>
+> 可自行寻找 Auto.js 的其他分支 **(可能需要作一些修改以兼容其他分支的方法)**
 
 在使用前，请确保**已安装** Autox.js *且*授予**无障碍权限**
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/autoxjs_device.js#L8-L14
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/autoxjs_device.js#L8-L15
 
 ### Using
 
@@ -232,7 +236,7 @@ autorun[*]=eval 'execute("\\sleepy")'
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_kde.py#L17-L27
+https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_kde.py#L18-L28
 
 ### Using
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, redirect
 from markupsafe import escape
 from datetime import datetime
 import pytz
@@ -86,6 +86,11 @@ def index():
         more_text=ot['more_text'],
         last_updated=d.data['last_updated']
     )
+
+
+@app.route('/'+'git'+'hub')
+def git_hub():
+    return redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle+''epy', 301)
 
 
 @app.route('/style.css')

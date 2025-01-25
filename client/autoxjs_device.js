@@ -11,6 +11,7 @@ const SECRET = '绝对猜不出来的密码'; // 你的 secret
 const ID = 'a-device'; // 你的设备 id, 唯一
 const SHOW_NAME = '一个设备'; // 你的设备名称, 将显示在网页上
 const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
+const SKIPPED_NAMES = ['', '系统界面', '系统界面组件', '手机管家', '平板管家', 'System UI', 'Security tools'] // 获取到的软件名为这些名字时忽略
 // config end
 
 auto.waitFor(); // 等待无障碍
@@ -71,6 +72,15 @@ function send_status() {
         log('same as last status, bypass request');
         return;
     }
+
+    // 判断是否在忽略列表中
+    for (let i = 0; i < SKIPPED_NAMES.length; i++) {
+        if (app_name.includes(SKIPPED_NAMES[i])) {
+            log(`bypass because of: '${SKIPPED_NAMES[i]}'`);
+            return;
+        }
+    }
+
     last_status = app_name;
     // 判断 using
     if (app_name == '') {
