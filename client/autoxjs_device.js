@@ -11,7 +11,7 @@ const SECRET = '绝对猜不出来的密码'; // 你的 secret
 const ID = 'a-device'; // 你的设备 id, 唯一
 const SHOW_NAME = '一个设备'; // 你的设备名称, 将显示在网页上
 const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
-const SKIPPED_NAMES = ['', '系统界面', '系统界面组件', '手机管家', '平板管家', 'System UI', 'Security tools'] // 获取到的软件名为这些名字时忽略
+const SKIPPED_NAMES = ['系统界面', '系统界面组件', '手机管家', '平板管家', 'System UI', 'Security tools'] // 获取到的软件名包含列表中之一时忽略
 // config end
 
 auto.waitFor(); // 等待无障碍
@@ -36,7 +36,7 @@ var last_status = '';
 
 function check_status() {
     /*
-    检查状态并返回 app_name (如未在使用则返回空)
+    检查状态并返回 app_name (如 未亮屏/获取不到应用名 则返回空)
     [Tip] 如有调试需要可自行取消 log 注释
     */
     // log(`[check] screen status: ${device.isScreenOn()}`);
