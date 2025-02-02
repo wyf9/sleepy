@@ -24,11 +24,14 @@
 
 > [!TIP]
 > **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** <br/>
+> **以及 [开发分支 `dev-2025-2-1`](https://github.com/wyf9/sleepy/tree/dev-2025-2-1)** <br/>
 > 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
+
+对智能家居 / Home Assistant 感兴趣的朋友，一定要参观 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): [maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!
 
 ### Preview
 
-演示站 (稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
+演示站 (*较*稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
 开发预览 (*不保证可用*, 密钥 `wyf9test`): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
@@ -90,12 +93,17 @@ python3 start.py
 
 ## 更新
 
-TODO
+只需 **4** 步:
+
+1. 使用 `git pull` 拉取最新代码 (注意查看所在分支是否存在)
+2. 启动服务 (应提示 `Config fotmat updated, please change your config.json` 并退出)
+3. 对照 [`config.example.jsonc`](./config.example.jsonc) 和 [`doc/config_json_update.md`](./doc/config_json_update.md) 编辑你的 `config.json`，并将 `version` 字段改为最新版本
+4. 再次启动服务，更新完成.
 
 ## 关于
 
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
-也欢迎参观 WinMEMZ *(GitHub: [maoawa](https://github.com/maoawa))* 的原版！[maoawa/sleepy](https://github.com/maoawa/sleepy)
+也欢迎参观 WinMEMZ *(GitHub: [maoawa](https://github.com/maoawa))* 的原版！~~[maoawa/sleepy](https://github.com/maoawa/sleepy)~~ 已归档
 
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
