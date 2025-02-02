@@ -50,7 +50,7 @@ async function update() {
                                 var device_show_name = device.show_name.replace('"', '\\"').replace('\'', '\\\'');
                                 var device_app_alert = device.app_name.replace('"', '\\"').replace('\'', '\\\'');
                                 // build
-                                var device_app = `<a class="awake" title="${device_app_title}" href="javascript:alert('${device_show_name}: \n${device_app_alert}')">${sliceText(device.app_name, data.device_status_slice)}</a>`;
+                                var device_app = `<a class="awake" title="${device_app_title}" href="javascript:alert('${device_show_name}: \\n${device_app_alert}')">${sliceText(device.app_name, data.device_status_slice)}</a>`;
                             } else {
                                 var device_app = '<a class="sleeping">未在使用</a>';
                             }

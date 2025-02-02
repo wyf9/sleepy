@@ -148,7 +148,7 @@ def query():
         'device': devicelst,
         'device_status_slice': c.config['other']['device_status_slice'],
         'last_updated': d.data['last_updated'],
-        'refresh': c.config['refresh']
+        'refresh': c.config['other']['refresh']
     }
     showip(request, '/query')
     return u.format_dict(ret)

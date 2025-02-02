@@ -100,6 +100,12 @@ python3 start.py
 3. 对照 [`config.example.jsonc`](./config.example.jsonc) 和 [`doc/config_json_update.md`](./doc/config_json_update.md) 编辑你的 `config.json`，并将 `version` 字段改为最新版本
 4. 再次启动服务，更新完成.
 
+## Star History
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
+
 ## 关于
 
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
