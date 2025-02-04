@@ -5,3 +5,8 @@ config.json
 config.*.json
 *.test.*
 *.local.*
+/.vs/sleepy/CopilotIndices/17.12.53.23981
+/.vs/sleepy/FileContentIndex
+/.vs/sleepy/v17
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
