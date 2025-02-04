@@ -90,7 +90,7 @@ def index():
 
 @app.route('/'+'git'+'hub')
 def git_hub():
-    return redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle+''epy', 301)
+    return redirect("https://github.com/kmizmal/sleepy", 301)
 
 
 @app.route('/style.css')
