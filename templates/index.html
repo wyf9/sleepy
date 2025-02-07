@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ user }} Alive?</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='avatar.png') }}">
 </head>
 
 <body>
@@ -31,7 +31,23 @@
         <div style="height: 15px;"></div>
         <div class="card" id="test">
             {{ more_text | safe }}
-            <div style="height: 15px;"></div>
+            <div class="hitokoto">
+
+                <p id="hitokoto">
+                    <a href="#" id="hitokoto_text">一言获取中~</a>
+                </p>
+            </div>
+            
+            <script>
+                fetch('https://v1.hitokoto.cn')
+                    .then(response => response.json())
+                    .then(data => {
+                        const hitokoto = document.querySelector('#hitokoto_text')
+                        hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
+                        hitokoto.innerText = data.hitokoto
+                    })
+                    .catch(console.error)
+            </script>
             <a>你可以通过这个页面视奸 {{ user }}。
                 <br>
                 <a href="{{ repo }}" target="_blank" style="color: rgb(0, 255, 0);">

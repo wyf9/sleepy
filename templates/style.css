@@ -32,7 +32,7 @@ body {
 }
 
 .card {
-    background-color: rgba(255, 255, 255, {{ alpha }});
+    background-color: rgba(255, 255, 255, "{{ alpha }}");
     border-radius: 30px;
     padding: 50px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -58,7 +58,7 @@ body {
 }
 
 .awake {
-    color: rgb(16, 128, 0);
+    color: rgba(109, 96, 149, 0.678);
 }
 
 .error {
@@ -66,3 +66,7 @@ body {
 }
 
 /* 不建议删除上面的 .sleeping .awake .error 三个默认颜色 */
+
+#hitokoto_text{
+    color: rgba(237, 202, 242, 0.719);
+}
