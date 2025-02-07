@@ -61,7 +61,7 @@ python3 server.py
 
 如果不出意外，会提示: `config.json not exist, creating`，同时目录下出现 `config.json` 文件，编辑该文件中的配置后重新运行即可
 
-`>>` **[配置示例](./example.jsonc)** `<<` *(`config.json` 从此生成)*
+`>>` **[配置示例](./config.example.jsonc)** `<<` *(`config.json` 从此生成)*
 
 
 ## 使用

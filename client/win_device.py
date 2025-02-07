@@ -5,6 +5,12 @@ win_device.py
 by: @wyf9
 依赖: pywin32, requests
 '''
+'''
+modification by pwnint
+- Added `SystemExit` case when the script is interrupted
+- Edited the `app_name` to be an empty string when the script is interrupted.
+- Works fine with modified `server.py`.
+'''
 from win32gui import GetWindowText, GetForegroundWindow  # type: ignore
 from requests import post
 from datetime import datetime
@@ -125,8 +131,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except KeyboardInterrupt as e:
-        # 如果中断则发送未在使用
+    except (KeyboardInterrupt, SystemExit) as e:
+        # 如果中断或被taskkill则发送未在使用
         print(f'Interrupt: {e}')
         try:
             resp = post(url=Url, json={
