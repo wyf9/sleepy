@@ -1,108 +1,121 @@
 #!/system/bin/sh
 
 # ========== 基础配置 ==========
-URL="https://asfag654-j.hf.space/device/set"
-SECRET="你猜"
+URL="https://52496a27f51a-sss.hf.space/device/set"
+SECRET="zmal"
 LOG_NAME="focus_monitor.log"
+SCRIPT_DIR=${0%/*}
+CACHE="${SCRIPT_DIR}/cache.txt"
 
-ARRAY="com.tencent.tmgp.speedmobile com.miHoYo.Yuanshen com.tencent.tmgp.sgame com.tencent.tmgp.supercell.clashofclans com.netease.sky.m4399"
+# 自定义游戏包名（以空格分隔）
+GAME_PACKAGES="com.tencent.tmgp.speedmobile com.miHoYo.Yuanshen com.tencent.tmgp.sgame com.tencent.tmgp.supercell.clashofclans com.netease.sky.m4399"
+
+# ========== 日志系统 ==========
+LOG_PATH="${SCRIPT_DIR}/${LOG_NAME}"
+log() {
+  message="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+  echo "$message" >> "$LOG_PATH"
+}
 
 # ========== 判断是否为游戏 ==========
 is_game() {
-  for item in $ARRAY; do
-    if [ "$item" = "$1" ]; then
-      log "在玩 $1，延长监测时间"
-      echo 600
-      break
-    else
-      continue
+  pkg="$1"
+  for game in $GAME_PACKAGES; do
+    if [ "$game" = "$pkg" ]; then
+      #log "检测到游戏进程: $pkg，延长监测间隔 600 秒"
+      sleep 600
+      return 0
     fi
   done
-echo 30
-
+  #log "非游戏进程: $pkg，默认监测间隔 30 秒"
+  sleep 30
 }
 
-# ========== 日志系统 ==========
-LOG_PATH="${0%/*}/${LOG_NAME}"
-log() {
-  local message="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-  echo "$message" | tee -a "$LOG_PATH"
+# ========== 解析应用名称 ==========
+get_app_name() {
+  package_name="$1"
+
+  # 如果是锁屏状态，直接返回
+  if [ "$package_name" = "NotificationShade" ]; then
+    echo "锁屏了"
+    return
+  fi
+
+  cached_name=$(awk -F '=' -v pkg="$package_name" '$1 == pkg {print $2; exit}' "$CACHE")
+  if [ -n "$cached_name" ]; then
+    echo "$cached_name"
+    #log "缓存命中: $package_name=$cached_name"
+    return
+  fi
+
+  # 请求应用商店获取名称
+  temp_file="${SCRIPT_DIR}/temp.html"
+  if curl --silent --show-error --fail -A "Mozilla/5.0" -o "$temp_file" "https://app.mi.com/details?id=$package_name"; then
+    app_name=$(sed -n 's/.*<title>\(.*\)<\/title>.*/\1/p' "$temp_file" | sed 's/-[^-]*$//')
+    rm -f "$temp_file"
+
+    if [ -n "$app_name" ]; then
+      echo "$app_name"
+      echo "$package_name=$app_name" >> "$CACHE"
+      log "已写入缓存: $package_name=$app_name"
+      return
+    else
+      echo "$package_name"
+      log "网页解析失败，回退到包名: $package_name"
+    fi
+  else
+    echo "$package_name"
+    log "网页请求失败，回退到包名: $package_name"
+  fi
 }
 
-# ========== 核心逻辑 ==========
+# ========== 发送状态请求 ==========
+send_status() {
+  package_name="$1"
+  app_name=$(get_app_name "$package_name")
+  
+  battery_level=$(dumpsys battery | grep 'level:' | awk '{print $2}')
+  res_up="$app_name[${battery_level}%]"
+  log "$res_up"
+  
+  http_code=$(curl -G -s --connect-timeout 35 --max-time 100 -w "%{http_code}" -o /tmp/curl_body "$URL" \
+    --data-urlencode "secret=${SECRET}" \
+    --data-urlencode "id=0" \
+    --data-urlencode "show_name=${device_model}" \
+    --data-urlencode "using=true" \
+    --data-urlencode "app_name=$res_up")
+    
+  if [ "$http_code" -ne 200 ]; then
+    log "警告：请求失败，状态码 $http_code，响应内容：$(cat /tmp/curl_body)"
+  fi
+}
+
+# ========== 主流程 ==========
 LAST_PACKAGE=""
-echo "" > "$LOG_PATH"
+> "$LOG_PATH"
 log "===== 服务启动 ====="
-device=$(getprop ro.product.model)
-log "设备信息：$device Android $(getprop ro.build.version.release) 等待一分钟"
+
+# 获取设备信息
+device_model=$(getprop ro.product.model)
+android_version=$(getprop ro.build.version.release)
+log "设备信息: ${device_model}, Android ${android_version}，等待一分钟"
+
+# 如有需要，可在此处覆盖设备显示名称
+device_model="OnePlus ACE3"
 
 sleep 60
-log "开始监测"
+log "开！"
 
+# ========== 核心逻辑 ==========
 while true; do
+  # 获取当前焦点窗口信息
   CURRENT_FOCUS=$(dumpsys window | grep mCurrentFocus)
   PACKAGE_NAME=$(echo "$CURRENT_FOCUS" | awk -F '[ /}]' '{print $5}' | tr -d '[:space:]')
 
-  if [ "$PACKAGE_NAME" != "$LAST_PACKAGE" ]; then
+  if [ "$PACKAGE_NAME" != "$LAST_PACKAGE" ] && [ -n "$PACKAGE_NAME" ]; then
     log "状态变化: ${LAST_PACKAGE:-none} → ${PACKAGE_NAME:-none}"
-
-
-# 定义缓存路径
-CACHE="${0%/*}/cache.txt"
-# 如果不是锁屏状态
-if [ "$PACKAGE_NAME" != "NotificationShade" ]; then
-    # 先检查缓存
-    if [ -f "$CACHE" ]; then
-       # 文件存在且是文件
-        ApkName=$(awk -F '=' -v pkg="$PACKAGE_NAME" '$1 == pkg {print $2; exit}' "$CACHE")
-    fi
-
-    # 如果缓存未命中，则进行网络请求
-    if [ -z "$ApkName" ]; then
-        #字符串长度为0
-        if ! curl --silent --show-error --fail -A "Mozilla/5.0" -o temp.html "https://app.mi.com/details?id=$PACKAGE_NAME"; then
-            log "网页请求失败，回退到包名 $PACKAGE_NAME"
-            ApkName="$PACKAGE_NAME"
-        else
-            # 解析网页获取 App 名称
-            ApkName=$(sed -n 's/.*<title>\(.*\)<\/title>.*/\1/p' temp.html)
-            rm -f temp.html  # 清理临时文件
-
-            # 解析失败则回退到包名
-            if [ -z "$ApkName" ]; then
-                log "网页解析失败，回退到包名 $PACKAGE_NAME"
-                ApkName="$PACKAGE_NAME"
-            else
-                echo "$PACKAGE_NAME=$ApkName" >> "$CACHE"
-                log "缓存已更新: $PACKAGE_NAME=$ApkName"              
-            fi
-        fi
-    else
-        log "缓存命中: $PACKAGE_NAME=$ApkName"
-    fi
-else
-    ApkName="锁屏了"
-fi
-
-
-    HTTP_CODE=$(curl -G -s --connect-timeout 35 --max-time 100 -w "%{http_code}" -o /tmp/curl_body "$URL" \
-      --data-urlencode "secret=$SECRET" \
-      --data-urlencode "id=0" \
-      --data-urlencode "show_name=OnePlus ACE3" \
-      --data-urlencode "using=true" \
-      --data-urlencode "app_name=$(echo "$ApkName" | sed 's/-[^-]*$//')")
-
-    if [ "$HTTP_CODE" -ne 200 ]; then
-      log "警告：请求失败，状态码 $HTTP_CODE，响应内容：$(cat /tmp/curl_body)"
-    fi
-
-    LAST_PACKAGE=$PACKAGE_NAME
+    send_status "$PACKAGE_NAME"
+    LAST_PACKAGE="$PACKAGE_NAME"
   fi
-
-  sleep_time=$(is_game "$PACKAGE_NAME")
-  sleep "$sleep_time"
+  is_game "$PACKAGE_NAME"
 done
-
-
-
-

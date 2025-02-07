@@ -32,7 +32,7 @@ body {
 }
 
 .card {
-    background-color: rgba(255, 255, 255, '{{ alpha }}');
+    background-color: rgba(255, 255, 255, "{{ alpha }}");
     border-radius: 30px;
     padding: 50px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
