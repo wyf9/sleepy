@@ -8,12 +8,14 @@ by: @wyf9
 '''
 modification by pwnint
 - Added `SystemExit` case when the script is interrupted
-- Edited the `app_name` to be an empty string when the script is interrupted.
-- Works fine with modified `server.py`.
+- Added mouse idle detection
+  :-) GLHF
 '''
 from win32gui import GetWindowText, GetForegroundWindow  # type: ignore
+from win32api import GetCursorPos  # 添加鼠标位置获取
 from requests import post
 from datetime import datetime
+import time  # 改用 time 模块以获取更精确的时间
 from time import sleep
 import sys
 import io
@@ -39,6 +41,10 @@ SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换',
 NOT_USING_NAMES = ['我们喜欢这张图片，因此我们将它与你共享。']
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
 REVERSE_APP_NAME = False
+# 鼠标静止判定时间(分钟)
+MOUSE_IDLE_TIME = 15
+# 鼠标移动检测的最小距离（像素）
+MOUSE_MOVE_THRESHOLD = 3
 # --- config end
 
 # buffer = stdout.buffer  # backup
@@ -72,60 +78,126 @@ def reverse_app_name(name: str) -> str:
     return ' - '.join(new)
 
 
+# 鼠标状态相关变量
+last_mouse_pos = GetCursorPos()
+last_mouse_move_time = time.time()
+is_mouse_idle = False
+cached_window_title = ''  # 缓存窗口标题,用于恢复
+
+def check_mouse_idle() -> bool:
+    '''
+    检查鼠标是否静止
+    返回 True 表示鼠标静止超时
+    '''
+    global last_mouse_pos, last_mouse_move_time, is_mouse_idle
+    
+    current_pos = GetCursorPos()
+    current_time = time.time()
+    
+    # 计算鼠标移动距离
+    dx = abs(current_pos[0] - last_mouse_pos[0])
+    dy = abs(current_pos[1] - last_mouse_pos[1])
+    distance = (dx * dx + dy * dy) ** 0.5
+    
+    # 打印详细的鼠标状态信息
+    print(f'Mouse: current={current_pos}, last={last_mouse_pos}, distance={distance:.1f}px')
+    
+    # 如果移动距离超过阈值
+    if distance > MOUSE_MOVE_THRESHOLD:
+        last_mouse_pos = current_pos
+        last_mouse_move_time = current_time
+        if is_mouse_idle:
+            is_mouse_idle = False
+            print(f'Mouse wake up: moved {distance:.1f}px')
+        else:
+            print(f'Mouse moving: {distance:.1f}px')
+        return False
+    
+    # 检查是否超过静止时间
+    idle_time = current_time - last_mouse_move_time
+    print(f'Idle time: {idle_time:.1f}s / {MOUSE_IDLE_TIME*60:.1f}s')
+    
+    if idle_time > MOUSE_IDLE_TIME * 60:
+        if not is_mouse_idle:
+            is_mouse_idle = True
+            print(f'Mouse entered idle state after {idle_time/60:.1f} minutes')
+        return True
+    
+    return is_mouse_idle  # 保持当前状态
+
 Url = f'{SERVER}/device/set'
 last_window = ''
 
 
 def do_update():
-    global last_window
-    window = GetWindowText(GetForegroundWindow())  # type: ignore
-    print(f'--- Window: `{window}`')
-
-    # 检测重复名称
-    if (BYPASS_SAME_REQUEST and window == last_window):
-        print('window not change, bypass')
-        return
-
-    # 检查跳过名称
-    for i in SKIPPED_NAMES:
-        if i == window:
-            print(f'* skipped: `{i}`')
-            return
-
-    # 判断是否在使用
+    global last_window, cached_window_title, is_mouse_idle
+    
+    # 获取当前窗口标题和鼠标状态
+    current_window = GetWindowText(GetForegroundWindow())
+    mouse_idle = check_mouse_idle()
+    
+    print(f'--- Window: `{current_window}`')
+    
+    # 始终保持同步的状态变量
+    window = current_window
     using = True
-    for i in NOT_USING_NAMES:
-        if i == window:
-            print(f'* not using: `{i}`')
-            using = False
-
-    # 反转名称
-    if REVERSE_APP_NAME:
-        window = reverse_app_name(window)
-        print(f'Reversed: `{i}`')
-
-    # POST to api
-    print(f'POST {Url}')
-    try:
-        resp = post(url=Url, json={
-            'secret': SECRET,
-            'id': DEVICE_ID,
-            'show_name': DEVICE_SHOW_NAME,
-            'using': using,
-            'app_name': window
-        }, headers={
-            'Content-Type': 'application/json'
-        })
-        print(f'Response: {resp.status_code} - {resp.json()}')
-    except Exception as e:
-        print(f'Error: {e}')
-    last_window = window
+    
+    # 鼠标空闲状态处理（优先级最高）
+    if mouse_idle:
+        # 缓存非空闲时的窗口标题
+        if not is_mouse_idle:
+            cached_window_title = current_window
+            print('Caching window title before idle')
+        # 设置空闲状态
+        using = False
+        window = ''
+        is_mouse_idle = True
+    else:
+        # 从空闲恢复
+        if is_mouse_idle:
+            window = cached_window_title
+            using = True
+            is_mouse_idle = False
+            print('Restoring window title from idle')
+        # 正常窗口状态检查
+        else:
+            for name in NOT_USING_NAMES:
+                if current_window == name:
+                    using = False
+                    print(f'* not using: `{name}`')
+                    break
+    
+    # 是否需要发送更新
+    should_update = (
+        mouse_idle != is_mouse_idle or  # 鼠标状态改变
+        window != last_window or  # 窗口改变
+        not BYPASS_SAME_REQUEST  # 强制更新模式
+    )
+    
+    if should_update:
+        print(f'Sending update: using={using}, app_name="{window}", idle={mouse_idle}')
+        try:
+            resp = post(url=Url, json={
+                'secret': SECRET,
+                'id': DEVICE_ID,
+                'show_name': DEVICE_SHOW_NAME,
+                'using': using,
+                'app_name': window
+            }, headers={
+                'Content-Type': 'application/json'
+            })
+            print(f'Response: {resp.status_code} - {resp.json()}')
+            last_window = window
+        except Exception as e:
+            print(f'Error: {e}')
+    else:
+        print('No state change, skipping update')
 
 
 def main():
     while True:
         do_update()
-        sleep(CHECK_INTERVAL)
+        sleep(1)  # 改为1秒检查一次，提高响应度
 
 
 if __name__ == '__main__':
