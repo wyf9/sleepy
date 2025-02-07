@@ -5,6 +5,12 @@ win_device.py
 by: @wyf9
 依赖: pywin32, requests
 '''
+'''
+modification by pwnint
+- Added `SystemExit` case when the script is interrupted
+- Edited the `app_name` to be an empty string when the script is interrupted.
+- Works fine with modified `server.py`.
+'''
 from win32gui import GetWindowText, GetForegroundWindow  # type: ignore
 from requests import post
 from datetime import datetime
@@ -26,7 +32,7 @@ CHECK_INTERVAL = 2
 # 是否忽略重复请求，即窗口未改变时不发送请求
 BYPASS_SAME_REQUEST = True
 # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-ENCODING = 'gb18030'
+ENCODING = 'utf-8'
 # 当窗口标题为其中任意一项时将不更新
 SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher']
 # 当窗口标题为其中任意一项时视为未在使用
@@ -125,8 +131,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except KeyboardInterrupt as e:
-        # 如果中断则发送未在使用
+    except (KeyboardInterrupt, SystemExit) as e:
+        # 如果中断或被taskkill则发送未在使用
         print(f'Interrupt: {e}')
         try:
             resp = post(url=Url, json={
