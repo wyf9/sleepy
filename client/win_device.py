@@ -32,7 +32,7 @@ CHECK_INTERVAL = 2
 # 是否忽略重复请求，即窗口未改变时不发送请求
 BYPASS_SAME_REQUEST = True
 # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-ENCODING = 'utf-8'
+ENCODING = 'gb18030'
 # 当窗口标题为其中任意一项时将不更新
 SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher']
 # 当窗口标题为其中任意一项时视为未在使用

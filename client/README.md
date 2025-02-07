@@ -82,7 +82,7 @@ https://github.com/wyf9/sleepy/blob/a2fb3e14a859dd8789c87a35a86324add676ada3/cli
 
 <details>
 
-<summary> 自动启动脚本</summary>
+<summary>自动启动脚本</summary>
 
 `win-device-auto.vbs`
 

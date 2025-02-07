@@ -233,12 +233,6 @@ def device_set():
             device_show_name = escape(request.args.get('show_name'))
             device_using = u.tobool(escape(request.args.get('using')), throw=True)
             app_name = escape(request.args.get('app_name'))
-            # 如果app_name为空,则设置为未使用状态
-            '''
-            Modified to comply with the `win_device.py`.
-            '''
-            if not app_name:
-                device_using = False
         except:
             return u.reterr(
                 code='bad request',
@@ -270,12 +264,6 @@ def device_set():
             device_show_name = req['show_name']
             device_using = u.tobool(req['using'], throw=True)
             app_name = req['app_name']
-            '''
-            Modified to comply with the `win_device.py`.
-            '''
-            # 如果app_name为空,则设置为未使用状态
-            if not app_name:
-                device_using = False
         except:
             return u.reterr(
                 code='bad request',
