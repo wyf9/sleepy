@@ -80,6 +80,20 @@ https://github.com/wyf9/sleepy/blob/a2fb3e14a859dd8789c87a35a86324add676ada3/cli
 > PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
 > 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)
 
+<details>
+
+<summary>自动启动脚本</summary>
+
+`win-device-auto.vbs`
+
+启动后不显示窗口
+
+随[WinDevice](./win_device.py)一同使用
+
+请将`win-device-auto.vbs`放入`shell:startup`文件夹，`win-device.py`放入`%UserProfile%`文件夹。
+
+</details>
+
 ## [AutoxjsScript](./autoxjs_device.js)
 
 > by: [@wyf9](https://github.com/wyf9) <br/>
