@@ -10,6 +10,26 @@
 - `dd`: 日
 - `n`: 本日第 `n` 次修改
 
+
+# 2025-02
+
+## 2025.2.2.1
+
+```jsonc
+// ...
+    "other": {
+        // ...
+        "more_text": "",
+        "refresh": 5000, // (1) [MOVED]
+        "device_status_slice": 30
+    }
+```
+
+- **Moved** (1)
+  * Name: `refresh`
+  * Upper *(Before)*: None
+  * Upper *(After)*: `other`
+
 # 2025-01
 
 ## 2025.1.18.1
