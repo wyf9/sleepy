@@ -31,20 +31,28 @@
         <div style="height: 15px;"></div>
 
         <div class="card" id="more_text">
-            <!-- 我就要用,加个开关 -->
+            <!-- 我就要用, 加个开关 -->
             <div id="hitokoto">
                 <p id="hitokoto">
-                    <a href="#" id="hitokoto_text">一言获取中~</a>
+                    <a href="#" id="hitokoto_text">{{ hitokoto }}</a>
                 </p>
                 <script>
-                    fetch('https://v1.hitokoto.cn')
-                        .then(response => response.json())
-                        .then(data => {
-                            const hitokoto = document.querySelector('#hitokoto_text')
-                            hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
-                            hitokoto.innerText = data.hitokoto
-                        })
-                        .catch(console.error)
+                    hitokoto_enabled = '{{ hitokoto }}';
+                    if (hitokoto_enabled) {
+                        console.log('Hitokoto enabled');
+                        fetch('https://v1.hitokoto.cn')
+                            .then(response => response.json())
+                            .then(data => {
+                                const hitokoto = document.querySelector('#hitokoto_text')
+                                hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
+                                hitokoto.innerText = data.hitokoto
+                            })
+                            .catch(console.error)
+                    } else {
+                        console.log('Hitokoto disabled');
+                        hitokoto.innerText = '';
+                    }
+
                 </script>
             </div>
             {{ more_text | safe }}

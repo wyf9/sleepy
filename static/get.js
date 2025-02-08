@@ -1,8 +1,8 @@
-const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay)); // custom sleep func (only can use in async function with await)
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay)); // 自定义 sleep (只能在 async 中加 await 使用)
 
 function sliceText(text, maxLength) {
     /*
-    better slice function
+    截取一段文本的置顶长度
     */
     if (maxLength == 0) { // disabled
         return text;
@@ -108,7 +108,7 @@ ${sliceText(escapedAppName, data.device_status_slice)}
                     errorinfo = error;
                     success_flag = false;
                 });
-            // update error
+            // 出错时显示
             if (!success_flag) {
                 statusElement.textContent = '[!错误!]';
                 document.getElementById('additional-info').textContent = errorinfo;

@@ -25,7 +25,7 @@ class config:
                 raise
         self.load()
         if self.config['version'] != jsonData['version']:
-            u.exception(f'Config fotmat updated ({self.config["version"]} -> {jsonData["version"]}), please change your config.jsonc\nSee: config.example.json and doc/config_json_update.md')
+            u.exception(f'Config fotmat updated ({self.config["version"]} -> {jsonData["version"]}), please change your config.jsonc\nSee: config.example.json and doc/config_update.md')
 
     def load(self):
         '''

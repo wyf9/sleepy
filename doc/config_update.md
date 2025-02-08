@@ -1,6 +1,8 @@
-# config.json update
+# config.jsonc update
 
-> 在 [2024.12.14.2](#202412142) 中拆分 `data.json` 为 config 与 data 两部分
+> [!IMPORTANT]
+> 在 [2024.12.14.2](#202412142) 中拆分 `data.json` 为 config 与 data 两部分 <br/>
+> **config 文件名为 `config.jsonc`，后缀为 `jsonc` 而非 `json`，*支持注释***
 
 ## `version` 字段的说明
 
@@ -9,17 +11,25 @@
 - `mm`: 月
 - `dd`: 日
 - `n`: 本日第 `n` 次修改
-
+- *不补 `0` (`1145.1.4`, not `1145.01.04`)*
 
 # 2025-02
+
 ## 2025.2.8.1
 ```jsonc
 // ...
     "other": {
-        // ...
-        "hitokoto": false, // 控制是否显示一言
+        "show_loading": true,
+        "hitokoto": true // (1) [NEW]
     }
 ```
+
+- **New** (1)
+  * Name: `hitokoto`
+  * Upper: None
+  * Type: `bool`
+  * Desc: 控制是否显示一言 (powered by [hitokoto.cn](https://hitokoto.cn))
+
 ## 2025.2.2.1
 
 ```jsonc

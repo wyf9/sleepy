@@ -12,7 +12,7 @@
 
 ### TODO
 
-- [x] **拆分 `config.json` (只读) 和 `data.json`** (https://github.com/wyf9/sleepy/issues/3)
+- [x] **拆分 `config.jsonc` (只读) 和 `data.json`** (https://github.com/wyf9/sleepy/issues/3)
 - [x] 网页使用 api 请求，并实现定时刷新
 - [x] 设备使用状态
 - [x] Windows 客户端 (Python)
@@ -35,6 +35,11 @@
 演示站 (*较*稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
 开发预览 (*不保证可用*, 密钥 `wyf9test`): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+
+> 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本
+
+> [!WARNING]
+> 不要拿演示站做坏事 (比如 js 注入)，已由 DeepSeek 强力修复 ~~，没准哪天我会加访问日志~~
 
 ## 部署
 
@@ -60,9 +65,9 @@ pip install flask pytz
 python3 server.py
 ```
 
-如果不出意外，会提示: `config.json not exist, creating`，同时目录下出现 `config.json` 文件，编辑该文件中的配置后重新运行即可
+如果不出意外，会提示: `config.jsonc not exist, creating`，同时目录下出现 `config.jsonc` 文件，编辑该文件中的配置后重新运行即可
 
-`>>` **[配置示例](./config.example.jsonc)** `<<` *(`config.json` 从此生成)*
+`>>` **[配置示例](./config.example.jsonc)** `<<` *(`config.jsonc` 从此复制)*
 
 
 ## 使用
@@ -79,9 +84,16 @@ python3 server.py
 python3 start.py
 ```
 
-默认服务 http 端口: **`9010`** *(可在 `config.json` 中修改)*
+默认服务 http 端口: **`9010`** *(可在 `config.jsonc` 中修改)*
 
 ### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
+
+> [@kmizmal](https://github.com/kmizmal) 的胡言乱语
+
+<details>
+
+***<summary>点!此!展!开! (大图警告)</summary>***
+
 有没有更简单无脑的方法推荐一下  
 **有的兄弟，有的！**
 这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作  
@@ -89,10 +101,12 @@ python3 start.py
 [这里](https://huggingface.co/spaces/52496a27f51a/sss/blob/main/config.example.jsonc?duplicate=true&visibility=public)  
 然后自己去注册一个账号
 然后这样
-![链接](doc/img/1.png)
+![链接](https://files.catbox.moe/svvdt6.png)
 就可以复制你的`URL`了，`SECRET`默认为`zmal`,也可以去改
-![配置](doc/img/2.png)
+![配置](https://files.catbox.moe/xz5sd8.png)
 里面第八行的secret
+
+</details>
 
 ## 客户端示例
 
@@ -111,8 +125,8 @@ python3 start.py
 只需 **4** 步:
 
 1. 使用 `git pull` 拉取最新代码 (注意查看所在分支是否存在)
-2. 启动服务 (应提示 `Config fotmat updated, please change your config.json` 并退出)
-3. 对照 [`config.example.jsonc`](./config.example.jsonc) 和 [`doc/config_json_update.md`](./doc/config_json_update.md) 编辑你的 `config.json`，并将 `version` 字段改为最新版本
+2. 启动服务 (应提示 `Config fotmat updated, please change your config.jsonc` 并退出)
+3. 对照 [`config.example.jsonc`](./config.example.jsonc) 和 [`doc/config_update.md`](./doc/config_update.md) 编辑你的 `config.jsonc`，并将 `version` 字段改为最新版本
 4. 再次启动服务，更新完成.
 
 ## Star History

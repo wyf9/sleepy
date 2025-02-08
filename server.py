@@ -83,6 +83,10 @@ def index():
             visit_year=d.data['metrics']['year'].get('/', 0),
             visit_total=d.data['metrics']['total'].get('/', 0)
         )
+    if c.config['other']['hitokoto']:
+        hitokoto = '一言获取中~'
+    else:
+        hitokoto = ''
     return render_template(
         'index.html',
         user=ot['user'],
@@ -92,7 +96,8 @@ def index():
         status_desc=stat['desc'],
         status_color=stat['color'],
         more_text=more_text,
-        last_updated=d.data['last_updated']
+        last_updated=d.data['last_updated'],
+        hitokoto=hitokoto
     )
 
 
@@ -110,16 +115,11 @@ def style_css():
     /style.css
     - Method: **GET**
     '''
-    if c.config['other']['hitokoto']:
-        hitokoto = 'block'  
-    else:  
-        hitokoto = 'none'  
 
     response = make_response(render_template(
         'style.css',
         bg=c.config['other']['background'],
-        alpha=c.config['other']['alpha'],
-        hitokoto=hitokoto
+        alpha=c.config['other']['alpha']
     ))
     response.mimetype = 'text/css'
     showip(request, '/style.css')
@@ -161,7 +161,7 @@ def query():
     return u.format_dict(ret)
 
 
-@app.route('/get/status_list')  # 兼容旧版
+@app.route('/get/status_list')  # 保证兼容
 @app.route('/status_list')
 def get_status_list():
     '''
@@ -401,7 +401,7 @@ def private_mode():
 @app.route('/reload_config')
 def reload_config():
     '''
-    从 `config.json` 重载配置
+    从 `config.jsonc` 重载配置
     - Method: **GET**
     '''
     secret = escape(request.args.get('secret'))

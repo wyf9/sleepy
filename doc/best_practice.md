@@ -14,7 +14,7 @@
 示例:
 
 ```jsonc
-// config.json
+// config.jsonc
     // ...
     "other": {
         // ...
@@ -39,7 +39,7 @@
 
 主页: https://finicounter.eu.org/
 
-在 `config.json` 的 `other.more_text` 中添加以下内容:
+在 `config.jsonc` 的 `other.more_text` 中添加以下内容:
 
 ```html
 <br/>本站访问次数: <span id='finicount_views'></span><script async src='https://finicounter.eu.org/finicounter.js'></script>
@@ -48,7 +48,7 @@
 修改后应该是这样的:
 
 ```jsonc
-// config.json
+// config.jsonc
     // ...
     "data_check_interval": 30,
     "other": {
