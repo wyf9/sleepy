@@ -5,3 +5,4 @@ config.json
 config.*.json
 *.test.*
 *.local.*
+.venv/

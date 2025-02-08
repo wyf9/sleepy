@@ -24,7 +24,7 @@ a {
 
 body {
     /* 背景图设置 */
-    background: url('{{ bg }}') no-repeat center center fixed;
+    background: url({{ bg }}) no-repeat center center fixed;
     background-size: cover;
     display: flex;
     justify-content: center;
@@ -32,7 +32,8 @@ body {
 }
 
 .card {
-    background-color: rgba(255, 255, 255, "{{ alpha }}");
+    background-color: aliceblue;
+    opacity: {{ alpha }};
     border-radius: 30px;
     padding: 50px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

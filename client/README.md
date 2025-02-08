@@ -4,11 +4,11 @@
 
 - [/client](#client)
   - [CMDConsole](#cmdconsole)
-  - [Configure](#configure)
-  - [Using](#using)
+    - [Configure](#configure)
+    - [Using](#using)
   - [CmdConsoleMulti](#cmdconsolemulti)
-  - [Configure](#configure-1)
-  - [Using](#using-1)
+    - [Configure](#configure-1)
+    - [Using](#using-1)
   - [WinDevice](#windevice)
     - [Configure](#configure-2)
   - [AutoxjsScript](#autoxjsscript)
@@ -30,6 +30,9 @@
   - [LinuxScriptHyprland](#linuxscripthyprland)
     - [Configure](#configure-8)
     - [Using](#using-6)
+  - [Magisk](#Magisk)
+    - [Configure](#configure-9)
+    - [Using](#using-7)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -274,6 +277,12 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 
 > 开机自启可自行在 `hyprland.conf` 中配置
 
+## [Magisk](./magisk/service.sh)
+### Configure
+[./magisk/service.sh#L4-L5](./magisk/service.sh#L4-L5)
+> 更多[说明](./magisk/README.md)
+### Using
+刷入[magisk.zip](./magisk/magisk.zip)重启
 ## Other repos
 
 > 在功能 / API 实现上有不同，需要进行修改以与本分支适配 (见 [API #device-set](../doc/api.md#device-set))
@@ -281,3 +290,4 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 - [1812z/sleepy] Android [Macrodroid](https://www.bing.com/search?q=Macrodroid%20download): [(main) `前台应用状态.macro`](https://github.com/1812z/sleepy/blob/main/%E5%89%8D%E5%8F%B0%E5%BA%94%E7%94%A8%E7%8A%B6%E6%80%81.macro)
 - [HBWuChang/sleepy] Android Magisk: [(main) `_example/win.py`](https://github.com/HBWuChang/sleepy/blob/main/_example/win.py) *(详见脚本同目录下 `/magisk`)*
 - [HBWuChang/sleepy] Windows Python: [(main) `_example/win.py`](https://github.com/HBWuChang/sleepy/blob/main/_example/win.py)
+
