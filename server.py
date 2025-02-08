@@ -110,16 +110,20 @@ def style_css():
     /style.css
     - Method: **GET**
     '''
+    if c.config['other']['hitokoto']:
+        hitokoto = 'block'  
+    else:  
+        hitokoto = 'none'  
+
     response = make_response(render_template(
         'style.css',
         bg=c.config['other']['background'],
-        alpha=c.config['other']['alpha']
+        alpha=c.config['other']['alpha'],
+        hitokoto=hitokoto
     ))
     response.mimetype = 'text/css'
     showip(request, '/style.css')
     return response
-
-
 # --- Read-only
 
 
