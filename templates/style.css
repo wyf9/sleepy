@@ -72,3 +72,6 @@ body {
 #hitokoto_text {
     color: rgba(237, 202, 242, 0.719);
 }
+#hitokoto{
+    display: {{hitokoto}};
+}
