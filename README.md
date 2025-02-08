@@ -1,6 +1,6 @@
 # sleepy
 
-一个 ~~用于视奸~~ 查看个人在线状态 (以及正在使用软件) 的 Flask 网站，让他人能知道你不在而不是故意吊他/她
+一个用于 ~~*视奸*~~ 查看个人在线状态 (以及正在使用软件) 的 Flask 应用，让他人能知道你不在而不是故意吊他/她
 
 [**功能**](#功能) / [**TODO**](#todo) / [演示](#preview) / [**部署**](#部署) / [**使用**](#使用) / [**关于**](#关于)
 
@@ -24,10 +24,11 @@
 
 > [!TIP]
 > **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** <br/>
-> **以及 [开发分支 `dev-2025-2-1`](https://github.com/wyf9/sleepy/tree/dev-2025-2-1)** <br/>
 > 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
 
 对智能家居 / Home Assistant 感兴趣的朋友，一定要参观 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): [maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!
+
+<!-- > **以及 [开发分支 `dev-2025-2-1`](https://github.com/wyf9/sleepy/tree/dev-2025-2-1)** <br/> -->
 
 ### Preview
 
@@ -122,6 +123,6 @@ python3 start.py
 
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
-也欢迎参观 WinMEMZ *(GitHub: [maoawa](https://github.com/maoawa))* 的原版！~~[maoawa/sleepy](https://github.com/maoawa/sleepy)~~ 已归档
+也欢迎参观 WinMEMZ *(GitHub: [maoawa](https://github.com/maoawa))* 的原版！~~[maoawa/sleepy](https://github.com/maoawa/sleepy)~~ *已归档*
 
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
