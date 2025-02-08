@@ -1,7 +1,7 @@
 __pycache__/
 data.json
 data.*.json
-config.json
+config.jsonc
 config.*.json
 *.test.*
 *.local.*

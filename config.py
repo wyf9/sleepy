@@ -1,8 +1,7 @@
 # coding: utf-8
 
-import json
 import os
-
+import shutil
 import utils as u
 from jsonc_parser.parser import JsoncParser
 
@@ -16,24 +15,23 @@ class config:
 
     def __init__(self):
         jsonData = JsoncParser.parse_file('config.example.jsonc', encoding='utf-8')
-        if not os.path.exists('config.json'):
-            u.warning('config.json not exist, creating')
+        if not os.path.exists('config.jsonc'):
+            u.warning('config.jsonc not exist, creating')
             try:
-                with open('config.json', 'w+', encoding='utf-8') as file:
-                    json.dump(jsonData, file, indent=4, ensure_ascii=False)
-                u.exception('Generated new config file (config.json), please edit it and re-run this program.')
+                shutil.copy('config.example.jsonc', 'config.jsonc')
+                u.exception('Generated new config file (config.jsonc), please edit it and re-run this program.')
             except Exception as e:
-                u.error(f'Create config.json failed: {e}')
+                u.error(f'Create config.jsonc failed: {e}')
                 raise
         self.load()
         if self.config['version'] != jsonData['version']:
-            u.exception(f'Config fotmat updated ({self.config["version"]} -> {jsonData["version"]}), please change your config.json\nSee: config.example.json and doc/config_json_update.md')
+            u.exception(f'Config fotmat updated ({self.config["version"]} -> {jsonData["version"]}), please change your config.jsonc\nSee: config.example.json and doc/config_json_update.md')
 
     def load(self):
         '''
         加载配置
         '''
-        self.config = JsoncParser.parse_file('config.json', encoding='utf-8')
+        self.config = JsoncParser.parse_file('config.jsonc', encoding='utf-8')
 
     def get(self, name):
         '''
