@@ -1,15 +1,9 @@
 #!/system/bin/sh
 
-# ========== 基础配置 ==========
-URL="https://52496a27f51a-sss.hf.space/device/set"
-SECRET="zmal"
-LOG_NAME="focus_monitor.log"
+# ========== 读取配置文件 ==========
 SCRIPT_DIR=${0%/*}
-CACHE="${SCRIPT_DIR}/cache.txt"
-
-# 自定义游戏包名（以空格分隔）
-GAME_PACKAGES="com.tencent.tmgp.speedmobile com.miHoYo.Yuanshen com.tencent.tmgp.sgame com.tencent.tmgp.supercell.clashofclans com.netease.sky.m4399"
-
+CONFIG_FILE="${SCRIPT_DIR}/config.cfg"
+source "$CONFIG_FILE"
 # ========== 日志系统 ==========
 LOG_PATH="${SCRIPT_DIR}/${LOG_NAME}"
 log() {
