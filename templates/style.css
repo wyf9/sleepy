@@ -24,7 +24,8 @@ a {
 
 body {
     /* 背景图设置 */
-    background: url({{ bg }}) no-repeat center center fixed;
+    background-image: url({{ bg }});
+    background: no-repeat center center fixed;
     background-size: cover;
     display: flex;
     justify-content: center;
