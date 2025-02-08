@@ -6,16 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ user }} Alive?</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="{{ url_for('static', filename='avatar.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"> <!-- 指向 static 目录中的 ico 或 png 文件 -->
 </head>
 
 <body>
     <div class="container">
-        <div class="card">
+
+        <div class="card" id="user_status">
             <a style="font-size: 2em;"><ruby>似<rt>sǐ</rt></ruby>了吗?</a>
-
             <div style="height: 15px;"></div>
-
             <a>{{ user }}'s Status:<br><a id="status" style="font-size: 1.2em;">{{ status_name }}</a></a>
             <br />
             <a id="additional-info" style="font-size: 1em;">{{ status_desc | safe }}</a>
@@ -26,28 +25,12 @@
             <a style="font-size: 0.75em;">最后更新:
                 <a id="last-updated" style="font-size: 0.75em;">{{ last_updated }}</a>
             </a>
-
         </div>
-        <div style="height: 15px;"></div>
-        <div class="card" id="test">
-            {{ more_text | safe }}
-            <div class="hitokoto">
 
-                <p id="hitokoto">
-                    <a href="#" id="hitokoto_text">一言获取中~</a>
-                </p>
-            </div>
-            
-            <script>
-                fetch('https://v1.hitokoto.cn')
-                    .then(response => response.json())
-                    .then(data => {
-                        const hitokoto = document.querySelector('#hitokoto_text')
-                        hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
-                        hitokoto.innerText = data.hitokoto
-                    })
-                    .catch(console.error)
-            </script>
+        <div style="height: 15px;"></div>
+
+        <div class="card" id="more_text">
+            {{ more_text | safe }}
             <a>你可以通过这个页面视奸 {{ user }}。
                 <br>
                 <a href="{{ repo }}" target="_blank" style="color: rgb(0, 255, 0);">
@@ -60,6 +43,24 @@
                 </a>
             </a>
         </div>
+
+        <!-- 此处先不启用 -->
+        <!-- <div class="card" id="hitokoto">
+            <p id="hitokoto">
+                <a href="#" id="hitokoto_text">一言获取中~</a>
+            </p>
+            <script>
+                fetch('https://v1.hitokoto.cn')
+                    .then(response => response.json())
+                    .then(data => {
+                        const hitokoto = document.querySelector('#hitokoto_text')
+                        hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
+                        hitokoto.innerText = data.hitokoto
+                    })
+                    .catch(console.error)
+            </script>
+        </div> -->
+
     </div>
 
     <script>
