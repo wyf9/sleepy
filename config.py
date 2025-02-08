@@ -31,7 +31,11 @@ class config:
         '''
         加载配置
         '''
-        self.config = JsoncParser.parse_file('config.jsonc', encoding='utf-8')
+        try:
+            self.config = JsoncParser.parse_file('config.jsonc', encoding='utf-8')
+        except Exception as e:
+            u.error(f'Error loading config.jsonc: {e}')
+            raise
 
     def get(self, name):
         '''
