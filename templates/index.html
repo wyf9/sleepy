@@ -22,31 +22,33 @@
             <br />
             <a id="device-status" style="font-size: 0.8em; width: 100px; overflow-x: auto">[设备状态列表]</a>
             <div style="height: 15px;"></div>
-            <a style="font-size: 0.75em;">最后更新:
-                <a id="last-updated" style="font-size: 0.75em;">{{ last_updated }}</a>
+            <a style="font-size: 0.75em;">
+                <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
+                <a id="last-updated" style="font-size: 0.75em;">最后更新: {{ last_updated }}</a>
             </a>
         </div>
 
         <div style="height: 15px;"></div>
 
         <div class="card" id="more_text">
-        <!-- 我就要用,加个开关 -->
-        <div id="hitokoto">
-            <p id="hitokoto">
-                <a href="#" id="hitokoto_text">一言获取中~</a>
-            </p>
-            <script>
-                fetch('https://v1.hitokoto.cn')
-                    .then(response => response.json())
-                    .then(data => {
-                        const hitokoto = document.querySelector('#hitokoto_text')
-                        hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
-                        hitokoto.innerText = data.hitokoto
-                    })
-                    .catch(console.error)
-            </script>
-        </div>
+            <!-- 我就要用,加个开关 -->
+            <div id="hitokoto">
+                <p id="hitokoto">
+                    <a href="#" id="hitokoto_text">一言获取中~</a>
+                </p>
+                <script>
+                    fetch('https://v1.hitokoto.cn')
+                        .then(response => response.json())
+                        .then(data => {
+                            const hitokoto = document.querySelector('#hitokoto_text')
+                            hitokoto.href = `https://hitokoto.cn/?uuid=${data.uuid}`
+                            hitokoto.innerText = data.hitokoto
+                        })
+                        .catch(console.error)
+                </script>
+            </div>
             {{ more_text | safe }}
+            <br />
             <a>你可以通过这个页面视奸 {{ user }}。
                 <br>
                 <a href="{{ repo }}" target="_blank" style="color: rgb(0, 255, 0);">

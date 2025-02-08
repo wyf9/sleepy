@@ -1,13 +1,43 @@
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay)); // custom sleep func (only can use in async function with await)
 
 function sliceText(text, maxLength) {
-    // better slice()
+    /*
+    better slice function
+    */
     if (maxLength == 0) { // disabled
         return text;
     } else if (text.length <= maxLength) { // shorter than maxLength
         return text;
     }
     return text.slice(0, maxLength) + '...';
+}
+
+function escapeHtml(str) {
+    /*
+    escape some chars for HTML
+    */
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function escapeJs(str) {
+    /*
+    escape some chars for JS
+    */
+    return String(str)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, '\\\'')
+        .replace(/"/g, '\\"')
+        .replace(/\r/g, '\\r')
+        .replace(/\n/g, '\\n')
+        .replace(/\t/g, '\\t')
+        .replace(/\f/g, '\\f')
+        .replace(/</g, '\\x3c')
+        .replace(/>/g, '\\x3e');
 }
 
 async function update() {
@@ -21,12 +51,7 @@ async function update() {
             let errorinfo = '';
             const statusElement = document.getElementById('status');
             // --- show updating
-            statusElement.textContent = '[更新中...]';
-            document.getElementById('additional-info').innerHTML = '正在更新状态, 请稍候...<br/>\n长时间无反应? 试试 <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>';
-            last_status = statusElement.classList.item(0);
-            statusElement.classList.remove(last_status);
-            statusElement.classList.add('sleeping');
-            document.getElementById('device-status').textContent = '[更新设备状态中...]';
+            document.getElementById('last-updated').innerHTML = `正在更新状态, 请稍候... <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>`;
             // fetch data
             fetch(url + 'query', { timeout: 10000 })
                 .then(response => response.json())
@@ -42,26 +67,36 @@ async function update() {
                         // update device status (device-status)
                         var deviceStatus = '<hr/>';
                         const devices = Object.values(data.device);
+
                         for (let device of devices) {
-                            console.log(device);
+                            let device_app;
                             if (device.using) {
-                                // replace "xxx" with 'xxx'
-                                var device_app_title = device.app_name.replace('"', '\\"').replace('\'', '\\\'');
-                                var device_show_name = device.show_name.replace('"', '\\"').replace('\'', '\\\'');
-                                var device_app_alert = device.app_name.replace('"', '\\"').replace('\'', '\\\'');
-                                // build
-                                var device_app = `<a class="awake" title="${device_app_title}" href="javascript:alert('${device_show_name}: \\n${device_app_alert}')">${sliceText(device.app_name, data.device_status_slice)}</a>`;
+
+                                const escapedAppName = escapeHtml(device.app_name);
+
+                                const jsShowName = escapeJs(device.show_name);
+                                const jsAppName = escapeJs(device.app_name);
+
+                                const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
+                                const escapedJsCode = escapeHtml(jsCode);
+
+                                device_app = `<a
+    class="awake" 
+    title="${escapedAppName}" 
+    href="javascript:${escapedJsCode}">
+${sliceText(escapedAppName, data.device_status_slice)}
+</a>`;
                             } else {
-                                var device_app = '<a class="sleeping">未在使用</a>';
+                                device_app = '<a class="sleeping">未在使用</a>';
                             }
-                            deviceStatus += `${device.show_name}: ${device_app} <br/>`;
+                            deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
                         }
                         if (deviceStatus == '<hr/>') {
                             deviceStatus = '';
                         }
                         document.getElementById('device-status').innerHTML = deviceStatus;
                         // update last update time (last-updated)
-                        document.getElementById('last-updated').textContent = data.last_updated;
+                        document.getElementById('last-updated').textContent = `最后更新: ${data.last_updated}`;
                         // update refresh time
                         refresh_time = data.refresh;
                     } else {
