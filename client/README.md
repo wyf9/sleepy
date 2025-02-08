@@ -7,10 +7,11 @@
     - [Configure](#configure)
     - [Using](#using)
   - [CmdConsoleMulti](#cmdconsolemulti)
-  - [Configure](#configure-1)
-  - [Using](#using-1)
+    - [Configure](#configure-1)
+    - [Using](#using-1)
   - [WinDevice](#windevice)
     - [Configure](#configure-2)
+    - [Autostart](#autostart)
   - [AutoxjsScript](#autoxjsscript)
     - [Configure](#configure-3)
     - [Using](#using-2)
@@ -60,17 +61,18 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 [CMDConsole](#cmdconsole) 的旧版本 (可选择多个服务)
 
-## Configure
+### Configure
 
 https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console_multi.py#L14-L23
 
-## Using
+### Using
 
 同上, 多了一步选择服务
 
 ## [WinDevice](./win_device.py)
 
 > by: [@wyf9](https://github.com/wyf9)
+> Co-authored-by: [@]
 
 在 Windows 上自动更新设备状态
 
@@ -83,19 +85,17 @@ https://github.com/wyf9/sleepy/blob/a2fb3e14a859dd8789c87a35a86324add676ada3/cli
 > PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
 > 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)
 
-<details>
+### Autostart
 
-<summary>自动启动脚本</summary>
+`win_device_autostart.vbs`
 
-`win-device-auto.vbs`
+自启脚本，使启动后不显示窗口 *(适用于不想用第三方软件托管进程的情况下)*
 
-启动后不显示窗口
+1. 将 `win_device_autostart.vbs` 放入 `shell:startup` 文件夹
+2. 将 `win_device.py` 放入 `%UserProfile%` 文件夹
 
-随[WinDevice](./win_device.py)一同使用
-
-请将`win-device-auto.vbs`放入`shell:startup`文件夹，`win-device.py`放入`%UserProfile%`文件夹。
-
-</details>
+> [!TIP]
+> `shell:startup` 和 `%UserProfile%` 两个文件夹可用运行窗口 (`Win+R`) 打开
 
 ## [AutoxjsScript](./autoxjs_device.js)
 
@@ -106,7 +106,8 @@ https://github.com/wyf9/sleepy/blob/a2fb3e14a859dd8789c87a35a86324add676ada3/cli
 
 > [!WARNING]
 > Autox.js 已删库，RIP <br/>
-> 可自行寻找 Auto.js 的其他分支 **(可能需要作一些修改以兼容其他分支的方法)**
+> 备份: [aiselp/AutoX](https://github.com/aiselp/AutoX), 请珍惜 <br/>
+> 可自行寻找 [Auto.js](https://github.com/hyb1996/Auto.js) 的其他分支 **(可能需要作一些修改以兼容)**
 
 在使用前，请确保**已安装** Autox.js *且*授予**无障碍权限**
 

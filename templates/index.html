@@ -5,12 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ user }} Alive?</title>
+    <meta name="description" content="{{ user }}'s Online Status Page">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"> <!-- 指向 static 目录中的 ico 或 png 文件 -->
 </head>
 
 <body>
     <div class="container">
+        <div style="height: 15px;"></div>
 
         <div class="card" id="user_status">
             <a style="font-size: 2em;"><ruby>似<rt>sǐ</rt></ruby>了吗?</a>
@@ -70,6 +72,7 @@
             </a>
         </div>
 
+        <div style="height: 15px;"></div>
     </div>
 
     <script>

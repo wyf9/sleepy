@@ -44,6 +44,10 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    width: 100%;
+    max-width: 600px; /* 限制最大宽度，可根据需要调整 */
+    margin: 0 auto; /* 水平居中 */
+    padding: 20px; /* 添加一些内边距 */
 }
 
 @media (max-width: 675px) {
