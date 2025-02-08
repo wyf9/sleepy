@@ -61,7 +61,8 @@ python3 server.py
 
 如果不出意外，会提示: `config.json not exist, creating`，同时目录下出现 `config.json` 文件，编辑该文件中的配置后重新运行即可
 
-`>>` **[配置示例](./example.jsonc)** `<<` *(`config.json` 从此生成)*
+`>>` **[配置示例](./config.example.jsonc)** `<<` *(`config.json` 从此生成)*
+
 
 ## 使用
 
@@ -78,6 +79,19 @@ python3 start.py
 ```
 
 默认服务 http 端口: **`9010`** *(可在 `config.json` 中修改)*
+
+### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
+有没有更简单无脑的方法推荐一下  
+**有的兄弟，有的！**
+这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作  
+我怕教太多了你学不会，现在只要点  
+[这里](https://huggingface.co/spaces/52496a27f51a/sss/blob/main/config.example.jsonc?duplicate=true&visibility=public)  
+然后自己去注册一个账号
+然后这样
+![链接](doc/img/1.png)
+就可以复制你的`URL`了，`SECRET`默认为`zmal`,也可以去改
+![配置](doc/img/2.png)
+里面第八行的secret
 
 ## 客户端示例
 

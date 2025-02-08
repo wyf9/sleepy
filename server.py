@@ -98,6 +98,9 @@ def index():
 
 @app.route('/'+'git'+'hub')
 def git_hub():
+    '''
+    这里谁来了都改不了!
+    '''
     return redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle'+'epy', 301)
 
 
@@ -250,6 +253,9 @@ def device_set():
         secret_real = c.get('secret')
         if secret == secret_real:
             devices: dict = d.dget('device_status')
+            # app_name非空时会显示原来的app_name, 状态不会被覆盖
+            if not device_using:
+                app_name = ''
             devices[device_id] = {
                 'show_name': device_show_name,
                 'using': device_using,
@@ -277,6 +283,9 @@ def device_set():
         secret_real = c.get('secret')
         if secret == secret_real:
             devices: dict = d.dget('device_status')
+            # L245~247同理
+            if not device_using:
+                app_name = ''
             devices[device_id] = {
                 'show_name': device_show_name,
                 'using': device_using,

@@ -33,8 +33,7 @@ class config:
         '''
         加载配置
         '''
-        with open('config.json', 'r', encoding='utf-8') as file:
-            self.config = json.load(file)
+        self.config = JsoncParser.parse_file('config.json', encoding='utf-8')
 
     def get(self, name):
         '''
