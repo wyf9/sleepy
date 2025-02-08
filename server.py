@@ -75,6 +75,14 @@ def index():
             'color': 'error'
         }
     showip(request, '/')
+    more_text: str = ot['more_text']
+    if METRICS_ENABLED:
+        more_text = more_text.format(
+            visit_today=d.data['metrics']['today'].get('/', 0),
+            visit_month=d.data['metrics']['month'].get('/', 0),
+            visit_year=d.data['metrics']['year'].get('/', 0),
+            visit_total=d.data['metrics']['total'].get('/', 0)
+        )
     return render_template(
         'index.html',
         user=ot['user'],
@@ -83,14 +91,17 @@ def index():
         status_name=stat['name'],
         status_desc=stat['desc'],
         status_color=stat['color'],
-        more_text=ot['more_text'],
+        more_text=more_text,
         last_updated=d.data['last_updated']
     )
 
 
 @app.route('/'+'git'+'hub')
 def git_hub():
-    return redirect("https://github.com/kmizmal/sleepy", 301)
+    '''
+    这里谁来了都改不了!
+    '''
+    return redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle'+'epy', 301)
 
 
 @app.route('/style.css')
@@ -140,7 +151,7 @@ def query():
         'device': devicelst,
         'device_status_slice': c.config['other']['device_status_slice'],
         'last_updated': d.data['last_updated'],
-        'refresh': c.config['refresh']
+        'refresh': c.config['other']['refresh']
     }
     showip(request, '/query')
     return u.format_dict(ret)

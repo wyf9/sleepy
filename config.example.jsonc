@@ -1,5 +1,5 @@
 {
-    "version": "2025.1.18.1", // 配置版本号，可在更新时用于确定更改内容, ** 见: data_json_update.md **
+    "version": "2025.2.2.1", // 配置版本号，可在更新时用于确定更改内容, ** 见: data_json_update.md **
     "debug": false, // Flask 服务器的 debug 开关, 无需更改
     "host": "0.0.0.0", // 监听地址, 0.0.0.0 (IPV6: ::) 表示所有
     "port": 9010, // 监听端口, 默认 9010
@@ -21,7 +21,6 @@
         }
         // 还可添加更多，以此类推
     ],
-    "refresh": 5000, // 网页多久刷新一次状态 (毫秒)
     "data_check_interval": 30, // 多久检查一次 data.json 是否有更改 (秒)
     "other": { // 其他配置 (网页上的信息)
         "user": "User", // 你的名字
@@ -32,6 +31,8 @@
         "repo": "https://github.com/wyf9/sleepy", // 更多信息链接的目标, 默认为存储库链接
         "more_text": "", // 内容将在状态页底部 learn_more 上方插入 (不转义)
         // ps: 可以在这里放你联系方式的链接
-        "device_status_slice": 30 // 设备状态从开头截取多少文字显示 (防止窗口标题过长, 设置为 0 禁用)
+        "refresh": 5000, // 网页多久刷新一次状态 (毫秒)
+        "device_status_slice": 30, // 设备状态从开头截取多少文字显示 (防止窗口标题过长, 设置为 0 禁用)
+        "show_loading": true // 控制是否显示 "更新中" 提示
     }
 }
