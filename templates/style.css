@@ -2,57 +2,52 @@
 WARNING: 不要使用格式化代码 (本文件内) / DON'T USE CODE FORMATTER IN THIS FILE
 */
 
-html {
+/* html {
     font-size: 25px;
     overflow: auto;
-}
+} */
 
 rt {
     font-size: 0.6em;
 }
 
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: auto;
-}
 
 a {
     text-decoration: none;
 }
 
 body {
-    /* 背景图设置 */
     background: url('{{ bg }}') no-repeat center center fixed; /* 此处不要展开 */
     background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .card {
     background-color: aliceblue;
-    opacity: {{ alpha }};
     border-radius: 30px;
-    padding: 50px;
+    padding: 2rem 1rem;
+    margin: .5rem auto;
+    width: 90%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
+    /* font-size: 1.5em; */
+    opacity: {{ alpha }};
 }
-
+.card p {
+    font-size: 1.2em;
+    margin: .5rem;
+}
 .container {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 100%;
-    max-width: 600px; /* 限制最大宽度，可根据需要调整 */
-    margin: 0 auto; /* 水平居中 */
+    max-width: 80vb; /* 限制最大宽度，可根据需要调整 */
+    margin: 0 auto;
     padding: 20px; /* 添加一些内边距 */
 }
 
 @media (max-width: 675px) {
     body {
-        display: unset;
+        touch-action: pan-y;
     }
 }
 
