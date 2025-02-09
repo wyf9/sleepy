@@ -80,7 +80,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/main/client/win_device.py#L23-L50
+https://github.com/wyf9/sleepy/blob/8c6829f172ca83c7a6949cc9a4df5e7a56672a1a/client/win_device.py#L23-L50
 
 > PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
 > 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)
