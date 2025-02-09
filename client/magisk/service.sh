@@ -95,7 +95,7 @@ android_version=$(getprop ro.build.version.release)
 log "设备信息: ${device_model}, Android ${android_version}，等待一分钟"
 
 # 如有需要，可在此处覆盖设备显示名称
-device_model="OnePlus ACE3"
+#device_model="OnePlus ACE3"
 
 sleep 60
 log "开！"
