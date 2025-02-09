@@ -98,13 +98,14 @@ python3 start.py
 **有的兄弟，有的！**
 这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作  
 我怕教太多了你学不会，现在只要点  
-[这里](https://huggingface.co/spaces/52496a27f51a/sss/blob/main/config.example.jsonc?duplicate=true&visibility=public)  
+[这里](https://huggingface.co/spaces/shegy/m/blob/main/config.example.jsonc?duplicate=true&visibility=public)  
 然后自己去注册一个账号
 然后这样
 ![链接](https://files.catbox.moe/svvdt6.png)
-就可以复制你的`URL`了，`SECRET`默认为`zmal`,也可以去改
+就可以复制你的`URL`了，
+配置文件在这里
 ![配置](https://files.catbox.moe/xz5sd8.png)
-里面第八行的secret
+按照文档改好自动重启就能用了
 
 </details>
 
@@ -128,7 +129,8 @@ python3 start.py
 2. 启动服务 (应提示 `Config fotmat updated, please change your config.jsonc` 并退出)
 3. 对照 [`config.example.jsonc`](./config.example.jsonc) 和 [`doc/config_update.md`](./doc/config_update.md) 编辑你的 `config.jsonc`，并将 `version` 字段改为最新版本
 4. 再次启动服务，更新完成.
-
+> Huggingface
+>>对照 [`config.example.jsonc`](./config.example.jsonc) 和 [`doc/config_update.md`](./doc/config_update.md) 编辑Files下的 `config.example.jsonc`，并将 `version` 字段改为最新版本
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
