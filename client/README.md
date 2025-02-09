@@ -34,6 +34,9 @@
   - [MagiskService](#magiskservice)
     - [Configure](#configure-9)
     - [Using](#using-7)
+  - [Win_Simple](#Win_Simple)
+    - [Configure](#configure-10)
+    - [Using](#using-8)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -297,6 +300,14 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 
 刷入 [magisk.zip](./magisk/magisk.zip) 并重启即可
 
+## [Win_Simple](./Win_Simple/dist/Win_Simple.exe)
+### Configure
+[./Win_Simple/dist/config.ini](./Win_Simple/dist/config.ini)
+https://github.com/wyf9/sleepy/blob/main/client//Win_Simple/dist/config.ini#L2-27
+### Using
+下载后双击Win_Simple.exe初始化配置文件，然后在同级目录下的config.ini中填写配置
+> 如何开机自启？
+>> 创建一个Win_Simple.exe的快捷方式，然后扔到`C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup`
 ## Other repos
 
 > 在功能 / API 实现上有不同，需要进行修改以与本分支适配 (见 [API #device-set](../doc/api.md#device-set))
