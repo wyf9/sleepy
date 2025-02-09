@@ -8,3 +8,4 @@ config.*.jsonc
 .venv/
 client/Win_Simple/build/
 client/Win_Simple/*.spec
+client/Win_Simple/dist/config.ini

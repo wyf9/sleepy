@@ -19,19 +19,19 @@ CONFIG_PATH = os.path.join(BASE_DIR, "config.ini")
 DEFAULT_CONFIG = """\
 [settings]
 # 服务地址, 末尾不带 /
-SERVER = 'http://localhost:9010'
+SERVER = http://localhost:9010
 # 密钥
-SECRET = 'wyf9test'
+SECRET = wyf9test
 # 设备标识符，唯一 (它也会被包含在 api 返回中, 不要包含敏感数据)
-DEVICE_ID = 'device-1'
+DEVICE_ID = device-1
 # 前台显示名称
-DEVICE_SHOW_NAME = 'MyDevice1'
+DEVICE_SHOW_NAME = MyDevice1
 # 检查间隔，以秒为单位
 CHECK_INTERVAL = 2
 # 是否忽略重复请求，即窗口未改变时不发送请求
 BYPASS_SAME_REQUEST = True
 # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-ENCODING = 'utf-8'
+ENCODING = utf-8
 # 当窗口标题为其中任意一项时将不更新（|分隔）
 SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 示例窗口1| 示例窗口2
 # 当窗口标题为其中任意一项时视为未在使用
@@ -51,7 +51,8 @@ def ensure_config_exists():
         print("⚠️ 配置文件不存在，正在创建默认 config.ini...")
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             f.write(DEFAULT_CONFIG)
-        print(f"✅ 默认配置文件已创建: {CONFIG_PATH}")
+        sys.exit(f"✅ 默认配置文件已创建: {CONFIG_PATH}, 请编辑后重新运行程序")
+        pass
 
 def parse_list(value: str):
     return [item.strip() for item in value.split('|') if item.strip()]
