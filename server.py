@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, make_response, redirect
 from markupsafe import escape
 from datetime import datetime
 import pytz
-
+import os
 import utils as u
 from config import config as config_init
 from data import data as data_init
@@ -192,7 +192,7 @@ def set_normal():
             message="argument 'status' must be int"
         )
     secret = escape(request.args.get('secret'))
-    secret_real = c.get('secret')
+    secret_real = os.getenv('SLPPE_SECRET') or c.get('secret')
     if secret == secret_real:
         d.dset('status', status)
         showip(request, '/set')
