@@ -45,6 +45,8 @@ REVERSE_APP_NAME = False
 MOUSE_IDLE_TIME = 15
 # 鼠标移动检测的最小距离（像素）
 MOUSE_MOVE_THRESHOLD = 3
+#日志是否显示更多信息 False/True
+INFO = True
 # --- config end
 
 # buffer = stdout.buffer  # backup
@@ -100,7 +102,8 @@ def check_mouse_idle() -> bool:
     distance = (dx * dx + dy * dy) ** 0.5
     
     # 打印详细的鼠标状态信息
-    print(f'Mouse: current={current_pos}, last={last_mouse_pos}, distance={distance:.1f}px')
+    if INFO:
+        print(f'Mouse: current={current_pos}, last={last_mouse_pos}, distance={distance:.1f}px')
     
     # 如果移动距离超过阈值
     if distance > MOUSE_MOVE_THRESHOLD:
@@ -110,12 +113,14 @@ def check_mouse_idle() -> bool:
             is_mouse_idle = False
             print(f'Mouse wake up: moved {distance:.1f}px')
         else:
-            print(f'Mouse moving: {distance:.1f}px')
+            if INFO:
+                print(f'Mouse moving: {distance:.1f}px')
         return False
     
     # 检查是否超过静止时间
     idle_time = current_time - last_mouse_move_time
-    print(f'Idle time: {idle_time:.1f}s / {MOUSE_IDLE_TIME*60:.1f}s')
+    if INFO:
+        print(f'Idle time: {idle_time:.1f}s / {MOUSE_IDLE_TIME*60:.1f}s')
     
     if idle_time > MOUSE_IDLE_TIME * 60:
         if not is_mouse_idle:
@@ -135,8 +140,8 @@ def do_update():
     # 获取当前窗口标题和鼠标状态
     current_window = GetWindowText(GetForegroundWindow())
     mouse_idle = check_mouse_idle()
-    
-    print(f'--- Window: `{current_window}`')
+    if INFO:
+        print(f'--- Window: `{current_window}`')
     
     # 始终保持同步的状态变量
     window = current_window
@@ -164,7 +169,8 @@ def do_update():
             for name in NOT_USING_NAMES:
                 if current_window == name:
                     using = False
-                    print(f'* not using: `{name}`')
+                    if INFO:
+                        print(f'* not using: `{name}`')
                     break
     
     # 是否需要发送更新
@@ -186,12 +192,17 @@ def do_update():
             }, headers={
                 'Content-Type': 'application/json'
             })
-            print(f'Response: {resp.status_code} - {resp.json()}')
+            if INFO:
+                print(f'Response: {resp.status_code} - {resp.json()}')
+            else:
+                if resp.status_code!=200:
+                    print(f'出现异常，Response: {resp.status_code} - {resp.json()}')
             last_window = window
         except Exception as e:
             print(f'Error: {e}')
     else:
-        print('No state change, skipping update')
+        if INFO:
+            print('No state change, skipping update')
 
 
 def main():
@@ -205,7 +216,8 @@ if __name__ == '__main__':
         main()
     except (KeyboardInterrupt, SystemExit) as e:
         # 如果中断或被taskkill则发送未在使用
-        print(f'Interrupt: {e}')
+        if INFO:
+            print(f'Interrupt: {e}')
         try:
             resp = post(url=Url, json={
                 'secret': SECRET,
@@ -216,6 +228,10 @@ if __name__ == '__main__':
             }, headers={
                 'Content-Type': 'application/json'
             })
-            print(f'Response: {resp.status_code} - {resp.json()}')
+            if INFO:
+                print(f'Response: {resp.status_code} - {resp.json()}')
+            else:
+                if resp.status_code!=200:
+                    print(f'出现异常，Response: {resp.status_code} - {resp.json()}')
         except Exception as e:
             print(f'Exception: {e}')
