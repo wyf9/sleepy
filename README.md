@@ -105,8 +105,8 @@ python3 start.py
 就可以复制你的`URL`了，
 配置文件在这里
 ![配置](https://files.catbox.moe/xz5sd8.png)
-按照文档改好自动重启就能用了
-
+按照文档改好自动重启就能用了  
+不想把`secret`明文写在这里可以去 *Settings->Variables and secrets->New secret* 新建一个`SLPPE_SECRET`变量存放`secret`  
 </details>
 
 ## 客户端示例
