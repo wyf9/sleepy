@@ -303,7 +303,7 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 ## [Win_Simple](./Win_Simple/dist/Win_Simple.exe)
 ### Configure
 [./Win_Simple/dist/config.ini](./Win_Simple/dist/config.ini)
-https://github.com/wyf9/sleepy/blob/main/client//Win_Simple/dist/config.ini#L2-27
+https://github.com/wyf9/sleepy/blob/5277a912977ae2d47fb38df77029c20830e86789/client//Win_Simple/dist/config.ini#L2-L27
 ### Using
 下载后双击Win_Simple.exe初始化配置文件，然后在同级目录下的config.ini中填写配置
 > 如何开机自启？
