@@ -19,7 +19,7 @@
 ```jsonc
 // ...
     "other": {
-        "show_loading": true,
+        "device_status_slice": 30,
         "hitokoto": true // (1) [NEW]
     }
 ```
