@@ -217,7 +217,7 @@ def set_path(secret, status):
     - Method: **GET**
     '''
     secret = escape(secret)
-    secret_real = c.get('secret')
+    secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
     if secret == secret_real:
         d.dset('status', status)
         ret = {
@@ -255,7 +255,7 @@ def device_set():
                 message='missing param or wrong param type'
             )
         secret = escape(request.args.get('secret'))
-        secret_real = c.get('secret')
+        secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
         if secret == secret_real:
             devices: dict = d.dget('device_status')
             # app_name非空时会显示原来的app_name, 状态不会被覆盖
@@ -285,7 +285,7 @@ def device_set():
                 code='bad request',
                 message='missing param'
             )
-        secret_real = c.get('secret')
+        secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
         if secret == secret_real:
             devices: dict = d.dget('device_status')
             # L245~247同理
@@ -322,7 +322,7 @@ def remove_device():
     '''
     device_id = escape(request.args.get('id'))
     secret = escape(request.args.get('secret'))
-    secret_real = c.get('secret')
+    secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
     if secret == secret_real:
         try:
             del d.data['device_status'][device_id]
@@ -351,7 +351,7 @@ def clear_device():
     - Method: **GET**
     '''
     secret = escape(request.args.get('secret'))
-    secret_real = c.get('secret')
+    secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
     if secret == secret_real:
         d.data['device_status'] = {}
         d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
@@ -374,7 +374,7 @@ def private_mode():
     - Method: **GET**
     '''
     secret = escape(request.args.get('secret'))
-    secret_real = c.get('secret')
+    secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
     if secret == secret_real:
         private = escape(request.args.get('private'))
         private = u.tobool(private)
@@ -406,7 +406,7 @@ def reload_config():
     - Method: **GET**
     '''
     secret = escape(request.args.get('secret'))
-    secret_real = c.get('secret')
+    secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
     if secret == secret_real:
         c.load()
         showip(request, '/reload_config')
@@ -428,7 +428,7 @@ def save_data():
     - Method: **GET**
     '''
     secret = escape(request.args.get('secret'))
-    secret_real = c.get('secret')
+    secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
     if secret == secret_real:
         showip(request, '/save_data')
         try:
