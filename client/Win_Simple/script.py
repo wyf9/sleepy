@@ -8,7 +8,6 @@ from requests import post
 from datetime import datetime
 import time
 from time import sleep
-import sys
 import io
 #pyinstaller -F -n Win_Simple.exe --icon=zmal.ico --hidden-import=win32gui --hidden-import=win32api --hidden-import=requests script.py
 
@@ -102,6 +101,17 @@ def print(msg: str, **kwargs):
     except Exception as e:
         _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Log Error: {e}', flush=True)
 
+def process_window_title(title: str) -> str:
+    """处理窗口标题（反转应用名+跳过检查）"""
+    if INFO:
+        print(f'Window: {title}')
+    # 反转应用名称
+    if REVERSE_APP_NAME:
+        title = reverse_app_name(title)
+    else:
+        title = title.strip()
+    # 跳过指定窗口
+    return title
 
 def reverse_app_name(name: str) -> str:
     '''反转应用名称 (将末尾的应用名提前)'''
@@ -150,8 +160,9 @@ last_window = ''
 def do_update():
     global last_window, cached_window_title, is_mouse_idle
     
-    # 获取当前窗口标题和鼠标状态
-    current_window = GetWindowText(GetForegroundWindow())
+    # 获取当前窗口标题
+    raw_window = GetWindowText(GetForegroundWindow())
+    current_window = process_window_title(raw_window)
     mouse_idle = check_mouse_idle()
     if INFO:
         print(f'--- Window: `{current_window}`')
@@ -220,9 +231,12 @@ def do_update():
 
 def main():
     while True:
-        do_update()
-        sleep(1)  # 改为1秒检查一次，提高响应度
-
+        try:
+            do_update()
+            sleep(CHECK_INTERVAL)  # 使用配置的间隔
+        except Exception as e:
+            print(f'主循环异常: {e}')
+            sleep(1)  # 防止错误循环
 
 if __name__ == '__main__':
     try:

@@ -65,6 +65,10 @@
         statusElement.classList.add('{{ status_color }}');
     </script>
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
+     <!-- 仅在 canvas 为 True 时加载 chart.js -->
+     {% if canvas %}
+     <script src="{{ url_for('static', filename='canvas.js') }}"></script>
+     {% endif %}
 </body>
 
 </html>

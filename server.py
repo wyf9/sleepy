@@ -97,7 +97,8 @@ def index():
         status_color=stat['color'],
         more_text=more_text,
         last_updated=d.data['last_updated'],
-        hitokoto=hitokoto
+        hitokoto=hitokoto,
+        canvas=ot['canvas']
     )
 
 

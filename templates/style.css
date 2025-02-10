@@ -1,12 +1,6 @@
 /*
 WARNING: 不要使用格式化代码 (本文件内) / DON'T USE CODE FORMATTER IN THIS FILE
 */
-
-/* html {
-    font-size: 25px;
-    overflow: auto;
-} */
-
 rt {
     font-size: 0.6em;
 }
@@ -25,29 +19,26 @@ body {
     background-color: aliceblue;
     border-radius: 30px;
     padding: 2rem 1rem;
-    margin: .5rem auto;
-    width: 90%;
+    margin: 1rem auto;
+    width: 40%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
-    /* font-size: 1.5em; */
     opacity: {{ alpha }};
 }
 .card p {
     font-size: 1.2em;
-    margin: .5rem;
+    margin: 1rem;
 }
 .container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    max-width: 80vb; /* 限制最大宽度，可根据需要调整 */
-    margin: 0 auto;
-    padding: 20px; /* 添加一些内边距 */
+    padding: 1rem;
 }
 
-@media (max-width: 675px) {
+@media (max-width: 700px) {
     body {
         touch-action: pan-y;
+    }
+    .card{
+        width: 90%;
     }
 }
 

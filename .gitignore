@@ -9,3 +9,4 @@ config.*.jsonc
 client/Win_Simple/build/
 client/Win_Simple/*.spec
 client/Win_Simple/dist/config.ini
+client/Win_Simple/config.ini
