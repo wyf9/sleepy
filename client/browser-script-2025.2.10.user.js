@@ -19,9 +19,8 @@
     const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
     const SECRET = '绝对猜不出来的密码'; // 你的 secret
     const ID = '114514'; // 你的设备 id
-    const SHOW_NAME = '设备名称'; // 替换为你的设备名称
+    const SHOW_NAME = ''; // 你的设备名称，如为空值即使用浏览器名称
     const NO_TITLE = 'url'; // 定义页面没有标题时的返回，url: 页面的完整 url 地址 / host: 域名 / 其他: 对应值
-    const PREFIX = true; // 控制是否显示前缀
     // [!!!] 请将第 10 行 `@connect` 处的域名改为你的服务域名，如此处就应为 sleepy.wyf9.top
     // 参数配置结束
 
@@ -55,29 +54,25 @@
 
     // 发送请求函数
     function sendRequest() {
-        var browserName = getBrowserName(); // 获取浏览器名称
-        var title;
+        // 获取当前网页
+        var appName;
         if (document.title == '') { // 如没有标题
             if (NO_TITLE == 'url') {
-                title = window.location.href; // 使用 url
+                appName = window.location.href; // 使用 url
             } else if (NO_TITLE == 'host') {
-                title = window.location.hostname; // 使用域名
+                appName = window.location.hostname; // 使用域名
             } else {
-                title = NO_TITLE; // 使用自定义提示
+                appName = NO_TITLE; // 使用自定义提示
             }
         } else {
-            title = document.title;
-        }
-
-        var appName;
-        if (PREFIX) {
-            // 显示前缀
-            appName = `${browserName} - ${title}`;
-        } else {
-            // 不显示前缀
-            appName = `${title}`;
+            appName = document.title;
         }
         log(`App name: ${appName}`);
+
+        if (!SHOW_NAME) {
+            // 如 SHOW_NAME 为空，使用浏览器名称
+            SHOW_NAME = getBrowserName();
+        }
 
         // 构造 API URL
         var apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=true&app_name=${encodeURIComponent(appName)}`;
