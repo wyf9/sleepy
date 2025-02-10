@@ -193,7 +193,7 @@ def set_normal():
             message="argument 'status' must be int"
         )
     secret = escape(request.args.get('secret'))
-    secret_real = os.environ.get('SLPPE_SECRET') or c.get('secret')
+    secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
     if secret == secret_real:
         d.dset('status', status)
         showip(request, '/set')
