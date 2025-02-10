@@ -14,14 +14,15 @@
     <div class="container">
         <div class="card" id="user_status">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
-            <h3><i>{{ user }}'s</i> <b>Status:</b><br><a id="status" style="font-size: 1.2em;">{{ status_name }}</a></h3>
+            <h3><i><b>{{ user }}'s</b></i> Status:<br><a id="status" style="font-size: 1.2em;">{{ status_name }}</a>
+            </h3>
             <p id="additional-info" style="font-size: 1em;">{{ status_desc | safe }}</p>
             <!-- <hr /> 由 get.js 控制 -->
             <p id="device-status">[设备状态列表]</p>
             <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
             <p id="last-updated">最后更新: {{ last_updated }}</p>
-            
-        </div>  
+
+        </div>
         <div class="card" id="more_text">
             <div>
                 <p id="hitokoto">
@@ -46,7 +47,7 @@
                 </script>
             </div>
             {{ more_text | safe }}
-            <p>你可以通过这个页面视奸<i>{{ user }}</i>。
+            <p>你可以通过这个页面视奸 <b>{{ user }}</b>。
                 <br>
                 <a href="{{ repo }}" target="_blank" style="color: rgb(0, 255, 0);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
@@ -65,10 +66,10 @@
         statusElement.classList.add('{{ status_color }}');
     </script>
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
-     <!-- 仅在 canvas 为 True 时加载 chart.js -->
-     {% if canvas %}
-     <script src="{{ url_for('static', filename='canvas.js') }}"></script>
-     {% endif %}
+    <!-- 仅在 canvas 为 True 时加载 canvas.js -->
+    {% if canvas %}
+    <script src="{{ url_for('static', filename='canvas.js') }}"></script>
+    {% endif %}
 </body>
 
 </html>

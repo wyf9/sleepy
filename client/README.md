@@ -75,7 +75,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 ## [WinDevice](./win_device.py)
 
 > by: [@wyf9](https://github.com/wyf9)
-> Co-authored-by: [@]
+> Co-authored-by: [@pwnInt](https://github.com/pwnInt)
 
 在 Windows 上自动更新设备状态
 
@@ -105,11 +105,11 @@ https://github.com/wyf9/sleepy/blob/8c6829f172ca83c7a6949cc9a4df5e7a56672a1a/cli
 > by: [@wyf9](https://github.com/wyf9) <br/>
 > Co-authored-by: [@NyaOH-Nahida](https://github.com/NyaOH-Nahida)
 
-使用 [(Archive) Autox.js](https://web.archive.org/*/https://github.com/kkevsekk1/AutoX) 编写的安卓自动更新状态脚本
+使用 [Autox.js](https://web.archive.org/web/20241224233444/https://github.com/kkevsekk1/AutoX) 编写的安卓自动更新状态脚本
 
 > [!WARNING]
 > Autox.js 已删库，RIP <br/>
-> 备份: [aiselp/AutoX](https://github.com/aiselp/AutoX), 请珍惜 <br/>
+> 备份: [aiselp/AutoX](https://github.com/aiselp/AutoX) <br/>
 > 可自行寻找 [Auto.js](https://github.com/hyb1996/Auto.js) 的其他分支 **(可能需要作一些修改以兼容)**
 
 在使用前，请确保**已安装** Autox.js *且*授予**无障碍权限**
@@ -127,19 +127,21 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 - 当手机息屏 (应用名返回为空) 时视为未在使用
 - 当脚本退出时也会更新状态为未在使用 *(不包括 Autox.js 直接停止运行)*
 
-## [BrowserScript](./页面标题上报脚本-2025.2.10.user.js)
+## [BrowserScript](./browser-script-2025.2.10.user.js)
 
 > by: [@nuym](https://github.com/nuym)
 
 在任何支持油猴脚本的浏览器均可使用，*据作者↑说是为了解决 Mac 无法获取窗口标题，遂退而求其次获取浏览器页面（有系统就有浏览器，即有用户脚本）*
 
-- [点击安装 (GitHub raw)](https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2025.2.10.user.js)
+- [点击安装 (GitHub raw)](https://raw.githubusercontent.com/wyf9/sleepy/main/client/browser-script-2025.2.10.user.js)
 
-- [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2025.2.10.user.js)
+- [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/browser-script-2025.2.10.user.js)
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/d35a6186114045789f0535876c55a10f126d97dc/client/页面标题上报脚本-2025.2.10.user.js#L18-L26
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/browser-script-2025.2.10.user.js#L18-L26
+
+> UNDONE
 
 ## [Homework](./homework_device.py)
 
@@ -301,14 +303,23 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 刷入 [magisk.zip](./magisk/magisk.zip) 并重启即可
 
 ## [Win_Simple](./Win_Simple/dist/Win_Simple.exe)
-### Configure
-[./Win_Simple/dist/config.ini](./Win_Simple/dist/config.ini)  
 
-https://github.com/wyf9/sleepy/blob/aa0ddcab22b2d30376596157be7000a8987c8b58/client/Win_Simple/dist/config.ini#L2-L27
+> by: [@kmizmal](https://github.com/kmizmal)
+
+### Configure
+
+[./Win_Simple/dist/config.ini](./Win_Simple/dist/config.ini)
+
+https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/client/Win_Simple/dist/config.ini#L2-L27
+
 ### Using
-下载后双击Win_Simple.exe初始化配置文件，然后在同级目录下的config.ini中填写配置
-> 如何开机自启？
->> 创建一个Win_Simple.exe的快捷方式，然后扔到`C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup`
+
+下载后双击 `Win_Simple.exe` 初始化配置文件，然后在同级目录下的 `config.ini` 中填写配置
+
+> [!TIP]
+> 如何开机自启? <br/>
+> 创建一个 `Win_Simple.exe` 的快捷方式，然后扔到 `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup` 下即可
+
 ## Other repos
 
 > 在功能 / API 实现上有不同，需要进行修改以与本分支适配 (见 [API #device-set](../doc/api.md#device-set))
