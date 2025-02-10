@@ -139,7 +139,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/页面标题上报脚本-2025.2.10.user.js#L18-L26
+https://github.com/wyf9/sleepy/blob/d35a6186114045789f0535876c55a10f126d97dc/client/页面标题上报脚本-2025.2.10.user.js#L18-L26
 
 ## [Homework](./homework_device.py)
 
