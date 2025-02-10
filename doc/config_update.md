@@ -19,13 +19,23 @@
 ```jsonc
 // ...
     "other": {
-        "canvas": true // 控制是否显示背景 canvas粒子效果
+        // ...
+        "hitokoto": true,
+        "canvas": true // (1) [NEW]
     }
 ```
+
+- **New** (1)
+  * Name: `canvas`
+  * Upper: `other`
+  * Type: `bool`
+  * Desc: 控制是否显示背景图中的 [`canvas` 粒子效果](../static/canvas.js)，使网站更美观 (?)
+
 ## 2025.2.8.1
 ```jsonc
 // ...
     "other": {
+        // ...
         "device_status_slice": 30,
         "hitokoto": true // (1) [NEW]
     }
@@ -33,7 +43,7 @@
 
 - **New** (1)
   * Name: `hitokoto`
-  * Upper: None
+  * Upper: `other`
   * Type: `bool`
   * Desc: 控制是否显示一言 (powered by [hitokoto.cn](https://hitokoto.cn))
 

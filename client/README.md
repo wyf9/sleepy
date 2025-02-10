@@ -34,7 +34,7 @@
   - [MagiskService](#magiskservice)
     - [Configure](#configure-9)
     - [Using](#using-7)
-  - [Win_Simple](#Win_Simple)
+  - [Win\_Simple](#win_simple)
     - [Configure](#configure-10)
     - [Using](#using-8)
   - [Other repos](#other-repos)
@@ -127,19 +127,19 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 - 当手机息屏 (应用名返回为空) 时视为未在使用
 - 当脚本退出时也会更新状态为未在使用 *(不包括 Autox.js 直接停止运行)*
 
-## [BrowserScript](./页面标题上报脚本-2024.12.2.user.js)
+## [BrowserScript](./页面标题上报脚本-2025.2.10.user.js)
 
 > by: [@nuym](https://github.com/nuym)
 
 在任何支持油猴脚本的浏览器均可使用，*据作者↑说是为了解决 Mac 无法获取窗口标题，遂退而求其次获取浏览器页面（有系统就有浏览器，即有用户脚本）*
 
-- [点击安装 (GitHub raw)](https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2024.12.2.user.js)
+- [点击安装 (GitHub raw)](https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2025.2.10.user.js)
 
-- [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2024.12.2.user.js)
+- [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/页面标题上报脚本-2025.2.10.user.js)
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/页面标题上报脚本-2024.12.2.user.js#L18-L26
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/页面标题上报脚本-2025.2.10.user.js#L18-L26
 
 ## [Homework](./homework_device.py)
 

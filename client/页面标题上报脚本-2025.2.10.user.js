@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         页面标题上报脚本
 // @namespace    sleepy
-// @version      2024.12.2
+// @version      2025.2.10
 // @description  获取页面标题并上报到指定 API (包括浏览器名称) / 请在安装脚本后手动编辑下面的配置
 // @author       nuym
 // @author       wyf9
@@ -94,8 +94,8 @@
                     error(`API 请求失败: ${response.status} ${response.statusText}`);
                 }
             },
-            onerror: (error) => {
-                error(`API 请求出错: ${error}`);
+            onerror: (errInfo) => {
+                error(`API 请求出错: ${errInfo}`);
             }
         });
     }
