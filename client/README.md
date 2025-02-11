@@ -38,6 +38,7 @@
     - [Configure](#configure-10)
     - [Using](#using-8)
   - [Shortcuts](#Shortcuts)
+    - [Using](#using-9)
   - [Other repos](#other-repos)
 
 > [!TIP]
