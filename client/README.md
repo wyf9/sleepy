@@ -38,7 +38,8 @@
     - [Configure](#configure-10)
     - [Using](#using-8)
   - [Shortcuts](#Shortcuts)
-    - [Using](#using-9)
+    - [完整版](#完整版)
+    - [极速版](#极速版)
   - [Other repos](#other-repos)
 
 > [!TIP]
