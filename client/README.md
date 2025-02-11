@@ -334,7 +334,7 @@ https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/cli
 > 这里的链接可能不是最新，[建议到项目内查看](https://github.com/Detritalw/Sleepy-Client-Shortcuts)
 
 > [!TIP]
-> 手动更新
+> 手动更新  
 > 您可以将该快捷指令设置为操作按钮、控制中心按钮、锁定屏幕按钮、敲击2/3下背板指令来快捷使用
 
 ## Other repos
