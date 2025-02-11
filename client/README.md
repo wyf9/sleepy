@@ -37,6 +37,9 @@
   - [Win\_Simple](#win_simple)
     - [Configure](#configure-10)
     - [Using](#using-8)
+  - [Shortcuts](#Shortcuts)
+    - [完整版](#完整版)
+    - [极速版](#极速版)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -319,6 +322,23 @@ https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/cli
 > [!TIP]
 > 如何开机自启? <br/>
 > 创建一个 `Win_Simple.exe` 的快捷方式，然后扔到 `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup` 下即可
+
+## [Shortcuts](https://github.com/Detritalw/Sleepy-Client-Shortcuts)
+
+> by: [@Detritalw](https://github.com/Detritalw)
+
+### 完整版
+[点击链接直接安装, 支持 Apple Watch, iPhone, iPad, mac...](https://www.icloud.com/shortcuts/aa31f2a5295842939be354285d4e9d14)
+
+### 极速版
+[点击链接安装，建议设置自动化→打开App→选择全部App→设置为不确认，立即执行→选择快捷指令为Sleepy Client Shortcuts Fast，即可获得超级好的体验。](https://www.icloud.com/shortcuts/eec863215bfb4d7ea7228b6032d1fc6c)
+
+> [!WARNING]
+> 这里的链接可能不是最新，[建议到项目内查看](https://www.icloud.com/shortcuts/92fbddbf922343f5b076c828f788371f)
+
+> [!TIP]
+> 手动更新  
+> 您可以将该快捷指令设置为操作按钮、控制中心按钮、锁定屏幕按钮、敲击2/3下背板指令来快捷使用
 
 ## Other repos
 
