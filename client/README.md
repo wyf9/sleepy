@@ -328,7 +328,7 @@ https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/cli
 
 ### Using
 
-[直接打开这里，填写表单即可](https://www.icloud.com/shortcuts/2f653ddbdea44f4a953ce1288f0c0e5b)
+[直接打开这里，填写表单即可](https://www.icloud.com/shortcuts/aa31f2a5295842939be354285d4e9d14)
 
 > [!WARNING]
 > 这里的链接可能不是最新，[建议到项目内查看](https://www.icloud.com/shortcuts/92fbddbf922343f5b076c828f788371f)
