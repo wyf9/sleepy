@@ -331,7 +331,7 @@ https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/cli
 [直接打开这里，填写表单即可](https://www.icloud.com/shortcuts/2f653ddbdea44f4a953ce1288f0c0e5b)
 
 > [!WARNING]
-> 这里的链接可能不是最新，[建议到项目内查看](https://github.com/Detritalw/Sleepy-Client-Shortcuts)
+> 这里的链接可能不是最新，[建议到项目内查看](https://www.icloud.com/shortcuts/23aa3fea273547649cd8c3ed842811bc)
 
 > [!TIP]
 > 手动更新  
