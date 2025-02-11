@@ -37,6 +37,7 @@
   - [Win\_Simple](#win_simple)
     - [Configure](#configure-10)
     - [Using](#using-8)
+  - [Shortcuts](#Shortcuts)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -319,6 +320,21 @@ https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/cli
 > [!TIP]
 > 如何开机自启? <br/>
 > 创建一个 `Win_Simple.exe` 的快捷方式，然后扔到 `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup` 下即可
+
+## [Shortcuts](https://github.com/Detritalw/Sleepy-Client-Shortcuts)
+
+> by: [@Detritalw](https://github.com/Detritalw)
+
+### Using
+
+[直接打开这里，填写表单即可](https://www.icloud.com/shortcuts/1d43116ecb7140d6b64c6bd6422d095a)
+
+> [!WARNING]
+> 这里的链接可能不是最新，[建议到项目内查看](https://github.com/Detritalw/Sleepy-Client-Shortcuts)
+
+> [!TIP]
+> 手动更新
+> 您可以将该快捷指令设置为操作按钮、控制中心按钮、锁定屏幕按钮、敲击2/3下背板指令来快捷使用
 
 ## Other repos
 
