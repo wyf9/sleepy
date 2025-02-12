@@ -199,9 +199,9 @@ def do_update():
     
     # 是否需要发送更新
     should_update = (
-        mouse_idle != is_mouse_idle or  # 鼠标状态改变
-        window != last_window or  # 窗口改变
-        not BYPASS_SAME_REQUEST  # 强制更新模式
+        (mouse_idle != is_mouse_idle or  # 鼠标状态改变
+        window != last_window) and    # 窗口改变
+        window not in SKIPPED_NAMES  # 不在跳过列表中
     )
     
     if should_update:
