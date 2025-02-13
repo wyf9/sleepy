@@ -31,7 +31,7 @@ jobs:
       - name: Archive artifacts
         run: |
           mkdir release  # 创建 release 文件夹
-          cp dist/Win_Simple.exe release/Win_Simple.exe
+          copy dist/Win_Simple.exe release/Win_Simple.exe
         #   cp clinet/autoxjs_device.js release/autoxjs_device.js
         #   cp clinet/browser-script-*.user.js release/browser-script.user.js
         #   cp clinet/cmd_console.py release/cmd_console.py
