@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    paths:
+      - 'client/Win_Simple'  # 只关注 Win_Simple 文件夹下的变化
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: build
+        run: |
+          python -m pip install --upgrade pip
+          pip install pywin32 requests
+          pyinstaller client/Win_Simple/Win_Simple.exe.spec
+    #这前面的不用动
+      - name: Archive artifacts
+        run: |
+          mkdir -p release  # 创建 release 文件夹方便发布
+          cp dist/Win_Simple.exe release/Win_Simple.exe
+        #   cp clinet/autoxjs_device.js release/autoxjs_device.js
+        #   cp clinet/browser-script-*.user.js release/browser-script.user.js
+        #   cp clinet/cmd_console.py release/cmd_console.py
+        #   cp clinet/homework_device.py release/homework_device.py
+        #   cp client/
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # GitHub Token（不用动
+          tag_name: ${{ github.ref_name }}  # Release 标签
+          name: "Release ${{ github.ref_name }}"    # Release 标题
+          draft: false
+          prerelease: false
+          files: |
+            release/*   # 上传 release 文件夹下的所有文件
