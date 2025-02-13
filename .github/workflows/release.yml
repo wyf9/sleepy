@@ -1,6 +1,7 @@
 name: Release
 
 on:
+  workflow_dispatch:  # 允许手动触发
   push:
     paths:
       - 'client/Win_Simple'  # 只关注 Win_Simple 文件夹下的变化
@@ -10,7 +11,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: windows-latest
+    runs-on: windows-latest  # 使用 Windows 环境
 
     steps:
       - name: Checkout code
@@ -29,8 +30,9 @@ jobs:
     #这前面的不用动
       - name: Archive artifacts
         run: |
-          mkdir -p release  # 创建 release 文件夹方便发布
-          cp dist/Win_Simple.exe release/Win_Simple.exe
+          mkdir release  # 创建 release 文件夹
+          xcopy dist\Win_Simple.exe release\Win_Simple.exe /Y
+#刚才gpt说cpWindows不能用，所以我改成了xcopy
         #   cp clinet/autoxjs_device.js release/autoxjs_device.js
         #   cp clinet/browser-script-*.user.js release/browser-script.user.js
         #   cp clinet/cmd_console.py release/cmd_console.py
