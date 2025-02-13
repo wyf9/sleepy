@@ -5,7 +5,6 @@ rt {
     font-size: 0.6em;
 }
 
-
 a {
     text-decoration: none;
 }
@@ -23,8 +22,14 @@ body {
     width: 40%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
-    opacity: {{ alpha }};
+    font-size: 1.1em;
+    opacity: {{ alpha }}; /* 格式化后注意此处 */
 }
+
+#last-updated {
+    font-size: 0.9em;
+}
+
 .card p {
     font-size: 1.2em;
     margin: 1rem;
