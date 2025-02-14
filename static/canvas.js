@@ -120,8 +120,8 @@ class ParticleBackground {
     // 鼠标靠近时的粒子交互
     handleMouseInteraction(particle, other, distanceSquared, dx, dy) {
         if (other === this.mouse && distanceSquared >= other.max / 2) {
-            particle.x -= 0.02 * dx;
-            particle.y -= 0.02 * dy;
+            particle.x -= 0.05 * dx;
+            particle.y -= 0.03 * dy;
         }
     }
 
@@ -139,5 +139,5 @@ const particleBg = new ParticleBackground({
     zIndex: -1,
     opacity: 0.8,
     color: "0,255,255",
-    count: 75
+    count: 80
 });

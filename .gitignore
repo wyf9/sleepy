@@ -6,7 +6,7 @@ config.*.jsonc
 *.test.*
 *.local.*
 .venv/
-build/
-dist/
+client/Win_Simple/build/
+client/Win_Simple/*.spec
 client/Win_Simple/dist/config.ini
 client/Win_Simple/config.ini

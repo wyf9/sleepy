@@ -9,7 +9,6 @@ from datetime import datetime
 from time import time, sleep
 import io
 #pyinstaller -F -n Win_Simple.exe --icon=zmal.ico --hidden-import=win32gui --hidden-import=win32api --hidden-import=requests script.py
-#pyinstaller client/Win_Simple/Win_Simple.exe.spec
 
 import logging
 
