@@ -12,7 +12,7 @@ modification by pwnint
   :-) GLHF
 '''
 from win32gui import GetWindowText, GetForegroundWindow  # type: ignore
-from win32api import GetCursorPos  # 添加鼠标位置获取
+from win32api import GetCursorPos  # type: ignore - 添加鼠标位置获取
 from requests import post
 from datetime import datetime
 import time  # 改用 time 模块以获取更精确的时间
@@ -41,12 +41,12 @@ SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换',
 NOT_USING_NAMES = ['我们喜欢这张图片，因此我们将它与你共享。']
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
 REVERSE_APP_NAME = False
-# 鼠标静止判定时间(分钟)
+# 鼠标静止判定时间 (分钟)
 MOUSE_IDLE_TIME = 15
-# 鼠标移动检测的最小距离（像素）
-MOUSE_MOVE_THRESHOLD = 3
-#日志是否显示更多信息 False/True
-INFO = True
+# 鼠标移动检测的最小距离 (像素)
+MOUSE_MOVE_THRESHOLD = 10
+# 控制日志是否显示更多信息
+DEBUG = True
 # --- config end
 
 # buffer = stdout.buffer  # backup
@@ -67,6 +67,14 @@ def print(msg: str, **kwargs):
         _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Log Error: {e}', flush=True)
 
 
+def debug(msg: str, **kwargs):
+    '''
+    显示调试消息
+    '''
+    if DEBUG:
+        print(msg, **kwargs)
+
+
 def reverse_app_name(name: str) -> str:
     '''
     反转应用名称 (将末尾的应用名提前)
@@ -84,7 +92,8 @@ def reverse_app_name(name: str) -> str:
 last_mouse_pos = GetCursorPos()
 last_mouse_move_time = time.time()
 is_mouse_idle = False
-cached_window_title = ''  # 缓存窗口标题,用于恢复
+cached_window_title = ''  # 缓存窗口标题, 用于恢复
+
 
 def check_mouse_idle() -> bool:
     '''
@@ -92,19 +101,18 @@ def check_mouse_idle() -> bool:
     返回 True 表示鼠标静止超时
     '''
     global last_mouse_pos, last_mouse_move_time, is_mouse_idle
-    
+
     current_pos = GetCursorPos()
     current_time = time.time()
-    
+
     # 计算鼠标移动距离
     dx = abs(current_pos[0] - last_mouse_pos[0])
     dy = abs(current_pos[1] - last_mouse_pos[1])
     distance = (dx * dx + dy * dy) ** 0.5
-    
+
     # 打印详细的鼠标状态信息
-    if INFO:
-        print(f'Mouse: current={current_pos}, last={last_mouse_pos}, distance={distance:.1f}px')
-    
+    debug(f'Mouse: current={current_pos}, last={last_mouse_pos}, distance={distance:.1f}px')
+
     # 如果移动距离超过阈值
     if distance > MOUSE_MOVE_THRESHOLD:
         last_mouse_pos = current_pos
@@ -113,22 +121,21 @@ def check_mouse_idle() -> bool:
             is_mouse_idle = False
             print(f'Mouse wake up: moved {distance:.1f}px')
         else:
-            if INFO:
-                print(f'Mouse moving: {distance:.1f}px')
+            debug(f'Mouse moving: {distance:.1f}px')
         return False
-    
+
     # 检查是否超过静止时间
     idle_time = current_time - last_mouse_move_time
-    if INFO:
-        print(f'Idle time: {idle_time:.1f}s / {MOUSE_IDLE_TIME*60:.1f}s')
-    
+    debug(f'Idle time: {idle_time:.1f}s / {MOUSE_IDLE_TIME*60:.1f}s')
+
     if idle_time > MOUSE_IDLE_TIME * 60:
         if not is_mouse_idle:
             is_mouse_idle = True
             print(f'Mouse entered idle state after {idle_time/60:.1f} minutes')
         return True
-    
+
     return is_mouse_idle  # 保持当前状态
+
 
 Url = f'{SERVER}/device/set'
 last_window = ''
@@ -136,17 +143,16 @@ last_window = ''
 
 def do_update():
     global last_window, cached_window_title, is_mouse_idle
-    
+
     # 获取当前窗口标题和鼠标状态
     current_window = GetWindowText(GetForegroundWindow())
     mouse_idle = check_mouse_idle()
-    if INFO:
-        print(f'--- Window: `{current_window}`')
-    
+    debug(f'--- Window: `{current_window}`')
+
     # 始终保持同步的状态变量
     window = current_window
     using = True
-    
+
     # 鼠标空闲状态处理（优先级最高）
     if mouse_idle:
         # 缓存非空闲时的窗口标题
@@ -169,19 +175,18 @@ def do_update():
             for name in NOT_USING_NAMES:
                 if current_window == name:
                     using = False
-                    if INFO:
-                        print(f'* not using: `{name}`')
+                    debug(f'* not using: `{name}`')
                     break
-    
+
     # 是否需要发送更新
     should_update = (
         mouse_idle != is_mouse_idle or  # 鼠标状态改变
         window != last_window or  # 窗口改变
         not BYPASS_SAME_REQUEST  # 强制更新模式
     )
-    
+
     if should_update:
-        print(f'Sending update: using={using}, app_name="{window}", idle={mouse_idle}')
+        print(f'Sending update: using = {using}, app_name = "{window}", idle = {mouse_idle}')
         try:
             resp = post(url=Url, json={
                 'secret': SECRET,
@@ -192,32 +197,28 @@ def do_update():
             }, headers={
                 'Content-Type': 'application/json'
             })
-            if INFO:
-                print(f'Response: {resp.status_code} - {resp.json()}')
-            else:
-                if resp.status_code!=200:
-                    print(f'出现异常，Response: {resp.status_code} - {resp.json()}')
+            debug(f'Response: {resp.status_code} - {resp.json()}')
+            if resp.status_code != 200 and not DEBUG:
+                print(f'出现异常! Response: {resp.status_code} - {resp.json()}')
             last_window = window
         except Exception as e:
             print(f'Error: {e}')
     else:
-        if INFO:
-            print('No state change, skipping update')
+        debug('No state change, skipping update')
 
 
 def main():
     while True:
         do_update()
-        sleep(1)  # 改为1秒检查一次，提高响应度
+        sleep(CHECK_INTERVAL)
 
 
 if __name__ == '__main__':
     try:
         main()
     except (KeyboardInterrupt, SystemExit) as e:
-        # 如果中断或被taskkill则发送未在使用
-        if INFO:
-            print(f'Interrupt: {e}')
+        # 如果中断或被 taskkill 则发送未在使用
+        debug(f'Interrupt: {e}')
         try:
             resp = post(url=Url, json={
                 'secret': SECRET,
@@ -228,10 +229,8 @@ if __name__ == '__main__':
             }, headers={
                 'Content-Type': 'application/json'
             })
-            if INFO:
-                print(f'Response: {resp.status_code} - {resp.json()}')
-            else:
-                if resp.status_code!=200:
-                    print(f'出现异常，Response: {resp.status_code} - {resp.json()}')
+            debug(f'Response: {resp.status_code} - {resp.json()}')
+            if resp.status_code != 200:
+                print(f'出现异常, Response: {resp.status_code} - {resp.json()}')
         except Exception as e:
             print(f'Exception: {e}')
