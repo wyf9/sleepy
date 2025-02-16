@@ -4,21 +4,21 @@ win_device.py
 在 Windows 上获取窗口名称
 by: @wyf9
 依赖: pywin32, requests
-'''
-'''
+---
 modification by pwnint
 - Added `SystemExit` case when the script is interrupted
 - Added mouse idle detection
   :-) GLHF
 '''
-from win32gui import GetWindowText, GetForegroundWindow  # type: ignore
-from win32api import GetCursorPos  # type: ignore - 添加鼠标位置获取
-from requests import post
-from datetime import datetime
-import time  # 改用 time 模块以获取更精确的时间
-from time import sleep
+
 import sys
 import io
+from time import sleep
+import time  # 改用 time 模块以获取更精确的时间
+from datetime import datetime
+from requests import post
+from win32api import GetCursorPos  # type: ignore - 添加鼠标位置获取
+from win32gui import GetWindowText, GetForegroundWindow  # type: ignore
 
 # --- config start
 # 服务地址, 末尾同样不带 /
@@ -47,6 +47,8 @@ MOUSE_IDLE_TIME = 15
 MOUSE_MOVE_THRESHOLD = 10
 # 控制日志是否显示更多信息
 DEBUG = True
+# 代理地址 (<http/socks>://host:port), 设置为空字符串禁用
+PROXY = ''
 # --- config end
 
 # buffer = stdout.buffer  # backup
@@ -141,6 +143,33 @@ Url = f'{SERVER}/device/set'
 last_window = ''
 
 
+def custom_post(json_data: dict, url: str = Url, **kwargs):
+    '''
+    post, 但默认设置了 headers 和 proxies
+    '''
+    if PROXY:
+        return post(
+            url=url,
+            json=json_data,
+            headers={
+                'Content-Type': 'application/json'
+            },
+            proxies={
+                'all': PROXY
+            },
+            **kwargs
+        )
+    else:
+        return post(
+            url=url,
+            json=json_data,
+            headers={
+                'Content-Type': 'application/json'
+            },
+            **kwargs
+        )
+
+
 def do_update():
     global last_window, cached_window_title, is_mouse_idle
 
@@ -188,14 +217,12 @@ def do_update():
     if should_update:
         print(f'Sending update: using = {using}, app_name = "{window}", idle = {mouse_idle}')
         try:
-            resp = post(url=Url, json={
+            resp = custom_post({
                 'secret': SECRET,
                 'id': DEVICE_ID,
                 'show_name': DEVICE_SHOW_NAME,
                 'using': using,
                 'app_name': window
-            }, headers={
-                'Content-Type': 'application/json'
             })
             debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code != 200 and not DEBUG:
@@ -220,14 +247,12 @@ if __name__ == '__main__':
         # 如果中断或被 taskkill 则发送未在使用
         debug(f'Interrupt: {e}')
         try:
-            resp = post(url=Url, json={
+            resp = custom_post({
                 'secret': SECRET,
                 'id': DEVICE_ID,
                 'show_name': DEVICE_SHOW_NAME,
                 'using': False,
                 'app_name': f'{e}'
-            }, headers={
-                'Content-Type': 'application/json'
             })
             debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code != 200:
