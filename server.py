@@ -151,6 +151,7 @@ def query():
         devicelst = {}
     ret = {
         'time': datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S'),
+        'timezone': c.config['timezone'],
         'success': True,
         'status': st,
         'info': stinfo,
