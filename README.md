@@ -98,8 +98,8 @@ python3 start.py
 **有的兄弟，有的！**
 这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作  
 我怕教太多了你学不会，现在只要点  
-[这里](https://huggingface.co/spaces/shegy/m/blob/main/config.example.jsonc?duplicate=true&visibility=public)  
-然后自己去注册一个账号
+[这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)  
+然后自己去注册一个账号   填入一个秘钥（随便写但不推荐特殊符号及中文
 然后这样
 ![链接](https://files.catbox.moe/svvdt6.png)
 就可以复制你的`URL`了，
