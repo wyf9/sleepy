@@ -284,7 +284,9 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 
 直接启动即可
 
-> 开机自启可自行在 `hyprland.conf` 中配置
+> [!TIP]
+> 开机自启可自行在 `hyprland.conf` 中配置 <br/>
+> **注意: 需要给脚本加上可执行权限 *(`chmod +x`)*, 否则无法运行!**
 
 ## [MagiskService](./magisk/service.sh)
 
