@@ -80,12 +80,14 @@ async function update() {
                                 const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
                                 const escapedJsCode = escapeHtml(jsCode);
 
-                                device_app = `<a
+                                device_app = `
+<a
     class="awake" 
     title="${escapedAppName}" 
     href="javascript:${escapedJsCode}">
 ${sliceText(escapedAppName, data.device_status_slice)}
-</a>`;
+</a>
+`;
                             } else {
                                 device_app = '<a class="sleeping">未在使用</a>';
                             }
@@ -96,7 +98,20 @@ ${sliceText(escapedAppName, data.device_status_slice)}
                         }
                         document.getElementById('device-status').innerHTML = deviceStatus;
                         // update last update time (last-updated)
-                        document.getElementById('last-updated').textContent = `最后更新: ${data.last_updated}`;
+                        timenow = new Date();
+                        document.getElementById('last-updated').innerHTML = `
+最后更新:
+<a
+class="awake" 
+title="时区: ${data.timezone}" 
+href="javascript:alert('
+浏览器最后一次成功获取时间: ${timenow}\\n
+数据最后更新时间 (基于服务器时区): ${data.last_updated}\\n
+服务端时区: ${data.timezone}
+')">
+${data.last_updated}
+</a>
+`;
                         // update refresh time
                         refresh_time = data.refresh;
                     } else {
