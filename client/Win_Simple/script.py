@@ -4,7 +4,7 @@ import sys
 import configparser
 from win32gui import GetWindowText, GetForegroundWindow
 from win32api import GetCursorPos
-from requests import post
+import requests
 from datetime import datetime
 from time import time, sleep
 import io
@@ -207,7 +207,7 @@ def do_update():
     if should_update:
         logging.info(f'Sending update: using={using}, app_name="{window}", idle={mouse_idle}')
         try:
-            resp = post(url=Url, json={
+            resp = requests.post(url=Url, json={
                 'secret': SECRET,
                 'id': DEVICE_ID,
                 'show_name': DEVICE_SHOW_NAME,
@@ -224,8 +224,24 @@ def do_update():
             logging.warning(f'Error: {e}')
     else:
         logging.debug('No state change, skipping update')
-
+        
+def check_network():
+    try:
+        response = requests.get('http://baidu.com', timeout=5)
+        if response.status_code == 200:
+            logging.debug("网络连接正常")
+            return True
+        else:
+            logging.debug("没有网络连接")
+            return False
+    except requests.RequestException:
+        print("没有网络连接")
+        return False
+    
 def main():
+    while(check_network()==False):
+        logging.warning('网络连接失败，等待5秒后重试')
+        sleep (5)
     while True:
         try:
             do_update()
@@ -252,6 +268,6 @@ if __name__ == '__main__':
             })
             logging.debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code!=200:
-                logging.warning(f'出现异常，Response: {resp.status_code} - {resp.json()}')
+                logging.warning(f'出现异常,Response: {resp.status_code} - {resp.json()}')
         except Exception as e:
             logging.error(f'Exception: {e}')
