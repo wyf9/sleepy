@@ -160,6 +160,21 @@ def check_mouse_idle() -> bool:
 Url = f'{SERVER}/device/set'
 last_window = ''
 
+def sent(using,window):
+    resp = requests.post(url=Url, json={
+                'secret': SECRET,
+                'id': DEVICE_ID,
+                'show_name': DEVICE_SHOW_NAME,
+                'using': using,
+                'app_name': window
+            }, headers={
+                'Content-Type': 'application/json'
+            })
+    logging.debug(f'Response: {resp.status_code} - {resp.json()}')
+    if resp.status_code!=200:
+        logging.warning(f'出现异常，Response: {resp.status_code} - {resp.json()}')
+    last_window = window
+    
 def do_update():
     global last_window, cached_window_title, is_mouse_idle
     
@@ -208,19 +223,7 @@ def do_update():
     if should_update:
         logging.info(f'Sending update: using={using}, app_name="{window}", idle={mouse_idle}')
         try:
-            resp = requests.post(url=Url, json={
-                'secret': SECRET,
-                'id': DEVICE_ID,
-                'show_name': DEVICE_SHOW_NAME,
-                'using': using,
-                'app_name': window
-            }, headers={
-                'Content-Type': 'application/json'
-            })
-            logging.debug(f'Response: {resp.status_code} - {resp.json()}')
-            if resp.status_code!=200:
-                logging.warning(f'出现异常，Response: {resp.status_code} - {resp.json()}')
-            last_window = window
+            sent(using,window)
         except Exception as e:
             logging.warning(f'Error: {e}')
     else:
@@ -249,6 +252,7 @@ def main():
             sleep(CHECK_INTERVAL)  # 使用配置的间隔
         except Exception as e:
             logging.error(f'主循环异常: {e}')
+            sent(False,f'{e}')
             sleep(1)  # 防止错误循环
 
 if __name__ == '__main__':
@@ -258,17 +262,6 @@ if __name__ == '__main__':
         # 如果中断或被taskkill则发送未在使用
         logging.warning(f'Interrupt: {e}')
         try:
-            resp = requests.post(url=Url, json={
-                'secret': SECRET,
-                'id': DEVICE_ID,
-                'show_name': DEVICE_SHOW_NAME,
-                'using': False,
-                'app_name': f'{e}'
-            }, headers={
-                'Content-Type': 'application/json'
-            })
-            logging.debug(f'Response: {resp.status_code} - {resp.json()}')
-            if resp.status_code!=200:
-                logging.warning(f'出现异常,Response: {resp.status_code} - {resp.json()}')
+            sent(False,f'{e}')
         except Exception as e:
             logging.error(f'Exception: {e}')
