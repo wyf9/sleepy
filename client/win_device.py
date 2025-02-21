@@ -2,14 +2,12 @@
 '''
 win_device.py
 在 Windows 上获取窗口名称
-by: @wyf9
+by: @wyf9, @pwnint, @kmizmal
 依赖: pywin32, requests
----
-modification by pwnint
-- Added `SystemExit` case when the script is interrupted
-- Added mouse idle detection
-  :-) GLHF
 '''
+
+# ----- Part: Import
+
 import sys
 import io
 from time import sleep
@@ -17,42 +15,45 @@ import time  # 改用 time 模块以获取更精确的时间
 from datetime import datetime
 from requests import post
 import threading
-import win32api
-import win32con
-import win32gui
+import win32api  # type: ignore - 勿删，用于强忽略 vscode linux 找不到 module 的 warning
+import win32con  # type: ignore
+import win32gui  # type: ignore
+
+# ----- Part: Config
 
 # --- config start
 # 服务地址, 末尾同样不带 /
-SERVER = 'http://localhost:9010'
+SERVER: str = 'http://localhost:9010'
 # 密钥
-SECRET = 'wyf9test'
+SECRET: str = 'wyf9test'
 # 设备标识符，唯一 (它也会被包含在 api 返回中, 不要包含敏感数据)
-DEVICE_ID = 'device-1'
+DEVICE_ID: str = 'device-1'
 # 前台显示名称
-DEVICE_SHOW_NAME = 'MyDevice1'
+DEVICE_SHOW_NAME: str = 'MyDevice1'
 # 检查间隔，以秒为单位
-CHECK_INTERVAL = 2
+CHECK_INTERVAL: int = 2
 # 是否忽略重复请求，即窗口未改变时不发送请求
-BYPASS_SAME_REQUEST = True
+BYPASS_SAME_REQUEST: bool = True
 # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-ENCODING = 'gb18030'
+ENCODING: str = 'gb18030'
 # 当窗口标题为其中任意一项时将不更新
-SKIPPED_NAMES = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher']
+SKIPPED_NAMES: list = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher']
 # 当窗口标题为其中任意一项时视为未在使用
-NOT_USING_NAMES = ['我们喜欢这张图片，因此我们将它与你共享。']
+NOT_USING_NAMES: list = ['我们喜欢这张图片，因此我们将它与你共享。', '启动']
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
-REVERSE_APP_NAME = False
+REVERSE_APP_NAME: bool = False
 # 鼠标静止判定时间 (分钟)
-MOUSE_IDLE_TIME = 15
+MOUSE_IDLE_TIME: int = 15
 # 鼠标移动检测的最小距离 (像素)
-MOUSE_MOVE_THRESHOLD = 10
+MOUSE_MOVE_THRESHOLD: int = 10
 # 控制日志是否显示更多信息
-DEBUG = True
+DEBUG: bool = True
 # 代理地址 (<http/socks>://host:port), 设置为空字符串禁用
-PROXY = ''
+PROXY: str = ''
 # --- config end
 
-# buffer = stdout.buffer  # backup
+# ----- Part: Functions
+
 # stdout = TextIOWrapper(stdout.buffer, encoding=ENCODING)  # https://stackoverflow.com/a/3218048/28091753
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 _print_ = print
@@ -91,24 +92,60 @@ def reverse_app_name(name: str) -> str:
     return ' - '.join(new)
 
 
-# 鼠标状态相关变量
-last_mouse_pos = win32api.GetCursorPos()
-last_mouse_move_time = time.time()
-is_mouse_idle = False
-cached_window_title = ''  # 缓存窗口标题, 用于恢复
+# ----- Part: Send status
 
-# 定义关机监听的回调函数
+Url = f'{SERVER}/device/set'
+last_window = ''
+
+
+def send_status(using: bool = True, app_name: str = '', **kwargs):
+    '''
+    post 发送设备状态信息
+    设置了 headers 和 proxies
+    '''
+    json_data = {
+        'secret': SECRET,
+        'id': DEVICE_ID,
+        'show_name': DEVICE_SHOW_NAME,
+        'using': using,
+        'app_name': app_name
+    }
+    if PROXY:
+        return post(
+            url=Url,
+            json=json_data,
+            headers={
+                'Content-Type': 'application/json'
+            },
+            proxies={
+                'all': PROXY
+            },
+            **kwargs
+        )
+    else:
+        return post(
+            url=Url,
+            json=json_data,
+            headers={
+                'Content-Type': 'application/json'
+            },
+            **kwargs
+        )
+
+# ----- Part: Shutdown handler
+
+
 def on_shutdown(hwnd, msg, wparam, lparam):
+    '''
+    关机监听回调
+    '''
     if msg == win32con.WM_QUERYENDSESSION:
         print("系统正在关机或注销...")
         try:
-            resp = custom_post({
-                'secret': SECRET,
-                'id': DEVICE_ID,
-                'show_name': DEVICE_SHOW_NAME,
-                'using': False,
-                'app_name': "要关机了喵"
-            })
+            resp = send_status(
+                using=False,
+                app_name="要关机了喵"
+            )
             debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code != 200:
                 print(f'出现异常, Response: {resp.status_code} - {resp.json()}')
@@ -116,6 +153,7 @@ def on_shutdown(hwnd, msg, wparam, lparam):
             print(f'Exception: {e}')
         return True  # 允许关机或注销
     return 0  # 其他消息
+
 
 # 注册窗口类
 wc = win32gui.WNDCLASS()
@@ -129,13 +167,26 @@ class_atom = win32gui.RegisterClass(wc)
 # 创建窗口
 hwnd = win32gui.CreateWindow(class_atom, "Shutdown Listener", 0, 0, 0, 0, 0, 0, 0, 0, wc.hInstance, None)
 
-# 定义一个函数用于在后台启动消息循环
+
 def message_loop():
+    '''
+    (需异步执行) 用于在后台启动消息循环
+    '''
     win32gui.PumpMessages()
+
 
 # 创建并启动线程
 message_thread = threading.Thread(target=message_loop, daemon=True)
 message_thread.start()
+
+# ----- Part: Mouse idle
+
+# 鼠标状态相关变量
+last_mouse_pos = win32api.GetCursorPos()
+last_mouse_move_time = time.time()
+is_mouse_idle = False
+cached_window_title = ''  # 缓存窗口标题, 用于恢复
+
 
 def check_mouse_idle() -> bool:
     '''
@@ -178,36 +229,7 @@ def check_mouse_idle() -> bool:
 
     return is_mouse_idle  # 保持当前状态
 
-
-Url = f'{SERVER}/device/set'
-last_window = ''
-
-
-def custom_post(json_data: dict, url: str = Url, **kwargs):
-    '''
-    post, 但默认设置了 headers 和 proxies
-    '''
-    if PROXY:
-        return post(
-            url=url,
-            json=json_data,
-            headers={
-                'Content-Type': 'application/json'
-            },
-            proxies={
-                'all': PROXY
-            },
-            **kwargs
-        )
-    else:
-        return post(
-            url=url,
-            json=json_data,
-            headers={
-                'Content-Type': 'application/json'
-            },
-            **kwargs
-        )
+# ----- Part: Main interval check
 
 
 def do_update():
@@ -257,13 +279,10 @@ def do_update():
     if should_update:
         print(f'Sending update: using = {using}, app_name = "{window}", idle = {mouse_idle}')
         try:
-            resp = custom_post({
-                'secret': SECRET,
-                'id': DEVICE_ID,
-                'show_name': DEVICE_SHOW_NAME,
-                'using': using,
-                'app_name': window
-            })
+            resp = send_status(
+                using=using,
+                app_name=window
+            )
             debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code != 200 and not DEBUG:
                 print(f'出现异常! Response: {resp.status_code} - {resp.json()}')
@@ -287,13 +306,10 @@ if __name__ == '__main__':
         # 如果中断或被 taskkill 则发送未在使用
         debug(f'Interrupt: {e}')
         try:
-            resp = custom_post({
-                'secret': SECRET,
-                'id': DEVICE_ID,
-                'show_name': DEVICE_SHOW_NAME,
-                'using': False,
-                'app_name': f'{e}'
-            })
+            resp = send_status(
+                using=False,
+                app_name=f'Client Exited: {e}'
+            )
             debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code != 200:
                 print(f'出现异常, Response: {resp.status_code} - {resp.json()}')
