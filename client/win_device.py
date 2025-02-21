@@ -10,15 +10,16 @@ modification by pwnint
 - Added mouse idle detection
   :-) GLHF
 '''
-
 import sys
 import io
 from time import sleep
 import time  # 改用 time 模块以获取更精确的时间
 from datetime import datetime
 from requests import post
-from win32api import GetCursorPos  # type: ignore - 添加鼠标位置获取
-from win32gui import GetWindowText, GetForegroundWindow  # type: ignore
+import threading
+import win32api
+import win32con
+import win32gui
 
 # --- config start
 # 服务地址, 末尾同样不带 /
@@ -91,11 +92,50 @@ def reverse_app_name(name: str) -> str:
 
 
 # 鼠标状态相关变量
-last_mouse_pos = GetCursorPos()
+last_mouse_pos = win32api.GetCursorPos()
 last_mouse_move_time = time.time()
 is_mouse_idle = False
 cached_window_title = ''  # 缓存窗口标题, 用于恢复
 
+# 定义关机监听的回调函数
+def on_shutdown(hwnd, msg, wparam, lparam):
+    if msg == win32con.WM_QUERYENDSESSION:
+        print("系统正在关机或注销...")
+        try:
+            resp = custom_post({
+                'secret': SECRET,
+                'id': DEVICE_ID,
+                'show_name': DEVICE_SHOW_NAME,
+                'using': False,
+                'app_name': "要关机了喵"
+            })
+            debug(f'Response: {resp.status_code} - {resp.json()}')
+            if resp.status_code != 200:
+                print(f'出现异常, Response: {resp.status_code} - {resp.json()}')
+        except Exception as e:
+            print(f'Exception: {e}')
+        return True  # 允许关机或注销
+    return 0  # 其他消息
+
+# 注册窗口类
+wc = win32gui.WNDCLASS()
+wc.lpfnWndProc = on_shutdown  # 设置回调函数
+wc.lpszClassName = "ShutdownListener"
+wc.hInstance = win32api.GetModuleHandle(None)
+
+# 创建窗口类并注册
+class_atom = win32gui.RegisterClass(wc)
+
+# 创建窗口
+hwnd = win32gui.CreateWindow(class_atom, "Shutdown Listener", 0, 0, 0, 0, 0, 0, 0, 0, wc.hInstance, None)
+
+# 定义一个函数用于在后台启动消息循环
+def message_loop():
+    win32gui.PumpMessages()
+
+# 创建并启动线程
+message_thread = threading.Thread(target=message_loop, daemon=True)
+message_thread.start()
 
 def check_mouse_idle() -> bool:
     '''
@@ -104,7 +144,7 @@ def check_mouse_idle() -> bool:
     '''
     global last_mouse_pos, last_mouse_move_time, is_mouse_idle
 
-    current_pos = GetCursorPos()
+    current_pos = win32api.GetCursorPos()
     current_time = time.time()
 
     # 计算鼠标移动距离
@@ -174,7 +214,7 @@ def do_update():
     global last_window, cached_window_title, is_mouse_idle
 
     # 获取当前窗口标题和鼠标状态
-    current_window = GetWindowText(GetForegroundWindow())
+    current_window = win32gui.GetWindowText(win32gui.GetForegroundWindow())
     mouse_idle = check_mouse_idle()
     debug(f'--- Window: `{current_window}`')
 
