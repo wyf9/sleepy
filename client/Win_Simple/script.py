@@ -8,6 +8,7 @@ import requests
 from datetime import datetime
 from time import time, sleep
 import io
+#cd client/Win_Simple
 #pyinstaller -F -n Win_Simple.exe --icon=zmal.ico --hidden-import=win32gui --hidden-import=win32api --hidden-import=requests script.py
 
 import logging
@@ -257,7 +258,7 @@ if __name__ == '__main__':
         # 如果中断或被taskkill则发送未在使用
         logging.warning(f'Interrupt: {e}')
         try:
-            resp = post(url=Url, json={
+            resp = requests.post(url=Url, json={
                 'secret': SECRET,
                 'id': DEVICE_ID,
                 'show_name': DEVICE_SHOW_NAME,
