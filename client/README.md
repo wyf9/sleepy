@@ -38,8 +38,8 @@
     - [Configure](#configure-10)
     - [Using](#using-8)
   - [AppleShortcuts](#appleshortcuts)
-    - [完整版](#完整版)
-    - [极速版](#极速版)
+    - [FullVer](#fullver)
+    - [FastVer](#fastver)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -78,7 +78,8 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 ## [WinDevice](./win_device.py)
 
 > by: [@wyf9](https://github.com/wyf9)
-> Co-authored-by: [@pwnInt](https://github.com/pwnInt)
+> Co-authored-by: [@kmizmal](https://github.com/kmizmal)
+> Co-authored-by: [@pwnInt](https://github.com/pwnInt) - ^C / 鼠标空闲检测
 
 在 Windows 上自动更新设备状态
 
@@ -86,7 +87,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/e3202483156cab91bfec45d91a60190ca2fedf52/client/win_device.py#L23-L52
+https://github.com/wyf9/sleepy/blob/cd70d1c6b5527e2df9a718000e8c58cc785b005d/client/win_device.py#L24-L53
 
 > PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
 > 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)
@@ -309,11 +310,12 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 
 ## [Win_Simple](./Win_Simple/dist/Win_Simple.exe)
 
-> by: [@kmizmal](https://github.com/kmizmal)
+> by: [@kmizmal](https://github.com/kmizmal) <br/>
+> Source: [`./Win_Simple/script.py`](./Win_Simple/script.py)
 
 ### Configure
 
-[./Win_Simple/dist/config.ini](./Win_Simple/dist/config.ini)
+配置文件 (首次打开自动创建): `config.ini`
 
 https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/client/Win_Simple/dist/config.ini#L2-L27
 
@@ -328,13 +330,17 @@ https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/cli
 ## [AppleShortcuts](https://github.com/Detritalw/Sleepy-Client-Shortcuts)
 
 > by: [@Detritalw](https://github.com/Detritalw) <br/>
-> *指向外部 repo / 链接资源*
+> ***指向外部资源***
 
-### 完整版
-[点击链接直接安装, 支持 Apple Watch, iPhone, iPad, mac...](https://www.icloud.com/shortcuts/aa31f2a5295842939be354285d4e9d14)
+### FullVer
 
-### 极速版
-[点击链接安装，建议设置自动化 → 打开App → 选择全部App → 设置为不确认，立即执行 → 选择快捷指令为Sleepy Client Shortcuts Fast，即可获得超级好的体验。](https://www.icloud.com/shortcuts/eec863215bfb4d7ea7228b6032d1fc6c)
+[点击链接安装完整版, 支持 Apple Watch, iPhone, iPad, mac...](https://www.icloud.com/shortcuts/aa31f2a5295842939be354285d4e9d14)
+
+### FastVer
+
+[点击链接安装极速版](https://www.icloud.com/shortcuts/eec863215bfb4d7ea7228b6032d1fc6c)
+
+**建议设置自动化 → 打开App → 选择全部App → 设置为不确认，立即执行 → 选择快捷指令为Sleepy Client Shortcuts Fast，即可获得超级好的体验。**
 
 > [!WARNING]
 > 这里的链接可能不是最新，[建议到项目内查看](https://www.icloud.com/shortcuts/92fbddbf922343f5b076c828f788371f)
@@ -345,6 +351,7 @@ https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/cli
 
 ## Other repos
 
+> [!IMPORTANT]
 > 在功能 / API 实现上有不同，需要进行修改以与本分支适配 (见 [API #device-set](../doc/api.md#device-set))
 
 - [1812z/sleepy] Android [Macrodroid](https://www.bing.com/search?q=Macrodroid%20download): [(main) `前台应用状态.macro`](https://github.com/1812z/sleepy/blob/main/%E5%89%8D%E5%8F%B0%E5%BA%94%E7%94%A8%E7%8A%B6%E6%80%81.macro)
