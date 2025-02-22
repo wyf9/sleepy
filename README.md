@@ -9,6 +9,7 @@
 - 自行设置在线状态
 - 实时更新设备打开应用 (名称)
 - 美观的展示页面 [见 [Preview](#preview)]
+- 开放的 Query / Metrics [接口](./doc/api.md), 方便统计
 
 ### TODO
 
@@ -19,7 +20,7 @@
 - [x] Android 客户端 ([Autox.js](https://github.com/aiselp/AutoX))
 - [x] [查看更多客户端 (如浏览器脚本)](./client/README.md)
 - [x] Metrics API (统计页面访问 / 接口调用次数)
-- [ ] **设备状态 Heartbeat 机制**
+- [ ] **设备状态使用 Heartbeat 超时判定未在使用**
 - [ ] ~~更多状态存储选项 (如 SQLite)~~
 
 > [!TIP]
@@ -34,9 +35,9 @@
 
 演示站 (*较*稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
-开发预览 (*不保证可用*, 密钥 `wyf9test`): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+开发预览 (*不保证可用*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
-> 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本
+> 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本 (**密钥 `wyf9test`**)
 
 > [!WARNING]
 > 不要拿演示站做坏事 (比如 js 注入，已由 DeepSeek 强力修复) ~~，没准哪天我会加访问日志~~

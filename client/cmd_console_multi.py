@@ -94,7 +94,7 @@ def main():
         "set_to": 0
     }
     '''
-    ret = loadjson(f'{server}/set/{SECRET}/{st}')
+    ret = loadjson(f'{server}/set?secret={SECRET}&status={st}')
     try:
         print(
             f'success: [{ret["success"]}], code: [{ret["code"]}], set_to: [{ret["set_to"]}]')
