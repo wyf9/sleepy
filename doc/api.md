@@ -152,7 +152,6 @@
 |                     | 路径                                   | 方法  | 作用     |
 | ------------------- | -------------------------------------- | ----- | -------- |
 | [Jump](#status-set) | `/set?secret=<secret>&status=<status>` | `GET` | 设置状态 |
-|                     | `/set/<secret>/<status>`               | `GET` | -        |
 
 
 ### status-set
@@ -164,7 +163,6 @@
 设置当前状态
 
 * Method: GET
-* Alias: `/set/<secret>/<status>`
 
 #### Params
 

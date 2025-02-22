@@ -119,7 +119,7 @@ ${sliceText(escapedAppName, data.device_status_slice)}
 class="awake" 
 title="服务器时区: ${data.timezone}" 
 href="javascript:alert('
-浏览器最后一次成功获取时间: ${timenow}\\n
+浏览器最后更新时间: ${timenow}\\n
 数据最后更新时间 (基于服务器时区): ${data.last_updated}\\n
 服务端时区: ${data.timezone}
 ')">

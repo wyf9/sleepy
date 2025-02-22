@@ -149,8 +149,9 @@ def query():
     devicelst = d.data['device_status']
     if d.data['private_mode']:
         devicelst = {}
+    timenow = datetime.now(pytz.timezone(c.config['timezone']))
     ret = {
-        'time': datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S'),
+        'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
         'timezone': c.config['timezone'],
         'success': True,
         'status': st,
@@ -164,8 +165,8 @@ def query():
     return u.format_dict(ret)
 
 
-@app.route('/get/status_list')  # 保证兼容
 @app.route('/status_list')
+@app.route('/get/status_list')  # 兼容旧版 client (?)
 def get_status_list():
     '''
     获取 `status_list`
@@ -204,31 +205,6 @@ def set_normal():
             'code': 'OK',
             'set_to': status
         })
-    else:
-        return u.reterr(
-            code='not authorized',
-            message='invaild secret'
-        )
-
-
-@app.route('/set/<secret>/<int:status>')
-def set_path(secret, status):
-    '''
-    set 设置状态, 但参数直接写路径里
-    - http[s]://<your-domain>[:your-port]/set/<your-secret>/<a-number>
-    - Method: **GET**
-    '''
-    secret = escape(secret)
-    secret_real = SECRET_real
-    if secret == secret_real:
-        d.dset('status', status)
-        ret = {
-            'success': True,
-            'code': 'OK',
-            'set_to': status
-        }
-        showip(request, '/set')
-        return u.format_dict(ret)
     else:
         return u.reterr(
             code='not authorized',
