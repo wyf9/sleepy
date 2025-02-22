@@ -24,7 +24,7 @@ class AppConfig:
     DEVICE_SHOW_NAME = MyComputer
     CHECK_INTERVAL = 2
     ENCODING = utf-8
-    SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 示例窗口1| 示例窗口2
+    SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 开始| 示例窗口1| 示例窗口2
     NOT_USING_NAMES = 我们喜欢这张图片，因此我们将它与你共享。| 示例窗口1| 示例窗口2
     REVERSE_APP_NAME = False
     MOUSE_IDLE_TIME = 15
@@ -44,7 +44,7 @@ class AppConfig:
             logging.warning("⚠️ 配置文件不存在，正在创建默认 config.ini...")
             with open(self.config_path, "w", encoding="utf-8") as f:
                 f.write(self._DEFAULT_CONFIG)
-            sys.exit(f"✅ 默认配置文件已创建: {self.config_path}, 请编辑后重新运行程序")
+            sys.exit(f"✅ 默认配置文件已创建: {self.config_path}, 可以冲了")
     
     def _load_config(self):
         """加载并验证配置"""
@@ -73,7 +73,7 @@ class AppConfig:
             self.log_file = self.config.getboolean('settings', 'LOG_FILE')
             
         except Exception as e:
-            logging.error(f'配置文件读取失败: {e}')
+            logging.error(f'配置文件打不开惹: {e}')
             sys.exit(1)
     
     def _parse_list(self, key: str) -> list:
@@ -118,14 +118,14 @@ class DeviceState:
             self.last_mouse_pos = current_pos
             self.last_mouse_time = current_time
             if self.is_mouse_idle:
-                logging.debug('鼠标恢复活动')
+                logging.debug('你起了？饭被我吃完了~')
                 self.is_mouse_idle = False
             return False
         
         # 检测空闲超时
         if (current_time - self.last_mouse_time) > (self.config.mouse_idle_time * 60):
             if not self.is_mouse_idle:
-                logging.debug('鼠标进入空闲状态')
+                logging.debug('主人睡着了吗，那我要偷吃惹')
                 self.is_mouse_idle = True
             return True
         return self.is_mouse_idle
@@ -156,6 +156,7 @@ class DeviceMonitor:
             
         logging.basicConfig(
             level=self.config.log_level,
+            datefmt="%Y-%m-%d %H:%M:%S",
             format="%(asctime)s - %(levelname)s - %(message)s",
             handlers=handlers
         )
@@ -178,7 +179,7 @@ class DeviceMonitor:
             resp.raise_for_status()
             self.state.last_window = window
         except requests.RequestException as e:
-            logging.warning(f'状态发送失败: {e}')
+            logging.warning(f'主人反省一下自己干了什么: {e}')
     
     def _should_update(self, new_window: str, mouse_idle: bool) -> bool:
         """判断是否需要更新状态"""
@@ -189,7 +190,7 @@ class DeviceMonitor:
         if window not in self.config.skipped_names:
             return window
         
-        logging.debug(f'跳过窗口: {window}')
+        logging.debug(f'不要~ {window}')
         # 使用上次有效窗口
         fallback = self.state.last_window if self.state.last_window not in self.config.skipped_names else ''
         return fallback if fallback else None
@@ -212,10 +213,10 @@ class DeviceMonitor:
             
             # 发送更新
             if self._should_update(processed_window, mouse_idle):
-                logging.info(f'状态更新: using={using}, app={processed_window}, idle={mouse_idle}')
+                logging.info(f'{using},主人在 {processed_window}')
                 self.send_state(using, processed_window)
         except Exception as e:
-            logging.error(f'状态更新异常: {e}')
+            logging.error(f'呼呼呼~{e}')
 
 # --------------------------
 # 系统功能模块
@@ -228,7 +229,7 @@ def check_network():
     except requests.RequestException:
         return False
 
-def message_loop():
+def message_loop(monitor):
     """(需异步执行) 窗口消息循环"""
     def create_window():
         wc = win32gui.WNDCLASS()
@@ -240,14 +241,22 @@ def message_loop():
                                      100, 100, 600, 400, 0, 0, wc.hInstance, None)
     
     def on_shutdown(hwnd, msg, wparam, lparam):
-        """关机事件处理"""
-        if msg == win32con.WM_QUERYENDSESSION:
-            logging.info("系统正在关机或注销...")
-            return True
+        """窗口事件处理"""
+        if msg == win32con.WM_QUERYENDSESSION or msg == win32con.WM_CLOSE:
+            logging.info("结束了喵...?")
+            try:
+                resp = monitor.send_state(False,"结束了喵")
+                logging.debug(f'Response: {resp.status_code} - {resp.json()}')
+                if resp.status_code != 200:
+                    logging.warning(f'阿巴阿巴，{resp.status_code} - {resp.json()}')
+            except Exception as e:
+                logging.warning(f'玛卡巴卡，{e}')
+            return True  # 允许关机或注销
+           
         return 0
     
     hwnd = create_window()
-    logging.info("窗口消息循环已启动")
+    # logging.info("启动")
     win32gui.PumpMessages()
 
 # --------------------------
@@ -259,11 +268,11 @@ def main():
     monitor = DeviceMonitor(config, state)
     
     # 启动消息循环线程
-    threading.Thread(target=message_loop, daemon=True).start()
+    threading.Thread(target=message_loop, args=(monitor,), daemon=True).start()
     
     # 等待网络连接
     while not check_network():
-        logging.warning('网络连接失败，5秒后重试...')
+        logging.warning('网络被主人冲坏了喵~，5秒后重试...')
         sleep(5)
     
     # 主监控循环
@@ -272,10 +281,11 @@ def main():
             monitor.update_state()
             sleep(config.check_interval)
         except KeyboardInterrupt:
-            monitor.send_state(False, "用户中断")
+            monitor.send_state(False, "主人要抛弃人家了吗~呜")
+            logging.info("主人要抛弃人家了吗~呜")
             sys.exit(0)
         except Exception as e:
-            logging.error(f'主循环异常: {e}')
+            logging.error(f'梦梦不知道哦: {e}')
             sleep(10)
 
 if __name__ == '__main__':
