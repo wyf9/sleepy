@@ -77,7 +77,6 @@ def index():
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
-    # showip(flask.request, '/')
     more_text: str = ot['more_text']
     if METRICS_ENABLED:
         more_text = more_text.format(
@@ -126,7 +125,6 @@ def style_css():
         alpha=c.config['other']['alpha']
     ))
     response.mimetype = 'text/css'
-    # showip(flask.request, '/style.css')
     return response
 # --- Read-only
 
@@ -163,12 +161,10 @@ def query():
         'last_updated': d.data['last_updated'],
         'refresh': c.config['other']['refresh']
     }
-    # showip(flask.request, '/query')
     return u.format_dict(ret)
 
 
 @app.route('/status_list')
-@app.route('/get/status_list')  # 兼容旧版 client (?)
 def get_status_list():
     '''
     获取 `status_list`
@@ -176,7 +172,6 @@ def get_status_list():
     - Method: **GET**
     '''
     stlst = c.get('status_list')
-    # showip(flask.request, '/status_list')
     return u.format_dict(stlst)
 
 # --- Status API
@@ -200,7 +195,6 @@ def set_normal():
     secret = escape(flask.request.args.get('secret'))
     if secret == SECRET_REAL:
         d.dset('status', status)
-        # showip(flask.request, '/set')
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -236,9 +230,6 @@ def device_set():
         secret = escape(flask.request.args.get('secret'))
         if secret == SECRET_REAL:
             devices: dict = d.dget('device_status')
-            # app_name非空时会显示原来的app_name, 状态不会被覆盖
-            if not device_using:
-                app_name = ''
             devices[device_id] = {
                 'show_name': device_show_name,
                 'using': device_using,
@@ -284,7 +275,6 @@ def device_set():
             code='invaild request',
             message='only supports GET and POST method!'
         )
-    # showip(flask.request, '/device/set')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -313,7 +303,6 @@ def remove_device():
             code='not authorized',
             message='invaild secret'
         )
-    # showip(flask.request, '/device/remove')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -335,7 +324,6 @@ def clear_device():
             code='not authorized',
             message='invaild secret'
         )
-    # showip(flask.request, '/device/clear')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -364,7 +352,6 @@ def private_mode():
             code='not authorized',
             message='invaild secret'
         )
-    # showip(flask.request, '/device/private_mode')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -380,11 +367,10 @@ def reload_config():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
+    global SECRET_REAL
     if secret == SECRET_REAL:
         c.load()
-        global SECRET_REAL
         SECRET_REAL = os.environ.get('SLEEPY_SECRET') or c.get('secret')
-        # showip(flask.request, '/reload_config')
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -404,7 +390,6 @@ def save_data():
     '''
     secret = escape(flask.request.args.get('secret'))
     if secret == SECRET_REAL:
-        # showip(flask.request, '/save_data')
         try:
             d.save()
         except Exception as e:
@@ -433,7 +418,6 @@ if METRICS_ENABLED:
         - Method: **GET**
         '''
         resp = d.get_metrics_resp()
-        # showip(flask.request, '/metrics')
         return resp
 
 
