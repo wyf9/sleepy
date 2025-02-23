@@ -20,6 +20,53 @@
             <!-- <hr /> 由 get.js 控制 -->
             <p id="device-status">[设备状态列表]</p>
             <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
+            <p id="steam"></p>
+            <script>
+                if(steamkey!==undefined){
+                    const steam = document.getElementById('steam');
+                    //也许这里需要反代
+                    const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
+                    const steamkey = '{{ steamkey }}';
+                    const steamids = '{{ steamids }}'
+                    const quresteaam = `${steamapi}/?key=${steamkey}&steamids=${steamids}`
+                    fetch($quresteaam)
+                            .then(response => response.json())
+                            .then(data => {
+                                // steam.href = ``
+                                //暂时不用a标签吧
+                                steam.innerText = data.player
+  //响应长这样                              
+// {
+//   "response": {
+//     "players": {
+//       "player": [
+//         {
+//           "steamid": "76561199517255765",
+//           "communityvisibilitystate": 3,
+//           "profilestate": 1,
+//           "personaname": "kmizmal",
+//           "commentpermission": 1,
+//           "profileurl": "https://steamcommunity.com/id/kmizmal/",
+//           "avatar": "https://avatars.steamstatic.com/e7de6f5d8afbc51f37e338b3bb82127c0f543fc6.jpg",
+//           "avatarmedium": "https://avatars.steamstatic.com/e7de6f5d8afbc51f37e338b3bb82127c0f543fc6_medium.jpg",
+//           "avatarfull": "https://avatars.steamstatic.com/e7de6f5d8afbc51f37e338b3bb82127c0f543fc6_full.jpg",
+//           "avatarhash": "e7de6f5d8afbc51f37e338b3bb82127c0f543fc6",
+//           "lastlogoff": 1740284028,
+//           "personastate": 1,
+//           "realname": "zmal",
+//           "primaryclanid": "103582791429521408",
+//           "timecreated": 1687087413,
+//           "personastateflags": 0
+//         }
+//       ]
+//     }
+//   }
+// }
+                            })
+                            .catch(console.error)
+                }
+                
+            </script>
             <p id="last-updated">最后更新: {{ last_updated }}</p>
 
         </div>
