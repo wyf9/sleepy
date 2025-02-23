@@ -17,7 +17,7 @@ try:
     app = flask.Flask(__name__)
     c.load()
     d.load()
-    SECRET_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
+    SECRET_REAL = os.environ.get('SLEEPY_SECRET') or c.get('secret')
     d.start_timer_check(data_check_interval=c.config['data_check_interval'])  # 启动定时保存
     # metrics?
     if c.get('metrics'):
@@ -198,8 +198,7 @@ def set_normal():
             message="argument 'status' must be int"
         )
     secret = escape(flask.request.args.get('secret'))
-    secret_real = SECRET_real
-    if secret == secret_real:
+    if secret == SECRET_REAL:
         d.dset('status', status)
         # showip(flask.request, '/set')
         return u.format_dict({
@@ -235,8 +234,7 @@ def device_set():
                 message='missing param or wrong param type'
             )
         secret = escape(flask.request.args.get('secret'))
-        secret_real = SECRET_real
-        if secret == secret_real:
+        if secret == SECRET_REAL:
             devices: dict = d.dget('device_status')
             # app_name非空时会显示原来的app_name, 状态不会被覆盖
             if not device_using:
@@ -265,8 +263,7 @@ def device_set():
                 code='bad request',
                 message='missing param'
             )
-        secret_real = SECRET_real
-        if secret == secret_real:
+        if secret == SECRET_REAL:
             devices: dict = d.dget('device_status')
             # L245~247同理
             if not device_using:
@@ -302,8 +299,7 @@ def remove_device():
     '''
     device_id = escape(flask.request.args.get('id'))
     secret = escape(flask.request.args.get('secret'))
-    secret_real = SECRET_real
-    if secret == secret_real:
+    if secret == SECRET_REAL:
         try:
             del d.data['device_status'][device_id]
             d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
@@ -331,8 +327,7 @@ def clear_device():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
-    secret_real = SECRET_real
-    if secret == secret_real:
+    if secret == SECRET_REAL:
         d.data['device_status'] = {}
         d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
     else:
@@ -354,8 +349,7 @@ def private_mode():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
-    secret_real = SECRET_real
-    if secret == secret_real:
+    if secret == SECRET_REAL:
         private = escape(flask.request.args.get('private'))
         private = u.tobool(private)
         if private == None:
@@ -386,10 +380,10 @@ def reload_config():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
-    secret_real = SECRET_real
-    if secret == secret_real:
+    if secret == SECRET_REAL:
         c.load()
-        SECRET_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
+        global SECRET_REAL
+        SECRET_REAL = os.environ.get('SLEEPY_SECRET') or c.get('secret')
         # showip(flask.request, '/reload_config')
         return u.format_dict({
             'success': True,
@@ -409,8 +403,7 @@ def save_data():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
-    secret_real = os.environ.get('SLEEP_SECRET') or c.get('secret')
-    if secret == secret_real:
+    if secret == SECRET_REAL:
         # showip(flask.request, '/save_data')
         try:
             d.save()
