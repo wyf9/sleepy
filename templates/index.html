@@ -22,51 +22,40 @@
             <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
             <p id="steam"></p>
             <script>
-                if(steamkey!==undefined){
-                    const steam = document.getElementById('steam');
-                    //也许这里需要反代
-                    const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
-                    const steamkey = '{{ steamkey }}';
-                    const steamids = '{{ steamids }}'
-                    const quresteaam = `${steamapi}/?key=${steamkey}&steamids=${steamids}`
-                    fetch($quresteaam)
-                            .then(response => response.json())
-                            .then(data => {
-                                // steam.href = ``
-                                //暂时不用a标签吧
-                                steam.innerText = data.player
-  //响应长这样                              
-// {
-//   "response": {
-//     "players": {
-//       "player": [
-//         {
-//           "steamid": "76561199517255765",
-//           "communityvisibilitystate": 3,
-//           "profilestate": 1,
-//           "personaname": "kmizmal",
-//           "commentpermission": 1,
-//           "profileurl": "https://steamcommunity.com/id/kmizmal/",
-//           "avatar": "https://avatars.steamstatic.com/e7de6f5d8afbc51f37e338b3bb82127c0f543fc6.jpg",
-//           "avatarmedium": "https://avatars.steamstatic.com/e7de6f5d8afbc51f37e338b3bb82127c0f543fc6_medium.jpg",
-//           "avatarfull": "https://avatars.steamstatic.com/e7de6f5d8afbc51f37e338b3bb82127c0f543fc6_full.jpg",
-//           "avatarhash": "e7de6f5d8afbc51f37e338b3bb82127c0f543fc6",
-//           "lastlogoff": 1740284028,
-//           "personastate": 1,
-//           "realname": "zmal",
-//           "primaryclanid": "103582791429521408",
-//           "timecreated": 1687087413,
-//           "personastateflags": 0
-//         }
-//       ]
-//     }
-//   }
-// }
-                            })
-                            .catch(console.error)
+                function getSteamUserInfo(userData) {
+                    const player = userData.response.players.player[0];
+
+                    // 获取昵称
+                    const nickname = player.personaname;
+
+                    // 获取在线状态
+                    const onlineStatus = player.personastate === 1 ? "在线" : "离线";
+
+                    // 获取游戏状态
+                    const gameStatus = player.gameextrainfo ? `正在玩: ${player.gameextrainfo}` : "未在游戏中";
+
+                    // 返回提取的信息
+                    return {
+                        nickname,
+                        onlineStatus,
+                        gameStatus
+                    };
                 }
-                
+
+                const steam = document.getElementById('steam');
+                fetch('/steam-api')  // 调用 Flask 的代理路由
+                    .then(response => response.json())
+                    .then(data => {
+                        const steamInfo = getSteamUserInfo(data);
+                        steam.innerHTML = `<p><span>${steamInfo.nickname}</span> ${steamInfo.gameStatus}</p>`;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        steam.innerHTML = '<p>无法加载 Steam 信息</p>';
+                    });
             </script>
+
+
             <p id="last-updated">最后更新: {{ last_updated }}</p>
 
         </div>

@@ -95,8 +95,7 @@ async function update() {
                                 const escapedJsCode = escapeHtml(jsCode);
 
                                 device_app = `
-<a
-    class="awake" 
+<a class="awake" 
     title="${escapedAppName}" 
     href="javascript:${escapedJsCode}">
 ${sliceText(escapedAppName, data.device_status_slice)}

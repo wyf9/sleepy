@@ -9,6 +9,7 @@ import os
 import utils as u
 from config import config as config_init
 from data import data as data_init
+import requests
 
 try:
     c = config_init()
@@ -101,9 +102,23 @@ def index():
         more_text=more_text,
         last_updated=d.data['last_updated'],
         hitokoto=hitokoto,
-        canvas=ot['canvas']
+        canvas=ot['canvas']    
     )
 
+@app.route('/steam-api')
+def steam_api():
+    ot = c.config['other']
+    steamkey=ot['steamkey']
+    steamids=ot['steamids']
+    steamapi="http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1"  # 也许这里需要反代   
+    url = f'{steamapi}/?key={steamkey}&steamids={steamids}'
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # 检查请求是否成功
+        return flask.jsonify(response.json())  # 返回 Steam API 的响应
+    except requests.exceptions.RequestException as e:
+        return flask.jsonify({'error': str(e)}), 500  # 返回错误信息
 
 @app.route('/'+'git'+'hub')
 def git_hub():
@@ -380,9 +395,12 @@ def reload_config():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
+    
+    # 先声明 global
+    global SECRET_REAL
+    
     if secret == SECRET_REAL:
         c.load()
-        global SECRET_REAL
         SECRET_REAL = os.environ.get('SLEEPY_SECRET') or c.get('secret')
         # showip(flask.request, '/reload_config')
         return u.format_dict({
@@ -392,9 +410,8 @@ def reload_config():
     else:
         return u.reterr(
             code='not authorized',
-            message='invaild secret'
+            message='invalid secret'
         )
-
 
 @app.route('/save_data')
 def save_data():
