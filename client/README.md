@@ -315,9 +315,8 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 
 ### Configure
 
-配置文件 (首次打开自动创建): `config.ini`
-
-https://github.com/wyf9/sleepy/blob/d11fee42d71b9405d9475794ecce6892f0671349/client/Win_Simple/dist/config.ini#L2-L27
+配置文件 (首次打开自动在同级目录下创建): `config.ini`
+> `config.ini`里面注释写的很详细了，不再提供示例
 
 ### Using
 

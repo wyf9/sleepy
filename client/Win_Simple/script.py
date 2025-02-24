@@ -18,18 +18,30 @@ class AppConfig:
     """应用程序配置管理"""
     _DEFAULT_CONFIG = """\
     [settings]
+    # 服务地址, 末尾不带 /
     SERVER = http://localhost:9010
+    # 密钥
     SECRET = wyf9test
     DEVICE_ID = Win_Simple
+    # 前台显示名称
     DEVICE_SHOW_NAME = MyComputer
+    # 检查间隔，以秒为单位
     CHECK_INTERVAL = 2
+    # 控制台输出所用编码(utf-8选一个gb18030)
     ENCODING = utf-8
+    # 当窗口标题为其中任意一项时将不更新（|分隔）
     SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 开始| 示例窗口1| 示例窗口2
+    # 当窗口标题为其中任意一项时视为未在使用
     NOT_USING_NAMES = 我们喜欢这张图片，因此我们将它与你共享。| 示例窗口1| 示例窗口2
+    # 是否反转窗口标题
     REVERSE_APP_NAME = False
+    # 鼠标静止判定时间(分钟)
     MOUSE_IDLE_TIME = 15
+    # 鼠标移动检测的最小距离（像素）
     MOUSE_MOVE_THRESHOLD = 3
+    #日志等级(DEBUG,INFO,WARNING,ERROR)DEBUG->ERROR日志依次减少
     LOGLEVEL = INFO
+    #日志是否写入文件
     LOG_FILE = False
     """
     

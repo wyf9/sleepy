@@ -101,13 +101,11 @@ python3 start.py
 我怕教太多了你学不会，现在只要点  
 [这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)  
 然后自己去注册一个账号   填入一个秘钥（随便写但不推荐特殊符号及中文
-然后这样
+然后在这里
 ![链接](https://files.catbox.moe/svvdt6.png)
-就可以复制你的`URL`了，
-配置文件在这里
-![配置](https://files.catbox.moe/xz5sd8.png)
-按照文档改好自动重启就能用了  
-不想把`secret`明文写在这里可以去 *Settings->Variables and secrets->New secret* 新建一个`SLEEPY_SECRET`变量存放`secret`  
+就可以复制你的`URL`，填入你选择的 **[`/client`](./client/README.md)** 对应的url配置中即可快速开始
+<!-- 配置文件在这里
+![配置](https://files.catbox.moe/xz5sd8.png)-->
 </details>
 
 ## 客户端示例
