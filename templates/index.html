@@ -24,17 +24,9 @@
             <script>
                 function getSteamUserInfo(userData) {
                     const player = userData.response.players.player[0];
-
-                    // 获取昵称
                     const nickname = player.personaname;
-
-                    // 获取在线状态
                     const onlineStatus = player.personastate === 1 ? "在线" : "离线";
-
-                    // 获取游戏状态
                     const gameStatus = player.gameextrainfo ? `正在玩: ${player.gameextrainfo}` : "未在游戏中";
-
-                    // 返回提取的信息
                     return {
                         nickname,
                         onlineStatus,
@@ -47,11 +39,13 @@
                     .then(response => response.json())
                     .then(data => {
                         const steamInfo = getSteamUserInfo(data);
+                        //css没想好
                         steam.innerHTML = `<p><span>${steamInfo.nickname}</span> ${steamInfo.gameStatus}</p>`;
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        steam.innerHTML = '<p>无法加载 Steam 信息</p>';
+                        console.log('steam未启用或网络异常', error);
+                        //反正没填相关配置必报错，此时data为空 <p id="steam"></p>也会为空就没影响了
+                        steam.innerHTML = '';
                     });
             </script>
 
