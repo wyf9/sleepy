@@ -23,7 +23,10 @@
             <p id="steam"></p>
             <script>
                 function getSteamUserInfo(userData) {
-                    const player = userData.response.players.player[0];
+                    if (!userData.response || !userData.response.players || userData.response.players.length === 0) {
+                        return { error: "No player data found." };
+                    }
+                    const player = userData.response.players[0];
                     const nickname = player.personaname;
                     const onlineStatus = player.personastate === 1 ? "在线" : "离线";
                     const gameStatus = player.gameextrainfo ? `正在玩: ${player.gameextrainfo}` : "未在游戏中";
@@ -33,22 +36,31 @@
                         gameStatus
                     };
                 }
+                const steamkey = '{{ steamkey }}';
+                const steamids = '{{ steamids }}'
+                if (steamkey && steamids) {
+                    const steam = document.getElementById('steam');
+                    //也许这里需要反代
+                    //const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
+                    const steamapi = "https://a.858efb39d39c.workers.dev";//且用且珍惜
+                    const quresteaam = `${steamapi}/?key=${steamkey}&steamids=${steamids}`;
+                        (async () => {
+                            try {
+                                const response = await fetch(quresteaam);
+                                const data = await response.json();
 
-                const steam = document.getElementById('steam');
-                fetch('/steam-api')  // 调用 Flask 的代理路由
-                    .then(response => response.json())
-                    .then(data => {
-                        const steamInfo = getSteamUserInfo(data);
-                        //css没想好
-                        steam.innerHTML = `<p><span>${steamInfo.nickname}</span> ${steamInfo.gameStatus}</p>`;
-                    })
-                    .catch(error => {
-                        console.log('steam未启用或网络异常', error);
-                        //反正没填相关配置必报错，此时data为空 <p id="steam"></p>也会为空就没影响了
-                        steam.innerHTML = '';
-                    });
+                                const steamInfo = getSteamUserInfo(data);
+                                steam.innerHTML = `<p><span>${steamInfo.nickname}</span> ${steamInfo.gameStatus}</p>`;
+                            } catch (error) {
+                                console.error('Error:', error);
+                                steam.innerHTML = '';
+                            }
+                        })();
+
+                }else{
+                    console.log('Steam disabled');
+                }
             </script>
-
 
             <p id="last-updated">最后更新: {{ last_updated }}</p>
 
