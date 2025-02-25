@@ -107,7 +107,7 @@ def index():
 @app.route('/steam-api')
 def steam_api():
     ot = c.config['other']
-    steamkey=ot['steamkey']
+    steamkey= os.environ.get('STEAMKEY') or ot['steamkey']
     steamids=ot['steamids']
     #steamapi="http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1"  # 也许这里需要反代   
     steamapi="https://a.858efb39d39c.workers.dev" #且用且珍惜
