@@ -9,7 +9,6 @@ import os
 import utils as u
 from config import config as config_init
 from data import data as data_init
-import requests
 
 try:
     c = config_init()
