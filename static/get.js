@@ -40,6 +40,20 @@ function escapeJs(str) {
         .replace(/>/g, '\\x3e');
 }
 
+function getFormattedDate(date) {
+    /*
+    convert data object to str like:
+    1145-01-14 19:19:08
+    */
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 async function update() {
     let refresh_time = 5000;
     let routerIndex = window.location.href.indexOf('?');
@@ -81,8 +95,7 @@ async function update() {
                                 const escapedJsCode = escapeHtml(jsCode);
 
                                 device_app = `
-<a
-    class="awake" 
+<a class="awake" 
     title="${escapedAppName}" 
     href="javascript:${escapedJsCode}">
 ${sliceText(escapedAppName, data.device_status_slice)}
@@ -98,14 +111,14 @@ ${sliceText(escapedAppName, data.device_status_slice)}
                         }
                         document.getElementById('device-status').innerHTML = deviceStatus;
                         // update last update time (last-updated)
-                        timenow = new Date();
+                        timenow = getFormattedDate(new Date());
                         document.getElementById('last-updated').innerHTML = `
 最后更新:
 <a
 class="awake" 
-title="时区: ${data.timezone}" 
+title="服务器时区: ${data.timezone}" 
 href="javascript:alert('
-浏览器最后一次成功获取时间: ${timenow}\\n
+浏览器最后更新时间: ${timenow}\\n
 数据最后更新时间 (基于服务器时区): ${data.last_updated}\\n
 服务端时区: ${data.timezone}
 ')">

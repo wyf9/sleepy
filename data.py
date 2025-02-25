@@ -151,8 +151,9 @@ class data:
 
         :param path: 访问的路径
         '''
-        if not path:
-            return
+        # if not path:
+        #     return
+        vaild_paths = {}
 
         # get time now
         now = datetime.now(pytz.timezone(self.c.config['timezone']))

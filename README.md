@@ -9,6 +9,7 @@
 - 自行设置在线状态
 - 实时更新设备打开应用 (名称)
 - 美观的展示页面 [见 [Preview](#preview)]
+- 开放的 Query / Metrics [接口](./doc/api.md), 方便统计
 
 ### TODO
 
@@ -16,17 +17,17 @@
 - [x] 网页使用 api 请求，并实现定时刷新
 - [x] 设备使用状态
 - [x] Windows 客户端 (Python)
-- [x] Android 客户端 ([Autox.js](http://doc.autoxjs.com/))
+- [x] Android 客户端 ([Autox.js](https://github.com/aiselp/AutoX))
 - [x] [查看更多客户端 (如浏览器脚本)](./client/README.md)
 - [x] Metrics API (统计页面访问 / 接口调用次数)
-- [ ] 设备状态 Heartbeat 机制
-- [ ] 更多状态存储选项 (如 SQLite)
+- [ ] **设备状态使用 Heartbeat 超时判定未在使用**
+- [ ] ~~更多状态存储选项 (如 SQLite)~~
 
 > [!TIP]
 > **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** <br/>
 > 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
 
-对智能家居 / Home Assistant 感兴趣的朋友，一定要参观 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): [maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!
+对智能家居 / Home Assistant 感兴趣的朋友，一定要看看 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): [maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!
 
 <!-- > **以及 [开发分支 `dev-2025-2-1`](https://github.com/wyf9/sleepy/tree/dev-2025-2-1)** <br/> -->
 
@@ -34,12 +35,12 @@
 
 演示站 (*较*稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
-开发预览 (*不保证可用*, 密钥 `wyf9test`): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+开发预览 (*不保证可用*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
-> 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本
+> 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本 (**密钥 `wyf9test`**)
 
 > [!WARNING]
-> 不要拿演示站做坏事 (比如 js 注入)，已由 DeepSeek 强力修复 ~~，没准哪天我会加访问日志~~
+> 不要拿演示站做坏事 (比如 js 注入，已由 DeepSeek 强力修复) ~~，没准哪天我会加访问日志~~
 
 ## 部署
 
@@ -88,7 +89,7 @@ python3 start.py
 
 ### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
 
-> [@kmizmal](https://github.com/kmizmal) 的胡言乱语
+> by [@kmizmal](https://github.com/kmizmal)
 
 <details>
 
@@ -100,13 +101,11 @@ python3 start.py
 我怕教太多了你学不会，现在只要点  
 [这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)  
 然后自己去注册一个账号   填入一个秘钥（随便写但不推荐特殊符号及中文
-然后这样
+然后在这里
 ![链接](https://files.catbox.moe/svvdt6.png)
-就可以复制你的`URL`了，
-配置文件在这里
-![配置](https://files.catbox.moe/xz5sd8.png)
-按照文档改好自动重启就能用了  
-不想把`secret`明文写在这里可以去 *Settings->Variables and secrets->New secret* 新建一个`SLEEPY_SECRET`变量存放`secret`  
+就可以复制你的`URL`，填入你选择的 **[`/client`](./client/README.md)** 对应的url配置中即可快速开始
+<!-- 配置文件在这里
+![配置](https://files.catbox.moe/xz5sd8.png)-->
 </details>
 
 ## 客户端示例
@@ -131,6 +130,7 @@ python3 start.py
 4. 再次启动服务，更新完成.
 > Huggingface
 >>对照 [`config.example.jsonc`](./config.example.jsonc) 和 [`doc/config_update.md`](./doc/config_update.md) 编辑Files下的 `config.example.jsonc`，并将 `version` 字段改为最新版本
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)

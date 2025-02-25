@@ -72,13 +72,12 @@ send_status() {
   res_up="$app_name[${battery_level}%]"
   log "$res_up"
   
-  http_code=$(curl -G -s --connect-timeout 35 --max-time 100 -w "%{http_code}" -o /tmp/curl_body "$URL" \
-    --data-urlencode "secret=${SECRET}" \
-    --data-urlencode "id=0" \
-    --data-urlencode "show_name=${device_model}" \
-    --data-urlencode "using=true" \
-    --data-urlencode "app_name=$res_up")
-    
+  http_code=$(curl -s --connect-timeout 35 --max-time 100 -w "%{http_code}" -o /tmp/curl_body "$URL" \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"secret": "'"${SECRET}"'", "id": 0, "show_name": "'"${device_model}"'", "using": true, "app_name": "'"$res_up"'"}')
+
+
   if [ "$http_code" -ne 200 ]; then
     log "警告：请求失败，状态码 $http_code，响应内容：$(cat /tmp/curl_body)"
   fi

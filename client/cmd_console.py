@@ -84,7 +84,7 @@ def main():
         print(f'{n["id"]} - {n["name"]} - {n["desc"]}')
 
     st = input('\n> ')
-    ret = loadjson(f'{SERVER}/set/{SECRET}/{st}')
+    ret = loadjson(f'{SERVER}/set?secret={SECRET}&status={st}')
     try:
         print(f'success: [{ret["success"]}], code: [{ret["code"]}], set_to: [{ret["set_to"]}]')
     except:

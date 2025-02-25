@@ -31,3 +31,4 @@ cn.kuwo.player=酷我音乐
 com.tencent.tmgp.speedmobile=QQ飞车手游
 com.android.bankabc=中国农业银行
 com.chaoxing.mobile=学习通
+com.cainiao.wireless=菜鸟-快递物流轻松查取寄

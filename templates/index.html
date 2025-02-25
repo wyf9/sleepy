@@ -20,6 +20,36 @@
             <!-- <hr /> 由 get.js 控制 -->
             <p id="device-status">[设备状态列表]</p>
             <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
+            <p id="steam"></p>
+            <script>
+                function getSteamUserInfo(userData) {
+                    const player = userData.response.players.player[0];
+                    const nickname = player.personaname;
+                    const onlineStatus = player.personastate === 1 ? "在线" : "离线";
+                    const gameStatus = player.gameextrainfo ? `正在玩: ${player.gameextrainfo}` : "未在游戏中";
+                    return {
+                        nickname,
+                        onlineStatus,
+                        gameStatus
+                    };
+                }
+
+                const steam = document.getElementById('steam');
+                fetch('/steam-api')  // 调用 Flask 的代理路由
+                    .then(response => response.json())
+                    .then(data => {
+                        const steamInfo = getSteamUserInfo(data);
+                        //css没想好
+                        steam.innerHTML = `<p><span>${steamInfo.nickname}</span> ${steamInfo.gameStatus}</p>`;
+                    })
+                    .catch(error => {
+                        console.log('steam未启用或网络异常', error);
+                        //反正没填相关配置必报错，此时data为空 <p id="steam"></p>也会为空就没影响了
+                        steam.innerHTML = '';
+                    });
+            </script>
+
+
             <p id="last-updated">最后更新: {{ last_updated }}</p>
 
         </div>

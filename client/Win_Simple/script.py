@@ -2,256 +2,303 @@
 import os
 import sys
 import configparser
-from win32gui import GetWindowText, GetForegroundWindow
-from win32api import GetCursorPos
-from requests import post
-from datetime import datetime
-from time import time, sleep
-import io
-#pyinstaller -F -n Win_Simple.exe --icon=zmal.ico --hidden-import=win32gui --hidden-import=win32api --hidden-import=requests script.py
-
+import requests
 import logging
+import threading
+import win32gui,win32con,win32api # type: ignore
+from time import time, sleep
 
-# 读取 ini 配置文件
-BASE_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
-CONFIG_PATH = os.path.join(BASE_DIR, "config.ini")
-# 创建默认配置
-DEFAULT_CONFIG = """\
-[settings]
-# 服务地址, 末尾不带 /
-SERVER = http://localhost:9010
-# 密钥
-SECRET = wyf9test
-# 设备标识符，唯一 (它也会被包含在 api 返回中, 不要包含敏感数据)
-DEVICE_ID = Win_Simple
-# 前台显示名称
-DEVICE_SHOW_NAME = MyComputer
-# 检查间隔，以秒为单位
-CHECK_INTERVAL = 2
-# 是否忽略重复请求，即窗口未改变时不发送请求
-BYPASS_SAME_REQUEST = True
-# 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-ENCODING = utf-8
-# 当窗口标题为其中任意一项时将不更新（|分隔）
-SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 示例窗口1| 示例窗口2
-# 当窗口标题为其中任意一项时视为未在使用
-NOT_USING_NAMES = 我们喜欢这张图片，因此我们将它与你共享。| 示例窗口1| 示例窗口2
-# 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
-REVERSE_APP_NAME = False
-# 鼠标静止判定时间(分钟)
-MOUSE_IDLE_TIME = 15
-# 鼠标移动检测的最小距离（像素）
-MOUSE_MOVE_THRESHOLD = 3
-#日志等级(DEBUG,INFO,WARNING,ERROR)DEBUG->ERROR日志依次减少
-LOGLEVEL = INFO
-#日志记录文件
-LOG_FILE = False
-"""
-def ensure_config_exists():
-    """如果 config.ini 不存在，则创建默认配置"""
-    if not os.path.exists(CONFIG_PATH):
-        logging.warning("⚠️ 配置文件不存在，正在创建默认 config.ini...")
-        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-            f.write(DEFAULT_CONFIG)
-        sys.exit(f"✅ 默认配置文件已创建: {CONFIG_PATH}, 请编辑后重新运行程序")
-        pass
+#cd client/Win_Simple
+#pyinstaller -F -n Win_Simple.exe --icon=zmal.ico --hidden-import=win32gui --hidden-import=win32con --hidden-import=win32api --hidden-import=requests script.py
 
-def parse_list(value: str):
-    return [item.strip() for item in value.split('|') if item.strip()]
-# 确保配置文件存在
-ensure_config_exists()
-# 读取配置
-config = configparser.ConfigParser()
-config.read(CONFIG_PATH, encoding='utf-8')
-try:
-
-    # if not config.sections():
-    #     raise ValueError('配置文件为空或无效')
-
-    SERVER = config.get('settings', 'SERVER')
-    SECRET = config.get('settings', 'SECRET')
-    DEVICE_ID = config.get('settings', 'DEVICE_ID')
-    DEVICE_SHOW_NAME = config.get('settings', 'DEVICE_SHOW_NAME')
-    CHECK_INTERVAL = config.getint('settings', 'CHECK_INTERVAL')
-    BYPASS_SAME_REQUEST = config.getboolean('settings', 'BYPASS_SAME_REQUEST')
-    ENCODING = config.get('settings', 'ENCODING')
-
-    SKIPPED_NAMES = parse_list(config.get('settings', 'SKIPPED_NAMES'))
-    NOT_USING_NAMES = parse_list(config.get('settings', 'NOT_USING_NAMES'))
+# --------------------------
+# 配置管理类
+# --------------------------
+class AppConfig:
+    """应用程序配置管理"""
+    _DEFAULT_CONFIG = """\
+    [settings]
+    # 服务地址, 末尾不带 /
+    SERVER = http://localhost:9010
+    # 密钥
+    SECRET = wyf9test
+    DEVICE_ID = Win_Simple
+    # 前台显示名称
+    DEVICE_SHOW_NAME = MyComputer
+    # 检查间隔，以秒为单位
+    CHECK_INTERVAL = 2
+    # 控制台输出所用编码(utf-8选一个gb18030)
+    ENCODING = utf-8
+    # 当窗口标题为其中任意一项时将不更新（|分隔）
+    SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 开始| 示例窗口1| 示例窗口2
+    # 当窗口标题为其中任意一项时视为未在使用
+    NOT_USING_NAMES = 我们喜欢这张图片，因此我们将它与你共享。| 示例窗口1| 示例窗口2
+    # 是否反转窗口标题
+    REVERSE_APP_NAME = False
+    # 鼠标静止判定时间(分钟)
+    MOUSE_IDLE_TIME = 15
+    # 鼠标移动检测的最小距离（像素）
+    MOUSE_MOVE_THRESHOLD = 3
+    #日志等级(DEBUG,INFO,WARNING,ERROR)DEBUG->ERROR日志依次减少
+    LOGLEVEL = INFO
+    #日志是否写入文件
+    LOG_FILE = False
+    """
     
-    REVERSE_APP_NAME = config.getboolean('settings', 'REVERSE_APP_NAME')
-    MOUSE_IDLE_TIME = config.getint('settings', 'MOUSE_IDLE_TIME')
-    MOUSE_MOVE_THRESHOLD = config.getint('settings', 'MOUSE_MOVE_THRESHOLD')
-    LogLevel = config.get('settings', 'LOGLEVEL')
-    LOG_FILE = config.getboolean('settings', 'LOG_FILE')
-
-except Exception as e:
-    logging.error(f'配置文件读取失败: {e}')
-    sys.exit(1)
+    def __init__(self):
+        self.config_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "config.ini")
+        self._ensure_config_exists()
+        self._load_config()
     
-if LogLevel=='DEBUG':
-    log_level = logging.DEBUG
-elif LogLevel=='INFO':
-    log_level = logging.INFO
-elif LogLevel=='WARNING':
-    log_level = logging.WARNING
-elif LogLevel=='ERROR':
-    log_level = logging.ERROR
-      
-if LOG_FILE:
-    Log_handler = [logging.FileHandler('mirror.log', encoding='utf-8'), logging.StreamHandler()]
-else:
-    Log_handler = [logging.StreamHandler()]
-
-logging.basicConfig(
-    level=log_level,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=Log_handler
-)
-
-def process_window_title(title: str) -> str:
-    """处理窗口标题（反转应用名+跳过检查）"""
-    logging.debug(f'Window: {title}')
-    # 反转应用名称
-    if REVERSE_APP_NAME:
-        title = reverse_app_name(title)
-    else:
-        title = title.strip()
-    return title
-
-def reverse_app_name(name: str) -> str:
-    '''反转应用名称 (将末尾的应用名提前)'''
-    return ' - '.join(reversed(name.split(' - ')))
-
-# 鼠标状态相关变量
-last_mouse_pos = GetCursorPos()
-last_mouse_move_time = time()
-is_mouse_idle = False
-cached_window_title = ''  # 缓存窗口标题,用于恢复
-
-def check_mouse_idle() -> bool:
-    '''检查鼠标是否静止'''
-    global last_mouse_pos, last_mouse_move_time, is_mouse_idle
+    def _ensure_config_exists(self):
+        """创建默认配置文件"""
+        if not os.path.exists(self.config_path):
+            logging.warning("⚠️ 配置文件不存在，正在创建默认 config.ini...")
+            with open(self.config_path, "w", encoding="utf-8") as f:
+                f.write(self._DEFAULT_CONFIG)
+            sys.exit(f"✅ 默认配置文件已创建: {self.config_path}, 可以冲了")
     
-    current_pos = GetCursorPos()
-    current_time = time()
-    dx, dy = abs(current_pos[0] - last_mouse_pos[0]), abs(current_pos[1] - last_mouse_pos[1])
-    distance = (dx ** 2 + dy ** 2) ** 0.5
+    def _load_config(self):
+        """加载并验证配置"""
+        self.config = configparser.ConfigParser()
+        self.config.read(self.config_path, encoding='utf-8')
+        
+        try:
+            # 基本配置
+            self.server = self.config.get('settings', 'SERVER')
+            self.secret = self.config.get('settings', 'SECRET')
+            self.device_id = self.config.get('settings', 'DEVICE_ID')
+            self.device_show_name = self.config.get('settings', 'DEVICE_SHOW_NAME')
+            self.check_interval = self.config.getint('settings', 'CHECK_INTERVAL')
+            
+            # 窗口处理配置
+            self.skipped_names = self._parse_list('SKIPPED_NAMES')
+            self.not_using_names = self._parse_list('NOT_USING_NAMES')
+            self.reverse_app_name = self.config.getboolean('settings', 'REVERSE_APP_NAME')
+            
+            # 鼠标配置
+            self.mouse_idle_time = self.config.getint('settings', 'MOUSE_IDLE_TIME')
+            self.mouse_move_threshold = self.config.getint('settings', 'MOUSE_MOVE_THRESHOLD')
+            
+            # 日志配置
+            self.log_level = self._get_log_level()
+            self.log_file = self.config.getboolean('settings', 'LOG_FILE')
+            
+        except Exception as e:
+            logging.error(f'配置文件打不开惹: {e}')
+            sys.exit(1)
+    
+    def _parse_list(self, key: str) -> list:
+        """解析竖线分隔的配置项"""
+        return [item.strip() for item in self.config.get('settings', key).split('|') if item.strip()]
+    
+    def _get_log_level(self):
+        """获取日志等级"""
+        level_map = {
+            'DEBUG': logging.DEBUG,
+            'INFO': logging.INFO,
+            'WARNING': logging.WARNING,
+            'ERROR': logging.ERROR
+        }
+        return level_map.get(self.config.get('settings', 'LOGLEVEL'), logging.INFO)
 
-    logging.debug(f'Mouse: {current_pos}, last={last_mouse_pos}, distance={distance:.1f}px')
+# --------------------------
+# 设备状态管理
+# --------------------------
+class DeviceState:
+    """设备状态跟踪管理"""
+    def __init__(self, config: AppConfig):
+        self.config = config
+        self.last_window = ''
+        self.cached_window = ''
+        self.last_mouse_pos = win32api.GetCursorPos()
+        self.last_mouse_time = time()
+        self.is_mouse_idle = False
 
-    if distance > MOUSE_MOVE_THRESHOLD:  # 只在鼠标真正移动时更新
-        last_mouse_pos, last_mouse_move_time = current_pos, current_time
-        if is_mouse_idle:
-            is_mouse_idle = False
-            logging.debug(f'Mouse wake up: moved {distance:.1f}px')
+    def check_mouse_idle(self) -> bool:
+        """检测鼠标空闲状态"""
+        current_pos = win32api.GetCursorPos()
+        current_time = time()
+        
+        # 计算移动距离
+        dx = abs(current_pos[0] - self.last_mouse_pos[0])
+        dy = abs(current_pos[1] - self.last_mouse_pos[1])
+        distance = (dx ** 2 + dy ** 2) ** 0.5
+        
+        # 超过阈值视为活动
+        if distance > self.config.mouse_move_threshold:
+            self.last_mouse_pos = current_pos
+            self.last_mouse_time = current_time
+            if self.is_mouse_idle:
+                logging.debug('你起了？饭被我吃完了~')
+                self.is_mouse_idle = False
+            return False
+        
+        # 检测空闲超时
+        if (current_time - self.last_mouse_time) > (self.config.mouse_idle_time * 60):
+            if not self.is_mouse_idle:
+                logging.debug('主人睡着了吗，那我要偷吃惹')
+                self.is_mouse_idle = True
+            return True
+        return self.is_mouse_idle
+
+    def process_window_title(self, raw_title: str) -> str:
+        """处理窗口标题格式"""
+        title = raw_title.strip()
+        if self.config.reverse_app_name:
+            parts = title.split(' - ')
+            return ' - '.join(reversed(parts)) if len(parts) > 1 else title
+        return title
+
+# --------------------------
+# 设备监控核心逻辑
+# --------------------------
+class DeviceMonitor:
+    """设备状态监控器"""
+    def __init__(self, config: AppConfig, state: DeviceState):
+        self.config = config
+        self.state = state
+        self._setup_logging()
+    
+    def _setup_logging(self):
+        """初始化日志配置"""
+        handlers = [logging.StreamHandler()]
+        if self.config.log_file:
+            handlers.append(logging.FileHandler('mirror.log', encoding='utf-8'))
+            
+        logging.basicConfig(
+            level=self.config.log_level,
+            datefmt="%Y-%m-%d %H:%M:%S",
+            format="%(asctime)s - %(levelname)s - %(message)s",
+            handlers=handlers
+        )
+    
+    def send_state(self, using: bool, window: str):
+        """发送状态到服务器"""
+        try:
+            resp = requests.post(
+                url=f'{self.config.server}/device/set',
+                json={
+                    'secret': self.config.secret,
+                    'id': self.config.device_id,
+                    'show_name': self.config.device_show_name,
+                    'using': using,
+                    'app_name': window
+                },
+                headers={'Content-Type': 'application/json'},
+                timeout=5
+            )
+            resp.raise_for_status()
+            self.state.last_window = window
+        except requests.RequestException as e:
+            logging.warning(f'主人反省一下自己干了什么: {e}')
+    
+    def _should_update(self, new_window: str, mouse_idle: bool) -> bool:
+        """判断是否需要更新状态"""
+        return (mouse_idle != self.state.is_mouse_idle) or (new_window != self.state.last_window)
+    
+    def _handle_skipped_window(self, window: str) -> str:
+        """处理需要跳过的窗口"""
+        if window not in self.config.skipped_names:
+            return window
+        
+        logging.debug(f'不要~ {window}')
+        # 使用上次有效窗口
+        fallback = self.state.last_window if self.state.last_window not in self.config.skipped_names else ''
+        return fallback if fallback else None
+    
+    def update_state(self):
+        """执行状态检测和更新"""
+        try:
+            # 获取当前窗口
+            raw_window = win32gui.GetWindowText(win32gui.GetForegroundWindow())
+            current_window = self.state.process_window_title(raw_window)
+            mouse_idle = self.state.check_mouse_idle()
+            
+            # 处理跳过窗口
+            processed_window = self._handle_skipped_window(current_window)
+            if not processed_window:
+                return
+            
+            # 判断使用状态
+            using = not (processed_window in self.config.not_using_names or mouse_idle)
+            
+            # 发送更新
+            if self._should_update(processed_window, mouse_idle):
+                logging.info(f'{using},主人在 {processed_window}')
+                self.send_state(using, processed_window)
+        except Exception as e:
+            logging.error(f'呼呼呼~{e}')
+
+# --------------------------
+# 系统功能模块
+# --------------------------
+def check_network():
+    """检测网络连接"""
+    try:
+        response = requests.get('http://baidu.com', timeout=5)
+        return response.status_code == 200
+    except requests.RequestException:
         return False
 
-    idle_time = current_time - last_mouse_move_time
-    if idle_time > MOUSE_IDLE_TIME * 60:
-        if not is_mouse_idle:
-            is_mouse_idle = True
-            logging.debug(f'Mouse entered idle state after {idle_time/60:.1f} minutes')
-        return True
-    return is_mouse_idle
+def message_loop(monitor):
+    """(需异步执行) 窗口消息循环"""
+    def create_window():
+        wc = win32gui.WNDCLASS()
+        wc.lpfnWndProc = on_shutdown
+        wc.lpszClassName = "LoggingWindow"
+        wc.hInstance = win32api.GetModuleHandle(None)
+        class_atom = win32gui.RegisterClass(wc)
+        return win32gui.CreateWindow(class_atom, "状态监控", win32con.WS_OVERLAPPEDWINDOW,
+                                     100, 100, 600, 400, 0, 0, wc.hInstance, None)
+    
+    def on_shutdown(hwnd, msg, wparam, lparam):
+        """窗口事件处理"""
+        if msg == win32con.WM_QUERYENDSESSION or msg == win32con.WM_CLOSE:
+            logging.info("结束了喵...?")
+            try:
+                resp = monitor.send_state(False,"结束了喵")
+                logging.debug(f'Response: {resp.status_code} - {resp.json()}')
+                if resp.status_code != 200:
+                    logging.warning(f'阿巴阿巴，{resp.status_code} - {resp.json()}')
+            except Exception as e:
+                logging.warning(f'玛卡巴卡，{e}')
+            return True  # 允许关机或注销
+           
+        return 0
+    
+    hwnd = create_window()
+    # logging.info("启动")
+    win32gui.PumpMessages()
 
-Url = f'{SERVER}/device/set'
-last_window = ''
-
-def do_update():
-    global last_window, cached_window_title, is_mouse_idle
-    
-    # 获取当前窗口标题
-    raw_window = GetWindowText(GetForegroundWindow())
-    current_window = process_window_title(raw_window)
-    mouse_idle = check_mouse_idle()
-    logging.debug(f'--- Window: `{current_window}`')
-    
-    # 始终保持同步的状态变量
-    window = current_window
-    using = True
-    
-    # 鼠标空闲状态处理（优先级最高）
-    if mouse_idle:
-        # 缓存非空闲时的窗口标题
-        if not is_mouse_idle:
-            cached_window_title = current_window
-            logging.debug('Caching window title before idle')
-        # 设置空闲状态
-        using = False
-        window = ''
-        is_mouse_idle = True
-    else:
-        # 从空闲恢复
-        if is_mouse_idle:
-            window = cached_window_title
-            using = True
-            is_mouse_idle = False
-            logging.info('Restoring window title from idle')
-        # 正常窗口状态检查
-        else:
-            for name in NOT_USING_NAMES:
-                if current_window == name:
-                    using = False
-                    logging.debug(f'* not using: `{name}`')
-                    break
-    
-    # 是否需要发送更新
-    should_update = (
-        (mouse_idle != is_mouse_idle or  # 鼠标状态改变
-        window != last_window) and    # 窗口改变
-        window not in SKIPPED_NAMES  # 不在跳过列表中
-    )
-    
-    if should_update:
-        logging.info(f'Sending update: using={using}, app_name="{window}", idle={mouse_idle}')
-        try:
-            resp = post(url=Url, json={
-                'secret': SECRET,
-                'id': DEVICE_ID,
-                'show_name': DEVICE_SHOW_NAME,
-                'using': using,
-                'app_name': window
-            }, headers={
-                'Content-Type': 'application/json'
-            })
-            logging.debug(f'Response: {resp.status_code} - {resp.json()}')
-            if resp.status_code!=200:
-                logging.warning(f'出现异常，Response: {resp.status_code} - {resp.json()}')
-            last_window = window
-        except Exception as e:
-            logging.warning(f'Error: {e}')
-    else:
-        logging.debug('No state change, skipping update')
-
+# --------------------------
+# 主程序入口
+# --------------------------
 def main():
+    config = AppConfig()
+    state = DeviceState(config)
+    monitor = DeviceMonitor(config, state)
+    
+    # 启动消息循环线程
+    threading.Thread(target=message_loop, args=(monitor,), daemon=True).start()
+    
+    # 等待网络连接
+    while not check_network():
+        logging.warning('网络被主人冲坏了喵~，5秒后重试...')
+        sleep(5)
+    
+    # 主监控循环
     while True:
         try:
-            do_update()
-            sleep(CHECK_INTERVAL)  # 使用配置的间隔
+            monitor.update_state()
+            sleep(config.check_interval)
+        except KeyboardInterrupt:
+            monitor.send_state(False, "主人要抛弃人家了吗~呜")
+            logging.info("主人要抛弃人家了吗~呜")
+            sys.exit(0)
         except Exception as e:
-            logging.error(f'主循环异常: {e}')
-            sleep(1)  # 防止错误循环
+            logging.error(f'梦梦不知道哦: {e}')
+            sleep(10)
 
 if __name__ == '__main__':
-    try:
-        main()
-    except (KeyboardInterrupt, SystemExit) as e:
-        # 如果中断或被taskkill则发送未在使用
-        logging.warning(f'Interrupt: {e}')
-        try:
-            resp = post(url=Url, json={
-                'secret': SECRET,
-                'id': DEVICE_ID,
-                'show_name': DEVICE_SHOW_NAME,
-                'using': False,
-                'app_name': f'{e}'
-            }, headers={
-                'Content-Type': 'application/json'
-            })
-            logging.debug(f'Response: {resp.status_code} - {resp.json()}')
-            if resp.status_code!=200:
-                logging.warning(f'出现异常，Response: {resp.status_code} - {resp.json()}')
-        except Exception as e:
-            logging.error(f'Exception: {e}')
+    main()
