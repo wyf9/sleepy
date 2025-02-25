@@ -101,30 +101,11 @@ def index():
         more_text=more_text,
         last_updated=d.data['last_updated'],
         hitokoto=hitokoto,
-        canvas=ot['canvas']    
+        canvas=ot['canvas'],
+        steamkey=os.environ.get('STEAMKEY') or ot.get('steamkey'),
+        steamids=ot.get('steamids')
     )
     
-@app.route('/steam-api')
-def steam_api():
-    try:
-        ot = c.config['other']       
-        # 获取 steamkey 和 steamids
-        steamkey = os.environ.get('STEAMKEY') or ot.get('steamkey')
-        steamids = ot.get('steamids')        
-        if not steamkey or not steamids:
-            return flask.jsonify({'error': 'Missing steamkey or steamids'}), 400
-        #steamapi="http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1"  # 也许这里需要反代
-        steamapi = "https://a.858efb39d39c.workers.dev" #且用且珍惜
-        url = f'{steamapi}/?key={steamkey}&steamids={steamids}'
-        response = requests.get(url)
-        response.raise_for_status()
-        return flask.jsonify(response.json())
-    except KeyError as e:
-        return flask.jsonify({'error': f'Missing configuration key: {str(e)}'}), 400
-    except requests.exceptions.RequestException as e:
-        return flask.jsonify({'error': str(e)}), 500  # 返回请求错误信息
-    except Exception as e:
-        return flask.jsonify({'error': str(e)}), 500  # 捕获其他异常
         
 @app.route('/'+'git'+'hub')
 def git_hub():
