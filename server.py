@@ -109,7 +109,8 @@ def steam_api():
     ot = c.config['other']
     steamkey=ot['steamkey']
     steamids=ot['steamids']
-    steamapi="http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1"  # 也许这里需要反代   
+    #steamapi="http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1"  # 也许这里需要反代   
+    steamapi="https://a.858efb39d39c.workers.dev" #且用且珍惜
     url = f'{steamapi}/?key={steamkey}&steamids={steamids}'
 
     try:
