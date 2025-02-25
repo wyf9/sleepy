@@ -228,6 +228,7 @@ class DeviceMonitor:
                 logging.info(f'{using},主人在 {processed_window}')
                 self.send_state(using, processed_window)
         except Exception as e:
+            self.send_state(False,e)
             logging.error(f'呼呼呼~{e}')
 
 # --------------------------
@@ -236,7 +237,7 @@ class DeviceMonitor:
 def check_network():
     """检测网络连接"""
     try:
-        response = requests.get('http://baidu.com', timeout=5)
+        response = requests.get('https://www.baidu.com/', timeout=5)
         return response.status_code == 200
     except requests.RequestException:
         return False
