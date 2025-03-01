@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         页面标题上报脚本
 // @namespace    sleepy
-// @version      2025.2.10
+// @version      2025.3.1
 // @description  获取页面标题并上报到指定 API (包括浏览器名称) / 请在安装脚本后手动编辑下面的配置
 // @author       nuym
 // @author       wyf9
@@ -53,7 +53,7 @@
     }
 
     // 发送请求函数
-    function sendRequest() {
+    function sendRequest(using) {
         // 获取当前网页
         var appName;
         if (document.title == '') { // 如没有标题
@@ -75,7 +75,7 @@
         }
 
         // 构造 API URL
-        var apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=true&app_name=${encodeURIComponent(appName)}`;
+        var apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=${using}&app_name=${encodeURIComponent(appName)}`;
 
         // 使用 GM_xmlhttpRequest 发送请求 (还是先用 get 吧)
         GM_xmlhttpRequest({
@@ -97,11 +97,14 @@
 
     // 页面加载完成时发送请求
     window.addEventListener('DOMContentLoaded', () => {
-        sendRequest();
+        sendRequest(using = true);
     });
-
     // 监听页面聚焦事件发送请求
     window.addEventListener('focus', () => {
-        sendRequest();
+        sendRequest(using = true);
     });
+    // 监听页面关闭事件发送请求
+    window.addEventListener('unload', function() {
+        sendRequest(using = false);
+    });    
 })();
