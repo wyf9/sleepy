@@ -9,7 +9,7 @@
 // @grant        GM_xmlhttpRequest
 // @connect      sleepy.wyf9.top
 // @homepage     https://github.com/wyf9/sleepy
-// @source       https://github.com/wyf9/sleepy/blob/main/client/%E9%A1%B5%E9%9D%A2%E6%A0%87%E9%A2%98%E4%B8%8A%E6%8A%A5%E8%84%9A%E6%9C%AC-2024.12.2.user.js
+// @source       https://github.com/wyf9/sleepy/raw/refs/heads/main/client/browser-script.user.js
 // ==/UserScript==
 
 (function () {

@@ -137,9 +137,9 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 在任何支持油猴脚本的浏览器均可使用，*据作者↑说是为了解决 Mac 无法获取窗口标题，遂退而求其次获取浏览器页面（有系统就有浏览器，即有用户脚本）*
 
-- [点击安装 (GitHub raw)](https://raw.githubusercontent.com/wyf9/sleepy/main/client/browser-script-2025.2.10.user.js)
+- [点击安装 (GitHub raw)](https://github.com/wyf9/sleepy/raw/refs/heads/main/client/browser-script.user.js)
 
-- [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/browser-script-2025.2.10.user.js)
+- [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/browser-script.user.js)
 
 ### Configure
 
