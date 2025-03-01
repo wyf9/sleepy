@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user }} Alive?</title>
     <meta name="description" content="{{ user }}'s Online Status Page">
+    <title>{{ user }} Alive?</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
@@ -28,12 +28,14 @@
                     }
                     const player = userData.response.players[0];
                     const nickname = player.personaname;
-                    const onlineStatus = player.personastate === 1 ? "在线" : "离线";
+                    // const onlineStatus = player.personastate === 1 ? "在线" : "离线";
                     const gameStatus = player.gameextrainfo ? `正在玩: ${player.gameextrainfo}` : "未在游戏中";
+                    const gameid = player.gameid ? player.gameid : -1;
                     return {
                         nickname,
-                        onlineStatus,
-                        gameStatus
+                        // onlineStatus,
+                        gameStatus,
+                        gameid
                     };
                 }
                 const steamkey = '{{ steamkey }}';
@@ -42,22 +44,27 @@
                     const steam = document.getElementById('steam');
                     //也许这里需要反代
                     //const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
+                    //https://store.steampowered.com/app/2358720
                     const steamapi = "https://a.858efb39d39c.workers.dev";//且用且珍惜
                     const quresteaam = `${steamapi}/?key=${steamkey}&steamids=${steamids}`;
-                        (async () => {
-                            try {
-                                const response = await fetch(quresteaam);
-                                const data = await response.json();
-
-                                const steamInfo = getSteamUserInfo(data);
+                    (async () => {
+                        try {
+                            const response = await fetch(quresteaam);
+                            const data = await response.json();
+                            const steamInfo = getSteamUserInfo(data);
+                            if (steamInfo.gameid !== -1) {
+                                steam.innerHTML = `<p><span>${steamInfo.nickname}</span> <a href="https://store.steampowered.com/app/${steamInfo.gameid}">${steamInfo.gameStatus}</a></p>`;
+                            } else {
                                 steam.innerHTML = `<p><span>${steamInfo.nickname}</span> ${steamInfo.gameStatus}</p>`;
-                            } catch (error) {
-                                console.error('Error:', error);
-                                steam.innerHTML = '';
                             }
-                        })();
 
-                }else{
+                        } catch (error) {
+                            console.error('Error:', error);
+                            steam.innerHTML = '';
+                        }
+                    })();
+
+                } else {
                     console.log('Steam disabled');
                 }
             </script>

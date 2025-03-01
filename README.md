@@ -49,7 +49,7 @@
 1. Clone 本仓库 (建议先 Fork / Use this template)
 
 ```shell
-git clone https://github.com/wyf9/sleepy.git
+git clone --depth=1 -b main https://github.com/wyf9/sleepy.git
 ```
 
 2. 安装依赖

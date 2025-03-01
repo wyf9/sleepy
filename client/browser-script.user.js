@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         页面标题上报脚本
 // @namespace    sleepy
-// @version      2025.2.10
+// @version      2025.3.1
 // @description  获取页面标题并上报到指定 API (包括浏览器名称) / 请在安装脚本后手动编辑下面的配置
 // @author       nuym
 // @author       wyf9
@@ -9,7 +9,7 @@
 // @grant        GM_xmlhttpRequest
 // @connect      sleepy.wyf9.top
 // @homepage     https://github.com/wyf9/sleepy
-// @source       https://github.com/wyf9/sleepy/blob/main/client/%E9%A1%B5%E9%9D%A2%E6%A0%87%E9%A2%98%E4%B8%8A%E6%8A%A5%E8%84%9A%E6%9C%AC-2024.12.2.user.js
+// @source       https://github.com/wyf9/sleepy/raw/refs/heads/main/client/browser-script.user.js
 // ==/UserScript==
 
 (function () {
@@ -53,31 +53,32 @@
     }
 
     // 发送请求函数
-    function sendRequest() {
-        // 获取当前网页
+    function sendRequest(using) {
+        // 处理页面标题
         var appName;
-        if (document.title == '') { // 如没有标题
-            if (NO_TITLE == 'url') {
-                appName = window.location.href; // 使用 url
-            } else if (NO_TITLE == 'host') {
-                appName = window.location.hostname; // 使用域名
-            } else {
-                appName = NO_TITLE; // 使用自定义提示
+        if (!document.title.trim()) { // 标题为空或空白
+            switch (NO_TITLE) {
+                case 'url':
+                    appName = window.location.href;
+                    break;
+                case 'host':
+                    appName = window.location.hostname;
+                    break;
+                default:
+                    appName = NO_TITLE;
             }
         } else {
             appName = document.title;
         }
         log(`App name: ${appName}`);
 
-        if (!SHOW_NAME) {
-            // 如 SHOW_NAME 为空，使用浏览器名称
-            SHOW_NAME = getBrowserName();
-        }
+        // 处理显示名称
+        const showName = SHOW_NAME || getBrowserName();
 
         // 构造 API URL
-        var apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=true&app_name=${encodeURIComponent(appName)}`;
+        const apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(showName)}&using=${using}&app_name=${encodeURIComponent(appName)}`;
 
-        // 使用 GM_xmlhttpRequest 发送请求 (还是先用 get 吧)
+        // 发送请求
         GM_xmlhttpRequest({
             method: 'GET',
             url: apiUrl,
@@ -95,13 +96,9 @@
         });
     }
 
-    // 页面加载完成时发送请求
-    window.addEventListener('DOMContentLoaded', () => {
-        sendRequest();
-    });
-
-    // 监听页面聚焦事件发送请求
-    window.addEventListener('focus', () => {
-        sendRequest();
-    });
+    // 事件监听
+    window.addEventListener('DOMContentLoaded', () => sendRequest(true));
+    window.addEventListener('focus', () => sendRequest(true));
+    window.addEventListener('blur', () => sendRequest(false));
+    window.addEventListener('beforeunload', () => sendRequest(false));
 })();

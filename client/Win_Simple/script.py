@@ -17,33 +17,33 @@ from time import time, sleep
 class AppConfig:
     """应用程序配置管理"""
     _DEFAULT_CONFIG = """\
-    [settings]
-    # 服务地址, 末尾不带 /
-    SERVER = http://localhost:9010
-    # 密钥
-    SECRET = wyf9test
-    DEVICE_ID = Win_Simple
-    # 前台显示名称
-    DEVICE_SHOW_NAME = MyComputer
-    # 检查间隔，以秒为单位
-    CHECK_INTERVAL = 2
-    # 控制台输出所用编码(utf-8选一个gb18030)
-    ENCODING = utf-8
-    # 当窗口标题为其中任意一项时将不更新（|分隔）
-    SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 开始| 示例窗口1| 示例窗口2
-    # 当窗口标题为其中任意一项时视为未在使用
-    NOT_USING_NAMES = 我们喜欢这张图片，因此我们将它与你共享。| 示例窗口1| 示例窗口2
-    # 是否反转窗口标题
-    REVERSE_APP_NAME = False
-    # 鼠标静止判定时间(分钟)
-    MOUSE_IDLE_TIME = 15
-    # 鼠标移动检测的最小距离（像素）
-    MOUSE_MOVE_THRESHOLD = 3
-    #日志等级(DEBUG,INFO,WARNING,ERROR)DEBUG->ERROR日志依次减少
-    LOGLEVEL = INFO
-    #日志是否写入文件
-    LOG_FILE = False
-    """
+[settings]
+# 服务地址, 末尾不带 /
+SERVER = http://localhost:9010
+# 密钥
+SECRET = wyf9test
+DEVICE_ID = Win_Simple
+# 前台显示名称
+DEVICE_SHOW_NAME = MyComputer
+# 检查间隔，以秒为单位
+CHECK_INTERVAL = 2
+# 控制台输出所用编码(utf-8选一个gb18030)
+ENCODING = utf-8
+# 当窗口标题为其中任意一项时将不更新（|分隔）
+SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 开始| Win_Simple.exe| 示例窗口1| 示例窗口2
+# 当窗口标题为其中任意一项时视为未在使用
+NOT_USING_NAMES = 我们喜欢这张图片，因此我们将它与你共享。| 示例窗口1| 示例窗口2
+# 是否反转窗口标题
+REVERSE_APP_NAME = False
+# 鼠标静止判定时间(分钟)
+MOUSE_IDLE_TIME = 15
+# 鼠标移动检测的最小距离（像素）
+MOUSE_MOVE_THRESHOLD = 3
+#日志等级(DEBUG,INFO,WARNING,ERROR)DEBUG->ERROR日志依次减少
+LOGLEVEL = INFO
+#日志是否写入文件
+LOG_FILE = False
+"""
     
     def __init__(self):
         self.config_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "config.ini")
@@ -85,7 +85,7 @@ class AppConfig:
             self.log_file = self.config.getboolean('settings', 'LOG_FILE')
             
         except Exception as e:
-            logging.error(f'配置文件打不开惹: {e}')
+            logging.error(f'配置文件打不开惹: {str(e)}')
             sys.exit(1)
     
     def _parse_list(self, key: str) -> list:
@@ -173,7 +173,7 @@ class DeviceMonitor:
             handlers=handlers
         )
     
-    def send_state(self, using: bool, window: str):
+    def send_state(self, using: bool, window: str = None):
         """发送状态到服务器"""
         try:
             resp = requests.post(
@@ -191,7 +191,7 @@ class DeviceMonitor:
             resp.raise_for_status()
             self.state.last_window = window
         except requests.RequestException as e:
-            logging.warning(f'主人反省一下自己干了什么: {e}')
+            logging.warning(f'主人反省一下自己干了什么: {str(e)}')
     
     def _should_update(self, new_window: str, mouse_idle: bool) -> bool:
         """判断是否需要更新状态"""
@@ -228,7 +228,8 @@ class DeviceMonitor:
                 logging.info(f'{using},主人在 {processed_window}')
                 self.send_state(using, processed_window)
         except Exception as e:
-            logging.error(f'呼呼呼~{e}')
+            self.send_state(False, [str(e)])
+            logging.error(f'呼呼呼~{str(e)}')
 
 # --------------------------
 # 系统功能模块
@@ -236,7 +237,7 @@ class DeviceMonitor:
 def check_network():
     """检测网络连接"""
     try:
-        response = requests.get('http://baidu.com', timeout=5)
+        response = requests.get('https://www.baidu.com/', timeout=5)
         return response.status_code == 200
     except requests.RequestException:
         return False
@@ -262,7 +263,7 @@ def message_loop(monitor):
                 if resp.status_code != 200:
                     logging.warning(f'阿巴阿巴，{resp.status_code} - {resp.json()}')
             except Exception as e:
-                logging.warning(f'玛卡巴卡，{e}')
+                logging.warning(f'玛卡巴卡，{str(e)}')
             return True  # 允许关机或注销
            
         return 0
@@ -297,8 +298,10 @@ def main():
             logging.info("主人要抛弃人家了吗~呜")
             sys.exit(0)
         except Exception as e:
-            logging.error(f'梦梦不知道哦: {e}')
+            logging.error(f'梦梦不知道哦: {str(e)}')
+            monitor.send_state(False, [str(e)])
             sleep(10)
+
 
 if __name__ == '__main__':
     main()
