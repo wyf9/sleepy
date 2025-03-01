@@ -54,30 +54,31 @@
 
     // 发送请求函数
     function sendRequest(using) {
-        // 获取当前网页
+        // 处理页面标题
         var appName;
-        if (document.title == '') { // 如没有标题
-            if (NO_TITLE == 'url') {
-                appName = window.location.href; // 使用 url
-            } else if (NO_TITLE == 'host') {
-                appName = window.location.hostname; // 使用域名
-            } else {
-                appName = NO_TITLE; // 使用自定义提示
+        if (!document.title.trim()) { // 标题为空或空白
+            switch (NO_TITLE) {
+                case 'url':
+                    appName = window.location.href;
+                    break;
+                case 'host':
+                    appName = window.location.hostname;
+                    break;
+                default:
+                    appName = NO_TITLE;
             }
         } else {
             appName = document.title;
         }
         log(`App name: ${appName}`);
 
-        if (!SHOW_NAME) {
-            // 如 SHOW_NAME 为空，使用浏览器名称
-            SHOW_NAME = getBrowserName();
-        }
+        // 处理显示名称
+        const showName = SHOW_NAME || getBrowserName();
 
         // 构造 API URL
-        var apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(SHOW_NAME)}&using=${using}&app_name=${encodeURIComponent(appName)}`;
+        const apiUrl = `${API_URL}?secret=${encodeURIComponent(SECRET)}&id=${encodeURIComponent(ID)}&show_name=${encodeURIComponent(showName)}&using=${using}&app_name=${encodeURIComponent(appName)}`;
 
-        // 使用 GM_xmlhttpRequest 发送请求 (还是先用 get 吧)
+        // 发送请求
         GM_xmlhttpRequest({
             method: 'GET',
             url: apiUrl,
@@ -95,16 +96,9 @@
         });
     }
 
-    // 页面加载完成时发送请求
-    window.addEventListener('DOMContentLoaded', () => {
-        sendRequest(using = true);
-    });
-    // 监听页面聚焦事件发送请求
-    window.addEventListener('focus', () => {
-        sendRequest(using = true);
-    });
-    // 监听页面关闭事件发送请求
-    window.addEventListener('unload', function() {
-        sendRequest(using = false);
-    });    
+    // 事件监听
+    window.addEventListener('DOMContentLoaded', () => sendRequest(true));
+    window.addEventListener('focus', () => sendRequest(true));
+    window.addEventListener('blur', () => sendRequest(false));
+    window.addEventListener('beforeunload', () => sendRequest(false));
 })();
