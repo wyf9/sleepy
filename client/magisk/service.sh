@@ -3,14 +3,14 @@
 # ========== 读取配置文件 ==========
 SCRIPT_DIR=${0%/*}
 CONFIG_FILE="${SCRIPT_DIR}/config.cfg"
-source "$CONFIG_FILE"
+. "$CONFIG_FILE"
 # ========== 日志系统 ==========
 LOG_PATH="${SCRIPT_DIR}/${LOG_NAME}"
 log() {
   message="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
   echo "$message" >> "$LOG_PATH"
 }
-
+sleepy=0
 # ========== 判断是否为游戏 ==========
 is_game() {
   pkg="$1"
@@ -32,9 +32,10 @@ get_app_name() {
   # 如果是锁屏状态，直接返回
   if [ "$package_name" = "NotificationShade" ]; then
     echo "锁屏了"
+    sleepy=$((sleepy + 1))
     return
   fi
-
+  sleepy=0
   cached_name=$(awk -F '=' -v pkg="$package_name" '$1 == pkg {print $2; exit}' "$CACHE")
   if [ -n "$cached_name" ]; then
     echo "$cached_name"
@@ -68,14 +69,27 @@ send_status() {
   package_name="$1"
   app_name=$(get_app_name "$package_name")
   
-  battery_level=$(dumpsys battery | grep 'level:' | awk '{print $2}')
-  res_up="$app_name[${battery_level}%]"
+battery_level=$(dumpsys battery | grep 'level:' | awk '{print $2}')
+dumpsys_charging="$(dumpsys deviceidle get charging)"
+
+if [ "$dumpsys_charging" = "true" ]; then
+  res_up="$app_name[${battery_level}%]⚡"
+else
+  res_up="$app_name[${battery_level}%]🔋"
+fi
+
   log "$res_up"
   
+if [ "$sleepy" -ge 60 ]; then
+  using="false"
+else
+  using="true"
+fi
+
   http_code=$(curl -s --connect-timeout 35 --max-time 100 -w "%{http_code}" -o /tmp/curl_body "$URL" \
     -X POST \
     -H "Content-Type: application/json" \
-    -d '{"secret": "'"${SECRET}"'", "id": 0, "show_name": "'"${device_model}"'", "using": true, "app_name": "'"$res_up"'"}')
+    -d '{"secret": "'"${SECRET}"'", "id": 0, "show_name": "'"${device_model}"'", "using": '"${using}"', "app_name": "'"$res_up"'"}')
 
 
   if [ "$http_code" -ne 200 ]; then
@@ -101,12 +115,11 @@ log "开！"
 
 # ========== 核心逻辑 ==========
 while true; do
-  # 获取当前焦点窗口信息
-  CURRENT_FOCUS=$(dumpsys window | grep mCurrentFocus)
+  CURRENT_FOCUS=$(dumpsys window | grep -m 1 'mCurrentFocus')
   PACKAGE_NAME=$(echo "$CURRENT_FOCUS" | awk -F '[ /}]' '{print $5}' | tr -d '[:space:]')
 
-  if [ "$PACKAGE_NAME" != "$LAST_PACKAGE" ] && [ -n "$PACKAGE_NAME" ]; then
-    log "状态变化: ${LAST_PACKAGE:-none} → ${PACKAGE_NAME:-none}"
+  if [ -n "$PACKAGE_NAME" ] && [ "$PACKAGE_NAME" != "$LAST_PACKAGE" ]; then
+    log "状态变化: ${LAST_PACKAGE:-none} → ${PACKAGE_NAME}"
     send_status "$PACKAGE_NAME"
     LAST_PACKAGE="$PACKAGE_NAME"
   fi

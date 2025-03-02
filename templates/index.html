@@ -53,7 +53,7 @@
                             const data = await response.json();
                             const steamInfo = getSteamUserInfo(data);
                             if (steamInfo.gameid !== -1) {
-                                steam.innerHTML = `<p><span>${steamInfo.nickname}</span> <a href="https://store.steampowered.com/app/${steamInfo.gameid}">${steamInfo.gameStatus}</a></p>`;
+                                steam.innerHTML = `<p><span>${steamInfo.nickname}</span> <a target="_blank" href="https://store.steampowered.com/app/${steamInfo.gameid}">${steamInfo.gameStatus}</a></p>`;
                             } else {
                                 steam.innerHTML = `<p><span>${steamInfo.nickname}</span> ${steamInfo.gameStatus}</p>`;
                             }

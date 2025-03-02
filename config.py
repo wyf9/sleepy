@@ -1,10 +1,9 @@
 # coding: utf-8
 
 import os
+import json5
 import shutil
 import utils as u
-from jsonc_parser.parser import JsoncParser
-
 
 class config:
     '''
@@ -14,7 +13,8 @@ class config:
     config: dict
 
     def __init__(self):
-        jsonData = JsoncParser.parse_file('config.example.jsonc', encoding='utf-8')
+        # jsonData = JsoncParser.parse_file('config.example.jsonc', encoding='utf-8')
+        jsonData= json5.load(open('config.example.jsonc', encoding='utf-8'))
         if not os.path.exists('config.jsonc'):
             u.warning('config.jsonc not exist, creating')
             try:
@@ -32,7 +32,7 @@ class config:
         加载配置
         '''
         try:
-            self.config = JsoncParser.parse_file('config.jsonc', encoding='utf-8')
+            self.config = json5.load(open('config.jsonc', encoding='utf-8'))
         except Exception as e:
             u.error(f'Error loading config.jsonc: {e}')
             raise

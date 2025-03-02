@@ -1,14 +1,14 @@
 # coding: utf-8
 
-import json
 import os
+import pytz
+import json5
 import threading
+
 from time import sleep
 from datetime import datetime
-import pytz
 
 import utils as u
-from jsonc_parser.parser import JsoncParser
 import config as config_module
 
 
@@ -26,7 +26,7 @@ class data:
 
     def __init__(self, config: config_module.config):
         self.c = config
-        self.preload_data = JsoncParser.parse_file('data.example.jsonc', encoding='utf-8')
+        self.preload_data = json5.load(open('data.example.jsonc', encoding='utf-8'))
         if os.path.exists('data.json'):
             try:
                 self.load()
@@ -62,7 +62,7 @@ class data:
                 self.data = self.preload_data
                 self.save()
             with open('data.json', 'r', encoding='utf-8') as file:
-                Data = json.load(file)
+                Data=json5.load(file)
                 DATA: dict = {**preload, **Data}
                 if ret:
                     return DATA
@@ -81,7 +81,7 @@ class data:
         保存配置
         '''
         with open('data.json', 'w+', encoding='utf-8') as file:
-            json.dump(self.data, file, indent=4, ensure_ascii=False)
+            json5.dump(self.data, file, indent=4, ensure_ascii=False)
 
     def dset(self, name, value):
         '''
