@@ -1,5 +1,5 @@
 {
-    "version": "2025.2.10.1", // 配置版本号，可在更新时用于确定更改内容, ** 见: data_json_update.md **
+    "version": "2025.3.2.1", // 配置版本号，可在更新时用于确定更改内容, ** 见: data_json_update.md **
     "debug": false, // Flask 服务器的 debug 开关, 无需更改
     "host": "0.0.0.0", // 监听地址, 0.0.0.0 (IPV6: ::) 表示所有
     "port": 9010, // 监听端口, 默认 9010
@@ -23,6 +23,8 @@
     ],
     "data_check_interval": 30, // 多久检查一次 data.json 是否有更改 (秒)
     "other": { // 其他配置 (网页上的信息)
+        "page_title": "User Alive?", // 页面标题
+        "page_desc": "User's Online Status Page", // 页面详情 
         "user": "User", // 你的名字
         "background": "https://imgapi.siiway.top/image", // 背景图片 url
         // 推荐 repo: [siiway/imgapi](https://github.com/siiway/imgapi)
@@ -35,6 +37,6 @@
         "device_status_slice": 30, // 设备状态从开头截取多少文字显示 (防止窗口标题过长, 设置为 0 禁用)
         "show_loading": true, // 控制是否显示 "更新中" 提示
         "hitokoto": false, // 控制是否显示一言
-        "canvas": true // 控制是否显示背景 canvas粒子效果
+        "canvas": true // 控制是否显示背景 canvas 粒子效果
     }
 }
