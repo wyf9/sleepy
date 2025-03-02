@@ -5,23 +5,129 @@ import requests
 # --- config start
 SERVER = 'https://sleepy.example.com'  # 部署地址，末尾不带 `/`
 SECRET = '11111111-4444-5555-1111-444444444444'
+PROXY: str = ''  # 代理地址 (<http/socks5>://host:port), 设置为空字符串禁用
 # --- config end
 
-# ----- functions
+# --- modifies
+
+_print_ = print
+
+
+def print(*args, **kwargs):
+    '''
+    modified `print()` function
+
+    replaced secret to `[SECRET]`
+
+    original: `_print_()`
+    '''
+    new_args = []
+    for i in args:
+        new_args.append(str(i).replace(str(SECRET), '[SECRET]'))
+    _print_(*new_args, **kwargs)
+
+
+def get(url: str, **kwargs):
+    '''
+    modified `requests.get()`
+    '''
+    if PROXY:
+        return requests.get(
+            url=url,
+            proxies={
+                'all': PROXY
+            },
+            **kwargs
+        )
+    else:
+        return requests.get(
+            url=url,
+            **kwargs
+        )
+
+
+def post(url: str, Json: dict, **kwargs):
+    '''
+    modified `requests.post()`
+    '''
+    if PROXY:
+        return requests.post(
+            url=url,
+            json=Json,
+            proxies={
+                'all': PROXY
+            },
+            headers={
+                'Content-Type': 'application/json'
+            },
+            **kwargs
+        )
+    else:
+        return requests.post(
+            url=url,
+            json=Json,
+            headers={
+                'Content-Type': 'application/json'
+            },
+            **kwargs
+        )
+
+# --- functions
+
+# - public
+
+
+def query():
+    '''
+    /query using GET
+    - check status now
+    '''
+    resp = get(f'{SERVER}/query')
+    print(f'[/query] Response: {resp.status_code} - {resp.text}')
+
+
+def status_list():
+    '''
+    /status_list using GET
+    - see status list
+    '''
+    resp = get(f'{SERVER}/status_list')
+    print(f'[/status_list] Response: {resp.status_code} - {resp.text}')
+
+
+def metrics():
+    '''
+    /metrics using GET
+    - see metrics data
+    '''
+    resp = get(f'{SERVER}/metrics')
+    print(f'[/metrics] Response: {resp.status_code} - {resp.text}')
+
+# - status
+
+
+def status(stat: int):
+    '''
+    /set using GET
+    - set status manually
+    '''
+    resp = get(f'{SERVER}/set?secret={SECRET}&status={stat}')
+    print(f'[/set] Response: {resp.status_code} - {resp.json()}')
+
+# - device
 
 
 def device_set(id: str, show_name: str, msg: str, using: bool = True):
     '''
     /device/set using POST
+    - set device status
     '''
-    resp = requests.post(url=f'{SERVER}/device/set', json={
+    resp = post(f'{SERVER}/device/set', {
         'secret': SECRET,
         'id': id,
         'show_name': show_name,
         'using': using,
         'app_name': msg
-    }, headers={
-        'Content-Type': 'application/json'
     })
     print(f'[/device/set] Response: {resp.status_code} - {resp.json()}')
 
@@ -29,88 +135,89 @@ def device_set(id: str, show_name: str, msg: str, using: bool = True):
 def device_remove(id: str):
     '''
     /device/remove using GET
+    - remove a device with it's status
     '''
-    resp = requests.get(url=f'{SERVER}/device/remove?secret={SECRET}&id={id}')
+    resp = get(f'{SERVER}/device/remove?secret={SECRET}&id={id}')
     print(f'[/device/remove] Response: {resp.status_code} - {resp.json()}')
 
 
 def device_clear():
     '''
     /device/clear using GET
+    - remove **all** devices with their statuses
     '''
-    resp = requests.get(url=f'{SERVER}/device/clear?secret={SECRET}')
+    resp = get(f'{SERVER}/device/clear?secret={SECRET}')
     print(f'[/device/clear] Response: {resp.status_code} - {resp.json()}')
 
 
 def private_mode(private: bool):
     '''
     /device/private_mode using GET
+    - open / close private mode *(don't show device status)*
     '''
-    if private:
-        private = 'true'
-    else:
-        private = 'false'
-    resp = requests.get(url=f'{SERVER}/device/private_mode?secret={SECRET}&private={private}')
+    resp = get(f'{SERVER}/device/private_mode?secret={SECRET}&private={private}')
     print(f'[/device/clear] Response: {resp.status_code} - {resp.json()}')
 
-# ---
+# - storage
 
 
-def left(num: int = 0):
+def reload_config():
+    '''
+    /reload_config using GET
+    - reload config from server `config.jsonc`
+    '''
+    resp = get(f'{SERVER}/reload_config?secret={SECRET}')
+    print(f'[/reload_config] Response: {resp.status_code} - {resp.json()}')
+
+
+def save_data():
+    '''
+    /save_data using GET
+    - save memory data (status, device, metrics) to server `data.json`
+    '''
+    resp = get(f'{SERVER}/save_data?secret={SECRET}')
+    print(f'[/save_data] Response: {resp.status_code} - {resp.json()}')
+
+# - custom
+
+
+def left(
+    num: int = 0,
+    id: str = 'homework-left',
+    show_name: str = 'Homework left'
+):
     '''
     set how much homework left
     '''
-    if num == 0:
-        device_remove(id='homework-left')
-    else:
+    if num:
         device_set(
-            id='homework-left',
-            show_name='Homework left',
+            id=id,
+            show_name=show_name,
             msg=f'{num}'
         )
+    else:
+        device_remove(id=id)
 
 
-def writing(name: str = ''):
+def writing(
+    name: str = '',
+    id: str = 'homework-writing',
+    show_name: str = 'Homework writing'
+):
     '''
     set what homework you're writing
     '''
-    if name == '':
-        device_remove(id='homework-name')
-    else:
+    if name:
         device_set(
-            id='homework-name',
-            show_name='Homework writing',
+            id=id,
+            show_name=show_name,
             msg=name
         )
-
-# ---
-
-
-def query():
-    '''
-    check status now
-    '''
-    resp = requests.get(url=f'{SERVER}/query')
-    print(f'[/query] Response: {resp.status_code} - {resp.text}')
+    else:
+        device_remove(id=id)
 
 
-def lst():
-    '''
-    status list
-    '''
-    resp = requests.get(url=f'{SERVER}/status_list')
-    print(f'[/status_list] Response: {resp.status_code} - {resp.text}')
-
-
-def status(stat: int):
-    '''
-    set status
-    '''
-    resp = requests.get(url=f'{SERVER}/set?secret={SECRET}&status={stat}')
-    print(f'[/set] Response: {resp.status_code} - {resp.json()}')
-
-# ----- main loop
-
+# --- main loop
 
 if __name__ == '__main__':
     try:
@@ -118,7 +225,8 @@ if __name__ == '__main__':
             i = input('in  < ')
             try:
                 o = eval(i)
-                print(f'out > {o}')
+                if not o is None:
+                    print(f'out > {o}')
             except Exception as e:
                 print(f'err - {e}')
     except KeyboardInterrupt:
