@@ -1,14 +1,13 @@
 #!/usr/bin/python3
 # coding: utf-8
-
-import flask
-from markupsafe import escape
-from datetime import datetime
-import pytz
 import os
+import pytz
+import flask
+from datetime import datetime
+from markupsafe import escape
 import utils as u
-from config import config as config_init
 from data import data as data_init
+from config import config as config_init
 
 try:
     c = config_init()
@@ -427,6 +426,7 @@ if METRICS_ENABLED:
 
 # --- End
 if __name__ == '__main__':
+    print(f"===============hi {c.config['other']['user']}!===============")
     app.run(  # 启↗动↘
         host=c.config['host'],
         port=c.config['port'],
