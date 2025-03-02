@@ -18,6 +18,7 @@ import threading
 import win32api  # type: ignore - 勿删，用于强忽略非 windows 系统上 vscode 找不到模块的警告
 import win32con  # type: ignore
 import win32gui  # type: ignore
+from pywintypes import error as pywinerror # type: ignore
 
 # ----- Part: Config
 
@@ -210,7 +211,11 @@ def check_mouse_idle() -> bool:
     '''
     global last_mouse_pos, last_mouse_move_time, is_mouse_idle
 
-    current_pos = win32api.GetCursorPos()
+    try:
+        current_pos = win32api.GetCursorPos()
+    except pywinerror as e:
+        print(f'Check mouse pos error: {e}')
+        return None
     current_time = time.time()
 
     # 计算鼠标移动距离
