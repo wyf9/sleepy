@@ -35,6 +35,7 @@ except:
 
 # --- Functions
 
+
 @app.before_request
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
@@ -84,12 +85,10 @@ def index():
             visit_year=d.data['metrics']['year'].get('/', 0),
             visit_total=d.data['metrics']['total'].get('/', 0)
         )
-    if c.config['other']['hitokoto']:
-        hitokoto = '一言获取中~'
-    else:
-        hitokoto = ''
     return flask.render_template(
         'index.html',
+        page_title=ot['page_title'],
+        page_desc=ot['page_desc'],
         user=ot['user'],
         learn_more=ot['learn_more'],
         repo=ot['repo'],
@@ -98,13 +97,13 @@ def index():
         status_color=stat['color'],
         more_text=more_text,
         last_updated=d.data['last_updated'],
-        hitokoto=hitokoto,
+        hitokoto=ot['hitokoto'],
         canvas=ot['canvas'],
         steamkey=os.environ.get('STEAMKEY') or ot.get('steamkey'),
         steamids=ot.get('steamids')
     )
-    
-        
+
+
 @app.route('/'+'git'+'hub')
 def git_hub():
     '''
@@ -368,10 +367,10 @@ def reload_config():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
-    
+
     # 先声明 global
     global SECRET_REAL
-    
+
     if secret == SECRET_REAL:
         c.load()
         SECRET_REAL = os.environ.get('SLEEPY_SECRET') or c.get('secret')
@@ -384,6 +383,7 @@ def reload_config():
             code='not authorized',
             message='invalid secret'
         )
+
 
 @app.route('/save_data')
 def save_data():

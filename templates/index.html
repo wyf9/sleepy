@@ -4,16 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{ user }}'s Online Status Page">
-    <title>{{ user }} Alive?</title>
+    <title>{{ page_title }}</title>
+    <meta name="description" content="{{ page_desc }}">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 
 <body>
     <div class="container">
-        <div class="card" id="user_status">
+        <div class="card light" id="user_status">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
+            <button id="moonlight" style="background: none; border: none; cursor: pointer;">
+                <!-- 版权所有 &copy; https://www.iconfont.cn/user/detail?uid=8623109&nid=9eLPALIxYUDV -->
+            <svg t="1741008747639" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2611" width="200" height="200"><path d="M624 888H304c-110.4 0-200-89.6-200-200s89.6-200 200-200c14 0 27.6 1.2 41.2 4.4C386.4 378 495.6 296 624 296c163.2 0 296 132.8 296 296s-132.8 296-296 296z m-319.2-352H304c-84 0-152 68-152 152s68 152 152 152h320c136.8 0 248-111.2 248-248s-111.2-248-248-248-248 111.2-248 248c0 13.2-10.8 24-24 24s-24-10.8-24-24c0-18 1.6-36 4.8-53.2-9.2-2-18.4-2.8-28-2.8z" p-id="2612"></path><path d="M188 579.6c-3.2 0-6.4-0.8-9.2-2-82.4-34.8-143.2-107.6-163.6-194.8-2-8 0.4-16.4 6.4-22.4 5.6-6 14-8.4 22.4-6.4 16.8 4 34.4 6 52 6 127.6 0 232-104.4 232-232 0-17.6-2-35.2-6-52.4-1.6-8 0.8-16.4 6.4-22.4 6-5.6 14.4-8 22.4-6.4 128 29.6 217.2 141.6 216.8 272.8 0 4.4 0 9.2-0.4 14.4-1.2 13.2-13.2 22.8-26.4 21.6-13.2-1.2-22.8-13.2-21.6-26.4 0.4-2.8 0.4-6 0.4-9.6 0-96.4-58-180.4-145.2-215.2 1.2 8 1.6 15.6 1.6 23.6-0.4 154.4-126 280-280 280-7.6 0-15.6-0.4-23.2-1.2 22.8 56.4 67.6 102.4 124.4 126.4 12.4 5.2 18 19.2 12.8 31.6-3.6 9.2-12.8 14.8-22 14.8z" p-id="2613"></path></svg>
+            </button>
             <h3><i><b>{{ user }}'s</b></i> Status:<br><a id="status" style="font-size: 1.2em;">{{ status_name }}</a>
             </h3>
             <p id="additional-info" style="font-size: 1em;">{{ status_desc | safe }}</p>
@@ -45,12 +49,13 @@
                     //也许这里需要反代
                     //const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
                     //https://store.steampowered.com/app/2358720
-                    const steamapi = "https://a.858efb39d39c.workers.dev";//且用且珍惜
+                    const steamapi = "https://a.858efb39d39c.workers.dev"; // 且用且珍惜
                     const quresteaam = `${steamapi}/?key=${steamkey}&steamids=${steamids}`;
                     (async () => {
                         try {
                             const response = await fetch(quresteaam);
                             const data = await response.json();
+                            console.log(`Steam info response: ${data}`);
                             const steamInfo = getSteamUserInfo(data);
                             if (steamInfo.gameid !== -1) {
                                 steam.innerHTML = `<p><span>${steamInfo.nickname}</span> <a target="_blank" href="https://store.steampowered.com/app/${steamInfo.gameid}">${steamInfo.gameStatus}</a></p>`;
@@ -59,42 +64,44 @@
                             }
 
                         } catch (error) {
-                            console.error('Error:', error);
+                            console.error(`Fetch steam info error: ${error}`);
                             steam.innerHTML = '';
                         }
                     })();
 
                 } else {
-                    console.log('Steam disabled');
+                    console.log('Steam info disabled');
                 }
             </script>
 
             <p id="last-updated">最后更新: {{ last_updated }}</p>
 
         </div>
-        <div class="card" id="more_text">
+        <div class="card light" id="more_text">
+            {% if hitokoto %}
             <div>
                 <p id="hitokoto">
-                    <a href="#" id="hitokoto_text">{{ hitokoto }}</a>
+                    <a href="#" id="hitokoto_text">一言获取中~</a>
                 </p>
                 <script>
-                    const hitokoto_enabled = '{{ hitokoto }}';
                     const hitokotoElement = document.querySelector('#hitokoto_text');
-                    if (hitokoto_enabled) {
-                        console.log('Hitokoto enabled');
+                    try {
                         fetch('https://v1.hitokoto.cn')
                             .then(response => response.json())
                             .then(data => {
-                                hitokotoElement.href = `https://hitokoto.cn/?uuid=${data.uuid}`
-                                hitokotoElement.innerText = data.hitokoto
+                                console.log(`Hitokoto response: ${data}`);
+                                hitokotoElement.href = `https://hitokoto.cn/?uuid=${data.uuid}`;
+                                hitokotoElement.innerText = data.hitokoto;
+                                hitokotoElement.title = `-- ${data.from_who} 《${data.from}》`
                             })
-                            .catch(console.error)
-                    } else {
-                        console.log('Hitokoto disabled');
-                        hitokotoElement.innerText = '';
+                    }
+                    catch (error) {
+                        console.error(`Hitokoto fetch error: ${error}`);
+                        hitokotoElement.innerText = '一言获取失败 :(';
                     }
                 </script>
             </div>
+            {% endif %}
             {{ more_text | safe }}
             <p>你可以通过这个页面视奸 <b>{{ user }}</b>。
                 <br>
@@ -114,6 +121,8 @@
         const statusElement = document.getElementById('status');
         statusElement.classList.add('{{ status_color }}');
     </script>
+    <!-- <script src="./moonlight.js"></script> -->
+    <script src="{{ url_for('static', filename='moonlight.js') }}"></script>
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
     <!-- 仅在 canvas 为 True 时加载 canvas.js -->
     {% if canvas %}

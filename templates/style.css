@@ -9,19 +9,44 @@ a {
     text-decoration: none;
 }
 
+html {
+    height: 100%;
+    width: 100%;
+}
+#moonlight{
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+#moonlight svg{
+    width: 40px;
+    height: 40px;
+}
 body {
     background: url('{{ bg }}') no-repeat center center fixed; /* 此处不要展开 */
     background-size: cover;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-attachment: fixed;
 }
-
-.card {
+.light{
     background-color: aliceblue;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.dark{
+    background-color: #1a151424;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.card {
     border-radius: 30px;
     padding: 2rem 1rem;
     margin: 1rem auto;
     width: 40%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
+    position: relative;
     font-size: 1.1em;
     opacity: {{ alpha }}; /* 格式化后注意此处 */
 }
@@ -35,7 +60,14 @@ body {
     margin: 1rem;
 }
 .container {
-    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 @media (max-width: 700px) {
@@ -62,7 +94,13 @@ body {
 }
 
 /* 不建议删除上面的 .sleeping .awake .error 三个默认颜色 */
+#hitokoto{
+    border-radius: .5rem;
+    box-shadow: 10px 6px 14px 6px rgb(0 0 0 / 12%);
+    padding: .8rem 1rem;
 
+}
 #hitokoto_text {
     color: rgba(237, 202, 242, 0.719);
+
 }

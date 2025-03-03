@@ -13,6 +13,30 @@
 - `n`: 本日第 `n` 次修改
 - *不补 `0` (`1145.1.4`, not `1145.01.04`)*
 
+# 2025-03
+
+## 2025.3.2.1
+
+```jsonc
+  "other": {
+    "page_title": "User Alive?", // (1) [NEW]
+    "page_desc": "User's Online Status Page", // (1) [NEW]
+    // ...
+  }
+```
+
+- **New** (1)
+  * Name: `page_title`
+  * Upper: `other`
+  * Type: `str`
+  * Desc: 控制网页标题
+
+- **New** (2)
+  * Name: `page_desc`
+  * Upper: `other`
+  * Type: `str`
+  * Desc: 控制网页的内容描述 *(`<meta name="description" content="">` 的内容)*
+
 # 2025-02
 
 ## 2025.2.10.1

@@ -17,7 +17,7 @@
     - [Using](#using-2)
   - [BrowserScript](#browserscript)
     - [Configure](#configure-4)
-  - [Homework](#homework)
+  - [HomeworkDevice](#homeworkdevice)
     - [Configure](#configure-5)
     - [Using](#using-3)
   - [MinecraftScript](#minecraftscript)
@@ -147,35 +147,44 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 > UNDONE
 
-## [Homework](./homework_device.py)
+## [HomeworkDevice](./homework_device.py)
 
 > by: [@wyf9](https://github.com/wyf9)
 
-一个手动设置设备状态的示例 *(用来展示你的作业进度)*
+一个手动设置设备状态的示例 ***(不止!)*** *用来展示你的作业进度*
 
 依赖: `requests`
 
 ### Configure
 
-只有两个配置:
-
-- `SERVER`: 服务器地址，末尾不带 `/`，如：`https://sleepy.wyf9.top`
-- `SECRET`: 同名
+TODO
 
 ### Using
 
 脚本提供了一些函数:
 
 - `left(num: int)`: 设置剩余作业的数量 (为 `0` 则移除) *[device id: `homework-left`]*
-- `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除) *[device id: `homework-name`]*
+- `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除) *[device id: `homework-writing`]*
 
-还有一些扩展函数, 可以调用大部分 API
-- `query()`: 查看当前状态 *(未格式化输出)*
-- `lst()`: 查看可用状态列表 *(未格式化输出)*
-- `status(stat: int)`: 设置状态
-- `device_set(id: str, show_name: str, msg: str, using: bool = True)`: 设备状态设置
-- `device_remove(id: str)`: 移除设备状态
-- `device_clear()`: 清除设备状态
+还有一些扩展函数, 可以调用 ~~全部 *(存疑)*~~ 大部分 API:
+
+<details>
+<summary>点击展开列表</summary>
+
+> 点击链接跳转 api 文档
+
+- [`query()`](../doc/api.md#query): 查看当前状态 *(未格式化输出)*
+- [`status_list()`](../doc/api.md#status-list): 查看可用状态列表 *(未格式化输出)*
+- [`metrics()`](../doc/api.md#metrics): 查看统计数据 *(未格式化输出)*
+- [`status(stat: int)`](../doc/api.md#status-set): 设置状态
+- [`device_set(id: str, show_name: str, msg: str, using: bool = True)`](../doc/api.md#device-set): 设备状态设置
+- [`device_remove(id: str)`](../doc/api.md#device-remove): 移除设备状态
+- [`device_clear()`](../doc/api.md#device-clear): 清除设备状态
+- [`private_mode(private: bool)`](../doc/api.md#device-private-mode): 开关隐私模式
+- [`reload_config()`](../doc/api.md#storage-reload-config): 从 `config.jsonc` 重载配置
+- [`save_data()`](../doc/api.md#storage-save-data): 保存数据到 `data.json`
+
+</details>
 
 那么，如何使用这两个函数呢？
 
