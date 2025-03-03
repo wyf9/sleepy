@@ -61,7 +61,7 @@ MEDIA_DEVICE_ID: str = 'media-device'
 # 独立设备模式下的显示名称
 MEDIA_DEVICE_SHOW_NAME: str = '正在播放'
 # 媒体信息前缀最大长度（超出部分将被截断）
-MEDIA_PREFIX_MAX_LENGTH: int = 30
+MEDIA_PREFIX_MAX_LENGTH: int = 20
 # --- config end
 
 # ----- Part: Functions
@@ -320,6 +320,9 @@ def do_update():
 
     # 获取当前窗口标题和鼠标状态
     current_window = win32gui.GetWindowText(win32gui.GetForegroundWindow())
+    # 如果启用了反转应用名称功能，则反转窗口标题
+    if REVERSE_APP_NAME and ' - ' in current_window:
+        current_window = reverse_app_name(current_window)
     mouse_idle = check_mouse_idle()
     debug(f'--- Window: `{current_window}`, mouse_idle: {mouse_idle}')
 
@@ -327,7 +330,7 @@ def do_update():
     window = current_window
     using = True
 
-    # 获取媒体信息
+        # 获取媒体信息
     prefix_media_info = None
     standalone_media_info = None
 
