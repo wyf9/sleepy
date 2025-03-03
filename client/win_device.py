@@ -54,7 +54,7 @@ PROXY: str = ''
 # --- 媒体信息配置
 # 是否启用媒体信息获取
 ENABLE_MEDIA_INFO: bool = True
-# 媒体信息显示模式: 'prefix' - 作为前缀添加到当前窗口名称, 'separate' - 使用独立设备
+# 媒体信息显示模式: 'prefix' - 作为前缀添加到当前窗口名称, 'separate' - 使用独立设备, 'both' - 都启用
 MEDIA_INFO_MODE: str = 'prefix'
 # 独立设备模式下的设备ID (仅当 MEDIA_INFO_MODE = 'separate' 时有效)
 MEDIA_DEVICE_ID: str = 'media-device'
@@ -343,7 +343,7 @@ def do_update():
             debug(f"检测到媒体: {title or ''} - {artist or ''} - {album or ''}")
     
     # 处理媒体信息 (prefix 模式)
-    if ENABLE_MEDIA_INFO and prefix_media_info and MEDIA_INFO_MODE == 'prefix':
+    if ENABLE_MEDIA_INFO and prefix_media_info and (MEDIA_INFO_MODE == 'prefix' or MEDIA_INFO_MODE == 'both'):
         # 作为前缀添加到窗口名称
         window = f"{prefix_media_info} {window}"
 
@@ -410,7 +410,7 @@ def do_update():
         return
 
     # 如果使用独立设备模式展示媒体信息
-    if ENABLE_MEDIA_INFO and separate_media_info and MEDIA_INFO_MODE == 'separate':
+    if ENABLE_MEDIA_INFO and separate_media_info and (MEDIA_INFO_MODE == 'separate' or MEDIA_INFO_MODE == 'both'):
         try:
             media_resp = send_status(
                 using=True,
