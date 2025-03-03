@@ -55,7 +55,7 @@ git clone --depth=1 -b main https://github.com/wyf9/sleepy.git
 2. 安装依赖
 
 ```shell
-pip install flask pytz
+pip install -r requirements.txt
 ```
 
 3. 编辑配置文件
