@@ -146,6 +146,7 @@ def get_media_info():
         
     except Exception as primary_error:
         debug(f"主要媒体信息获取方式失败: {primary_error}")
+        return False, "", "", ""
 
 # ----- Part: Send status
 
