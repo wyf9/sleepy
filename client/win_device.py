@@ -51,6 +51,15 @@ MOUSE_MOVE_THRESHOLD: int = 10
 DEBUG: bool = True
 # 代理地址 (<http/socks>://host:port), 设置为空字符串禁用
 PROXY: str = ''
+# --- 媒体信息配置
+# 是否启用媒体信息获取
+ENABLE_MEDIA_INFO: bool = True
+# 媒体信息显示模式: 'prefix' - 作为前缀添加到当前窗口名称, 'separate' - 使用独立设备
+MEDIA_INFO_MODE: str = 'prefix'
+# 独立设备模式下的设备ID (仅当 MEDIA_INFO_MODE = 'separate' 时有效)
+MEDIA_DEVICE_ID: str = 'media-device'
+# 独立设备模式下的显示名称
+MEDIA_DEVICE_SHOW_NAME: str = '正在播放'
 # --- config end
 
 # ----- Part: Functions
@@ -96,21 +105,63 @@ def reverse_app_name(name: str) -> str:
     return ' - '.join(new)
 
 
+def get_media_info():
+    '''
+    使用 winrt 获取 Windows SMTC 媒体信息 (正在播放的音乐等)
+    Returns:
+        tuple: (是否正在播放, 标题, 艺术家, 专辑)
+    '''
+    # 首先尝试使用 winrt
+    try:
+        import winrt.windows.media.control as media
+        from asyncio import run
+
+        # 以异步方式获取媒体会话管理器
+        async def get_media_session():
+            # 获取媒体会话管理器
+            manager = await media.GlobalSystemMediaTransportControlsSessionManager.request_async()
+            return manager.get_current_session()
+
+        # 使用异步函数包装整个操作
+        async def get_media_info_async():
+            session = await get_media_session()
+            if not session:
+                return False, "", "", ""
+                
+            # 获取播放状态
+            info = session.get_playback_info()
+            is_playing = info.playback_status == media.GlobalSystemMediaTransportControlsSessionPlaybackStatus.PLAYING
+            
+            # 获取媒体属性
+            props = await session.try_get_media_properties_async()
+            
+            title = props.title or ""
+            artist = props.artist or ""
+            album = props.album_title or ""
+            
+            return is_playing, title, artist, album
+        
+        # 运行异步函数
+        return run(get_media_info_async())
+        
+    except Exception as primary_error:
+        debug(f"主要媒体信息获取方式失败: {primary_error}")
+
 # ----- Part: Send status
 
 Url = f'{SERVER}/device/set'
 last_window = ''
 
 
-def send_status(using: bool = True, app_name: str = '', **kwargs):
+def send_status(using: bool = True, app_name: str = '', id: str = None, show_name: str = None, **kwargs):
     '''
     post 发送设备状态信息
     设置了 headers 和 proxies
     '''
     json_data = {
         'secret': SECRET,
-        'id': DEVICE_ID,
-        'show_name': DEVICE_SHOW_NAME,
+        'id': id,
+        'show_name': show_name,
         'using': using,
         'app_name': app_name
     }
@@ -263,6 +314,38 @@ def do_update():
     # 始终保持同步的状态变量
     window = current_window
     using = True
+    
+    # 获取媒体信息
+    media_info = None
+    prefix_media_info = None
+    separate_media_info = None
+
+    if ENABLE_MEDIA_INFO:
+        is_playing, title, artist, album = get_media_info()
+        if is_playing and (title or artist):
+            # 为 prefix 模式创建格式化后的媒体信息 [♪歌曲名]
+            if title:
+                prefix_media_info = f"[♪{title}]"
+            else:
+                prefix_media_info = "[♪播放中]"
+            
+            # 为 separate 模式创建格式化后的媒体信息 ♪歌曲名-歌手-专辑
+            parts = []
+            if title:
+                parts.append(f"♪{title}")
+            if artist:
+                parts.append(artist)
+            if album:
+                parts.append(album)
+            
+            separate_media_info = "-".join(parts) if parts else "♪播放中"
+            
+            debug(f"检测到媒体: {title or ''} - {artist or ''} - {album or ''}")
+    
+    # 处理媒体信息 (prefix 模式)
+    if ENABLE_MEDIA_INFO and prefix_media_info and MEDIA_INFO_MODE == 'prefix':
+        # 作为前缀添加到窗口名称
+        window = f"{prefix_media_info} {window}"
 
     # 鼠标空闲状态处理（优先级最高）
     if mouse_idle:
@@ -312,7 +395,9 @@ def do_update():
         try:
             resp = send_status(
                 using=using,
-                app_name=window
+                app_name=window,
+                id=DEVICE_ID,
+                show_name=DEVICE_SHOW_NAME
             )
             debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code != 200 and not DEBUG:
@@ -323,6 +408,19 @@ def do_update():
     else:
         debug('No state change, skipping update')
         return
+
+    # 如果使用独立设备模式展示媒体信息
+    if ENABLE_MEDIA_INFO and separate_media_info and MEDIA_INFO_MODE == 'separate':
+        try:
+            media_resp = send_status(
+                using=True,
+                app_name=separate_media_info,  # 使用 separate 格式的媒体信息
+                id=MEDIA_DEVICE_ID,
+                show_name=MEDIA_DEVICE_SHOW_NAME
+            )
+            debug(f'Media Response: {media_resp.status_code}')
+        except Exception as e:
+            debug(f'Media Info Error: {e}')
 
 
 def main():
