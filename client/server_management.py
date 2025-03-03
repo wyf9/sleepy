@@ -6,6 +6,8 @@
 依赖: requests, prettytable, argparse
 by @Claude 3.7 Sonnet Thinking
 '''
+#! SECRET出错不会报错，需要鉴权的操作都会失败，但是不显示失败
+#* 传参用法在最后面
 
 import requests
 import json
@@ -608,6 +610,7 @@ class SleepyManagerCLI:
                 
             except KeyboardInterrupt:
                 print("\n操作已中断")
+                #! 控制台中断不会退出
                 continue
             except Exception as e:
                 print(f"错误: {e}")
