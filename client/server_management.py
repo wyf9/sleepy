@@ -3,22 +3,35 @@
 
 '''
 一个 python 服务器设备，个人状态管理器
-依赖: requests
-by @gongfuture&Claude-3.7
+依赖: requests, prettytable, argparse
+by @gongfuture
 '''
 
 import requests
 import json
 import sys
+import argparse
+import shlex
 from typing import Dict, List, Union, Any, Optional
+
+# 尝试导入 PrettyTable，如果不可用则提供简易替代
+try:
+    from prettytable import PrettyTable
+    PRETTYTABLE_AVAILABLE = True
+except ImportError:
+    PRETTYTABLE_AVAILABLE = False
+    print("警告: PrettyTable 库未安装，将使用简易格式化输出。")
+    print("您可以通过 'pip install prettytable' 安装该库以获得更好的显示效果。")
 
 # --- config start
 # 密钥
-SECRET = 'YourSecretCannotGuess'
+SECRET = ''
 # 服务地址, 末尾不加 `/`
-SERVER = 'https://example.com'
+SERVER = 'http://127.0.0.1:9010'
 # 请求重试次数
 RETRY = 3
+# 是否显示原始 JSON 响应
+SHOW_RAW_JSON = False
 # --- config end
 
 class SleepyManager:
@@ -118,194 +131,357 @@ class SleepyManager:
         return self._request('GET', 'save_data')
 
 
-class CommandLineInterface:
-    """命令行界面，管理用户交互"""
+class SimplePrinter:
+    """当无法使用 PrettyTable 时的简单格式化打印替代品"""
+    
+    @staticmethod
+    def print_table(headers, rows, title=None):
+        """打印简单的表格"""
+        if title:
+            print(f"\n=== {title} ===")
+        
+        # 计算每列的最大宽度
+        col_widths = [len(h) for h in headers]
+        for row in rows:
+            for i, cell in enumerate(row):
+                col_widths[i] = max(col_widths[i], len(str(cell)))
+        
+        # 打印表头
+        header_line = " | ".join(h.ljust(col_widths[i]) for i, h in enumerate(headers))
+        print(header_line)
+        print("-" * len(header_line))
+        
+        # 打印数据行
+        for row in rows:
+            row_str = " | ".join(str(cell).ljust(col_widths[i]) for i, cell in enumerate(row))
+            print(row_str)
+    
+    @staticmethod
+    def print_dict(data, title=None):
+        """打印字典数据"""
+        if title:
+            print(f"\n=== {title} ===")
+        
+        for key, value in data.items():
+            if isinstance(value, dict):
+                print(f"{key}:")
+                for k, v in value.items():
+                    print(f"  {k}: {v}")
+            else:
+                print(f"{key}: {value}")
+
+
+class SleepyManagerCLI:
+    """改进的命令行界面，支持参数解析和表格显示"""
     
     def __init__(self):
         """初始化 CLI"""
         self.manager = SleepyManager(SERVER, SECRET, RETRY)
-        self.commands = {
-            "help": self.show_help,
-            "query": self.query,
-            "status_list": self.status_list,
-            "metrics": self.metrics,
-            "set_status": self.set_status,
-            "device_set": self.device_set,
-            "device_remove": self.device_remove,
-            "device_clear": self.device_clear,
-            "private_mode": self.private_mode,
-            "reload_config": self.reload_config,
-            "save_data": self.save_data,
-            "exit": self.exit
-        }
+        self.parser = argparse.ArgumentParser(description='Sleepy 服务管理工具')
+        self.setup_commands()
+        
+    def setup_commands(self):
+        """设置命令行参数"""
+        subparsers = self.parser.add_subparsers(dest='command', help='可用命令')
+        
+        # 查询当前状态
+        subparsers.add_parser('query', help='获取当前状态')
+        
+        # 获取状态列表
+        subparsers.add_parser('status_list', help='获取可用状态列表')
+        
+        # 获取统计信息
+        subparsers.add_parser('metrics', help='获取统计信息')
+        
+        # 设置状态
+        set_status_parser = subparsers.add_parser('set_status', help='设置当前状态')
+        set_status_parser.add_argument('status_id', type=int, help='状态ID（数字）')
+        
+        # 设置设备
+        device_set_parser = subparsers.add_parser('device_set', help='设置设备状态')
+        device_set_parser.add_argument('device_id', help='设备ID')
+        device_set_parser.add_argument('show_name', help='显示名称')
+        device_set_parser.add_argument('using', choices=['true', 'false'], help='是否使用 (true/false)')
+        device_set_parser.add_argument('app_name', help='应用名称')
+        
+        # 移除设备
+        device_remove_parser = subparsers.add_parser('device_remove', help='移除设备')
+        device_remove_parser.add_argument('device_id', help='设备ID')
+        
+        # 清除设备
+        subparsers.add_parser('device_clear', help='清除所有设备')
+        
+        # 隐私模式
+        private_parser = subparsers.add_parser('private_mode', help='设置隐私模式')
+        private_parser.add_argument('status', choices=['true', 'false'], help='隐私模式状态 (true/false)')
+        
+        # 重载配置
+        subparsers.add_parser('reload_config', help='重新加载配置文件')
+        
+        # 保存数据
+        subparsers.add_parser('save_data', help='保存数据到文件')
+        
+        # 退出
+        subparsers.add_parser('exit', help='退出程序')
     
-    def show_help(self, *args) -> None:
-        """显示帮助信息"""
-        print("\n=== Sleepy 服务管理工具 ===")
-        print("可用命令:")
-        print("  help                             - 显示此帮助")
-        print("  query                            - 获取当前状态")
-        print("  status_list                      - 获取可用状态列表")
-        print("  metrics                          - 获取统计信息")
-        print("  set_status <状态ID>               - 设置当前状态")
-        print("  device_set <设备ID> <显示名> <是否使用> <应用名>  - 设置设备状态")
-        print("  device_remove <设备ID>            - 移除设备")
-        print("  device_clear                     - 清除所有设备")
-        print("  private_mode <true/false>        - 设置隐私模式")
-        print("  reload_config                    - 重新加载配置")
-        print("  save_data                        - 保存数据")
-        print("  exit                             - 退出程序")
-    
-    def pretty_print(self, data: Any) -> None:
-        """美化输出 JSON 数据"""
-        print(json.dumps(data, indent=2, ensure_ascii=False))
-    
-    def query(self, *args) -> None:
-        """获取当前状态"""
+    def handle_query(self, args):
+        """处理 query 命令"""
         try:
             result = self.manager.query()
-            self.pretty_print(result)
+            
+            # 显示原始 JSON（如果开启）
+            if SHOW_RAW_JSON:
+                print("\n=== 原始 JSON 响应 ===")
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+            
+            print("\n=== 当前状态信息 ===")
+            
+            # 根据是否可用 PrettyTable 选择显示方式
+            if PRETTYTABLE_AVAILABLE:
+                # 状态信息表
+                status_table = PrettyTable(["字段", "值"])
+                status_table.align = "l"
+                status_table.add_row(["状态ID", result['status']])
+                status_table.add_row(["状态名称", result['info']['name']])
+                status_table.add_row(["状态描述", result['info']['desc']])
+                status_table.add_row(["状态颜色", result['info']['color']])
+                status_table.add_row(["当前时间", result['time']])
+                status_table.add_row(["时区", result['timezone']])
+                status_table.add_row(["最后更新", result['last_updated']])
+                print(status_table)
+                
+                # 设备信息表
+                if result['device']:
+                    print("\n=== 设备信息 ===")
+                    device_table = PrettyTable(["设备ID", "显示名称", "状态", "应用名称"])
+                    device_table.align = "l"
+                    for device_id, device_info in result['device'].items():
+                        device_table.add_row([
+                            device_id,
+                            device_info['show_name'],
+                            "使用中" if device_info['using'] else "未使用",
+                            device_info['app_name'] if device_info['using'] else "-"
+                        ])
+                    print(device_table)
+                else:
+                    print("\n没有设备信息")
+            else:
+                # 使用 SimplePrinter 替代 PrettyTable
+                # 状态信息
+                status_data = [
+                    ["状态ID", result['status']],
+                    ["状态名称", result['info']['name']],
+                    ["状态描述", result['info']['desc']],
+                    ["状态颜色", result['info']['color']],
+                    ["当前时间", result['time']],
+                    ["时区", result['timezone']],
+                    ["最后更新", result['last_updated']]
+                ]
+                SimplePrinter.print_table(["字段", "值"], status_data)
+                
+                # 设备信息
+                if result['device']:
+                    print("\n=== 设备信息 ===")
+                    device_rows = []
+                    for device_id, device_info in result['device'].items():
+                        device_rows.append([
+                            device_id,
+                            device_info['show_name'],
+                            "使用中" if device_info['using'] else "未使用",
+                            device_info['app_name'] if device_info['using'] else "-"
+                        ])
+                    SimplePrinter.print_table(["设备ID", "显示名称", "状态", "应用名称"], device_rows)
+                else:
+                    print("\n没有设备信息")
         except Exception as e:
             print(f"错误: {e}")
     
-    def status_list(self, *args) -> None:
-        """获取可用状态列表"""
+    def handle_status_list(self, args):
+        """处理 status_list 命令"""
         try:
             result = self.manager.status_list()
-            self.pretty_print(result)
+            
+            # 显示原始 JSON（如果开启）
+            if SHOW_RAW_JSON:
+                print("\n=== 原始 JSON 响应 ===")
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+            
+            print("\n=== 可用状态列表 ===")
+            
+            if PRETTYTABLE_AVAILABLE:
+                table = PrettyTable(["ID", "名称", "描述", "颜色"])
+                table.align = "l"
+                
+                for status in result:
+                    table.add_row([
+                        status['id'],
+                        status['name'],
+                        status['desc'],
+                        status['color']
+                    ])
+                print(table)
+            else:
+                # 使用 SimplePrinter
+                rows = []
+                for status in result:
+                    rows.append([
+                        status['id'],
+                        status['name'],
+                        status['desc'],
+                        status['color']
+                    ])
+                SimplePrinter.print_table(["ID", "名称", "描述", "颜色"], rows)
         except Exception as e:
             print(f"错误: {e}")
     
-    def metrics(self, *args) -> None:
-        """获取统计信息"""
+    def handle_metrics(self, args):
+        """处理 metrics 命令"""
         try:
             result = self.manager.metrics()
-            self.pretty_print(result)
+            
+            if not result:
+                print("无统计数据")
+                return
+                
+            print("\n=== 统计信息 ===")
+            
+            # 处理基本统计信息
+            if 'basic' in result:
+                if PRETTYTABLE_AVAILABLE:
+                    basic_table = PrettyTable(["指标", "值"])
+                    basic_table.align = "l"
+                    for key, value in result['basic'].items():
+                        basic_table.add_row([key, value])
+                    print(basic_table)
+                else:
+                    SimplePrinter.print_dict(result['basic'], title="基本统计信息")
+            
+            # 处理详细统计信息
+            if 'detailed' in result:
+                print("\n=== 详细统计 ===")
+                for category, items in result['detailed'].items():
+                    print(f"\n-- {category} --")
+                    if PRETTYTABLE_AVAILABLE:
+                        detailed_table = PrettyTable(["项目", "计数"])
+                        detailed_table.align = "l"
+                        for key, value in items.items():
+                            detailed_table.add_row([key, value])
+                        print(detailed_table)
+                    else:
+                        rows = [[key, value] for key, value in items.items()]
+                        SimplePrinter.print_table(["项目", "计数"], rows, title=category)
+                    
         except Exception as e:
             print(f"错误: {e}")
     
-    def set_status(self, *args) -> None:
-        """设置当前状态"""
-        if not args or not args[0].isdigit():
-            print("错误: 需要提供有效的状态 ID（数字）")
-            return
-            
+    def handle_set_status(self, args):
+        """处理 set_status 命令"""
         try:
-            result = self.manager.set_status(int(args[0]))
-            self.pretty_print(result)
+            result = self.manager.set_status(args.status_id)
+            print(f"状态已更新为 ID: {args.status_id}")
+            print(f"响应: {result['success']} - {result['code']}")
         except Exception as e:
             print(f"错误: {e}")
     
-    def device_set(self, *args) -> None:
-        """设置设备状态"""
-        if len(args) < 4:
-            print("错误: 需要提供设备ID、显示名称、是否使用和应用名称")
-            return
-            
-        device_id = args[0]
-        show_name = args[1]
-        
-        # 解析布尔值
-        using_str = args[2].lower()
-        if using_str in ('true', 't', 'yes', 'y', '1'):
-            using = True
-        elif using_str in ('false', 'f', 'no', 'n', '0'):
-            using = False
-        else:
-            print("错误: 使用状态必须是布尔值")
-            return
-            
-        app_name = args[3]
-        
+    def handle_device_set(self, args):
+        """处理 device_set 命令"""
         try:
-            result = self.manager.device_set(device_id, show_name, using, app_name)
-            self.pretty_print(result)
+            using = args.using.lower() in ('true', 't', 'yes', 'y', '1')
+            result = self.manager.device_set(args.device_id, args.show_name, using, args.app_name)
+            print(f"设备 {args.device_id} 状态已更新")
+            print(f"响应: {result['success']} - {result['code']}")
         except Exception as e:
             print(f"错误: {e}")
     
-    def device_remove(self, *args) -> None:
-        """移除设备"""
-        if not args:
-            print("错误: 需要提供设备 ID")
-            return
-            
+    def handle_device_remove(self, args):
+        """处理 device_remove 命令"""
         try:
-            result = self.manager.device_remove(args[0])
-            self.pretty_print(result)
+            result = self.manager.device_remove(args.device_id)
+            print(f"设备 {args.device_id} 已移除")
+            print(f"响应: {result['success']} - {result['code']}")
         except Exception as e:
             print(f"错误: {e}")
     
-    def device_clear(self, *args) -> None:
-        """清除所有设备"""
+    def handle_device_clear(self, args):
+        """处理 device_clear 命令"""
         try:
             result = self.manager.device_clear()
-            self.pretty_print(result)
+            print("所有设备已清除")
+            print(f"响应: {result['success']} - {result['code']}")
         except Exception as e:
             print(f"错误: {e}")
     
-    def private_mode(self, *args) -> None:
-        """设置隐私模式"""
-        if not args:
-            print("错误: 需要提供隐私模式状态 (true/false)")
-            return
-            
-        private_str = args[0].lower()
-        if private_str in ('true', 't', 'yes', 'y', '1'):
-            is_private = True
-        elif private_str in ('false', 'f', 'no', 'n', '0'):
-            is_private = False
-        else:
-            print("错误: 隐私状态必须是布尔值")
-            return
-            
+    def handle_private_mode(self, args):
+        """处理 private_mode 命令"""
         try:
+            is_private = args.status.lower() in ('true', 't', 'yes', 'y', '1')
             result = self.manager.device_private_mode(is_private)
-            self.pretty_print(result)
+            status_text = "启用" if is_private else "禁用"
+            print(f"隐私模式已{status_text}")
+            print(f"响应: {result['success']} - {result['code']}")
         except Exception as e:
             print(f"错误: {e}")
     
-    def reload_config(self, *args) -> None:
-        """重新加载配置"""
+    def handle_reload_config(self, args):
+        """处理 reload_config 命令"""
         try:
             result = self.manager.reload_config()
-            self.pretty_print(result)
+            print("配置已重新加载")
+            print(f"响应: {result['success']} - {result['code']}")
         except Exception as e:
             print(f"错误: {e}")
     
-    def save_data(self, *args) -> None:
-        """保存数据"""
+    def handle_save_data(self, args):
+        """处理 save_data 命令"""
         try:
             result = self.manager.save_data()
-            self.pretty_print(result)
+            print("数据已保存")
+            print(f"响应: {result['success']} - {result['code']}")
         except Exception as e:
             print(f"错误: {e}")
     
-    def exit(self, *args) -> None:
-        """退出程序"""
-        print("再见！")
-        sys.exit(0)
-    
-    def run(self) -> None:
+    def run(self):
         """运行命令行界面"""
         print("欢迎使用 Sleepy 服务管理工具")
         print(f"服务器: {SERVER}")
-        print("输入 'help' 获取帮助，输入 'exit' 退出")
+        print("输入命令或 'help' 获取帮助，输入 'exit' 退出")
         
         while True:
             try:
                 cmd_line = input("\n> ").strip()
                 if not cmd_line:
                     continue
+                    
+                # 将用户输入拆分成参数列表，支持引号内的空格
+                args = shlex.split(cmd_line)
                 
-                parts = cmd_line.split()
-                cmd = parts[0].lower()
-                args = parts[1:]
-                
-                if cmd in self.commands:
-                    self.commands[cmd](*args)
-                else:
-                    print(f"未知命令: {cmd}")
-                    self.show_help()
+                # 如果是退出命令，直接处理
+                if args[0].lower() == 'exit':
+                    print("再见!")
+                    break
+                    
+                # 显示帮助
+                if args[0].lower() == 'help':
+                    self.parser.print_help()
+                    continue
+                    
+                # 解析参数并执行对应的处理函数
+                try:
+                    parsed_args = self.parser.parse_args(args)
+                    command = parsed_args.command
+                    
+                    # 调用对应的处理函数
+                    handler_name = f"handle_{command}"
+                    if hasattr(self, handler_name):
+                        getattr(self, handler_name)(parsed_args)
+                    else:
+                        print(f"错误: 未知命令 '{command}'")
+                        self.parser.print_help()
+                except SystemExit:
+                    # argparse 在遇到 -h/--help 或参数错误时会调用 sys.exit()
+                    # 我们捕获这个异常以避免程序退出
+                    pass
+                    
             except KeyboardInterrupt:
                 print("\n已中断")
                 break
@@ -314,5 +490,5 @@ class CommandLineInterface:
 
 
 if __name__ == "__main__":
-    cli = CommandLineInterface()
+    cli = SleepyManagerCLI()
     cli.run()
