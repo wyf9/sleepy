@@ -154,7 +154,7 @@ Url = f'{SERVER}/device/set'
 last_window = ''
 
 
-def send_status(using: bool = True, app_name: str = '', id: str = None, show_name: str = None, **kwargs):
+def send_status(using: bool = True, app_name: str = '', id: str = DEVICE_ID, show_name: str = DEVICE_SHOW_NAME, **kwargs):
     '''
     post 发送设备状态信息
     设置了 headers 和 proxies
@@ -200,7 +200,9 @@ def on_shutdown(hwnd, msg, wparam, lparam):
         try:
             resp = send_status(
                 using=False,
-                app_name="要关机了喵"
+                app_name="要关机了喵",
+                id=DEVICE_ID,
+                show_name=DEVICE_SHOW_NAME
             )
             debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code != 200:
@@ -439,9 +441,22 @@ if __name__ == '__main__':
         try:
             resp = send_status(
                 using=False,
-                app_name=f'Client Exited: {e}'
+                app_name=f'Client Exited: {e}',
+                id=DEVICE_ID,             # 添加设备ID
+                show_name=DEVICE_SHOW_NAME # 添加显示名称
             )
             debug(f'Response: {resp.status_code} - {resp.json()}')
+            
+            # 如果启用了独立媒体设备，也发送该设备的退出状态
+            if MEDIA_INFO_ENABLED and (MEDIA_INFO_MODE == 'standalone' or MEDIA_INFO_MODE == 'both'):
+                media_resp = send_status(
+                    using=False,
+                    app_name='Media Client Exited',
+                    id=MEDIA_DEVICE_ID,
+                    show_name=MEDIA_DEVICE_SHOW_NAME
+                )
+                debug(f'Media Response: {media_resp.status_code}')
+            
             if resp.status_code != 200:
                 print(f'Error! Response: {resp.status_code} - {resp.json()}')
         except Exception as e:
