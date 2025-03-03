@@ -9,9 +9,23 @@ a {
     text-decoration: none;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
 body {
     background: url('{{ bg }}') no-repeat center center fixed; /* 此处不要展开 */
     background-size: cover;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-attachment: fixed;
+    background-position: center;
 }
 
 .card {
@@ -35,7 +49,14 @@ body {
     margin: 1rem;
 }
 .container {
-    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 @media (max-width: 700px) {
