@@ -31,8 +31,8 @@ get_app_name() {
 
   # 如果是锁屏状态，直接返回
   if [ "$package_name" = "NotificationShade" ]; then
-    echo "锁屏了"
     sleepy=$((sleepy + 1))
+    echo "锁屏了"
     return
   fi
   sleepy=0
@@ -69,7 +69,7 @@ send_status() {
   package_name="$1"
   app_name=$(get_app_name "$package_name")
   
-battery_level=$(dumpsys battery | grep 'level:' | awk '{print $2}')
+battery_level=$(cat /sys/class/power_supply/battery/capacity 2>/dev/null)
 dumpsys_charging="$(dumpsys deviceidle get charging)"
 
 if [ "$dumpsys_charging" = "true" ]; then
@@ -80,17 +80,10 @@ fi
 
   log "$res_up"
   
-if [ "$sleepy" -ge 60 ]; then
-  using="false"
-else
-  using="true"
-fi
-
   http_code=$(curl -s --connect-timeout 35 --max-time 100 -w "%{http_code}" -o /tmp/curl_body "$URL" \
     -X POST \
     -H "Content-Type: application/json" \
     -d '{"secret": "'"${SECRET}"'", "id": 0, "show_name": "'"${device_model}"'", "using": '"${using}"', "app_name": "'"$res_up"'"}')
-
 
   if [ "$http_code" -ne 200 ]; then
     log "警告：请求失败，状态码 $http_code，响应内容：$(cat /tmp/curl_body)"
@@ -117,6 +110,17 @@ log "开！"
 while true; do
   CURRENT_FOCUS=$(dumpsys window | grep -m 1 'mCurrentFocus')
   PACKAGE_NAME=$(echo "$CURRENT_FOCUS" | awk -F '[ /}]' '{print $5}' | tr -d '[:space:]')
+  
+if [ "$sleepy" -ge 60 ]; then
+  using="false"
+  log "睡死了"
+  send_status "睡死了"
+  sleepy=0
+else
+  using="true"
+fi
+
+#log $sleepy
 
   if [ -n "$PACKAGE_NAME" ] && [ "$PACKAGE_NAME" != "$LAST_PACKAGE" ]; then
     log "状态变化: ${LAST_PACKAGE:-none} → ${PACKAGE_NAME}"
