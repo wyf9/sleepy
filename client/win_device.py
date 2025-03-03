@@ -60,6 +60,8 @@ MEDIA_INFO_MODE: str = 'prefix'
 MEDIA_DEVICE_ID: str = 'media-device'
 # 独立设备模式下的显示名称
 MEDIA_DEVICE_SHOW_NAME: str = '正在播放'
+# 媒体信息前缀最大长度（超出部分将被截断）
+MEDIA_PREFIX_MAX_LENGTH: int = 30
 # --- config end
 
 # ----- Part: Functions
@@ -311,9 +313,10 @@ def check_mouse_idle() -> bool:
 # ----- Part: Main interval check
 
 last_media_playing = False  # 跟踪上一次的媒体播放状态
+last_media_content = ""  # 跟踪上一次的媒体内容
 
 def do_update():
-    global last_window, cached_window_title, is_mouse_idle
+    global last_window, cached_window_title, is_mouse_idle, last_media_playing, last_media_content
 
     # 获取当前窗口标题和鼠标状态
     current_window = win32gui.GetWindowText(win32gui.GetForegroundWindow())
@@ -325,7 +328,6 @@ def do_update():
     using = True
 
     # 获取媒体信息
-    media_info = None
     prefix_media_info = None
     standalone_media_info = None
 
@@ -334,9 +336,14 @@ def do_update():
         if is_playing and (title or artist):
             # 为 prefix 模式创建格式化后的媒体信息 [♪歌曲名]
             if title:
-                prefix_media_info = f"[♪{title}]"
+                # 如果标题太长，进行截断
+                if len(title) > MEDIA_PREFIX_MAX_LENGTH - 4:  # 为[♪]和...留出空间
+                    truncated_title = title[:MEDIA_PREFIX_MAX_LENGTH - 7] + "..."
+                    prefix_media_info = f"[♪{truncated_title}]"
+                else:
+                    prefix_media_info = f"[♪{title}]"
             else:
-                prefix_media_info = "[♪播放中]"
+                prefix_media_info = "[♪]"
 
             # 为 standalone 模式创建格式化后的媒体信息 ♪歌曲名-歌手-专辑
             parts = []
@@ -422,17 +429,20 @@ def do_update():
 
     # 如果使用独立设备模式展示媒体信息
     if MEDIA_INFO_ENABLED and (MEDIA_INFO_MODE == 'standalone' or MEDIA_INFO_MODE == 'both'):
-        global last_media_playing
         try:
             # 确定当前媒体状态
             current_media_playing = bool(standalone_media_info)
+            current_media_content = standalone_media_info if standalone_media_info else ""
             
-            # 只有在媒体播放状态变化时才发送更新
-            if current_media_playing != last_media_playing:
-                debug(f'Media status changed: {last_media_playing} -> {current_media_playing}')
+            # 检测播放状态或歌曲内容是否变化
+            media_changed = (current_media_playing != last_media_playing) or \
+                           (current_media_playing and current_media_content != last_media_content)
+            
+            if media_changed:
+                debug(f'Media changed: status {last_media_playing}->{current_media_playing}, content changed: {last_media_content != current_media_content}')
                 
                 if current_media_playing:
-                    # 从不播放变为播放
+                    # 从不播放变为播放或歌曲内容变化
                     media_resp = send_status(
                         using=True,
                         app_name=standalone_media_info,
@@ -449,8 +459,9 @@ def do_update():
                     )
                 debug(f'Media Response: {media_resp.status_code}')
                 
-                # 更新上一次的媒体状态
+                # 更新上一次的媒体状态和内容
                 last_media_playing = current_media_playing
+                last_media_content = current_media_content
         except Exception as e:
             debug(f'Media Info Error: {e}')
 
