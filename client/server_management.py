@@ -3,7 +3,7 @@
 
 '''
 一个 python 服务器设备，个人状态管理器
-依赖: requests, prettytable, argparse
+依赖: requests, argparse(传参需选), prettytable(可选)
 by @Claude 3.7 Sonnet Thinking
 '''
 #! SECRET出错不会报错，需要鉴权的操作都会失败，但是不显示失败
