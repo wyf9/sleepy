@@ -31,7 +31,6 @@ get_app_name() {
 
   # 如果是锁屏状态，直接返回
   if [ "$package_name" = "NotificationShade" ]; then
-    sleepy=$((sleepy + 1))
     echo "锁屏了"
     return
   fi
@@ -119,9 +118,12 @@ if [ "$sleepy" -ge 60 ]; then
 else
   using="true"
 fi
-
-#log $sleepy
-
+if [ "$PACKAGE_NAME" = "NotificationShade" ]; then
+sleepy=$((sleepy + 1))
+log $sleepy
+else
+sleepy=0
+fi
   if [ -n "$PACKAGE_NAME" ] && [ "$PACKAGE_NAME" != "$LAST_PACKAGE" ]; then
     log "状态变化: ${LAST_PACKAGE:-none} → ${PACKAGE_NAME}"
     send_status "$PACKAGE_NAME"
