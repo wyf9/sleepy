@@ -422,11 +422,18 @@ def events():
     '''
     def event_stream():
         last_update = None
+        last_heartbeat = time.time()
         while True:
+            current_time = time.time()
             # 检查数据是否已更新
             current_update = d.data['last_updated']
+
+            # 如果数据有更新，发送更新事件并重置心跳计时器
             if last_update != current_update:
                 last_update = current_update
+                # 重置心跳计时器
+                last_heartbeat = current_time
+
                 # 构造与 /query 相同的数据
                 st = d.data['status']
                 try:
@@ -453,7 +460,13 @@ def events():
                     'last_updated': d.data['last_updated'],
                     'refresh': c.config['other']['refresh']
                 }
-                yield f"data: {json.dumps(ret)}\n\n"
+                yield f"event: update\ndata: {json.dumps(ret)}\n\n"
+            # 只有在没有数据更新的情况下才检查是否需要发送心跳
+            elif current_time - last_heartbeat >= 30:
+                timenow = datetime.now(pytz.timezone(c.config['timezone']))
+                yield f"event: heartbeat\ndata: {timenow.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                last_heartbeat = current_time
+
             time.sleep(1)  # 每秒检查一次更新
 
     response = flask.Response(event_stream(), mimetype="text/event-stream")

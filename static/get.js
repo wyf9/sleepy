@@ -54,94 +54,163 @@ function getFormattedDate(date) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+let reconnectInProgress = false;
+
+function reconnectWithDelay(delay) {
+    if (reconnectInProgress) return;
+    reconnectInProgress = true;
+
+    setTimeout(() => {
+        setupEventSource();
+        reconnectInProgress = false;
+    }, delay);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     // 检查浏览器是否支持 SSE
     if (typeof (EventSource) !== "undefined") {
-        const statusElement = document.getElementById('status');
+        let lastEventTime = Date.now();
+        let connectionAttempts = 0;
+        const maxReconnectDelay = 30000; // 最大重连延迟时间为30秒
+        let connectionCheckTimer = null;
 
-        // 设置正在连接的状态
-        document.getElementById('last-updated').innerHTML = `正在连接服务器... <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>`;
+        function setupEventSource() {
+            // 清除旧的定时器
+            if (connectionCheckTimer) {
+                clearTimeout(connectionCheckTimer);
+                connectionCheckTimer = null;
+            }
 
-        // 创建 EventSource
-        const evtSource = new EventSource('/events');
+            const statusElement = document.getElementById('status');
+            document.getElementById('last-updated').innerHTML = `正在连接服务器... <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>`;
 
-        evtSource.onopen = function () {
-            console.log('SSE连接已建立');
-        };
+            // 创建 EventSource
+            const evtSource = new EventSource('/events');
 
-        evtSource.onerror = function (e) {
-            console.error('SSE 错误', e);
-            document.getElementById('last-updated').innerHTML = `连接服务器失败，尝试重新连接... <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>`;
-            statusElement.textContent = '[!错误!]';
-            document.getElementById('additional-info').textContent = '无法连接到服务器，请稍后再试';
-            let last_status = statusElement.classList.item(0);
-            statusElement.classList.remove(last_status);
-            statusElement.classList.add('error');
-        };
+            // 监听连接打开事件
+            evtSource.onopen = function () {
+                console.log('SSE连接已建立');
+                connectionAttempts = 0; // 重置重连计数
+                lastEventTime = Date.now(); // 初始化最后事件时间
+            };
 
-        evtSource.onmessage = function (event) {
-            if (document.visibilityState == 'visible') {
-                console.log('收到数据更新');
-                const data = JSON.parse(event.data);
+            // 监听更新事件
+            evtSource.addEventListener('update', function (event) {
+                lastEventTime = Date.now();
+                if (document.visibilityState == 'visible') {
+                    console.log('收到数据更新');
+                    const data = JSON.parse(event.data);
 
-                if (data.success) {
-                    // 更新状态 (status, additional-info)
-                    statusElement.textContent = data.info.name;
-                    document.getElementById('additional-info').innerHTML = data.info.desc;
-                    let last_status = statusElement.classList.item(0);
-                    statusElement.classList.remove(last_status);
-                    statusElement.classList.add(data.info.color);
+                    // 处理更新数据...
+                    if (data.success) {
+                        // 原有的数据更新逻辑...
+                        statusElement.textContent = data.info.name;
+                        document.getElementById('additional-info').innerHTML = data.info.desc;
+                        let last_status = statusElement.classList.item(0);
+                        statusElement.classList.remove(last_status);
+                        statusElement.classList.add(data.info.color);
 
-                    // 更新设备状态 (device-status)
-                    var deviceStatus = '<hr/>';
-                    const devices = Object.values(data.device);
+                        // 更新设备状态 (device-status)
+                        var deviceStatus = '<hr/>';
+                        const devices = Object.values(data.device);
 
-                    for (let device of devices) {
-                        let device_app;
-                        if (device.using) {
-                            const escapedAppName = escapeHtml(device.app_name);
-                            const jsShowName = escapeJs(device.show_name);
-                            const jsAppName = escapeJs(device.app_name);
-                            const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
-                            const escapedJsCode = escapeHtml(jsCode);
+                        for (let device of devices) {
+                            let device_app;
+                            if (device.using) {
+                                const escapedAppName = escapeHtml(device.app_name);
+                                const jsShowName = escapeJs(device.show_name);
+                                const jsAppName = escapeJs(device.app_name);
+                                const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
+                                const escapedJsCode = escapeHtml(jsCode);
 
-                            device_app = `
+                                device_app = `
 <a class="awake" 
     title="${escapedAppName}" 
     href="javascript:${escapedJsCode}">
 ${sliceText(escapedAppName, data.device_status_slice)}
 </a>`;
-                        } else {
-                            device_app = '<a class="sleeping">未在使用</a>';
+                            } else {
+                                device_app = '<a class="sleeping">未在使用</a>';
+                            }
+                            deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
                         }
-                        deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
-                    }
 
-                    if (deviceStatus == '<hr/>') {
-                        deviceStatus = '';
-                    }
-                    document.getElementById('device-status').innerHTML = deviceStatus;
+                        if (deviceStatus == '<hr/>') {
+                            deviceStatus = '';
+                        }
+                        document.getElementById('device-status').innerHTML = deviceStatus;
 
-                    // 更新最后更新时间 (last-updated)
-                    timenow = getFormattedDate(new Date());
-                    document.getElementById('last-updated').innerHTML = `
+                        // 更新最后更新时间 (last-updated)
+                        timenow = getFormattedDate(new Date());
+                        document.getElementById('last-updated').innerHTML = `
 最后更新:
 <a class="awake" 
 title="服务器时区: ${data.timezone}" 
 href="javascript:alert('浏览器最后更新时间: ${timenow}\\n数据最后更新时间 (基于服务器时区): ${data.last_updated}\\n服务端时区: ${data.timezone}')">
 ${data.last_updated}
 </a>`;
+                    } else {
+                        statusElement.textContent = '[!错误!]';
+                        document.getElementById('additional-info').textContent = data.info || '未知错误';
+                        let last_status = statusElement.classList.item(0);
+                        statusElement.classList.remove(last_status);
+                        statusElement.classList.add('error');
+                    }
                 } else {
-                    statusElement.textContent = '[!错误!]';
-                    document.getElementById('additional-info').textContent = data.info || '未知错误';
-                    let last_status = statusElement.classList.item(0);
-                    statusElement.classList.remove(last_status);
-                    statusElement.classList.add('error');
+                    console.log('tab not visible, skip update');
                 }
-            } else {
-                console.log('tab not visible, skip update');
+            });
+
+            // 添加这段代码 - 监听心跳事件
+            evtSource.addEventListener('heartbeat', function (event) {
+                console.log('收到心跳:', event.data);
+                lastEventTime = Date.now(); // 关键：更新最后收到消息的时间
+            });
+
+            // 错误处理
+            evtSource.onerror = function (e) {
+                console.error('SSE 错误', e);
+                evtSource.close();
+
+                // 计算重连延迟时间 (指数退避)
+                const reconnectDelay = Math.min(1000 * Math.pow(2, connectionAttempts), maxReconnectDelay);
+                connectionAttempts++;
+
+                document.getElementById('last-updated').innerHTML = `连接服务器失败，${reconnectDelay / 1000}秒后重新连接... <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>`;
+                statusElement.textContent = '[!错误!]';
+                document.getElementById('additional-info').textContent = '与服务器的连接已断开，正在尝试重新连接...';
+                let last_status = statusElement.classList.item(0);
+                statusElement.classList.remove(last_status);
+                statusElement.classList.add('error');
+
+                // 延迟后重连
+                reconnectWithDelay(reconnectDelay);
+            };
+
+            // 设置长时间未收到消息的检测
+            function checkConnectionStatus() {
+                const currentTime = Date.now();
+                const elapsedTime = currentTime - lastEventTime;
+
+                if (elapsedTime > 60000) { // 如果超过60秒未收到任何消息
+                    console.warn('长时间未收到服务器消息，正在重新连接...');
+                    evtSource.close();
+                    setupEventSource(); // 重新建立连接
+                }
+                connectionCheckTimer = setTimeout(checkConnectionStatus, 10000); // 每10秒检查一次
             }
-        };
+
+            connectionCheckTimer = setTimeout(checkConnectionStatus, 10000);
+
+            // 在页面卸载时关闭连接
+            window.addEventListener('beforeunload', function () {
+                evtSource.close();
+            });
+        }
+
+        // 初始建立连接
+        setupEventSource();
+
     } else {
         // 浏览器不支持SSE，回退到原来的轮询方案
         console.log('Browser does not support SSE, falling back to polling');
