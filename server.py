@@ -8,6 +8,8 @@ from markupsafe import escape
 import utils as u
 from data import data as data_init
 from config import config as config_init
+import json
+import time
 
 try:
     c = config_init()
@@ -410,6 +412,67 @@ def save_data():
             code='not authorized',
             message='invaild secret'
         )
+
+
+@app.route('/events')
+def events():
+    '''
+    SSE 事件流，用于推送状态更新
+    - Method: **GET**
+    '''
+    def event_stream():
+        last_update = None
+        last_heartbeat = time.time()
+        while True:
+            current_time = time.time()
+            # 检查数据是否已更新
+            current_update = d.data['last_updated']
+
+            # 如果数据有更新，发送更新事件并重置心跳计时器
+            if last_update != current_update:
+                last_update = current_update
+                # 重置心跳计时器
+                last_heartbeat = current_time
+
+                # 构造与 /query 相同的数据
+                st = d.data['status']
+                try:
+                    stinfo = c.config['status_list'][st]
+                except:
+                    stinfo = {
+                        'id': -1,
+                        'name': '未知',
+                        'desc': '未知的标识符，可能是配置问题。',
+                        'color': 'error'
+                    }
+                devicelst = d.data['device_status']
+                if d.data['private_mode']:
+                    devicelst = {}
+                timenow = datetime.now(pytz.timezone(c.config['timezone']))
+                ret = {
+                    'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
+                    'timezone': c.config['timezone'],
+                    'success': True,
+                    'status': st,
+                    'info': stinfo,
+                    'device': devicelst,
+                    'device_status_slice': c.config['other']['device_status_slice'],
+                    'last_updated': d.data['last_updated'],
+                    'refresh': c.config['other']['refresh']
+                }
+                yield f"event: update\ndata: {json.dumps(ret)}\n\n"
+            # 只有在没有数据更新的情况下才检查是否需要发送心跳
+            elif current_time - last_heartbeat >= 30:
+                timenow = datetime.now(pytz.timezone(c.config['timezone']))
+                yield f"event: heartbeat\ndata: {timenow.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                last_heartbeat = current_time
+
+            time.sleep(1)  # 每秒检查一次更新
+
+    response = flask.Response(event_stream(), mimetype="text/event-stream")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"  # 禁用 Nginx 缓冲
+    return response
 
 
 # --- (Special) Metrics API
