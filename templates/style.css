@@ -45,6 +45,8 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); /* 更强阴影 */
     color: white;
     border: 1px solid rgba(60, 60, 60, 0.8); /* 暗色边框 */
+    /* 增加文字清晰度 */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .card {
@@ -60,8 +62,8 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.3); 
     position: relative;
     box-shadow: 
-        0 4px 8px rgba(0, 0, 0, 0.1),
-        0 0 20px rgba(0, 0, 0, 0.05); /* 双层阴影效果 */
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 0 8px rgba(0, 0, 0, 0.1); /* 内阴影 */
     opacity: {{ alpha }}; /* 格式化后注意此处 */
 }
 .glass {
