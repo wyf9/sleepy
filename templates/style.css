@@ -134,3 +134,36 @@ body {
 .light a, .light .awake {
     color: rgb(0, 100, 0); /* 更深的绿色 */
 }
+
+/* 添加到style.css */
+.theme-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    padding: 10px;
+    z-index: 1000;
+}
+
+.opacity-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+}
+
+.opacity-controls button {
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.opacity-controls button:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
