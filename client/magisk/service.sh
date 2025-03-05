@@ -137,5 +137,6 @@ while true; do
     LAST_PACKAGE="$PACKAGE_NAME"
   fi
   
+  
   is_game "$PACKAGE_NAME"
 done
