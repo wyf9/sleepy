@@ -44,7 +44,7 @@
                 }
                 const steamkey = '{{ steamkey }}';
                 const steamids = '{{ steamids }}'
-                if (steamkey && steamids) {
+                if (steamkey && !isNaN(steamids)) {
                     const steam = document.getElementById('steam');
                     //也许这里需要反代
                     //const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
@@ -121,7 +121,7 @@
         const statusElement = document.getElementById('status');
         statusElement.classList.add('{{ status_color }}');
     </script>
-    <!-- <script src="./moonlight.js"></script> -->
+    <script src="../static/moonlight.js"></script>
     <script src="{{ url_for('static', filename='moonlight.js') }}"></script>
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
     <!-- 仅在 canvas 为 True 时加载 canvas.js -->
