@@ -32,25 +32,37 @@ body {
     align-items: center;
     background-attachment: fixed;
 }
+
 .light{
     background-color: aliceblue;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: black;
 }
 .dark{
     background-color: #1a151424;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: white;
 }
 .card {
     border-radius: 30px;
     padding: 2rem 1rem;
     margin: 1rem auto;
+    font-size: 1.1em;
     width: 40%;
     text-align: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3); 
     position: relative;
-    font-size: 1.1em;
+    
     opacity: {{ alpha }}; /* 格式化后注意此处 */
 }
-
+.glass {
+    height: 200px;
+    
+    
+  }
 #last-updated {
     font-size: 0.9em;
 }

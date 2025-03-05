@@ -34,7 +34,7 @@ get_app_name() {
     echo "锁屏了"
     return
   fi
-  sleepy=0
+
   cached_name=$(awk -F '=' -v pkg="$package_name" '$1 == pkg {print $2; exit}' "$CACHE")
   if [ -n "$cached_name" ]; then
     echo "$cached_name"
@@ -68,24 +68,24 @@ send_status() {
   package_name="$1"
   app_name=$(get_app_name "$package_name")
   
-battery_level=$(cat /sys/class/power_supply/battery/capacity 2>/dev/null)
-dumpsys_charging="$(dumpsys deviceidle get charging)"
-
-if [ "$dumpsys_charging" = "true" ]; then
-  res_up="$app_name[${battery_level}%]⚡"
-else
-  res_up="$app_name[${battery_level}%]🔋"
-fi
+  battery_level=$(dumpsys battery | sed -n 's/.*level: \([0-9]*\).*/\1/p')
+  dumpsys_charging="$(dumpsys deviceidle get charging)"
+  
+  if [ "$dumpsys_charging" = "true" ]; then
+    res_up="$app_name[${battery_level}%]⚡"
+  else
+    res_up="$app_name[${battery_level}%]🔋"
+  fi
 
   log "$res_up"
   
-  http_code=$(curl -s --connect-timeout 35 --max-time 100 -w "%{http_code}" -o /tmp/curl_body "$URL" \
+  http_code=$(curl -s --connect-timeout 35 --max-time 100 -w "%{http_code}" -o ./curl_body "$URL" \
     -X POST \
     -H "Content-Type: application/json" \
     -d '{"secret": "'"${SECRET}"'", "id": 0, "show_name": "'"${device_model}"'", "using": '"${using}"', "app_name": "'"$res_up"'"}')
 
   if [ "$http_code" -ne 200 ]; then
-    log "警告：请求失败，状态码 $http_code，响应内容：$(cat /tmp/curl_body)"
+    log "警告：请求失败，状态码 $http_code，响应内容：$(cat ./curl_body)"
   fi
 }
 
@@ -99,7 +99,7 @@ device_model=$(getprop ro.product.model)
 android_version=$(getprop ro.build.version.release)
 log "设备信息: ${device_model}, Android ${android_version}，等待一分钟"
 
-# 如有需要，可在此处覆盖设备显示名称
+# 可以在这里覆盖设备显示名称
 device_model="OnePlus ACE3"
 
 sleep 60
@@ -107,27 +107,35 @@ log "开！"
 
 # ========== 核心逻辑 ==========
 while true; do
-  CURRENT_FOCUS=$(dumpsys window | grep -m 1 'mCurrentFocus')
-  PACKAGE_NAME=$(echo "$CURRENT_FOCUS" | awk -F '[ /}]' '{print $5}' | tr -d '[:space:]')
-  
-if [ "$sleepy" -ge 60 ]; then
-  using="false"
-  log "睡死了"
-  send_status "睡死了"
-  sleepy=0
-else
-  using="true"
-fi
-if [ "$PACKAGE_NAME" = "NotificationShade" ]; then
-sleepy=$((sleepy + 1))
-log $sleepy
-else
-sleepy=0
-fi
+  isLock=$(dumpsys window policy | sed -n 's/.*showing=\([a-z]*\).*/\1/p')
+  echo "isLock: $isLock"
+  if [ "$isLock" = "true" ]; then
+    log "锁屏了"
+    sleepy=$((sleepy + 1))
+    log "锁屏计数器: $sleepy"
+    PACKAGE_NAME="NotificationShade"
+      # 休眠检测
+      if [ "$sleepy" -ge 60 ]; then
+         using="false"
+         log "睡死了"
+         send_status "$PACKAGE_NAME"
+         sleepy=0
+      else
+        using="true"
+      fi
+  else
+    sleepy=0
+    using="true"
+    CURRENT_FOCUS=$(dumpsys activity activities 2>/dev/null | grep -m 1 'ResumedActivity')
+    PACKAGE_NAME=$(echo "$CURRENT_FOCUS" | sed -E 's/.*u0 ([^/]+).*/\1/')
+  fi
+
+  # 常规状态更新
   if [ -n "$PACKAGE_NAME" ] && [ "$PACKAGE_NAME" != "$LAST_PACKAGE" ]; then
     log "状态变化: ${LAST_PACKAGE:-none} → ${PACKAGE_NAME}"
     send_status "$PACKAGE_NAME"
     LAST_PACKAGE="$PACKAGE_NAME"
   fi
+  
   is_game "$PACKAGE_NAME"
 done
