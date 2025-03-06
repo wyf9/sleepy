@@ -267,6 +267,7 @@ def device_set():
                 'app_name': app_name
             }
             d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
+            d.check_device_status()
         else:
             return u.reterr(
                 code='not authorized',
@@ -295,6 +296,7 @@ def remove_device():
         try:
             del d.data['device_status'][device_id]
             d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
+            d.check_device_status()
         except KeyError:
             return u.reterr(
                 code='not found',
@@ -321,6 +323,7 @@ def clear_device():
     if secret == SECRET_REAL:
         d.data['device_status'] = {}
         d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
+        d.check_device_status()
     else:
         return u.reterr(
             code='not authorized',

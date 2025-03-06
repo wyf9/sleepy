@@ -210,6 +210,21 @@ class data:
         self.timer_thread = threading.Thread(target=self.timer_check, daemon=True)
         self.timer_thread.start()
 
+    def check_device_status(self):
+        device_status = self.data.get('device_status', {})
+        current_status = self.data.get('status', 0)  # 获取当前 status，默认为 0
+    
+    # 仅当当前 status 为 0 或 1 时启用自动切换
+        if current_status in [0, 1]:
+            any_using = any(device.get('using', False) for device in device_status.values())
+            if any_using:
+                self.data['status'] = 0
+            else:
+                self.data['status'] = 1
+    # 如果 status 不是 0 或 1，则不执行自动切换逻辑，保持自定义状态不变
+        else:
+            u.info(f'[check_device_status] 当前状态为 {current_status}, 关闭自动切换功能.')
+
     def timer_check(self):
         '''
         定时检查更改并自动保存
@@ -220,10 +235,8 @@ class data:
         while True:
             sleep(self.data_check_interval)
             try:
-                try:
-                    file_data = self.load(ret=True)
-                except Exception as e:
-                    file_data = {}
+                self.check_device_status()  # 检测设备状态并更新status
+                file_data = self.load(ret=True)
                 if file_data != self.data:
                     self.save()
             except Exception as e:
