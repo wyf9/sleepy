@@ -9,8 +9,7 @@ from time import sleep
 from datetime import datetime
 
 import utils as u
-import config as config_module
-
+import env
 
 class data:
     '''
@@ -22,10 +21,8 @@ class data:
     data: dict
     preload_data: dict
     data_check_interval: int = 60
-    c: config_module.config
 
-    def __init__(self, config: config_module.config):
-        self.c = config
+    def __init__(self):
         self.preload_data = json5.load(open('data.example.jsonc', encoding='utf-8'))
         if os.path.exists('data.json'):
             try:
@@ -118,12 +115,12 @@ class data:
             self.record_metrics()
 
     def get_metrics_resp(self, json_only: bool = False):
-        now = datetime.now(pytz.timezone(self.c.config['timezone']))
+        now = datetime.now(pytz.timezone(env.timezone))
         if json_only:
             # 仅用于调试
             return {
                 'time': f'{now}',
-                'timezone': self.c.config['timezone'],
+                'timezone': env.timezone,
                 'today_is': self.data['metrics']['today_is'],
                 'month_is': self.data['metrics']['month_is'],
                 'year_is': self.data['metrics']['year_is'],
@@ -135,7 +132,7 @@ class data:
         else:
             return u.format_dict({
                 'time': f'{now}',
-                'timezone': self.c.config['timezone'],
+                'timezone': env.timezone,
                 'today_is': self.data['metrics']['today_is'],
                 'month_is': self.data['metrics']['month_is'],
                 'year_is': self.data['metrics']['year_is'],
@@ -156,7 +153,7 @@ class data:
         vaild_paths = {}
 
         # get time now
-        now = datetime.now(pytz.timezone(self.c.config['timezone']))
+        now = datetime.now(pytz.timezone(env.timezone))
         year_is = str(now.year)
         month_is = f'{now.year}-{now.month}'
         today_is = f'{now.year}-{now.month}-{now.day}'

@@ -61,10 +61,14 @@ body {
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.3); 
     position: relative;
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.2),
-        inset 0 0 8px rgba(0, 0, 0, 0.1); /* 内阴影 */
+    box-shadow: 0 8px 32px rgb(174 137 245 / 20%), inset 0 0 6px 1px rgb(185 210 216 / 10%);
+    transition: all 0.5s;
 }
+.card:hover {
+    transition: all 0.3s;
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(206, 140, 210, 0.2);
+  }
 .glass {
     height: 200px;
     

@@ -15,7 +15,7 @@ import env
 # print(f"Running on {env.host}:{env.port}")
 try:
     c = config_init()
-    d = data_init(c)
+    d = data_init()
     METRICS_ENABLED = False
     app = flask.Flask(__name__)
     c.load()

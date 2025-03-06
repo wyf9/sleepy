@@ -8,7 +8,7 @@ load_dotenv()
 user = os.getenv("sleepyUser", "admin")  # 默认用户名
 host = os.getenv("sleepyHost", "localhost")  # 默认主机名
 port = int(os.getenv("sleepyPort", 7860))  # 默认端口
-timezone = os.getenv("timezone", "UTC")  # 默认时区
+timezone = os.getenv("timezone", "Asia/Shanghai")  # 默认时区
 
 metrics = os.getenv("metrics", "false").lower() in ['true', '1', 't', 'y', 'yes']  # 默认 false
 show_loading = os.getenv("showLoading", "false").lower() in ['true', '1', 't', 'y', 'yes']  # 默认 false
