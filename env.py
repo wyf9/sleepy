@@ -6,7 +6,7 @@ if not find_dotenv():
 load_dotenv()
 
 user = os.getenv("sleepyUser", "admin")  # 默认用户名
-host = os.getenv("sleepyHost", "localhost")  # 默认主机名
+host = os.getenv("sleepyHost", "0.0.0.0")  # 默认主机名
 port = int(os.getenv("sleepyPort", 7860))  # 默认端口
 timezone = os.getenv("timezone", "Asia/Shanghai")  # 默认时区
 
@@ -23,7 +23,7 @@ repo = os.getenv("sleepyRepo", "https://github.com/wyf9/sleepy")  # 默认仓库
 more_text = os.getenv("sleepyMoreText", "More details available.")  # 默认更多信息文本
 
 refresh = int(os.getenv("sleepyRefresh", 30))  # 默认刷新间隔 30 秒
-device_status_slice = int(os.getenv("deviceStatusSlice", 5))  # 默认设备状态片段数
+device_status_slice = int(os.getenv("deviceStatusSlice", 30))  # 默认设备状态片段数
 data_check_interval = int(os.getenv("dataCheckInterval", 60))  # 默认数据检查间隔 60 秒
 
 secret = os.getenv("SLEEPY_SECRET", "")  # 默认密钥为空
