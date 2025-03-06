@@ -167,3 +167,13 @@ body {
 .opacity-controls button:hover {
     background: rgba(255, 255, 255, 0.5);
 }
+
+/* 确保 sleeping 类的优先级高于主题链接样式 */
+.dark a.sleeping, .light a.sleeping {
+    color: gray !important;
+}
+
+/* 或者为错误状态也添加相应规则 */
+.dark a.error, .light a.error {
+    color: red !important;
+}
