@@ -135,6 +135,13 @@ python3 start.py
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
 
+## 贡献
+
+欢迎大家提交自己的 client / 修改建议~
+
+> [!IMPORTANT]
+> 请将 pull request 提交到 dev 分支，main 分支仅在修改稳定后同步
+
 ## 关于
 
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
