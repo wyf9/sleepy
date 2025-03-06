@@ -3,7 +3,8 @@
 win_device.py
 在 Windows 上获取窗口名称
 by: @wyf9, @pwnint, @kmizmal
-依赖: pywin32, requests
+依赖: pywin32, requests,
+媒体信息依赖: winrt.windows.media.control, winrt.windows.foundation
 '''
 
 # ----- Part: Import
@@ -111,11 +112,11 @@ def reverse_app_name(name: str) -> str:
 
 def get_media_info():
     '''
-    使用 winrt 获取 Windows SMTC 媒体信息 (正在播放的音乐等)
+    使用 pywinrt 获取 Windows SMTC 媒体信息 (正在播放的音乐等)
     Returns:
         tuple: (是否正在播放, 标题, 艺术家, 专辑)
     '''
-    # 首先尝试使用 winrt
+    # 首先尝试使用 pywinrt
     try:
         import winrt.windows.media.control as media
         from asyncio import run
