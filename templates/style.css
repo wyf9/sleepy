@@ -33,16 +33,22 @@ body {
     background-attachment: fixed;
 }
 
-.light{
-    background-color: aliceblue;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.light {
+    background-color: rgba(240, 248, 255, 0.9); /* 增加不透明度 */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* 增强阴影 */
     color: black;
+    border: 1px solid rgba(255, 255, 255, 0.6); /* 更明显的边框 */
 }
-.dark{
-    background-color: #1a151424;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+.dark {
+    background-color: rgba(26, 21, 20, 0.85); /* 增加不透明度 */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); /* 更强阴影 */
     color: white;
+    border: 1px solid rgba(60, 60, 60, 0.8); /* 暗色边框 */
+    /* 增加文字清晰度 */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
+
 .card {
     border-radius: 30px;
     padding: 2rem 1rem;
@@ -50,12 +56,14 @@ body {
     font-size: 1.1em;
     width: 40%;
     text-align: center;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px); /* 增加模糊效果 */
+    -webkit-backdrop-filter: blur(15px);
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.3); 
     position: relative;
-    
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 0 8px rgba(0, 0, 0, 0.1); /* 内阴影 */
     opacity: {{ alpha }}; /* 格式化后注意此处 */
 }
 .glass {
@@ -115,4 +123,57 @@ body {
 #hitokoto_text {
     color: rgba(237, 202, 242, 0.719);
 
+}
+
+/* 增强文本可读性 */
+.dark a, .dark .awake {
+    color: rgb(100, 255, 100); /* 更亮的绿色 */
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.7); /* 文字阴影增强可见性 */
+}
+
+.light a, .light .awake {
+    color: rgb(0, 100, 0); /* 更深的绿色 */
+}
+
+/* 添加到style.css */
+.theme-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    padding: 10px;
+    z-index: 1000;
+}
+
+.opacity-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+}
+
+.opacity-controls button {
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.opacity-controls button:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* 确保 sleeping 类的优先级高于主题链接样式 */
+.dark a.sleeping, .light a.sleeping {
+    color: gray !important;
+}
+
+/* 或者为错误状态也添加相应规则 */
+.dark a.error, .light a.error {
+    color: red !important;
 }
