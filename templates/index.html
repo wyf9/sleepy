@@ -121,9 +121,12 @@
         const statusElement = document.getElementById('status');
         statusElement.classList.add('{{ status_color }}');
     </script>
+    <!-- 方便调试 -->
     <script src="../static/moonlight.js"></script>
+    <script src="../static/canvas.js"></script>
     <script src="{{ url_for('static', filename='moonlight.js') }}"></script>
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
+    
     <!-- 仅在 canvas 为 True 时加载 canvas.js -->
     {% if canvas %}
     <script src="{{ url_for('static', filename='canvas.js') }}"></script>

@@ -10,7 +10,9 @@ from data import data as data_init
 from config import config as config_init
 import json
 import time
+import env
 
+# print(f"Running on {env.host}:{env.port}")
 try:
     c = config_init()
     d = data_init(c)
@@ -18,10 +20,10 @@ try:
     app = flask.Flask(__name__)
     c.load()
     d.load()
-    SECRET_REAL = os.environ.get('SLEEPY_SECRET') or c.get('secret')
-    d.start_timer_check(data_check_interval=c.config['data_check_interval'])  # 启动定时保存
+    SECRET_REAL = env.secret
+    d.start_timer_check(data_check_interval=env.data_check_interval)  # 启动定时保存
     # metrics?
-    if c.get('metrics'):
+    if env.metrics:
         u.info('Note: metrics enabled, open /metrics to see your count.')
         METRICS_ENABLED = True
         d.metrics_init()
@@ -89,20 +91,22 @@ def index():
         )
     return flask.render_template(
         'index.html',
-        page_title=ot['page_title'],
-        page_desc=ot['page_desc'],
-        user=ot['user'],
-        learn_more=ot['learn_more'],
-        repo=ot['repo'],
-        status_name=stat['name'],
-        status_desc=stat['desc'],
-        status_color=stat['color'],
+        page_title=env.title,
+        page_desc=env.sleepyDesc,
+        user=env.user,
+        learn_more=env.learn_more,
+        repo=env.repo,
         more_text=more_text,
+        hitokoto=env.hitokoto,
+        canvas=env.canvas,
+        steamkey=env.steamkey,
+        steamids=env.steamids,
+        
+        status_name=stat['name'],
+        status_color=stat['color'],
+        status_desc=stat['desc'],
+        
         last_updated=d.data['last_updated'],
-        hitokoto=ot['hitokoto'],
-        canvas=ot['canvas'],
-        steamkey=os.environ.get('STEAMKEY') or ot.get('steamkey'),
-        steamids=ot.get('steamids')
     )
 
 
@@ -123,8 +127,8 @@ def style_css():
 
     response = flask.make_response(flask.render_template(
         'style.css',
-        bg=c.config['other']['background'],
-        alpha=c.config['other']['alpha']
+        bg=env.background,
+
     ))
     response.mimetype = 'text/css'
     return response
@@ -151,17 +155,17 @@ def query():
     devicelst = d.data['device_status']
     if d.data['private_mode']:
         devicelst = {}
-    timenow = datetime.now(pytz.timezone(c.config['timezone']))
+    timenow = datetime.now(pytz.timezone(env.timezone))
     ret = {
         'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
-        'timezone': c.config['timezone'],
+        'timezone': env.timezone,
         'success': True,
         'status': st,
         'info': stinfo,
         'device': devicelst,
-        'device_status_slice': c.config['other']['device_status_slice'],
+        'device_status_slice': env.device_status_slice,
         'last_updated': d.data['last_updated'],
-        'refresh': c.config['other']['refresh']
+        'refresh': env.refresh
     }
     return u.format_dict(ret)
 
@@ -237,7 +241,7 @@ def device_set():
                 'using': device_using,
                 'app_name': app_name
             }
-            d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         else:
             return u.reterr(
                 code='not authorized',
@@ -266,7 +270,7 @@ def device_set():
                 'using': device_using,
                 'app_name': app_name
             }
-            d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
             d.check_device_status()
         else:
             return u.reterr(
@@ -295,7 +299,7 @@ def remove_device():
     if secret == SECRET_REAL:
         try:
             del d.data['device_status'][device_id]
-            d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
             d.check_device_status()
         except KeyError:
             return u.reterr(
@@ -322,7 +326,7 @@ def clear_device():
     secret = escape(flask.request.args.get('secret'))
     if secret == SECRET_REAL:
         d.data['device_status'] = {}
-        d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
+        d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         d.check_device_status()
     else:
         return u.reterr(
@@ -351,7 +355,7 @@ def private_mode():
                 message='"private" arg only supports boolean type'
             )
         d.data['private_mode'] = private
-        d.data['last_updated'] = datetime.now(pytz.timezone(c.config['timezone'])).strftime('%Y-%m-%d %H:%M:%S')
+        d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     else:
         return u.reterr(
             code='not authorized',
@@ -451,22 +455,22 @@ def events():
                 devicelst = d.data['device_status']
                 if d.data['private_mode']:
                     devicelst = {}
-                timenow = datetime.now(pytz.timezone(c.config['timezone']))
+                timenow = datetime.now(pytz.timezone(env.timezone))
                 ret = {
                     'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
-                    'timezone': c.config['timezone'],
+                    'timezone': env.timezone,
                     'success': True,
                     'status': st,
                     'info': stinfo,
                     'device': devicelst,
-                    'device_status_slice': c.config['other']['device_status_slice'],
+                    'device_status_slice': env.device_status_slice,
                     'last_updated': d.data['last_updated'],
-                    'refresh': c.config['other']['refresh']
+                    'refresh': env.refresh
                 }
                 yield f"event: update\ndata: {json.dumps(ret)}\n\n"
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
-                timenow = datetime.now(pytz.timezone(c.config['timezone']))
+                timenow = datetime.now(pytz.timezone(env.timezone))
                 yield f"event: heartbeat\ndata: {timenow.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
                 last_heartbeat = current_time
 
@@ -492,10 +496,10 @@ if METRICS_ENABLED:
 
 # --- End
 if __name__ == '__main__':
-    print(f"===============hi {c.config['other']['user']}!===============")
+    print(f"===================hi {env.user}!===================")
     app.run(  # 启↗动↘
-        host=c.config['host'],
-        port=c.config['port'],
+        host=env.host,
+        port=env.port,
         debug=c.config['debug']
     )
     print('Server exited, saving data...')

@@ -56,15 +56,18 @@ class ParticleBackground {
 
     // 事件绑定
     bindEvents() {
-        window.addEventListener("mousemove", e => {
+        this.mouseMoveHandler = e => {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
-        });
+        };
 
-        window.addEventListener("mouseout", () => {
+        this.mouseOutHandler = () => {
             this.mouse.x = null;
             this.mouse.y = null;
-        });
+        };
+
+        window.addEventListener("mousemove", this.mouseMoveHandler);
+        window.addEventListener("mouseout", this.mouseOutHandler);
     }
 
     // 动画更新
