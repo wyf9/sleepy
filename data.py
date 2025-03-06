@@ -215,7 +215,7 @@ class data:
         current_status = self.data.get('status', 0)  # 获取当前 status，默认为 0
         auto_switch_enabled = self.c.config.get('auto_switch_status', True)  # config开关，默认为 True
     
-    # 检查是否启用自动切换功能，并且当前 status 为 0 或 1
+    # 检查是否启用自动切换功能，并且当前 status 为 0 或 1。
         if auto_switch_enabled and current_status in [0, 1]:
             any_using = any(device.get('using', False) for device in device_status.values())
             if any_using:
