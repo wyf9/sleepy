@@ -20,7 +20,7 @@
 - [x] Android 客户端 ([Autox.js](https://github.com/aiselp/AutoX))
 - [x] [查看更多客户端 (如浏览器脚本)](./client/README.md)
 - [x] Metrics API (统计页面访问 / 接口调用次数)
-- [ ] **设备状态使用 Heartbeat 超时判定未在使用**
+- [x] **设备状态使用 Heartbeat 超时判定未在使用**
 - [ ] ~~更多状态存储选项 (如 SQLite)~~
 
 > [!TIP]
@@ -60,16 +60,9 @@ pip install -r requirements.txt
 
 3. 编辑配置文件
 
-先启动一遍程序:
-
-```shell
-python3 server.py
-```
-
-如果不出意外，会提示: `config.jsonc not exist, creating`，同时目录下出现 `config.jsonc` 文件，编辑该文件中的配置后重新运行即可
-
-`>>` **[配置示例](./config.example.jsonc)** `<<` *(`config.jsonc` 从此复制)*
-
+在目录下新建`.env`文件参考`.env.example`填写  
+也可以直接设置相应的环境变量，注意*环境变量的优先级**高于**`.env`文件*
+>> **[配置示例](./.env.example)**
 
 ## 使用
 
@@ -84,8 +77,7 @@ python3 server.py
 # 简易启动器
 python3 start.py
 ```
-
-默认服务 http 端口: **`9010`** *(可在 `config.jsonc` 中修改)*
+默认服务 http 端口: **`7860`**
 
 ### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
 
@@ -100,12 +92,11 @@ python3 start.py
 这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作  
 我怕教太多了你学不会，现在只要点  
 [这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)  
-然后自己去注册一个账号   填入一个秘钥（随便写但不推荐特殊符号及中文
-然后在这里
+然后自己去注册一个账号  
+参考`.env.example`在Setting==>Variables and secrets添加环境变量配置
+然后在这里  
 ![链接](https://files.catbox.moe/svvdt6.png)
 就可以复制你的`URL`，填入你选择的 **[`/client`](./client/README.md)** 对应的url配置中即可快速开始
-<!-- 配置文件在这里
-![配置](https://files.catbox.moe/xz5sd8.png)-->
 </details>
 
 ## 客户端示例
@@ -121,15 +112,12 @@ python3 start.py
 见 [Best Practice](./doc/best_practice.md)
 
 ## 更新
-
-只需 **4** 步:
-
-1. 使用 `git pull` 拉取最新代码 (注意查看所在分支是否存在)
-2. 启动服务 (应提示 `Config fotmat updated, please change your config.jsonc` 并退出)
-3. 对照 [`config.example.jsonc`](./config.example.jsonc) 和 [`doc/config_update.md`](./doc/config_update.md) 编辑你的 `config.jsonc`，并将 `version` 字段改为最新版本
-4. 再次启动服务，更新完成.
+```bash
+git pull
+pip install -r requirements.txt
+```
 > Huggingface
->>对照 [`config.example.jsonc`](./config.example.jsonc) 和 [`doc/config_update.md`](./doc/config_update.md) 编辑Files下的 `config.example.jsonc`，并将 `version` 字段改为最新版本
+>>Setting==>Variables and secrets=>更改对应的新增配置项===>Factory rebuild
 
 ## Star History
 

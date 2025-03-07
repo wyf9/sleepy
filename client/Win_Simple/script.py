@@ -19,9 +19,9 @@ class AppConfig:
     _DEFAULT_CONFIG = """\
 [settings]
 # 服务地址, 末尾不带 /
-SERVER = http://localhost:9010
+SERVER = http://localhost:7860
 # 密钥
-SECRET = wyf9test
+SECRET = ""
 DEVICE_ID = Win_Simple
 # 前台显示名称
 DEVICE_SHOW_NAME = MyComputer

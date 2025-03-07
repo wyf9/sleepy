@@ -7,21 +7,28 @@ from datetime import datetime
 from markupsafe import escape
 import utils as u
 from data import data as data_init
-from config import config as config_init
-import json
+import json5
 import time
 import env
 
-# print(f"Running on {env.host}:{env.port}")
 try:
-    c = config_init()
     d = data_init()
     METRICS_ENABLED = False
     app = flask.Flask(__name__)
-    c.load()
+    # c.load()
     d.load()
     SECRET_REAL = env.secret
     d.start_timer_check(data_check_interval=env.data_check_interval)  # 启动定时保存
+    try:
+        with open('status_list.jsonc', encoding='utf-8') as f:
+         status_list = json5.load(f)
+    except FileNotFoundError:
+        u.error("File 'status_list.jsonc' not found!")
+        exit(1)
+except json5.JSONDecodeError as e:
+    u.error(f"Error decoding 'status_list.jsonc': {e}")
+    exit(1)
+
     # metrics?
     if env.metrics:
         u.info('Note: metrics enabled, open /metrics to see your count.')
@@ -38,8 +45,6 @@ except:
     raise
 
 # --- Functions
-
-
 @app.before_request
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
@@ -64,24 +69,22 @@ def showip():  # type: ignore / (req: flask.request, msg)
 
 
 # --- Templates
-
-
 @app.route('/')
 def index():
     '''
     根目录返回 html
     - Method: **GET**
     '''
-    ot = c.config['other']
     try:
-        stat = c.config['status_list'][d.data['status']]
+       stat = status_list[d.data['status']]
     except:
+        print("索引超出范围，使用默认值")
         stat = {
-            'name': '未知',
-            'desc': '未知的标识符，可能是配置问题。',
-            'color': 'error'
-        }
-    more_text: str = ot['more_text']
+        'name': '82',
+        'desc': '未知的标识符，可能是配置问题。',
+        'color': 'error'
+    }
+    more_text: str = env.more_text
     if METRICS_ENABLED:
         more_text = more_text.format(
             visit_today=d.data['metrics']['today'].get('/', 0),
@@ -109,7 +112,6 @@ def index():
         last_updated=d.data['last_updated'],
     )
 
-
 @app.route('/'+'git'+'hub')
 def git_hub():
     '''
@@ -133,8 +135,6 @@ def style_css():
     response.mimetype = 'text/css'
     return response
 # --- Read-only
-
-
 @app.route('/query')
 def query():
     '''
@@ -144,7 +144,7 @@ def query():
     '''
     st = d.data['status']
     try:
-        stinfo = c.config['status_list'][st]
+        stinfo = status_list[st]
     except:
         stinfo = {
             'id': -1,
@@ -169,7 +169,6 @@ def query():
     }
     return u.format_dict(ret)
 
-
 @app.route('/status_list')
 def get_status_list():
     '''
@@ -177,12 +176,10 @@ def get_status_list():
     - 无需鉴权
     - Method: **GET**
     '''
-    stlst = c.get('status_list')
+    stlst = status_list
     return u.format_dict(stlst)
 
 # --- Status API
-
-
 @app.route('/set')
 def set_normal():
     '''
@@ -214,8 +211,6 @@ def set_normal():
 
 
 # --- Device API
-
-
 @app.route('/device/set', methods=['GET', 'POST'])
 def device_set():
     '''
@@ -286,7 +281,6 @@ def device_set():
         'success': True,
         'code': 'OK'
     })
-
 
 @app.route('/device/remove')
 def remove_device():
@@ -381,8 +375,7 @@ def reload_config():
     global SECRET_REAL
 
     if secret == SECRET_REAL:
-        c.load()
-        SECRET_REAL = os.environ.get('SLEEPY_SECRET') or c.get('secret')
+        SECRET_REAL = env.secret
         return u.format_dict({
             'success': True,
             'code': 'OK',
@@ -444,7 +437,7 @@ def events():
                 # 构造与 /query 相同的数据
                 st = d.data['status']
                 try:
-                    stinfo = c.config['status_list'][st]
+                    stinfo = status_list[st]
                 except:
                     stinfo = {
                         'id': -1,
@@ -467,7 +460,7 @@ def events():
                     'last_updated': d.data['last_updated'],
                     'refresh': env.refresh
                 }
-                yield f"event: update\ndata: {json.dumps(ret)}\n\n"
+                yield f"event: update\ndata: {json5.dumps(ret, quote_keys=True)}\n\n"
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
                 timenow = datetime.now(pytz.timezone(env.timezone))
@@ -500,7 +493,7 @@ if __name__ == '__main__':
     app.run(  # 启↗动↘
         host=env.host,
         port=env.port,
-        debug=c.config['debug']
+        debug=env.debug
     )
     print('Server exited, saving data...')
     d.save()

@@ -15,6 +15,7 @@ show_loading = os.getenv("showLoading", "false").lower() in ['true', '1', 't', '
 hitokoto = os.getenv("hitokoto", "true").lower() in ['true', '1', 't', 'y', 'yes']  # 默认 hitokoto 启用
 canvas = os.getenv("canvas", "true").lower() in ['true', '1', 't', 'y', 'yes']  # 默认 canvas 启用
 auto_switch_status= os.getenv("autoSwitchStatus", "true").lower() in ['true', '1', 't', 'y', 'yes']  # 默认自动切换状态
+debug = os.getenv("debug", "false").lower() in ['true', '1', 't', 'y', 'yes']
 
 title = os.getenv("sleepyTitle", "Sleepy App")  # 默认标题
 sleepyDesc = os.getenv("sleepyDesc", "A simple status monitoring app.")  # 默认描述
