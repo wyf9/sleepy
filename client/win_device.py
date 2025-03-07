@@ -4,7 +4,9 @@ win_device.py
 在 Windows 上获取窗口名称
 by: @wyf9, @pwnint, @kmizmal
 依赖: pywin32, requests,
-媒体信息依赖: winrt.windows.media.control, winrt.windows.foundation
+媒体信息依赖: Python≤3.9:  winrt
+             Python≥3.10: winrt.windows.media.control, winrt.windows.foundation
+            (如果你嫌麻烦并且不在乎几十m的包占用, 也可以直接装winsdk :)
 '''
 
 # ----- Part: Import
@@ -39,7 +41,9 @@ BYPASS_SAME_REQUEST: bool = True
 # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
 ENCODING: str = 'gb18030'
 # 当窗口标题为其中任意一项时将不更新
-SKIPPED_NAMES: list = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher', '任务视图', '任务切换', 'Snipper - Snipaste']
+SKIPPED_NAMES: list = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '操作中心',
+                       '日期和时间信息', '网络连接', '电池信息', '', '搜索', 'Flow.Launcher', '任务视图', 
+                       '任务切换', 'Snipper - Snipaste']
 # 当窗口标题为其中任意一项时视为未在使用
 NOT_USING_NAMES: list = ['我们喜欢这张图片，因此我们将它与你共享。', '启动']
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
@@ -49,7 +53,7 @@ MOUSE_IDLE_TIME: int = 15
 # 鼠标移动检测的最小距离 (像素)
 MOUSE_MOVE_THRESHOLD: int = 10
 # 控制日志是否显示更多信息
-DEBUG: bool = True
+DEBUG: bool = False
 # 代理地址 (<http/socks>://host:port), 设置为空字符串禁用
 PROXY: str = ''
 # --- 媒体信息配置
@@ -109,6 +113,13 @@ def reverse_app_name(name: str) -> str:
         new = [i] + new
     return ' - '.join(new)
 
+# 导入拎出来优化性能
+if MEDIA_INFO_ENABLED:
+    try:
+        import winrt.windows.media.control as media  # type: ignore
+    except ImportError:
+        import winrt.windows.media.control as media  # type: ignore
+    from asyncio import run  # type: ignore
 
 def get_media_info():
     '''
@@ -118,9 +129,6 @@ def get_media_info():
     '''
     # 首先尝试使用 pywinrt
     try:
-        import winrt.windows.media.control as media
-        from asyncio import run
-
         # 以异步方式获取媒体会话管理器
         async def get_media_session():
             # 获取媒体会话管理器
@@ -275,28 +283,33 @@ def check_mouse_idle() -> bool:
         current_pos = win32api.GetCursorPos()
     except pywinerror as e:
         print(f'Check mouse pos error: {e}')
-        return None
+        return is_mouse_idle
     current_time = time.time()
 
-    # 计算鼠标移动距离
+    # 计算鼠标移动距离的平方（避免开平方运算）
     dx = abs(current_pos[0] - last_mouse_pos[0])
     dy = abs(current_pos[1] - last_mouse_pos[1])
-    distance = (dx * dx + dy * dy) ** 0.5
+    distance_squared = dx * dx + dy * dy
+    
+    # 阈值的平方，用于比较
+    threshold_squared = MOUSE_MOVE_THRESHOLD * MOUSE_MOVE_THRESHOLD
 
-    # 打印详细的鼠标状态信息
+    # 打印详细的鼠标状态信息（为了保持日志一致性，仍然显示计算后的距离）
+    distance = distance_squared ** 0.5 if DEBUG else 0  # 仅在需要打印日志时计算
     debug(
         f'Mouse: current={current_pos}, last={last_mouse_pos}, distance={distance:.1f}px')
 
-    # 如果移动距离超过阈值
-    if distance > MOUSE_MOVE_THRESHOLD:
+    # 如果移动距离超过阈值（使用平方值比较）
+    if distance_squared > threshold_squared:
         last_mouse_pos = current_pos
         last_mouse_move_time = current_time
         if is_mouse_idle:
             is_mouse_idle = False
-            print(
-                f'Mouse wake up: moved {distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
-        else:
-            debug(f'Mouse moving: {distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
+        #     actual_distance = distance_squared ** 0.5  # 仅在状态变化时计算实际距离用于日志
+        #     print(
+        #         f'Mouse wake up: moved {actual_distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
+        # else:
+        #     debug(f'Mouse moving: {distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
         return False
 
     # 检查是否超过静止时间
