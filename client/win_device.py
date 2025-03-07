@@ -4,7 +4,9 @@ win_device.py
 在 Windows 上获取窗口名称
 by: @wyf9, @pwnint, @kmizmal
 依赖: pywin32, requests,
-媒体信息依赖: winrt.windows.media.control, winrt.windows.foundation
+媒体信息依赖: Python≤3.9:  winrt
+             Python≥3.10: winrt.windows.media.control, winrt.windows.foundation
+            (如果你嫌麻烦并且不在乎几十m的包占用, 也可以直接装winsdk :)
 '''
 
 # ----- Part: Import
@@ -118,7 +120,10 @@ def get_media_info():
     '''
     # 首先尝试使用 pywinrt
     try:
-        import winrt.windows.media.control as media
+        try:
+            import winsdk.windows.media.control as media
+        finally:
+            import winrt.windows.media.control as media
         from asyncio import run
 
         # 以异步方式获取媒体会话管理器
