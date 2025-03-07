@@ -51,34 +51,41 @@ class data:
         :param ret: 是否返回加载后的 dict (为否则设置 self.data)
         :param preload: 将会将 data.json 的内容追加到此后
         '''
-        if preload == {}:
+        if not preload:
             preload = self.preload_data
-        try:
-            if not os.path.exists('data.json'):
-                u.warning('data.json not exist, try re-create')
-                self.data = self.preload_data
-                self.save()
-            with open('data.json', 'r', encoding='utf-8') as file:
-                Data=json5.load(file)
-                DATA: dict = {**preload, **Data}
-                if ret:
-                    return DATA
+        attempts = error_count
+
+        while attempts > 0:
+            try:
+                if not os.path.exists('data.json'):
+                    u.warning('data.json not exist, try re-create')
+                    self.data = self.preload_data
+                    self.save()
+                with open('data.json', 'r', encoding='utf-8') as file:
+                    Data = json5.load(file)
+                    DATA: dict = {**preload, **Data}
+                    if ret:
+                        return DATA
+                    else:
+                        self.data = DATA
+                break  # 成功加载数据后跳出循环
+            except Exception as e:
+                attempts -= 1
+                if attempts > 0:
+                    u.warning(f'Load data error: {e}, retrying ({attempts} attempts left)')
                 else:
-                    self.data = DATA
-        except Exception as e:
-            if error_count > 0:
-                u.warning(f'Load data error: {e}, retrying')
-                self.load(error_count=error_count-1)
-            else:
-                u.error(f'Load data error: {e}, reached max retry count!')
-                raise
+                    u.error(f'Load data error: {e}, reached max retry count!')
+                    raise
 
     def save(self):
         '''
         保存配置
         '''
-        with open('data.json', 'w+', encoding='utf-8') as file:
-            json5.dump(self.data, file, indent=4, ensure_ascii=False)
+        try:
+            with open('data.json', 'w', encoding='utf-8') as file:
+                json5.dump(self.data, file, indent=4, ensure_ascii=False, quote_keys=True)
+        except Exception as e:
+                u.error(f'Failed to save data.json: {e}')
 
     def dset(self, name, value):
         '''
@@ -100,7 +107,7 @@ class data:
 
     def metrics_init(self):
         try:
-            metrics = self.data['metrics']
+            self.data['metrics']
         except KeyError:
             u.info('Metrics data init')
             self.data['metrics'] = {
@@ -150,7 +157,7 @@ class data:
         '''
         # if not path:
         #     return
-        vaild_paths = {}
+        # vaild_paths = {}
 
         # get time now
         now = datetime.now(pytz.timezone(env.timezone))
