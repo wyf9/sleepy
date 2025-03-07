@@ -41,7 +41,9 @@ BYPASS_SAME_REQUEST: bool = True
 # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
 ENCODING: str = 'gb18030'
 # 当窗口标题为其中任意一项时将不更新
-SKIPPED_NAMES: list = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '搜索', 'Flow.Launcher', '任务视图', '任务切换', 'Snipper - Snipaste']
+SKIPPED_NAMES: list = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '操作中心',
+                       '日期和时间信息', '网络连接', '电池信息', '', '搜索', 'Flow.Launcher', '任务视图', 
+                       '任务切换', 'Snipper - Snipaste']
 # 当窗口标题为其中任意一项时视为未在使用
 NOT_USING_NAMES: list = ['我们喜欢这张图片，因此我们将它与你共享。', '启动']
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
