@@ -11,14 +11,6 @@ from data import data as data_init
 import utils as u
 import env
 
-import logging
-logging.basicConfig(
-            level=env.main.logLevel,
-            datefmt="%Y-%m-%d %H:%M:%S",
-            format="%(asctime)s - %(levelname)s - %(message)s",
-            handlers=[logging.StreamHandler()]
-        )
-# logging.info("Starting server...")
 
 try:
     d = data_init()
@@ -38,20 +30,22 @@ except Exception as e:
 
     # metrics?
     if env.util.metrics:
-        logging.info('Note: metrics enabled, open /metrics to see your count.')
+        u.info('Note: metrics enabled, open /metrics to see your count.')
         METRICS_ENABLED = True
         d.metrics_init()
 except KeyboardInterrupt:
-    logging.warning('Interrupt init')
+    u.warning('Interrupt init')
     exit(0)
 except u.SleepyException as e:
-    logging.warning(f'==========\n{e}')
+    u.warning(f'==========\n{e}')
     exit(1)
 except:
-    logging.error('Unexpected Error!')
+    u.error('Unexpected Error!')
     raise
 
 # --- Functions
+
+
 @app.before_request
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
@@ -66,10 +60,10 @@ def showip():  # type: ignore / (req: flask.request, msg)
     ip1 = flask.request.remote_addr
     try:
         ip2 = flask.request.headers['X-Forwarded-For']
-        logging.info(f'- Request: {ip1} / {ip2} : {path}')
+        u.info(f'- Request: {ip1} / {ip2} : {path}')
     except:
         ip2 = None
-        logging.info(f'- Request: {ip1} : {path}')
+        u.info(f'- Request: {ip1} : {path}')
     # --- count
     if METRICS_ENABLED:
         d.record_metrics(path)
@@ -120,6 +114,7 @@ def index():
         last_updated=d.data['last_updated'],
     )
 
+
 @app.route('/'+'git'+'hub')
 def git_hub():
     '''
@@ -151,6 +146,8 @@ def style_css():
     response.mimetype = 'text/css'
     return response
 # --- Read-only
+
+
 @app.route('/query')
 def query(ret_as_dict: bool = False):
     '''
@@ -191,6 +188,7 @@ def query(ret_as_dict: bool = False):
     else:
         return u.format_dict(ret)
 
+
 @app.route('/status_list')
 def get_status_list():
     '''
@@ -203,6 +201,8 @@ def get_status_list():
     return u.format_dict(stlst)
 
 # --- Status API
+
+
 @app.route('/set')
 def set_normal():
     '''
@@ -304,6 +304,7 @@ def device_set():
         'success': True,
         'code': 'OK'
     })
+
 
 @app.route('/device/remove')
 def remove_device():
@@ -487,7 +488,7 @@ if __name__ == '__main__':
     app.run(  # 启↗动↘
         host=env.main.host,
         port=env.main.port,
-        debug=env.main.debug
+        debug=env.main.flask_debug
     )
     print('Server exited, saving data...')
     d.save()

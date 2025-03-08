@@ -10,13 +10,6 @@ from datetime import datetime
 import utils as u
 import env as env
 
-import logging
-logging.basicConfig(
-            level=env.main.logLevel,
-            datefmt="%Y-%m-%d %H:%M:%S",
-            format="%(asctime)s - %(levelname)s - %(message)s",
-            handlers=[logging.StreamHandler()]
-        )
 
 class data:
     '''
@@ -184,7 +177,7 @@ class data:
 
         # - check time
         if self.data['metrics']['today_is'] != today_is:
-            logging.info(f'[metrics] today_is changed: {self.data["metrics"]["today_is"]} -> {today_is}')
+            u.info(f'[metrics] today_is changed: {self.data["metrics"]["today_is"]} -> {today_is}')
             self.data['metrics']['today_is'] = today_is
             self.data['metrics']['today'] = {}
         # this month
@@ -233,12 +226,12 @@ class data:
                 self.data['status'] = 0
             else:
                 self.data['status'] = 1
-            logging.debug(f'[check_device_status] log:自动状态切换已启用, 已更新状态 {self.data["status"]}.')
+            u.debug(f'[check_device_status] log:自动状态切换已启用, 已更新状态 {self.data["status"]}.')
         else:
             if not auto_switch_enabled:
-                logging.debug('[check_device_status] log:自动切换功能已被config禁用.')
+                u.debug('[check_device_status] log:自动切换功能已被config禁用.')
             elif current_status not in [0, 1]:
-                logging.debug(f'[check_device_status] log:当前状态为 {current_status}, 关闭自动切换功能.')
+                u.debug(f'[check_device_status] log:当前状态为 {current_status}, 关闭自动切换功能.')
 
     def timer_check(self):
         '''
@@ -246,7 +239,7 @@ class data:
         * 根据 `data_check_interval` 参数调整 sleep() 的秒数
         * 需要使用 threading 启动新线程运行
         '''
-        logging.info(f'[timer_check] started, interval: {self.data_check_interval} seconds.')
+        u.info(f'[timer_check] started, interval: {self.data_check_interval} seconds.')
         while True:
             sleep(self.data_check_interval)
             try:
