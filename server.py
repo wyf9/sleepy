@@ -17,9 +17,19 @@ try:
     METRICS_ENABLED = False
     app = flask.Flask(__name__)
     # c.load()
+    # c.load()
     d.load()
-    SECRET_REAL = env.secret
-    d.start_timer_check(data_check_interval=env.data_check_interval)  # 启动定时保存
+    d.start_timer_check(data_check_interval=env.main.checkdata_interval)  # 启动定时保存
+    try:
+        with open('status_list.jsonc', encoding='utf-8') as f:
+            status_list = json5.load(f)
+    except FileNotFoundError:
+        u.error("File 'status_list.jsonc' not found!")
+        exit(1)
+except Exception as e:
+    u.error(f"Error initing: {e}")
+    exit(1)
+
     # metrics?
     if env.util.metrics:
         u.info('Note: metrics enabled, open /metrics to see your count.')
@@ -67,15 +77,16 @@ def index():
     - Method: **GET**
     '''
     try:
-        stat = c.config['status_list'][d.data['status']]
+        stat = status_list[d.data['status']]
     except:
         print("索引超出范围，使用默认值")
+        print("索引超出范围，使用默认值")
         stat = {
-            'name': '未知',
+            'name': '82',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
-    more_text: str = ot['more_text']
+    more_text: str = env.page.more_text
     if METRICS_ENABLED:
         more_text = more_text.format(
             visit_today=d.data['metrics']['today'].get('/', 0),
@@ -146,6 +157,7 @@ def query(ret_as_dict: bool = False):
     st = d.data['status']
     try:
         stinfo = status_list[st]
+        stinfo = status_list[st]
     except:
         stinfo = {
             'id': -1,
@@ -180,6 +192,7 @@ def get_status_list():
     - 无需鉴权
     - Method: **GET**
     '''
+    stlst = status_list
     stlst = status_list
     return u.format_dict(stlst)
 
@@ -374,21 +387,16 @@ def private_mode():
 #     '''
 #     secret = escape(flask.request.args.get('secret'))
 
-    # 先声明 global
-    global SECRET_REAL
-
-    if secret == SECRET_REAL:
-        c.load()
-        SECRET_REAL = os.environ.get('SLEEPY_SECRET') or c.get('secret')
-        return u.format_dict({
-            'success': True,
-            'code': 'OK',
-        })
-    else:
-        return u.reterr(
-            code='not authorized',
-            message='invalid secret'
-        )
+#     if secret == e.main.secret:
+#         return u.format_dict({
+#             'success': True,
+#             'code': 'OK',
+#         })
+#     else:
+#         return u.reterr(
+#             code='not authorized',
+#             message='invalid secret'
+#         )
 
 
 @app.route('/save_data')
@@ -438,33 +446,9 @@ def events():
                 # 重置心跳计时器
                 last_heartbeat = current_time
 
-                # 构造与 /query 相同的数据
-                st = d.data['status']
-                try:
-                    stinfo = c.config['status_list'][st]
-                except:
-                    stinfo = {
-                        'id': -1,
-                        'name': '未知',
-                        'desc': '未知的标识符，可能是配置问题。',
-                        'color': 'error'
-                    }
-                devicelst = d.data['device_status']
-                if d.data['private_mode']:
-                    devicelst = {}
-                timenow = datetime.now(pytz.timezone(env.timezone))
-                ret = {
-                    'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
-                    'timezone': env.timezone,
-                    'success': True,
-                    'status': st,
-                    'info': stinfo,
-                    'device': devicelst,
-                    'device_status_slice': env.device_status_slice,
-                    'last_updated': d.data['last_updated'],
-                    'refresh': env.refresh
-                }
-                yield f"event: update\ndata: {json.dumps(ret)}\n\n"
+                # 获取 /query 返回数据
+                ret = query(ret_as_dict=True)
+                yield f"event: update\ndata: {json5.dumps(ret, quote_keys=True)}\n\n"
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
                 timenow = datetime.now(pytz.timezone(env.main.timezone))
@@ -495,9 +479,9 @@ if METRICS_ENABLED:
 if __name__ == '__main__':
     print(f"===================hi {env.page.user}!===================")
     app.run(  # 启↗动↘
-        host=env.host,
-        port=env.port,
-        debug=c.config['debug']
+        host=env.main.host,
+        port=env.main.port,
+        debug=env.main.debug
     )
     print('Server exited, saving data...')
     d.save()

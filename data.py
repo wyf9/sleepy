@@ -81,8 +81,11 @@ class data:
         '''
         保存配置
         '''
-        with open('data.json', 'w+', encoding='utf-8') as file:
-            json5.dump(self.data, file, indent=4, ensure_ascii=False)
+        try:
+            with open('data.json', 'w', encoding='utf-8') as file:
+                json5.dump(self.data, file, indent=4, ensure_ascii=False, quote_keys=True)
+        except Exception as e:
+            u.error(f'Failed to save data.json: {e}')
 
     def dset(self, name, value):
         '''
