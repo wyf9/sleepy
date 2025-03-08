@@ -19,7 +19,7 @@ class AppConfig:
     _DEFAULT_CONFIG = """\
 [settings]
 # 服务地址, 末尾不带 /
-SERVER = http://localhost:7860
+SERVER = http://localhost:9010
 # 密钥
 SECRET = ""
 DEVICE_ID = Win_Simple

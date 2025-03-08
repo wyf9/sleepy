@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 # coding: utf-8
-import os
+
 import pytz
 import flask
 from datetime import datetime
 from markupsafe import escape
-import utils as u
-from data import data as data_init
 import json5
 import time
+
+from data import data as data_init
+import utils as u
 import env
 
 try:
@@ -17,20 +18,19 @@ try:
     app = flask.Flask(__name__)
     # c.load()
     d.load()
-    SECRET_REAL = env.secret
-    d.start_timer_check(data_check_interval=env.data_check_interval)  # 启动定时保存
+    d.start_timer_check(data_check_interval=env.main.checkdata_interval)  # 启动定时保存
     try:
         with open('status_list.jsonc', encoding='utf-8') as f:
-         status_list = json5.load(f)
+            status_list = json5.load(f)
     except FileNotFoundError:
         u.error("File 'status_list.jsonc' not found!")
         exit(1)
-except json5.JSONDecodeError as e:
-    u.error(f"Error decoding 'status_list.jsonc': {e}")
+except Exception as e:
+    u.error(f"Error initing: {e}")
     exit(1)
 
     # metrics?
-    if env.metrics:
+    if env.util.metrics:
         u.info('Note: metrics enabled, open /metrics to see your count.')
         METRICS_ENABLED = True
         d.metrics_init()
@@ -45,6 +45,8 @@ except:
     raise
 
 # --- Functions
+
+
 @app.before_request
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
@@ -76,15 +78,15 @@ def index():
     - Method: **GET**
     '''
     try:
-       stat = status_list[d.data['status']]
+        stat = status_list[d.data['status']]
     except:
         print("索引超出范围，使用默认值")
         stat = {
-        'name': '82',
-        'desc': '未知的标识符，可能是配置问题。',
-        'color': 'error'
-    }
-    more_text: str = env.more_text
+            'name': '82',
+            'desc': '未知的标识符，可能是配置问题。',
+            'color': 'error'
+        }
+    more_text: str = env.page.more_text
     if METRICS_ENABLED:
         more_text = more_text.format(
             visit_today=d.data['metrics']['today'].get('/', 0),
@@ -94,23 +96,24 @@ def index():
         )
     return flask.render_template(
         'index.html',
-        page_title=env.title,
-        page_desc=env.sleepyDesc,
-        user=env.user,
-        learn_more=env.learn_more,
-        repo=env.repo,
+        page_title=env.page.title,
+        page_desc=env.page.desc,
+        user=env.page.user,
+        learn_more=env.page.learn_more,
+        repo=env.page.repo,
         more_text=more_text,
-        hitokoto=env.hitokoto,
-        canvas=env.canvas,
-        steamkey=env.steamkey,
-        steamids=env.steamids,
-        
+        hitokoto=env.page.hitokoto,
+        canvas=env.page.canvas,
+        steamkey=env.util.steam_key,
+        steamids=env.util.steam_ids,
+
         status_name=stat['name'],
         status_color=stat['color'],
         status_desc=stat['desc'],
-        
+
         last_updated=d.data['last_updated'],
     )
+
 
 @app.route('/'+'git'+'hub')
 def git_hub():
@@ -129,18 +132,22 @@ def style_css():
 
     response = flask.make_response(flask.render_template(
         'style.css',
-        bg=env.background,
+        bg=env.page.background,
 
     ))
     response.mimetype = 'text/css'
     return response
 # --- Read-only
+
+
 @app.route('/query')
-def query():
+def query(ret_as_dict: bool = False):
     '''
     获取当前状态
     - 无需鉴权
     - Method: **GET**
+
+    :param ret_as_dict: 使函数直接返回 dict 而非 u.format_dict() 格式化后的 response
     '''
     st = d.data['status']
     try:
@@ -155,19 +162,23 @@ def query():
     devicelst = d.data['device_status']
     if d.data['private_mode']:
         devicelst = {}
-    timenow = datetime.now(pytz.timezone(env.timezone))
+    timenow = datetime.now(pytz.timezone(env.main.timezone))
     ret = {
         'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
-        'timezone': env.timezone,
+        'timezone': env.main.timezone,
         'success': True,
         'status': st,
         'info': stinfo,
         'device': devicelst,
-        'device_status_slice': env.device_status_slice,
+        'device_status_slice': env.status.device_slice,
         'last_updated': d.data['last_updated'],
-        'refresh': env.refresh
+        'refresh': env.status.refresh_interval
     }
-    return u.format_dict(ret)
+    if ret_as_dict:
+        return ret
+    else:
+        return u.format_dict(ret)
+
 
 @app.route('/status_list')
 def get_status_list():
@@ -180,6 +191,8 @@ def get_status_list():
     return u.format_dict(stlst)
 
 # --- Status API
+
+
 @app.route('/set')
 def set_normal():
     '''
@@ -196,7 +209,7 @@ def set_normal():
             message="argument 'status' must be int"
         )
     secret = escape(flask.request.args.get('secret'))
-    if secret == SECRET_REAL:
+    if secret == env.main.secret:
         d.dset('status', status)
         return u.format_dict({
             'success': True,
@@ -229,14 +242,14 @@ def device_set():
                 message='missing param or wrong param type'
             )
         secret = escape(flask.request.args.get('secret'))
-        if secret == SECRET_REAL:
+        if secret == env.main.secret:
             devices: dict = d.dget('device_status')
             devices[device_id] = {
                 'show_name': device_show_name,
                 'using': device_using,
                 'app_name': app_name
             }
-            d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         else:
             return u.reterr(
                 code='not authorized',
@@ -255,7 +268,7 @@ def device_set():
                 code='bad request',
                 message='missing param'
             )
-        if secret == SECRET_REAL:
+        if secret == env.main.secret:
             devices: dict = d.dget('device_status')
             # L245~247同理
             if not device_using:
@@ -265,7 +278,7 @@ def device_set():
                 'using': device_using,
                 'app_name': app_name
             }
-            d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
             d.check_device_status()
         else:
             return u.reterr(
@@ -282,6 +295,7 @@ def device_set():
         'code': 'OK'
     })
 
+
 @app.route('/device/remove')
 def remove_device():
     '''
@@ -290,10 +304,10 @@ def remove_device():
     '''
     device_id = escape(flask.request.args.get('id'))
     secret = escape(flask.request.args.get('secret'))
-    if secret == SECRET_REAL:
+    if secret == env.main.secret:
         try:
             del d.data['device_status'][device_id]
-            d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+            d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
             d.check_device_status()
         except KeyError:
             return u.reterr(
@@ -318,9 +332,9 @@ def clear_device():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
-    if secret == SECRET_REAL:
+    if secret == env.main.secret:
         d.data['device_status'] = {}
-        d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         d.check_device_status()
     else:
         return u.reterr(
@@ -340,7 +354,7 @@ def private_mode():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
-    if secret == SECRET_REAL:
+    if secret == env.main.secret:
         private = escape(flask.request.args.get('private'))
         private = u.tobool(private)
         if private == None:
@@ -349,7 +363,7 @@ def private_mode():
                 message='"private" arg only supports boolean type'
             )
         d.data['private_mode'] = private
-        d.data['last_updated'] = datetime.now(pytz.timezone(env.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     else:
         return u.reterr(
             code='not authorized',
@@ -362,29 +376,24 @@ def private_mode():
 
 # --- Storage API
 
+# @app.route('/reload_config')
+# def reload_config():
+#     '''
+#     从 `config.jsonc` 重载配置
+#     - Method: **GET**
+#     '''
+#     secret = escape(flask.request.args.get('secret'))
 
-@app.route('/reload_config')
-def reload_config():
-    '''
-    从 `config.jsonc` 重载配置
-    - Method: **GET**
-    '''
-    secret = escape(flask.request.args.get('secret'))
-
-    # 先声明 global
-    global SECRET_REAL
-
-    if secret == SECRET_REAL:
-        SECRET_REAL = env.secret
-        return u.format_dict({
-            'success': True,
-            'code': 'OK',
-        })
-    else:
-        return u.reterr(
-            code='not authorized',
-            message='invalid secret'
-        )
+#     if secret == e.main.secret:
+#         return u.format_dict({
+#             'success': True,
+#             'code': 'OK',
+#         })
+#     else:
+#         return u.reterr(
+#             code='not authorized',
+#             message='invalid secret'
+#         )
 
 
 @app.route('/save_data')
@@ -394,7 +403,7 @@ def save_data():
     - Method: **GET**
     '''
     secret = escape(flask.request.args.get('secret'))
-    if secret == SECRET_REAL:
+    if secret == env.main.secret:
         try:
             d.save()
         except Exception as e:
@@ -434,36 +443,12 @@ def events():
                 # 重置心跳计时器
                 last_heartbeat = current_time
 
-                # 构造与 /query 相同的数据
-                st = d.data['status']
-                try:
-                    stinfo = status_list[st]
-                except:
-                    stinfo = {
-                        'id': -1,
-                        'name': '未知',
-                        'desc': '未知的标识符，可能是配置问题。',
-                        'color': 'error'
-                    }
-                devicelst = d.data['device_status']
-                if d.data['private_mode']:
-                    devicelst = {}
-                timenow = datetime.now(pytz.timezone(env.timezone))
-                ret = {
-                    'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
-                    'timezone': env.timezone,
-                    'success': True,
-                    'status': st,
-                    'info': stinfo,
-                    'device': devicelst,
-                    'device_status_slice': env.device_status_slice,
-                    'last_updated': d.data['last_updated'],
-                    'refresh': env.refresh
-                }
+                # 获取 /query 返回数据
+                ret = query(ret_as_dict=True)
                 yield f"event: update\ndata: {json5.dumps(ret, quote_keys=True)}\n\n"
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
-                timenow = datetime.now(pytz.timezone(env.timezone))
+                timenow = datetime.now(pytz.timezone(env.main.timezone))
                 yield f"event: heartbeat\ndata: {timenow.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
                 last_heartbeat = current_time
 
@@ -489,11 +474,11 @@ if METRICS_ENABLED:
 
 # --- End
 if __name__ == '__main__':
-    print(f"===================hi {env.user}!===================")
+    print(f"===================hi {env.page.user}!===================")
     app.run(  # 启↗动↘
-        host=env.host,
-        port=env.port,
-        debug=env.debug
+        host=env.main.host,
+        port=env.main.port,
+        debug=env.main.debug
     )
     print('Server exited, saving data...')
     d.save()

@@ -4,12 +4,12 @@ import os
 import pytz
 import json5
 import threading
-
 from time import sleep
 from datetime import datetime
 
 import utils as u
-import env
+import env as env
+
 
 class data:
     '''
@@ -85,7 +85,7 @@ class data:
             with open('data.json', 'w', encoding='utf-8') as file:
                 json5.dump(self.data, file, indent=4, ensure_ascii=False, quote_keys=True)
         except Exception as e:
-                u.error(f'Failed to save data.json: {e}')
+            u.error(f'Failed to save data.json: {e}')
 
     def dset(self, name, value):
         '''
@@ -122,12 +122,12 @@ class data:
             self.record_metrics()
 
     def get_metrics_resp(self, json_only: bool = False):
-        now = datetime.now(pytz.timezone(env.timezone))
+        now = datetime.now(pytz.timezone(env.main.timezone))
         if json_only:
             # 仅用于调试
             return {
                 'time': f'{now}',
-                'timezone': env.timezone,
+                'timezone': env.main.timezone,
                 'today_is': self.data['metrics']['today_is'],
                 'month_is': self.data['metrics']['month_is'],
                 'year_is': self.data['metrics']['year_is'],
@@ -139,7 +139,7 @@ class data:
         else:
             return u.format_dict({
                 'time': f'{now}',
-                'timezone': env.timezone,
+                'timezone': env.main.timezone,
                 'today_is': self.data['metrics']['today_is'],
                 'month_is': self.data['metrics']['month_is'],
                 'year_is': self.data['metrics']['year_is'],
@@ -160,7 +160,7 @@ class data:
         # vaild_paths = {}
 
         # get time now
-        now = datetime.now(pytz.timezone(env.timezone))
+        now = datetime.now(pytz.timezone(env.main.timezone))
         year_is = str(now.year)
         month_is = f'{now.year}-{now.month}'
         today_is = f'{now.year}-{now.month}-{now.day}'
@@ -217,8 +217,8 @@ class data:
     def check_device_status(self):
         device_status = self.data.get('device_status', {})
         current_status = self.data.get('status', 0)  # 获取当前 status，默认为 0
-        auto_switch_enabled = env.auto_switch_status
-    
+        auto_switch_enabled = env.util.auto_switch_status
+
     # 检查是否启用自动切换功能，并且当前 status 为 0 或 1。
         if auto_switch_enabled and current_status in [0, 1]:
             any_using = any(device.get('using', False) for device in device_status.values())

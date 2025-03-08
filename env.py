@@ -1,39 +1,77 @@
+# coding: utf-8
 import os
-from dotenv import load_dotenv,find_dotenv
-if not find_dotenv():
-    print("⚠️ 未找到 .env 文件，将使用默认配置，部分功能可能失效！")
+import utils as u
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()
+dotenv_filename = '.env'
+if not find_dotenv(filename=dotenv_filename):
+    u.warning("未找到 .env 文件，将使用默认配置，部分功能可能失效！")
+load_dotenv(dotenv_path=dotenv_filename)
 
-user = os.getenv("sleepyUser", "admin")  # 默认用户名
-host = os.getenv("sleepyHost", "0.0.0.0")  # 默认主机名
-port = int(os.getenv("sleepyPort", 7860))  # 默认端口
-timezone = os.getenv("timezone", "Asia/Shanghai")  # 默认时区
 
-metrics = os.getenv("metrics", "false").lower() in ['true', '1', 't', 'y', 'yes']  # 默认 false
-show_loading = os.getenv("showLoading", "false").lower() in ['true', '1', 't', 'y', 'yes']  # 默认 false
-hitokoto = os.getenv("hitokoto", "true").lower() in ['true', '1', 't', 'y', 'yes']  # 默认 hitokoto 启用
-canvas = os.getenv("canvas", "true").lower() in ['true', '1', 't', 'y', 'yes']  # 默认 canvas 启用
-auto_switch_status= os.getenv("autoSwitchStatus", "true").lower() in ['true', '1', 't', 'y', 'yes']  # 默认自动切换状态
-debug = os.getenv("debug", "false").lower() in ['true', '1', 't', 'y', 'yes']
+def getenv(key: str, default, typeobj: object = str) -> any:
+    '''
+    获取环境变量
 
-title = os.getenv("sleepyTitle", "Sleepy App")  # 默认标题
-sleepyDesc = os.getenv("sleepyDesc", "A simple status monitoring app.")  # 默认描述
-background = os.getenv("sleepyBackground", "https://imgapi.siiway.top/image")  # 默认背景
-learn_more = os.getenv("sleepyLearnMore", "")  # 默认了解更多链接
-repo = os.getenv("sleepyRepo", "https://github.com/wyf9/sleepy")  # 默认仓库地址
-more_text = os.getenv("sleepyMoreText", "More details available.")  # 默认更多信息文本
+    :param key: 键
+    :param typeobj: 类型对象 (str / int / bool)
+    '''
+    got_value = os.getenv(key)
+    if got_value is None:
+        return default
+    else:
+        if typeobj == bool:
+            return u.tobool(got_value)
+        return typeobj(got_value)
 
-refresh = int(os.getenv("sleepyRefresh", 30))  # 默认刷新间隔 30 秒
-device_status_slice = int(os.getenv("deviceStatusSlice", 30))  # 默认设备状态片段数
-data_check_interval = int(os.getenv("dataCheckInterval", 60))  # 默认数据检查间隔 60 秒
 
-secret = os.getenv("SLEEPY_SECRET", "")  # 默认密钥为空
-steamkey = os.getenv("STEAMKEY", "")  # 默认 steamkey 为空
-steamids = os.getenv("steamids", "")  # 默认 steamid 为空
+class _main:
+    '''
+    (main) 系统基本配置
+    '''
+    host: str = getenv('sleepy_main_host', '0.0.0.0', str)
+    port: int = getenv('sleepy_main_port', 9010, int)
+    debug: bool = getenv('sleepy_main_debug', False, bool)
+    timezone: str = getenv('sleepy_main_timezone', 'Asia/Shanghai', str)
+    checkdata_interval: int = getenv('sleepy_main_checkdata_interval', 30, int)
+    secret: str = getenv('SLEEPY_SECRET', '', str)
 
-# 打印配置检查
-# print(f"Host: {host}, Port: {port}, Timezone: {timezone}, Metrics: {metrics}")
-# print(f"Title: {title}, Description: {sleepyDesc}, User: {user}")
-# print(f"Refresh Interval: {refresh}, Show Loading: {show_loading}, Canvas: {canvas}")
 
+class _page:
+    '''
+    (page) 页面内容配置
+    '''
+    title: str = getenv('sleepy_page_title', 'User Alive?', str)
+    desc: str = getenv('sleepy_page_desc', 'User\'s Online Status Page', str)
+    user: str = getenv('sleepy_page_user', 'User', str)
+    background: str = getenv('sleepy_page_background', 'https://imgapi.siiway.top/image', str)
+    learn_more: str = getenv('sleepy_page_learn_more', 'GitHub Repo', str)
+    repo: str = getenv('sleepy_page_repo', 'https://github.com/wyf9/sleepy', str)
+    more_text: str = getenv('sleepy_page_more_text', '', str)
+    hitokoto: bool = getenv('sleepy_page_hitokoto', True, bool)
+    canvas: bool = getenv('sleepy_page_canvas', True, bool)
+
+
+class _status:
+    '''
+    (status) 页面状态显示配置
+    '''
+    device_slice: int = getenv('sleepy_status_device_slice', 30, int)
+    show_loading: bool = getenv('sleepy_status_show_loading', True, bool)
+    refresh_interval: int = getenv('sleepy_status_refresh_interval', 5000, int)
+
+
+class _util:
+    '''
+    (util) 可选功能
+    '''
+    metrics: bool = getenv('sleepy_util_metrics', True, bool)
+    auto_switch_status: bool = getenv('sleepy_util_auto_switch_status', True, bool)
+    steam_key: str = getenv('sleepy_util_steam_key', '', str)
+    steam_ids: str = getenv('sleepy_util_steam_ids', '', str)
+
+
+main = _main()
+page = _page()
+status = _status()
+util = _util()

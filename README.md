@@ -29,8 +29,6 @@
 
 对智能家居 / Home Assistant 感兴趣的朋友，一定要看看 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): [maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!
 
-<!-- > **以及 [开发分支 `dev-2025-2-1`](https://github.com/wyf9/sleepy/tree/dev-2025-2-1)** <br/> -->
-
 ### Preview
 
 演示站 (*较*稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
@@ -77,7 +75,7 @@ python3 server.py
 # 简易启动器
 python3 start.py
 ```
-默认服务 http 端口: **`7860`**
+默认服务 http 端口: **`9010`**
 
 ### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
 
@@ -122,13 +120,6 @@ pip install -r requirements.txt
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
-
-## 贡献
-
-欢迎大家提交自己的 client / 修改建议~
-
-> [!IMPORTANT]
-> 请将 pull request 提交到 dev 分支，main 分支仅在修改稳定后同步
 
 ## 关于
 
