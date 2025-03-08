@@ -180,3 +180,8 @@ body {
 .dark a.error, .light a.error {
     color: red !important;
 }
+
+/* Steam Card */
+.steam-card {
+    text-align: center;
+}
