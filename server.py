@@ -123,6 +123,11 @@ def git_hub():
     return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle'+'epy', 301)
 
 
+@app.route('/steam')
+def test():
+    return flask.render_template('steamstatus.html')
+
+
 @app.route('/style.css')
 def style_css():
     '''
