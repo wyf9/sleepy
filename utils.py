@@ -3,20 +3,20 @@ import json
 from flask import make_response, Response
 
 
-def info(log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Info] ℹ️  {log}")
+# def info(log):
+#     print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Info] ℹ️  {log}")
 
 
-def infon(log):
-    print(f"\n{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Info] ℹ️  {log}")
+# def infon(log):
+#     print(f"\n{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Info] ℹ️  {log}")
 
 
-def warning(log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Warning] ⚠️  {log}")
+# def warning(log):
+#     print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Warning] ⚠️  {log}")
 
 
-def error(log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Error] ❌  {log}")
+# def error(log):
+#     print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Error] ❌  {log}")
 
 
 def format_dict(dic) -> Response:

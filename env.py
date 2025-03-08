@@ -2,12 +2,17 @@
 import os
 import utils as u
 from dotenv import load_dotenv, find_dotenv
-
+import logging
 dotenv_filename = '.env'
 if not find_dotenv(filename=dotenv_filename):
-    u.warning("未找到 .env 文件，将使用默认配置，部分功能可能失效！")
+    logging.warning("未找到 .env 文件，将使用默认配置，部分功能可能失效！")
 load_dotenv(dotenv_path=dotenv_filename)
-
+logging.basicConfig(
+            level=os.getenv('logLevel', 'INFO'),
+            datefmt="%Y-%m-%d %H:%M:%S",
+            format="%(asctime)s - %(levelname)s - %(message)s",
+            handlers=[logging.StreamHandler()]
+        )
 
 def getenv(key: str, default, typeobj: object = str) -> any:
     '''
