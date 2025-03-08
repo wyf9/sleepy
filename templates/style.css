@@ -34,14 +34,14 @@ body {
 }
 
 .light {
-    background-color: rgba(240, 248, 255, 0.9); /* 增加不透明度 */
+    background-color: rgba(240, 248, 255, 0.6); /* 增加不透明度 */
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* 增强阴影 */
     color: black;
     border: 1px solid rgba(255, 255, 255, 0.6); /* 更明显的边框 */
 }
 
 .dark {
-    background-color: rgba(26, 21, 20, 0.85); /* 增加不透明度 */
+    background-color: rgba(26, 21, 20, 0.65); /* 增加不透明度 */
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); /* 更强阴影 */
     color: white;
     border: 1px solid rgba(60, 60, 60, 0.8); /* 暗色边框 */
@@ -75,11 +75,11 @@ body {
     
   }
 #last-updated {
-    font-size: 0.9em;
+    font-size: 0.8em;
 }
 
 .card p {
-    font-size: 1.2em;
+    font-size: 1.1em;
     margin: 1rem;
 }
 .container {
@@ -119,7 +119,7 @@ body {
 /* 不建议删除上面的 .sleeping .awake .error 三个默认颜色 */
 #hitokoto{
     border-radius: .5rem;
-    box-shadow: 10px 6px 14px 6px rgb(0 0 0 / 12%);
+    /* 这一条边框也太难看了吧（） box-shadow: 10px 6px 14px 6px rgb(0 0 0 / 12%); */
     padding: .8rem 1rem;
 
 }
