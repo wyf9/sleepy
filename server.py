@@ -7,16 +7,23 @@ from datetime import datetime
 from markupsafe import escape
 import json5
 import time
-
 from data import data as data_init
 import utils as u
 import env
+
+import logging
+logging.basicConfig(
+            level=env.main.logLevel,
+            datefmt="%Y-%m-%d %H:%M:%S",
+            format="%(asctime)s - %(levelname)s - %(message)s",
+            handlers=[logging.StreamHandler()]
+        )
+# logging.info("Starting server...")
 
 try:
     d = data_init()
     METRICS_ENABLED = False
     app = flask.Flask(__name__)
-    # c.load()
     d.load()
     d.start_timer_check(data_check_interval=env.main.checkdata_interval)  # 启动定时保存
     try:
@@ -31,22 +38,20 @@ except Exception as e:
 
     # metrics?
     if env.util.metrics:
-        u.info('Note: metrics enabled, open /metrics to see your count.')
+        logging.info('Note: metrics enabled, open /metrics to see your count.')
         METRICS_ENABLED = True
         d.metrics_init()
 except KeyboardInterrupt:
-    u.warning('Interrupt init')
+    logging.warning('Interrupt init')
     exit(0)
 except u.SleepyException as e:
-    u.warning(f'==========\n{e}')
+    logging.warning(f'==========\n{e}')
     exit(1)
 except:
-    u.error('Unexpected Error!')
+    logging.error('Unexpected Error!')
     raise
 
 # --- Functions
-
-
 @app.before_request
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
@@ -61,10 +66,10 @@ def showip():  # type: ignore / (req: flask.request, msg)
     ip1 = flask.request.remote_addr
     try:
         ip2 = flask.request.headers['X-Forwarded-For']
-        u.infon(f'- Request: {ip1} / {ip2} : {path}')
+        logging.info(f'- Request: {ip1} / {ip2} : {path}')
     except:
         ip2 = None
-        u.infon(f'- Request: {ip1} : {path}')
+        logging.info(f'- Request: {ip1} : {path}')
     # --- count
     if METRICS_ENABLED:
         d.record_metrics(path)
@@ -81,8 +86,9 @@ def index():
         stat = status_list[d.data['status']]
     except:
         print("索引超出范围，使用默认值")
+        print("索引超出范围，使用默认值")
         stat = {
-            'name': '82',
+            'name': '85',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
@@ -114,7 +120,6 @@ def index():
         last_updated=d.data['last_updated'],
     )
 
-
 @app.route('/'+'git'+'hub')
 def git_hub():
     '''
@@ -125,7 +130,10 @@ def git_hub():
 
 @app.route('/steam')
 def test():
-    return flask.render_template('steamstatus.html')
+    return flask.render_template(
+        'steamstatus.html',
+        steamids=env.util.steam_ids
+    )
 
 
 @app.route('/style.css')
@@ -143,8 +151,6 @@ def style_css():
     response.mimetype = 'text/css'
     return response
 # --- Read-only
-
-
 @app.route('/query')
 def query(ret_as_dict: bool = False):
     '''
@@ -157,10 +163,11 @@ def query(ret_as_dict: bool = False):
     st = d.data['status']
     try:
         stinfo = status_list[st]
+        stinfo = status_list[st]
     except:
         stinfo = {
             'id': -1,
-            'name': '未知',
+            'name': '164',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
@@ -184,7 +191,6 @@ def query(ret_as_dict: bool = False):
     else:
         return u.format_dict(ret)
 
-
 @app.route('/status_list')
 def get_status_list():
     '''
@@ -193,11 +199,10 @@ def get_status_list():
     - Method: **GET**
     '''
     stlst = status_list
+    stlst = status_list
     return u.format_dict(stlst)
 
 # --- Status API
-
-
 @app.route('/set')
 def set_normal():
     '''
@@ -299,7 +304,6 @@ def device_set():
         'success': True,
         'code': 'OK'
     })
-
 
 @app.route('/device/remove')
 def remove_device():

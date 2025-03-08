@@ -19,7 +19,7 @@ class AppConfig:
     _DEFAULT_CONFIG = """\
 [settings]
 # 服务地址, 末尾不带 /
-SERVER = http://localhost:9010
+SERVER = http://localhost:7860
 # 密钥
 SECRET = ""
 DEVICE_ID = Win_Simple
@@ -43,6 +43,8 @@ MOUSE_MOVE_THRESHOLD = 3
 LOGLEVEL = INFO
 #日志是否写入文件
 LOG_FILE = False
+# 黑名单配置（竖线分隔）
+BLACKLIST = ExampleApp|Privacy Information
 """
     
     def __init__(self):
@@ -65,34 +67,38 @@ LOG_FILE = False
         
         try:
             # 基本配置
-            self.server = self.config.get('settings', 'SERVER')
-            self.secret = self.config.get('settings', 'SECRET')
-            self.device_id = self.config.get('settings', 'DEVICE_ID')
-            self.device_show_name = self.config.get('settings', 'DEVICE_SHOW_NAME')
-            self.check_interval = self.config.getint('settings', 'CHECK_INTERVAL')
+            self.server = self.config.get('settings', 'SERVER', fallback='localhost:7860')
+            self.secret = self.config.get('settings', 'SECRET', fallback='')
+            self.device_id = self.config.get('settings', 'DEVICE_ID', fallback='Win_Simple')
+            self.device_show_name = self.config.get('settings', 'DEVICE_SHOW_NAME', fallback='Computer')
+            self.check_interval = self.config.getint('settings', 'CHECK_INTERVAL', fallback=60)
             
             # 窗口处理配置
-            self.skipped_names = self._parse_list('SKIPPED_NAMES')
-            self.not_using_names = self._parse_list('NOT_USING_NAMES')
-            self.reverse_app_name = self.config.getboolean('settings', 'REVERSE_APP_NAME')
+            self.skipped_names = self._parse_list('SKIPPED_NAMES', fallback=['Window1', 'Window2'])
+            self.not_using_names = self._parse_list('NOT_USING_NAMES', fallback=['App1', 'App2'])
+            self.reverse_app_name = self.config.getboolean('settings', 'REVERSE_APP_NAME', fallback=False)
             
             # 鼠标配置
-            self.mouse_idle_time = self.config.getint('settings', 'MOUSE_IDLE_TIME')
-            self.mouse_move_threshold = self.config.getint('settings', 'MOUSE_MOVE_THRESHOLD')
+            self.mouse_idle_time = self.config.getint('settings', 'MOUSE_IDLE_TIME', fallback=300)
+            self.mouse_move_threshold = self.config.getint('settings', 'MOUSE_MOVE_THRESHOLD', fallback=10)
             
             # 日志配置
-            self.log_level = self._get_log_level()
-            self.log_file = self.config.getboolean('settings', 'LOG_FILE')
+            self.log_level = self._get_log_level(fallback='INFO')
+            self.log_file = self.config.getboolean('settings', 'LOG_FILE', fallback=True)
             
+            # 黑名单配置
+            self.blacklist = self._parse_list('BLACKLIST', fallback=['User1', 'User2'])
+        
         except Exception as e:
             logging.error(f'配置文件打不开惹: {str(e)}')
             sys.exit(1)
     
-    def _parse_list(self, key: str) -> list:
+    def _parse_list(self, key: str, fallback="") -> list:
         """解析竖线分隔的配置项"""
-        return [item.strip() for item in self.config.get('settings', key).split('|') if item.strip()]
+        value = self.config.get('settings', key, fallback=fallback)
+        return [item.strip() for item in value.split('|') if item.strip()]
     
-    def _get_log_level(self):
+    def _get_log_level(self, fallback='INFO'):
         """获取日志等级"""
         level_map = {
             'DEBUG': logging.DEBUG,
@@ -100,7 +106,7 @@ LOG_FILE = False
             'WARNING': logging.WARNING,
             'ERROR': logging.ERROR
         }
-        return level_map.get(self.config.get('settings', 'LOGLEVEL'), logging.INFO)
+        return level_map.get(self.config.get('settings', 'LOGLEVEL', fallback=fallback), logging.INFO)
 
 # --------------------------
 # 设备状态管理
@@ -175,6 +181,9 @@ class DeviceMonitor:
     
     def send_state(self, using: bool, window: str = None):
         """发送状态到服务器"""
+        if any(blacklisted in window for blacklisted in self.config.blacklist):
+            logging.debug(f'应用 {window} 在黑名单中，忽略上报')
+            return
         try:
             resp = requests.post(
                 url=f'{self.config.server}/device/set',
