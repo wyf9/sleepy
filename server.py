@@ -125,7 +125,10 @@ def git_hub():
 
 @app.route('/steam')
 def test():
-    return flask.render_template('steamstatus.html')
+    return flask.render_template(
+        'steamstatus.html',
+        steamids=env.util.steam_ids
+    )
 
 
 @app.route('/style.css')
