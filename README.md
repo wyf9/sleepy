@@ -125,6 +125,8 @@ pip install -r requirements.txt
 
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
+templates/steamstatus.html来自项目[gamer2810/steam-miniprofile](https://github.com/gamer2810/steam-miniprofile)。
+
 也欢迎参观 WinMEMZ *(GitHub: [maoawa](https://github.com/maoawa))* 的原版！~~[maoawa/sleepy](https://github.com/maoawa/sleepy)~~ *已归档*
 
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))
