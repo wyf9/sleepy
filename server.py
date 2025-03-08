@@ -17,6 +17,7 @@ try:
     METRICS_ENABLED = False
     app = flask.Flask(__name__)
     # c.load()
+    # c.load()
     d.load()
     d.start_timer_check(data_check_interval=env.main.checkdata_interval)  # 启动定时保存
     try:
@@ -45,8 +46,6 @@ except:
     raise
 
 # --- Functions
-
-
 @app.before_request
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
@@ -81,6 +80,7 @@ def index():
         stat = status_list[d.data['status']]
     except:
         print("索引超出范围，使用默认值")
+        print("索引超出范围，使用默认值")
         stat = {
             'name': '82',
             'desc': '未知的标识符，可能是配置问题。',
@@ -114,7 +114,6 @@ def index():
         last_updated=d.data['last_updated'],
     )
 
-
 @app.route('/'+'git'+'hub')
 def git_hub():
     '''
@@ -146,8 +145,6 @@ def style_css():
     response.mimetype = 'text/css'
     return response
 # --- Read-only
-
-
 @app.route('/query')
 def query(ret_as_dict: bool = False):
     '''
@@ -159,6 +156,7 @@ def query(ret_as_dict: bool = False):
     '''
     st = d.data['status']
     try:
+        stinfo = status_list[st]
         stinfo = status_list[st]
     except:
         stinfo = {
@@ -187,7 +185,6 @@ def query(ret_as_dict: bool = False):
     else:
         return u.format_dict(ret)
 
-
 @app.route('/status_list')
 def get_status_list():
     '''
@@ -196,11 +193,10 @@ def get_status_list():
     - Method: **GET**
     '''
     stlst = status_list
+    stlst = status_list
     return u.format_dict(stlst)
 
 # --- Status API
-
-
 @app.route('/set')
 def set_normal():
     '''
@@ -302,7 +298,6 @@ def device_set():
         'success': True,
         'code': 'OK'
     })
-
 
 @app.route('/device/remove')
 def remove_device():

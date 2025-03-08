@@ -21,6 +21,7 @@
 - [x] [查看更多客户端 (如浏览器脚本)](./client/README.md)
 - [x] Metrics API (统计页面访问 / 接口调用次数)
 - [x] **设备状态使用 Heartbeat 超时判定未在使用**
+- [x] **设备状态使用 Heartbeat 超时判定未在使用**
 - [ ] ~~更多状态存储选项 (如 SQLite)~~
 
 > [!TIP]
@@ -61,6 +62,9 @@ pip install -r requirements.txt
 在目录下新建`.env`文件参考`.env.example`填写  
 也可以直接设置相应的环境变量，注意*环境变量的优先级**高于**`.env`文件*
 >> **[配置示例](./.env.example)**
+在目录下新建`.env`文件参考`.env.example`填写  
+也可以直接设置相应的环境变量，注意*环境变量的优先级**高于**`.env`文件*
+>> **[配置示例](./.env.example)**
 
 ## 使用
 
@@ -93,6 +97,9 @@ python3 start.py
 然后自己去注册一个账号  
 参考`.env.example`在Setting==>Variables and secrets添加环境变量配置
 然后在这里  
+然后自己去注册一个账号  
+参考`.env.example`在Setting==>Variables and secrets添加环境变量配置
+然后在这里  
 ![链接](https://files.catbox.moe/svvdt6.png)
 就可以复制你的`URL`，填入你选择的 **[`/client`](./client/README.md)** 对应的url配置中即可快速开始
 </details>
@@ -114,7 +121,12 @@ python3 start.py
 git pull
 pip install -r requirements.txt
 ```
+```bash
+git pull
+pip install -r requirements.txt
+```
 > Huggingface
+>>Setting==>Variables and secrets=>更改对应的新增配置项===>Factory rebuild
 >>Setting==>Variables and secrets=>更改对应的新增配置项===>Factory rebuild
 
 ## Star History
