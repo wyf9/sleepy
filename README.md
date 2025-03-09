@@ -129,6 +129,6 @@ pip install -r requirements.txt
 
 [`templates/steam.html`](./templates/steam.html) 来自项目 [gamer2810/steam-miniprofile](https://github.com/gamer2810/steam-miniprofile).
 
-也欢迎参观 WinMEMZ *(GitHub: [maoawa](https://github.com/maoawa))* 的原版！~~[maoawa/sleepy](https://github.com/maoawa/sleepy)~~ *已归档*
+**也欢迎参观 WinMEMZ *(GitHub: [maoawa](https://github.com/maoawa))* 的原版！[maoawa/sleepy](https://github.com/maoawa/sleepy)**
 
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ ([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))

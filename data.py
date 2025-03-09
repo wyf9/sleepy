@@ -226,16 +226,19 @@ class data:
 
         # 检查是否启用自动切换功能，并且当前 status 为 0 或 1
         last_status = self.data['status']
-        if auto_switch_enabled and current_status in [0, 1]:
-            any_using = any(device.get('using', False) for device in device_status.values())
-            if any_using:
-                self.data['status'] = 0
-            else:
-                self.data['status'] = 1
-            if last_status != self.data['status'] and (not trigged_by_timer):
-                u.debug(f'[check_device_status] 自动状态切换已启用, 已更新状态 {self.data["status"]}.')
-        elif current_status not in [0, 1] and (not trigged_by_timer):
-            u.debug(f'[check_device_status] 当前状态为 {current_status}, 不适用自动切换.')
+        if auto_switch_enabled:
+            if current_status in [0, 1]:
+                any_using = any(device.get('using', False) for device in device_status.values())
+                if any_using:
+                    self.data['status'] = 0
+                else:
+                    self.data['status'] = 1
+                if last_status != self.data['status']:
+                    u.debug(f'[check_device_status] 已自动切换状态 ({last_status} -> {self.data["status"]}).')
+                elif not trigged_by_timer:
+                    u.debug(f'[check_device_status] 当前状态已为 {current_status}, 无需切换.')
+            elif not trigged_by_timer:
+                u.debug(f'[check_device_status] 当前状态为 {current_status}, 不适用自动切换.')
 
     def timer_check(self):
         '''
@@ -247,7 +250,7 @@ class data:
         while True:
             sleep(self.data_check_interval)
             try:
-                self.check_device_status()  # 检测设备状态并更新status
+                self.check_device_status(trigged_by_timer=True)  # 检测设备状态并更新 status
                 file_data = self.load(ret=True)
                 if file_data != self.data:
                     self.save()

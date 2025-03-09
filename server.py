@@ -14,7 +14,6 @@ import env
 
 try:
     d = data_init()
-    METRICS_ENABLED = False
     app = flask.Flask(__name__)
     d.load()
     d.start_timer_check(data_check_interval=env.main.checkdata_interval)  # 启动定时保存
@@ -24,15 +23,13 @@ try:
     except FileNotFoundError:
         u.error("File 'status_list.jsonc' not found!")
         exit(1)
+    # metrics?
+    if env.util.metrics:
+        u.info('[metrics] metrics enabled, open /metrics to see your count.')
+        d.metrics_init()
 except Exception as e:
     u.error(f"Error initing: {e}")
     exit(1)
-
-    # metrics?
-    if env.util.metrics:
-        u.info('Note: metrics enabled, open /metrics to see your count.')
-        METRICS_ENABLED = True
-        d.metrics_init()
 except KeyboardInterrupt:
     u.warning('Interrupt init')
     exit(0)
@@ -65,7 +62,7 @@ def showip():  # type: ignore / (req: flask.request, msg)
         ip2 = None
         u.info(f'- Request: {ip1} : {path}')
     # --- count
-    if METRICS_ENABLED:
+    if env.util.metrics:
         d.record_metrics(path)
 
 
@@ -87,7 +84,7 @@ def index():
             'color': 'error'
         }
     more_text: str = env.page.more_text
-    if METRICS_ENABLED:
+    if env.util.metrics:
         more_text = more_text.format(
             visit_today=d.data['metrics']['today'].get('/', 0),
             visit_month=d.data['metrics']['month'].get('/', 0),
@@ -479,7 +476,7 @@ def events():
 
 
 # --- (Special) Metrics API
-if METRICS_ENABLED:
+if env.util.metrics:
     @app.route('/metrics')
     def metrics():
         '''
