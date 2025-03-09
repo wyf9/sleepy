@@ -13,12 +13,28 @@ html {
     height: 100%;
     width: 100%;
 }
+button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  
 #moonlight{
     position: absolute;
     right: 10px;
     top: 10px;
 }
 #moonlight svg{
+    width: 40px;
+    height: 40px;
+}
+#slider{
+    position: absolute;
+    left: 10px;
+    top: 10px;
+}
+#slider svg{
     width: 40px;
     height: 40px;
 }
