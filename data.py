@@ -229,7 +229,7 @@ class data:
             u.debug(f'[check_device_status] log:自动状态切换已启用, 已更新状态 {self.data["status"]}.')
         else:
             if not auto_switch_enabled:
-                u.debug('[check_device_status] log:自动切换功能已被config禁用.')
+                u.debug('[check_device_status] log:自动切换功能已禁用.')
             elif current_status not in [0, 1]:
                 u.debug(f'[check_device_status] log:当前状态为 {current_status}, 关闭自动切换功能.')
 

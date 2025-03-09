@@ -21,7 +21,6 @@
 - [x] [查看更多客户端 (如浏览器脚本)](./client/README.md)
 - [x] Metrics API (统计页面访问 / 接口调用次数)
 - [x] **设备状态使用 Heartbeat 超时判定未在使用**
-- [x] **设备状态使用 Heartbeat 超时判定未在使用**
 - [ ] ~~更多状态存储选项 (如 SQLite)~~
 
 > [!TIP]
@@ -59,16 +58,14 @@ pip install -r requirements.txt
 
 3. 编辑配置文件
 
-在目录下新建`.env`文件参考`.env.example`填写  
-也可以直接设置相应的环境变量，注意*环境变量的优先级**高于**`.env`文件*
->> **[配置示例](./.env.example)**
-在目录下新建`.env`文件参考`.env.example`填写  
-也可以直接设置相应的环境变量，注意*环境变量的优先级**高于**`.env`文件*
->> **[配置示例](./.env.example)**
+在目录下新建 `.env` 文件 (参考 `.env.example` 填写), 也可以直接设置相应的环境变量
+
+> [!IMPORTANT]
+> **[配置示例](./.env.example)** <br/>
+> *注意: 环境变量的优先级**高于** `.env` 文件*
 
 ## 使用
 
-> [!IMPORTANT]
 > **使用宝塔面板 (uwsgi) 等部署时，请确定只为本程序分配了 1 个进程, 如设置多个服务进程可能导致数据不同步!!!**
 
 有两种启动方式:
@@ -89,17 +86,14 @@ python3 start.py
 
 ***<summary>点!此!展!开! (大图警告)</summary>***
 
-有没有更简单无脑的方法推荐一下  
+有没有更简单无脑的方法推荐一下
 **有的兄弟，有的！**
-这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作  
-我怕教太多了你学不会，现在只要点  
+这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作
+我怕教太多了你学不会，现在只要点
 [这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)  
-然后自己去注册一个账号  
+然后自己去注册一个账号
 参考`.env.example`在Setting==>Variables and secrets添加环境变量配置
-然后在这里  
-然后自己去注册一个账号  
-参考`.env.example`在Setting==>Variables and secrets添加环境变量配置
-然后在这里  
+然后在这里:
 ![链接](https://files.catbox.moe/svvdt6.png)
 就可以复制你的`URL`，填入你选择的 **[`/client`](./client/README.md)** 对应的url配置中即可快速开始
 </details>
@@ -121,13 +115,9 @@ python3 start.py
 git pull
 pip install -r requirements.txt
 ```
-```bash
-git pull
-pip install -r requirements.txt
-```
-> Huggingface
->>Setting==>Variables and secrets=>更改对应的新增配置项===>Factory rebuild
->>Setting==>Variables and secrets=>更改对应的新增配置项===>Factory rebuild
+
+> **Huggingface 更新**: <br/>
+> `Setting` ==> `Variables and secrets` ==> *更改对应的新增配置项* ==> **`Factory rebuild`**
 
 ## Star History
 
@@ -137,7 +127,7 @@ pip install -r requirements.txt
 
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: [site](https://maao.cc/sleepy/) / [blog](https://www.maodream.com/archives/192/), 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
-templates/steamstatus.html来自项目[gamer2810/steam-miniprofile](https://github.com/gamer2810/steam-miniprofile)。
+[`templates/steam.html`](./templates/steam.html) 来自项目 [gamer2810/steam-miniprofile](https://github.com/gamer2810/steam-miniprofile).
 
 也欢迎参观 WinMEMZ *(GitHub: [maoawa](https://github.com/maoawa))* 的原版！~~[maoawa/sleepy](https://github.com/maoawa/sleepy)~~ *已归档*
 
