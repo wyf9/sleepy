@@ -34,7 +34,6 @@ class _main:
     timezone: str = getenv('sleepy_main_timezone', 'Asia/Shanghai', str)
     checkdata_interval: int = getenv('sleepy_main_checkdata_interval', 30, int)
     secret: str = getenv('SLEEPY_SECRET', '', str)
-    log_level: str = getenv('sleepy_main_log_level', 'INFO', str)
 
 
 class _page:

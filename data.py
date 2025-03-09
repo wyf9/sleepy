@@ -214,24 +214,28 @@ class data:
         self.timer_thread = threading.Thread(target=self.timer_check, daemon=True)
         self.timer_thread.start()
 
-    def check_device_status(self):
+    def check_device_status(self, trigged_by_timer: bool = False):
+        '''
+        按情况自动切换状态
+
+        :param trigged_by_timer: 是否由计时器触发 (为 True 将不记录日志)
+        '''
         device_status = self.data.get('device_status', {})
         current_status = self.data.get('status', 0)  # 获取当前 status，默认为 0
         auto_switch_enabled = env.util.auto_switch_status
 
-    # 检查是否启用自动切换功能，并且当前 status 为 0 或 1。
+        # 检查是否启用自动切换功能，并且当前 status 为 0 或 1
+        last_status = self.data['status']
         if auto_switch_enabled and current_status in [0, 1]:
             any_using = any(device.get('using', False) for device in device_status.values())
             if any_using:
                 self.data['status'] = 0
             else:
                 self.data['status'] = 1
-            u.debug(f'[check_device_status] log:自动状态切换已启用, 已更新状态 {self.data["status"]}.')
-        else:
-            if not auto_switch_enabled:
-                u.debug('[check_device_status] log:自动切换功能已禁用.')
-            elif current_status not in [0, 1]:
-                u.debug(f'[check_device_status] log:当前状态为 {current_status}, 关闭自动切换功能.')
+            if last_status != self.data['status'] and (not trigged_by_timer):
+                u.debug(f'[check_device_status] 自动状态切换已启用, 已更新状态 {self.data["status"]}.')
+        elif current_status not in [0, 1] and (not trigged_by_timer):
+            u.debug(f'[check_device_status] 当前状态为 {current_status}, 不适用自动切换.')
 
     def timer_check(self):
         '''

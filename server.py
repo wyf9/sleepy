@@ -11,16 +11,6 @@ from data import data as data_init
 import utils as u
 import env
 
-import logging
-logging.basicConfig(
-            level=env.main.logLevel,
-            datefmt="%Y-%m-%d %H:%M:%S",
-            format="%(asctime)s - %(levelname)s - %(message)s",
-            handlers=[logging.StreamHandler()]
-        )
-# logging.info("Starting server...")
-
-
 
 try:
     d = data_init()
@@ -40,17 +30,17 @@ except Exception as e:
 
     # metrics?
     if env.util.metrics:
-        logging.info('Note: metrics enabled, open /metrics to see your count.')
+        u.info('Note: metrics enabled, open /metrics to see your count.')
         METRICS_ENABLED = True
         d.metrics_init()
 except KeyboardInterrupt:
-    logging.warning('Interrupt init')
+    u.warning('Interrupt init')
     exit(0)
 except u.SleepyException as e:
-    logging.warning(f'==========\n{e}')
+    u.warning(f'==========\n{e}')
     exit(1)
 except:
-    logging.error('Unexpected Error!')
+    u.error('Unexpected Error!')
     raise
 
 # --- Functions
@@ -132,12 +122,14 @@ def git_hub():
     '''
     return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle'+'epy', 301)
 
+
 @app.route('/none')
 def none():
     '''
     返回 204 No Content, 可用于 Uptime Kuma 等工具监控服务器状态使用
     '''
     return '', 204
+
 
 @app.route('/steam')
 def steam():
