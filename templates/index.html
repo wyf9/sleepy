@@ -31,7 +31,7 @@
             <p id="additional-info" style="font-size: 1em;">{{ status_desc | safe }}</p>
             <!-- <hr /> 由 get.js 控制 -->
             <p id="device-status">[设备状态列表]</p>
-            <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
+            <!-- Steam Game Playing Status -->
             <p id="steam"></p>
             <script>
                 function getSteamUserInfo(userData) {
@@ -57,7 +57,8 @@
                     //也许这里需要反代
                     //const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
                     //https://store.steampowered.com/app/2358720
-                    const steamapi = "https://a.858efb39d39c.workers.dev"; // 且用且珍惜
+                    //const steamapi = "https://a.858efb39d39c.workers.dev"; // 且用且珍惜
+                    const steamapi = "https://proxy.mooncc.cn/http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2";
                     const quresteaam = `${steamapi}/?key=${steamkey}&steamids=${steamids}`;
                     (async () => {
                         try {
@@ -81,18 +82,20 @@
                     console.log('Steam info disabled');
                 }
             </script>
-            <!-- Steam Card Start -->
-            <div id="steam_card">
-                <h3><b>Steam Status</b></h3>
-                <iframe src="/steam" style="border: dashed rgba(135, 207, 235, 0.185);" name="myiFrame" scrolling="no" frameborder="1"
-                    marginheight="0px" marginwidth="0px" height="202px" width="310px" allowfullscreen></iframe>
-            </div>
-            <!-- Steam Card End -->
 
+            <!-- Steam Card Start -->
+			<hr />
+			<h3><b><p id="device-status"><i>Steam</i> Status</p></b></h3>
+			<div class="steam" id="steam">
+				<iframe src="/steam" style="border: dashed skyblue;" name="myiFrame" scrolling="no" frameborder="1" 
+                marginheight="0px" marginwidth="0px" height="210px" width="310px" allowfullscreen></iframe>
+			</div>
+			<!-- Steam Card End -->
+
+            <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
             <p id="last-updated">最后更新: {{ last_updated }}</p>
 
         </div>
-
 
         <div class="card light" id="more_text">
             {% if hitokoto %}

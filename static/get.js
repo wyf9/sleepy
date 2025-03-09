@@ -154,7 +154,7 @@ function setupEventSource() {
                 }
 
                 // 更新设备状态
-                var deviceStatus = '<hr/>';
+                var deviceStatus = '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>';
                 const devices = Object.values(data.device);
 
                 for (let device of devices) {
@@ -177,8 +177,8 @@ ${sliceText(escapedAppName, data.device_status_slice)}
                     }
                     deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
                 }
-
-                if (deviceStatus == '<hr/>') {
+                
+                if (deviceStatus == '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>') {
                     deviceStatus = '';
                 }
 
@@ -315,7 +315,7 @@ async function update() {
                         statusElement.classList.remove(last_status);
                         statusElement.classList.add(data.info.color);
                         // update device status (device-status)
-                        var deviceStatus = '<hr/>';
+                        var deviceStatus = '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>';
                         const devices = Object.values(data.device);
 
                         for (let device of devices) {
@@ -342,7 +342,7 @@ ${sliceText(escapedAppName, data.device_status_slice)}
                             }
                             deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
                         }
-                        if (deviceStatus == '<hr/>') {
+                        if (deviceStatus == '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>') {
                             deviceStatus = '';
                         }
                         document.getElementById('device-status').innerHTML = deviceStatus;

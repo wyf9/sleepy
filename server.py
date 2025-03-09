@@ -12,6 +12,7 @@ import utils as u
 import env
 
 
+
 try:
     d = data_init()
     METRICS_ENABLED = False
