@@ -63,7 +63,7 @@
                     };
                 }
                 const steamkey = '{{ steamkey }}';
-                const steamids = '{{ steamids }}'
+                const steamids = '{{ steamids }}';
                 if (steamkey && !isNaN(steamids)) {
                     const steam = document.getElementById('steam-legacy');
                     //也许这里需要反代
@@ -160,9 +160,9 @@
         const statusElement = document.getElementById('status');
         statusElement.classList.add('{{ status_color }}');
     </script>
-    <!-- 方便调试 -->
-    <script src="../static/moonlight.js"></script>
-    <script src="../static/canvas.js"></script>
+    <!-- ~~方便调试~~ 你用 flask 怎么就不能调试了() -->
+    <!-- <script src="../static/moonlight.js"></script>
+    <script src="../static/canvas.js"></script> -->
     <script src="{{ url_for('static', filename='moonlight.js') }}"></script>
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
 

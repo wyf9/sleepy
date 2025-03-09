@@ -104,11 +104,6 @@
 > 本接口较特殊: 如服务器关闭了统计 *(`config.jsonc` 中的 `metrics` 为 `false`)*, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果 <br/>
 > ~~*我也不知道自己怎么想的*~~
 
-> 在需要鉴权的路由中，鉴权通过后才会计入统计
-
-> [!WARNING]
-> 目前 data.py 逻辑可能存在问题，会导致 metrics 数据无故被清空，原因未知
-
 #### Response
 
 ```jsonc
@@ -153,6 +148,7 @@
 | ------------------- | -------------------------------------- | ----- | -------- |
 | [Jump](#status-set) | `/set?secret=<secret>&status=<status>` | `GET` | 设置状态 |
 
+> 已移除旧的 `/set/<secret>/<status>` 接口
 
 ### status-set
 
@@ -380,41 +376,11 @@
 
 [Back to # api](#api)
 
-|                                | 路径                             | 方法  | 作用                 |
-| ------------------------------ | -------------------------------- | ----- | -------------------- |
-| [Jump](#storage-reload-config) | `/reload_config?secret=<secret>` | `GET` | 重载配置             |
-| [Jump](#storage-save-data)     | `/save_data?secret=<secret>`     | `GET` | 保存内存中的状态信息 |
+|                            | 路径                         | 方法  | 作用                 |
+| -------------------------- | ---------------------------- | ----- | -------------------- |
+| [Jump](#storage-save-data) | `/save_data?secret=<secret>` | `GET` | 保存内存中的状态信息 |
 
-### storage-reload-config
-
-[Back to ## storage](#storage)
-
-> `/reload_config?secret=<secret>`
-
-重新从 `config.jsonc` 加载配置
-
-* Method: GET
-
-#### Params
-
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
-
-#### Response
-
-```jsonc
-// 成功
-{
-    "success": true,
-    "code": "OK",
-}
-
-// 失败 - 密钥错误
-{
-    "success": false,
-    "code": "not authorized",
-    "message": "invaild secret"
-}
-```
+> 已移除 `/reload_config` 接口, 现在需要重启服务以重载配置
 
 ### storage-save-data
 

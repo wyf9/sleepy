@@ -37,6 +37,7 @@ except:
     u.error('Unexpected Error!')
     raise
 
+
 # --- Functions
 
 
@@ -64,6 +65,8 @@ def showip():  # type: ignore / (req: flask.request, msg)
 
 
 # --- Templates
+
+
 @app.route('/')
 def index():
     '''
@@ -127,12 +130,13 @@ def none():
     return '', 204
 
 
-@app.route('/steam')
-def steam():
-    return flask.render_template(
-        'steam.html',
-        steamids=env.util.steam_ids
-    )
+if env.util.steam_enabled:
+    @app.route('/steam')
+    def steam():
+        return flask.render_template(
+            'steam.html',
+            steamids=env.util.steam_ids
+        )
 
 
 @app.route('/style.css')
@@ -149,6 +153,8 @@ def style_css():
     ))
     response.mimetype = 'text/css'
     return response
+
+
 # --- Read-only
 
 
@@ -202,6 +208,7 @@ def get_status_list():
     stlst = status_list
     return u.format_dict(stlst)
 
+
 # --- Status API
 
 
@@ -236,6 +243,8 @@ def set_normal():
 
 
 # --- Device API
+
+
 @app.route('/device/set', methods=['GET', 'POST'])
 def device_set():
     '''
@@ -386,27 +395,6 @@ def private_mode():
         'code': 'OK'
     })
 
-# --- Storage API
-
-# @app.route('/reload_config')
-# def reload_config():
-#     '''
-#     从 `config.jsonc` 重载配置
-#     - Method: **GET**
-#     '''
-#     secret = escape(flask.request.args.get('secret'))
-
-#     if secret == e.main.secret:
-#         return u.format_dict({
-#             'success': True,
-#             'code': 'OK',
-#         })
-#     else:
-#         return u.reterr(
-#             code='not authorized',
-#             message='invalid secret'
-#         )
-
 
 @app.route('/save_data')
 def save_data():
@@ -473,6 +461,8 @@ def events():
 
 
 # --- (Special) Metrics API
+
+
 if env.util.metrics:
     @app.route('/metrics')
     def metrics():
@@ -485,6 +475,8 @@ if env.util.metrics:
 
 
 # --- End
+
+
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
     app.run(  # 启↗动↘

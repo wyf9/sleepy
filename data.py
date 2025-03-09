@@ -2,28 +2,28 @@
 
 import os
 import pytz
-import json5
+import json
 import threading
 from time import sleep
 from datetime import datetime
 
 import utils as u
 import env as env
+from setting import metrics_list
 
 
 class data:
     '''
     data 类，存储当前/设备状态
     可用 `.data['xxx']` 直接调取数据 (加载后) *(?)*
-
-    :param config: config class
     '''
     data: dict
     preload_data: dict
     data_check_interval: int = 60
 
     def __init__(self):
-        self.preload_data = json5.load(open('data.example.jsonc', encoding='utf-8'))
+        with open('data.template.json', 'r', encoding='utf-8') as file:
+            self.preload_data = json.load(file)
         if os.path.exists('data.json'):
             try:
                 self.load()
@@ -38,9 +38,8 @@ class data:
             try:
                 self.data = self.preload_data
                 self.save()
-            except:
-                u.error('Create data.json failed')
-                raise
+            except Exception as e:
+                u.exception(f'Create data.json failed: {e}')
 
     # --- Storage functions
 
@@ -62,7 +61,7 @@ class data:
                     self.data = self.preload_data
                     self.save()
                 with open('data.json', 'r', encoding='utf-8') as file:
-                    Data = json5.load(file)
+                    Data = json.load(file)
                     DATA: dict = {**preload, **Data}
                     if ret:
                         return DATA
@@ -83,7 +82,7 @@ class data:
         '''
         try:
             with open('data.json', 'w', encoding='utf-8') as file:
-                json5.dump(self.data, file, indent=4, ensure_ascii=False, quote_keys=True)
+                json.dump(self.data, file, indent=4, ensure_ascii=False)
         except Exception as e:
             u.error(f'Failed to save data.json: {e}')
 
@@ -149,31 +148,18 @@ class data:
                 'total': self.data['metrics']['total']
             })
 
-    def record_metrics(self, path: str = None) -> None:
+    def check_metrics_time(self) -> None:
         '''
-        记录调用
-
-        :param path: 访问的路径
+        跨 日 / 月 / 年 检测
         '''
-        # if not path:
-        #     return
-        # vaild_paths = {}
+        if not env.util.metrics:
+            return
 
         # get time now
         now = datetime.now(pytz.timezone(env.main.timezone))
         year_is = str(now.year)
         month_is = f'{now.year}-{now.month}'
         today_is = f'{now.year}-{now.month}-{now.day}'
-
-        # 调试使用, 请勿取消注释!!!
-        # year_is = '2025'
-        # month_is = '2025-1'
-        # today_is = '2025-1-18'
-        # if now.minute > 31 and now.second > 40:
-        #     print('ok')
-        #     today_is = '2025-1-19'
-        # else:
-        #     print('no')
 
         # - check time
         if self.data['metrics']['today_is'] != today_is:
@@ -190,6 +176,19 @@ class data:
             u.info(f'[metrics] year_is changed: {self.data["metrics"]["year_is"]} -> {year_is}')
             self.data['metrics']['year_is'] = year_is
             self.data['metrics']['year'] = {}
+
+    def record_metrics(self, path: str = None) -> None:
+        '''
+        记录调用
+
+        :param path: 访问的路径
+        '''
+
+        # check metrics list
+        if not path in metrics_list:
+            return
+
+        self.check_metrics_time()
 
         # - record num
         today = self.data['metrics'].setdefault('today', {})
@@ -220,9 +219,9 @@ class data:
 
         :param trigged_by_timer: 是否由计时器触发 (为 True 将不记录日志)
         '''
-        device_status = self.data.get('device_status', {})
-        current_status = self.data.get('status', 0)  # 获取当前 status，默认为 0
-        auto_switch_enabled = env.util.auto_switch_status
+        device_status: dict = self.data.get('device_status', {})
+        current_status: int = self.data.get('status', 0)  # 获取当前 status，默认为 0
+        auto_switch_enabled: bool = env.util.auto_switch_status
 
         # 检查是否启用自动切换功能，并且当前 status 为 0 或 1
         last_status = self.data['status']
@@ -250,6 +249,7 @@ class data:
         while True:
             sleep(self.data_check_interval)
             try:
+                self.check_metrics_time()  # 检测是否跨日
                 self.check_device_status(trigged_by_timer=True)  # 检测设备状态并更新 status
                 file_data = self.load(ret=True)
                 if file_data != self.data:

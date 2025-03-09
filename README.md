@@ -11,16 +11,17 @@
 - 美观的展示页面 [见 [Preview](#preview)]
 - 开放的 Query / Metrics [接口](./doc/api.md), 方便统计
 
-### TODO
+### 功能
 
 - [x] **拆分 `config.jsonc` (只读) 和 `data.json`** (https://github.com/wyf9/sleepy/issues/3)
-- [x] 网页使用 api 请求，并实现定时刷新
-- [x] 设备使用状态
+- [x] 网页使用 SSE *(Server Send Events)* 刷新状态
+- [x] 网页使用 api 请求，并实现定时轮询刷新 *(备选方案)*
+- [x] 设备使用状态 *(包括 是否正在使用 / 打开的应用名)*
 - [x] Windows 客户端 (Python)
 - [x] Android 客户端 ([Autox.js](https://github.com/aiselp/AutoX))
-- [x] [查看更多客户端 (如浏览器脚本)](./client/README.md)
+- [x] [查看更多客户端 (如浏览器脚本等)](./client/README.md)
 - [x] Metrics API (统计页面访问 / 接口调用次数)
-- [x] **设备状态使用 Heartbeat 超时判定未在使用**
+- [ ] **设备状态使用 Heartbeat 超时判定未在使用**
 - [ ] ~~更多状态存储选项 (如 SQLite)~~
 
 > [!TIP]
@@ -108,15 +109,19 @@ python3 start.py
 
 ## 优化站点
 
-见 [Best Practice](./doc/best_practice.md)
+见 [Best Practice](./doc/best_practice.md).
+
+> [!TIP]
+> 想自定义你的状态列表 / metrics 统计白名单? **[见 Setting README](./setting/README.md)**
 
 ## 更新
+
 ```bash
 git pull
 pip install -r requirements.txt
 ```
 
-> **Huggingface 更新**: <br/>
+> **Huggingface 更新** <br/>
 > `Setting` ==> `Variables and secrets` ==> *更改对应的新增配置项* ==> **`Factory rebuild`**
 
 ## Star History
