@@ -11,6 +11,15 @@ from data import data as data_init
 import utils as u
 import env
 
+import logging
+logging.basicConfig(
+            level=env.main.logLevel,
+            datefmt="%Y-%m-%d %H:%M:%S",
+            format="%(asctime)s - %(levelname)s - %(message)s",
+            handlers=[logging.StreamHandler()]
+        )
+# logging.info("Starting server...")
+
 
 
 try:
@@ -31,17 +40,17 @@ except Exception as e:
 
     # metrics?
     if env.util.metrics:
-        u.info('Note: metrics enabled, open /metrics to see your count.')
+        logging.info('Note: metrics enabled, open /metrics to see your count.')
         METRICS_ENABLED = True
         d.metrics_init()
 except KeyboardInterrupt:
-    u.warning('Interrupt init')
+    logging.warning('Interrupt init')
     exit(0)
 except u.SleepyException as e:
-    u.warning(f'==========\n{e}')
+    logging.warning(f'==========\n{e}')
     exit(1)
 except:
-    u.error('Unexpected Error!')
+    logging.error('Unexpected Error!')
     raise
 
 # --- Functions
