@@ -97,6 +97,9 @@ def index():
         more_text=more_text,
         hitokoto=env.page.hitokoto,
         canvas=env.page.canvas,
+
+        steam_legacy_enabled=env.util.steam_legacy_enabled,
+        steam_enabled=env.util.steam_enabled,
         steamkey=env.util.steam_key,
         steamids=env.util.steam_ids,
 

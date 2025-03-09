@@ -26,16 +26,25 @@
                         p-id="2613"></path>
                 </svg>
             </button>
-        <button id="slider">
-        <svg t="1741527882713" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2640" width="200" height="200"><path d="M384 187.8V160c0-17.7-14.3-32-32-32H160c-17.7 0-32 14.3-32 32v27.8c0 2.2-1.8 4-4 4H0v64h124c2.2 0 4 1.8 4 4V288c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28.3c0-2.2 1.8-4 4-4h636v-64H388c-2.2 0.1-4-1.7-4-3.9zM316 256H196c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM768 476v-28c0-17.7-14.3-32-32-32H544c-17.7 0-32 14.3-32 32v28c0 2.2-1.8 4-4 4H0v64h508c2.2 0 4 1.8 4 4v28c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28c0-2.2 1.8-4 4-4h252v-64H772c-2.2 0-4-1.8-4-4z m-68 68H580c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM480 764.3V736c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v28.3c0 2.2-1.8 4-4 4H0v64h220c2.2 0 4 1.8 4 4V864c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-27.8c0-2.2 1.8-4 4-4h540v-64H484c-2.2 0.1-4-1.7-4-3.9zM412 832H292c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4z" p-id="2641"></path></svg>
-        </button>
+            <button id="slider">
+                <svg t="1741527882713" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="2640" width="200" height="200">
+                    <path
+                        d="M384 187.8V160c0-17.7-14.3-32-32-32H160c-17.7 0-32 14.3-32 32v27.8c0 2.2-1.8 4-4 4H0v64h124c2.2 0 4 1.8 4 4V288c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28.3c0-2.2 1.8-4 4-4h636v-64H388c-2.2 0.1-4-1.7-4-3.9zM316 256H196c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM768 476v-28c0-17.7-14.3-32-32-32H544c-17.7 0-32 14.3-32 32v28c0 2.2-1.8 4-4 4H0v64h508c2.2 0 4 1.8 4 4v28c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28c0-2.2 1.8-4 4-4h252v-64H772c-2.2 0-4-1.8-4-4z m-68 68H580c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM480 764.3V736c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v28.3c0 2.2-1.8 4-4 4H0v64h220c2.2 0 4 1.8 4 4V864c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-27.8c0-2.2 1.8-4 4-4h540v-64H484c-2.2 0.1-4-1.7-4-3.9zM412 832H292c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4z"
+                        p-id="2641"></path>
+                </svg>
+            </button>
+            <script>
+                document.getElementById('slider').addEventListener('click', () => alert('还没做~\n(帮我想想应该把透明度设置放在这还是保持原位)'));
+            </script>
             <h3><i><b>{{ user }}'s</b></i> Status:<br><a id="status" style="font-size: 1.2em;">{{ status_name }}</a>
             </h3>
             <p id="additional-info" style="font-size: 1em;">{{ status_desc | safe }}</p>
             <!-- <hr /> 由 get.js 控制 -->
             <p id="device-status">[设备状态列表]</p>
-            <!-- Steam Game Playing Status -->
-            <p id="steam"></p>
+            <!-- Steam Game Playing Status (legacy) Start -->
+            {% if steam_legacy_enabled %}
+            <p id="steam-legacy"></p>
             <script>
                 function getSteamUserInfo(userData) {
                     if (!userData.response || !userData.response.players || userData.response.players.length === 0) {
@@ -56,7 +65,7 @@
                 const steamkey = '{{ steamkey }}';
                 const steamids = '{{ steamids }}'
                 if (steamkey && !isNaN(steamids)) {
-                    const steam = document.getElementById('steam');
+                    const steam = document.getElementById('steam-legacy');
                     //也许这里需要反代
                     //const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
                     //https://store.steampowered.com/app/2358720
@@ -85,15 +94,20 @@
                     console.log('Steam info disabled');
                 }
             </script>
-
-            <!-- Steam Card Start -->
-			<hr />
-			<h3><b><p id="device-status"><i>Steam</i> Status</p></b></h3>
-			<div class="steam" id="steam">
-				<iframe src="/steam" style="border: dashed skyblue;" name="myiFrame" scrolling="no" frameborder="1" 
-                marginheight="0px" marginwidth="0px" height="210px" width="310px" allowfullscreen></iframe>
-			</div>
-			<!-- Steam Card End -->
+            {% endif %}
+            <!-- Steam Game Playing Status (legacy) End -->
+            <!-- Steam Card (new) Start -->
+            {% if steam_enabled %}
+            <hr />
+            <h3><b>
+                    <p id="device-status"><i>Steam</i> Status</p>
+                </b></h3>
+            <div class="steam" id="steam">
+                <iframe src="/steam" style="border: dashed skyblue;" name="myiFrame" scrolling="no" frameborder="1"
+                    marginheight="0px" marginwidth="0px" height="210px" width="310px" allowfullscreen></iframe>
+            </div>
+            {% endif %}
+            <!-- Steam Card (new) End -->
 
             <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
             <p id="last-updated">最后更新: {{ last_updated }}</p>
@@ -101,6 +115,7 @@
         </div>
 
         <div class="card light" id="more_text">
+            <!-- Hitokoto Start -->
             {% if hitokoto %}
             <div>
                 <p id="hitokoto">
@@ -125,6 +140,7 @@
                 </script>
             </div>
             {% endif %}
+            <!-- Hitokoto End -->
             {{ more_text | safe }}
             <p>你可以通过这个页面视奸 <b>{{ user }}</b>。
                 <br>
