@@ -132,24 +132,6 @@ def git_hub():
     '''
     return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle'+'epy', 301)
 
-
-@app.route('/none')
-def none():
-    '''
-    返回 204 No Content, 可用于 Uptime Kuma 等工具监控服务器状态使用
-    '''
-    return '', 204
-
-
-if env.util.steam_enabled:
-    @app.route('/steam')
-    def steam():
-        return flask.render_template(
-            'steam.html',
-            steamids=env.util.steam_ids
-        )
-
-
 @app.route('/style.css')
 def style_css():
     '''
