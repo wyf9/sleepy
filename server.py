@@ -10,19 +10,16 @@ import time
 from data import data as data_init
 import utils as u
 import env
-
+from setting import status_list
 
 try:
-    d = data_init()
+    # init flask app
     app = flask.Flask(__name__)
+    # init data
+    d = data_init()
     d.load()
     d.start_timer_check(data_check_interval=env.main.checkdata_interval)  # 启动定时保存
-    try:
-        with open('status_list.jsonc', encoding='utf-8') as f:
-            status_list = json5.load(f)
-    except FileNotFoundError:
-        u.error("File 'status_list.jsonc' not found!")
-        exit(1)
+
     # metrics?
     if env.util.metrics:
         u.info('[metrics] metrics enabled, open /metrics to see your count.')
@@ -34,7 +31,7 @@ except KeyboardInterrupt:
     u.warning('Interrupt init')
     exit(0)
 except u.SleepyException as e:
-    u.warning(f'==========\n{e}')
+    u.error(f'==========\n{e}')
     exit(1)
 except:
     u.error('Unexpected Error!')
@@ -76,10 +73,9 @@ def index():
     try:
         stat = status_list[d.data['status']]
     except:
-        print("索引超出范围，使用默认值")
-        print("索引超出范围，使用默认值")
+        print(f"索引 {d.data['status']} 超出范围, 使用默认值")
         stat = {
-            'name': '85',
+            'name': 'Unknown',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
@@ -165,7 +161,6 @@ def query(ret_as_dict: bool = False):
     st = d.data['status']
     try:
         stinfo = status_list[st]
-        stinfo = status_list[st]
     except:
         stinfo = {
             'id': -1,
@@ -202,7 +197,6 @@ def get_status_list():
     - Method: **GET**
     '''
     stlst = status_list
-    stlst = status_list
     return u.format_dict(stlst)
 
 # --- Status API
@@ -211,7 +205,7 @@ def get_status_list():
 @app.route('/set')
 def set_normal():
     '''
-    普通的 set 设置状态
+    设置状态
     - http[s]://<your-domain>[:your-port]/set?secret=<your-secret>&status=<a-number>
     - Method: **GET**
     '''
@@ -259,6 +253,8 @@ def device_set():
         secret = escape(flask.request.args.get('secret'))
         if secret == env.main.secret:
             devices: dict = d.dget('device_status')
+            if not device_using:
+                app_name = ''
             devices[device_id] = {
                 'show_name': device_show_name,
                 'using': device_using,
@@ -285,7 +281,6 @@ def device_set():
             )
         if secret == env.main.secret:
             devices: dict = d.dget('device_status')
-            # L245~247同理
             if not device_using:
                 app_name = ''
             devices[device_id] = {
@@ -303,7 +298,7 @@ def device_set():
     else:
         return u.reterr(
             code='invaild request',
-            message='only supports GET and POST method!'
+            message='This endpoint only supports GET and POST method!'
         )
     return u.format_dict({
         'success': True,
@@ -370,8 +365,7 @@ def private_mode():
     '''
     secret = escape(flask.request.args.get('secret'))
     if secret == env.main.secret:
-        private = escape(flask.request.args.get('private'))
-        private = u.tobool(private)
+        private = u.tobool(escape(flask.request.args.get('private')))
         if private == None:
             return u.reterr(
                 code='invaild request',
@@ -470,7 +464,7 @@ def events():
             time.sleep(1)  # 每秒检查一次更新
 
     response = flask.Response(event_stream(), mimetype="text/event-stream")
-    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Cache-Control"] = "no-cache"  # 禁用缓存
     response.headers["X-Accel-Buffering"] = "no"  # 禁用 Nginx 缓冲
     return response
 
@@ -489,12 +483,12 @@ if env.util.metrics:
 
 # --- End
 if __name__ == '__main__':
-    print(f"===================hi {env.page.user}!===================")
+    u.info(f'=============== hi {env.page.user}! ===============')
     app.run(  # 启↗动↘
         host=env.main.host,
         port=env.main.port,
         debug=env.main.flask_debug
     )
-    print('Server exited, saving data...')
+    u.info('Server exited, saving data...')
     d.save()
-    print('Bye.')
+    u.info('Bye.')
