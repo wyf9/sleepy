@@ -13,7 +13,7 @@ import env
 
 import logging
 logging.basicConfig(
-            level=env.main.logLevel,
+            level="INFO",
             datefmt="%Y-%m-%d %H:%M:%S",
             format="%(asctime)s - %(levelname)s - %(message)s",
             handlers=[logging.StreamHandler()]
@@ -53,8 +53,6 @@ except:
     raise
 
 # --- Functions
-
-
 @app.before_request
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
@@ -88,7 +86,6 @@ def index():
     try:
         stat = status_list[d.data['status']]
     except:
-        print("索引超出范围，使用默认值")
         print("索引超出范围，使用默认值")
         stat = {
             'name': '85',

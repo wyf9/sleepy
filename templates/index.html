@@ -7,7 +7,7 @@
     <title>{{ page_title }}</title>
     <meta name="description" content="{{ page_desc }}">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" href="https://img.zmal.top/image.5tr66d09qg.jpg">
 </head>
 
 <body>
@@ -81,18 +81,10 @@
                     console.log('Steam info disabled');
                 }
             </script>
-            <!-- Steam Card Start -->
-            <div id="steam_card">
-                <h3><b>Steam Status</b></h3>
-                <iframe src="/steam" style="border: dashed rgba(135, 207, 235, 0.185);" name="myiFrame" scrolling="no" frameborder="1"
-                    marginheight="0px" marginwidth="0px" height="202px" width="310px" allowfullscreen></iframe>
-            </div>
-            <!-- Steam Card End -->
-
             <p id="last-updated">最后更新: {{ last_updated }}</p>
 
         </div>
-        
+
         <div class="card light" id="more_text">
             {% if hitokoto %}
             <div>
