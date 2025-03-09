@@ -2,7 +2,6 @@
 import os
 import utils as u
 from dotenv import load_dotenv, find_dotenv
-
 dotenv_filename = '.env'
 if not find_dotenv(filename=dotenv_filename):
     u.warning("未找到 .env 文件，将使用默认配置，部分功能可能失效！")
@@ -31,11 +30,11 @@ class _main:
     '''
     host: str = getenv('sleepy_main_host', '0.0.0.0', str)
     port: int = getenv('sleepy_main_port', 9010, int)
-    debug: bool = getenv('sleepy_main_debug', False, bool)
+    flask_debug: bool = getenv('sleepy_main_flask_debug', False, bool)
     timezone: str = getenv('sleepy_main_timezone', 'Asia/Shanghai', str)
     checkdata_interval: int = getenv('sleepy_main_checkdata_interval', 30, int)
     secret: str = getenv('SLEEPY_SECRET', '', str)
-    logLevel= getenv('logLevel', 'INFO', str)
+    log_level: str = getenv('sleepy_main_log_level', 'INFO', str)
 
 
 class _page:

@@ -4,19 +4,23 @@ from flask import make_response, Response
 
 
 def info(log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Info] ℹ️  {log}")
+    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ℹ️  [Info] {log}")
 
 
 def infon(log):
-    print(f"\n{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Info] ℹ️  {log}")
+    print(f"\n{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ℹ️  [Info] {log}")
 
 
 def warning(log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Warning] ⚠️  {log}")
+    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚠️  [Warning] {log}")
 
 
 def error(log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} [Error] ❌  {log}")
+    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ❌  [Error] {log}")
+
+
+def debug(log):
+    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚙️  [Debug] {log}")
 
 
 def format_dict(dic) -> Response:
@@ -88,22 +92,24 @@ def tobool(string: str, throw: bool = False) -> bool:
 def show_404():
     return '<!DOCTYPE HTML>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>', 404
 
+
 class SleepyException(Exception):
     '''
     Custom Exception
     '''
 
-    def __init__(self, msg = None):
+    def __init__(self, msg=None):
         if msg:
             self.msg = msg
 
     def __str__(self):
         return self.msg
 
+
 def exception(msg: str):
     '''
     抛出 SleepyException
-    
+
     :param msg: 错误描述
     '''
     raise SleepyException(msg)
