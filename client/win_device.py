@@ -2,7 +2,7 @@
 '''
 win_device.py
 在 Windows 上获取窗口名称
-by: @wyf9, @pwnint, @kmizmal
+by: @wyf9, @pwnint, @kmizmal, @gongfuture
 依赖: pywin32, requests,
 媒体信息依赖: Python≤3.9:  winrt
              Python≥3.10: winrt.windows.media.control, winrt.windows.foundation
@@ -21,7 +21,7 @@ import threading
 import win32api  # type: ignore - 勿删，用于强忽略非 windows 系统上 vscode 找不到模块的警告
 import win32con  # type: ignore
 import win32gui  # type: ignore
-from pywintypes import error as pywinerror # type: ignore
+from pywintypes import error as pywinerror  # type: ignore
 
 # ----- Part: Config
 
@@ -42,8 +42,8 @@ BYPASS_SAME_REQUEST: bool = True
 ENCODING: str = 'gb18030'
 # 当窗口标题为其中任意一项时将不更新
 SKIPPED_NAMES: list = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '操作中心',
-                       '日期和时间信息', '网络连接', '电池信息', '', '搜索', 'Flow.Launcher', '任务视图', 
-                       '任务切换', 'Snipper - Snipaste']
+                       '日期和时间信息', '网络连接', '电池信息', '', '搜索', 'Flow.Launcher', '任务视图',
+                       '任务切换', 'Snipper - Snipaste', '喜欢这张图片吗?']
 # 当窗口标题为其中任意一项时视为未在使用
 NOT_USING_NAMES: list = ['我们喜欢这张图片，因此我们将它与你共享。', '启动']
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
@@ -66,7 +66,7 @@ MEDIA_DEVICE_ID: str = 'media-device'
 # 独立设备模式下的显示名称
 MEDIA_DEVICE_SHOW_NAME: str = '正在播放'
 # 媒体信息前缀最大长度（超出部分将被截断）
-MEDIA_PREFIX_MAX_LENGTH: int = 20
+MEDIA_PREFIX_MAX_LENGTH: int = 30
 # --- config end
 
 # ----- Part: Functions
@@ -113,13 +113,15 @@ def reverse_app_name(name: str) -> str:
         new = [i] + new
     return ' - '.join(new)
 
-# 导入拎出来优化性能
+
+# 导入拎出来优化性能 (?)
 if MEDIA_INFO_ENABLED:
     try:
         import winrt.windows.media.control as media  # type: ignore
     except ImportError:
         import winrt.windows.media.control as media  # type: ignore
     from asyncio import run  # type: ignore
+
 
 def get_media_info():
     '''
@@ -290,7 +292,7 @@ def check_mouse_idle() -> bool:
     dx = abs(current_pos[0] - last_mouse_pos[0])
     dy = abs(current_pos[1] - last_mouse_pos[1])
     distance_squared = dx * dx + dy * dy
-    
+
     # 阈值的平方，用于比较
     threshold_squared = MOUSE_MOVE_THRESHOLD * MOUSE_MOVE_THRESHOLD
 
@@ -326,8 +328,10 @@ def check_mouse_idle() -> bool:
 
 # ----- Part: Main interval check
 
+
 last_media_playing = False  # 跟踪上一次的媒体播放状态
 last_media_content = ""  # 跟踪上一次的媒体内容
+
 
 def do_update():
     global last_window, cached_window_title, is_mouse_idle, last_media_playing, last_media_content
@@ -344,7 +348,7 @@ def do_update():
     window = current_window
     using = True
 
-        # 获取媒体信息
+    # 获取媒体信息
     prefix_media_info = None
     standalone_media_info = None
 
@@ -450,14 +454,14 @@ def do_update():
             # 确定当前媒体状态
             current_media_playing = bool(standalone_media_info)
             current_media_content = standalone_media_info if standalone_media_info else ""
-            
+
             # 检测播放状态或歌曲内容是否变化
             media_changed = (current_media_playing != last_media_playing) or \
-                           (current_media_playing and current_media_content != last_media_content)
-            
+                (current_media_playing and current_media_content != last_media_content)
+
             if media_changed:
                 debug(f'Media changed: status {last_media_playing}->{current_media_playing}, content changed: {last_media_content != current_media_content}')
-                
+
                 if current_media_playing:
                     # 从不播放变为播放或歌曲内容变化
                     media_resp = send_status(
@@ -475,7 +479,7 @@ def do_update():
                         show_name=MEDIA_DEVICE_SHOW_NAME
                     )
                 debug(f'Media Response: {media_resp.status_code}')
-                
+
                 # 更新上一次的媒体状态和内容
                 last_media_playing = current_media_playing
                 last_media_content = current_media_content

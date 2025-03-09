@@ -80,6 +80,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 > by: [@wyf9](https://github.com/wyf9)
 > Co-authored-by: [@kmizmal](https://github.com/kmizmal)
 > Co-authored-by: [@pwnInt](https://github.com/pwnInt) - ^C / 鼠标空闲检测
+> Co-authored-by: [@gongfuture](https://github.com/gongfuture) - 媒体信息获取
 
 在 Windows 上自动更新设备状态
 
@@ -87,7 +88,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/cd70d1c6b5527e2df9a718000e8c58cc785b005d/client/win_device.py#L24-L53
+https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/client/win_device.py#L28-L70
 
 > PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
 > 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)

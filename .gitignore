@@ -1,7 +1,6 @@
 __pycache__/
 .env
 data.json
-data.*.json
 *.test.*
 *.local.*
 .venv/
