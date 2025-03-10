@@ -1,20 +1,28 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import time
+import json5
+import importlib
 import pytz
 import flask
 from datetime import datetime
 from markupsafe import escape
-import json5
-import time
-from data import data as data_init
+
 import utils as u
 import env
+from data import data as data_init
 from setting import status_list
 
 try:
     # init flask app
     app = flask.Flask(__name__)
+
+    # disable flask access log
+    from logging import getLogger
+    flask_default_logger = getLogger('werkzeug')
+    flask_default_logger.disabled = True
+
     # init data
     d = data_init()
     d.load()
@@ -45,6 +53,7 @@ except:
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
     在日志中显示 ip, 并记录 metrics 信息
+    如 Header 中 User-Agent 为 SleepyPlugin/(每次启动使用随机 uuid) 则不进行任何记录
 
     :param req: `flask.request` 对象, 用于取 ip
     :param msg: 信息 (一般是路径, 同时作为 metrics 的项名)
@@ -479,6 +488,7 @@ if env.util.metrics:
 
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
+    u.info(f'Starting server: {f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}{" (debug enabled)" if env.main.flask_debug else ""}')
     app.run(  # 启↗动↘
         host=env.main.host,
         port=env.main.port,
