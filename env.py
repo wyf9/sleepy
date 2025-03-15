@@ -14,6 +14,7 @@ def getenv(key: str, default, typeobj: object = str) -> any:
 
     :param key: 键
     :param typeobj: 类型对象 (str / int / bool)
+    :param default: 默认值 (未读取到此项配置时使用)
     '''
     got_value = os.getenv(key)
     if got_value is None:
