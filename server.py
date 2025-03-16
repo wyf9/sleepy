@@ -47,8 +47,6 @@ except:
 
 
 # --- Functions
-
-
 @app.before_request
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
