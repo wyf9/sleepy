@@ -1,15 +1,5 @@
 const MLswitch = document.getElementById('moonlight');
 
-// 保存主题偏好
-function saveThemePreference(isDark) {
-    localStorage.setItem('themePref', isDark ? 'dark' : 'light');
-}
-
-// 获取主题偏好
-function getThemePreference() {
-    return localStorage.getItem('themePref') || 'auto';
-}
-
 // 应用主题
 function applyTheme(theme) {
     document.querySelectorAll('.light, .dark').forEach(el => {
@@ -43,12 +33,6 @@ function applySavedOpacity() {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
-    // 应用保存的主题
-    const savedTheme = getThemePreference();
-    if (savedTheme !== 'auto') {
-        applyTheme(savedTheme);
-    }
-
     // 应用保存的不透明度
     applySavedOpacity();
 
@@ -69,16 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('increase-opacity').addEventListener('click', () => adjustOpacity(true));
 });
 
-// 原有的主题切换功能
+// 主题切换功能
 MLswitch.onclick = function () {
     document.querySelectorAll('.light, .dark').forEach(el => {
         if (el.classList.contains('light')) {
             el.classList.replace('light', 'dark');
-            saveThemePreference(true);
         } else {
             el.classList.replace('dark', 'light');
-            saveThemePreference(false);
         }
     });
 };
-
