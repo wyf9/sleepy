@@ -111,6 +111,7 @@ def index():
         canvas=env.page.canvas,
         moonlight=env.page.moonlight,
         lantern=env.page.lantern,
+        mplayer=env.page.mplayer,
 
         steam_legacy_enabled=env.util.steam_legacy_enabled,
         steam_enabled=env.util.steam_enabled,
