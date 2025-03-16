@@ -36,13 +36,13 @@ except Exception as e:
     u.error(f"Error initing: {e}")
     exit(1)
 except KeyboardInterrupt:
-    logging.warning('Interrupt init')
+    u.warning('Interrupt init')
     exit(0)
 except u.SleepyException as e:
     u.error(f'==========\n{e}')
     exit(1)
 except:
-    logging.error('Unexpected Error!')
+    u.error('Unexpected Error!')
     raise
 
 
