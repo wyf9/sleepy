@@ -1,14 +1,3 @@
----
-title: Sleepy Hf
-emoji: 👀
-colorFrom: green
-colorTo: green
-sdk: docker
-pinned: true
-license: mit
-short_description: 'GitHub: wyf9 / sleepy'
----
-
 # sleepy
 
 一个用于 ~~*视奸*~~ 查看个人在线状态 (以及正在使用软件) 的 Flask 应用，让他人能知道你不在而不是故意吊他/她
@@ -33,10 +22,10 @@ short_description: 'GitHub: wyf9 / sleepy'
 - [x] [查看更多客户端 (如浏览器脚本等)](./client/README.md)
 - [x] Metrics API (统计页面访问 / 接口调用次数)
 - [ ] **设备状态使用 Heartbeat 超时判定未在使用**
-- [ ] ~~更多状态存储选项 (如 SQLite)~~
+- [ ] ~~更多状态存储选项 (如 Redis)~~
 
 > [!TIP]
-> **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** <br/>
+> **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** / [Telegram Group](https://t.me/wyf9_sleepy) / [QQ Group]()<br/>
 > 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
 
 对智能家居 / Home Assistant 感兴趣的朋友，一定要看看 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): [maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!
@@ -74,7 +63,8 @@ pip install -r requirements.txt
 
 > [!IMPORTANT]
 > **[配置示例](./.env.example)** <br/>
-> *注意: 环境变量的优先级**高于** `.env` 文件*
+> **Windows 用户请确保 `.env` 文件以 UTF-8 编码而非 GBK 编码保存，否则读取可能出现问题!** *(如错误读入行尾注释)* <br/>
+> *注意: 环境变量的优先级**高于** `.env` 文件* <br/>
 
 ## 使用
 

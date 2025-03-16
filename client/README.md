@@ -144,9 +144,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### Configure
 
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/browser-script-2025.2.10.user.js#L18-L26
-
-> UNDONE
+https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/browser-script.user.js#L18-L25
 
 ## [HomeworkDevice](./homework_device.py)
 
@@ -158,7 +156,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### Configure
 
-TODO
+https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/homework_device.py#L5-L9
 
 ### Using
 

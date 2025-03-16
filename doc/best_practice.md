@@ -3,9 +3,10 @@
 ## 添加访问量统计
 
 > [!TIP]
-> 请确保你启用了 metrics 功能，否则无法正常使用
+> 请确保你启用了 metrics 功能，否则无法正常使用 <br/>
+> 更精确的访问量请使用专门的统计工具 (如 [umami](https://umami.is/))
 
-很简单，只需要在 `config.json` 的 `other.more_text` 中添加特殊的占位符:
+很简单，只需要在 `sleepy_page_more_text` 环境变量中添加特殊的占位符:
 - `{visit_today}`: 今日的访问量 (即 `/` 的访问次数)
 - `{visit_month}`: 本月的访问量
 - `{visit_year}`: 本年的访问量
@@ -13,15 +14,9 @@
 
 示例:
 
-```jsonc
-// config.jsonc
-    // ...
-    "other": {
-        // ...
-        "more_text": "其他文本<br/>今日已被视奸 {visit_today} 次",
-        // ...
-    }
-}
+```ini
+# .env
+sleepy_page_more_text = "其他文本<br/>今日已被视奸 {visit_today} 次"
 ```
 
 将会渲染为:
@@ -39,7 +34,7 @@
 
 主页: https://finicounter.eu.org/
 
-在 `config.jsonc` 的 `other.more_text` 中添加以下内容:
+在 `sleepy_page_more_text` 环境变量中添加以下内容:
 
 ```html
 <br/>本站访问次数: <span id='finicount_views'></span><script async src='https://finicounter.eu.org/finicounter.js'></script>
@@ -47,15 +42,7 @@
 
 修改后应该是这样的:
 
-```jsonc
-// config.jsonc
-    // ...
-    "data_check_interval": 30,
-    "other": {
-        // ...
-        "repo": "https://github.com/wyf9/sleepy",
-        "more_text": "其他文本<br/>已被视奸 <span id='finicount_views'>(未知)</span> 次<script async src='https://finicounter.eu.org/finicounter.js'></script>",
-        "device_status_slice": 30
-    }
-}
+```ini
+# .env
+sleepy_page_more_text = "其他文本<br/>已被视奸 <span id='finicount_views'>(未知)</span> 次<script async src='https://finicounter.eu.org/finicounter.js'></script>"
 ```

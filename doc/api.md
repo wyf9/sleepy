@@ -53,7 +53,7 @@
 }
 ```
 
-> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可在 config.jsonc 中修改
+> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可在配置中修改
 
 ### status-list
 
@@ -87,7 +87,7 @@
 ]
 ```
 
-> 就是返回 `config.jsonc` 中的 `status_list` 列表
+> 就是返回 `setting/status_list.json` 的内容
 
 ### metrics
 
@@ -101,7 +101,7 @@
 * 无需鉴权
 
 > [!TIP]
-> 本接口较特殊: 如服务器关闭了统计 *(`config.jsonc` 中的 `metrics` 为 `false`)*, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果 <br/>
+> 本接口较特殊: 如服务器关闭了统计, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果 <br/>
 > ~~*我也不知道自己怎么想的*~~
 
 #### Response
@@ -162,7 +162,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<status>`: 状态码 *(`int`)*
 
 #### Response
@@ -219,7 +219,7 @@
 
 > `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>`
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<id>`: 设备标识符
 - `<show_name>`: 显示名称
 - `<using>`: 是否正在使用
@@ -275,7 +275,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<device_id>`: 设备标识符
 
 #### Response
@@ -314,7 +314,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 
 #### Response
 
@@ -345,7 +345,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<isprivate>`: bool (仅接受 `true` / `false`), 开关状态
 
 #### Response
@@ -394,7 +394,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 
 #### Response
 
