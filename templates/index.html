@@ -7,7 +7,7 @@
     <title>{{ page_title }}</title>
     <meta name="description" content="{{ page_desc }}">
     <link rel="stylesheet" href="style.css">
-	<link rel="stylesheet" href="lantern.css">
+    <link rel="stylesheet" href="lantern.css">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 
@@ -30,6 +30,29 @@
                         p-id="2613"></path>
                 </svg>
             </button>
+            <!-- 深/浅色模式 -->
+            <script>
+                function updateTheme() {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    const cards = document.querySelectorAll('.card');
+
+                    cards.forEach(card => {
+                        if (prefersDark) {
+                            card.classList.remove('light');
+                            card.classList.add('dark');
+                        } else {
+                            card.classList.remove('dark');
+                            card.classList.add('light');
+                        }
+                    });
+                }
+
+                updateTheme();
+
+                // 监听系统主题变化
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+            </script>
+            <!-- 深/浅色模式 End -->
             {% endif %}
             <!-- Moonlight End -->
 
@@ -176,99 +199,67 @@
     {% if canvas %}
     <script src="{{ url_for('static', filename='canvas.js') }}" defer></script>
     {% endif %}
-	
-	<!-- 节日灯笼 Start -->
+
+    <!-- 节日灯笼 Start -->
     {% if lantern %}
     <div class="deng-box2">
-		<div class="deng">
-			<div class="xian"></div>
-			<div class="deng-a">
-				<div class="deng-b">
-					<div class="deng-t">度</div>
-				</div>
-			</div>
-			<div class="shui shui-a">
-				<div class="shui-c"></div>
-				<div class="shui-b"></div>
-			</div>
-		</div>
-	</div>
-	<div class="deng-box3">
-		<div class="deng">
-			<div class="xian"></div>
-			<div class="deng-a">
-				<div class="deng-b">
-					<div class="deng-t">欢</div>
-				</div>
-			</div>
-			<div class="shui shui-a">
-				<div class="shui-c"></div>
-				<div class="shui-b"></div>
-			</div>
-		</div>
-	</div>
-	<div class="deng-box1">
-		<div class="deng">
-			<div class="xian"></div>
-			<div class="deng-a">
-				<div class="deng-b">
-					<div class="deng-t">春</div>
-				</div>
-			</div>
-			<div class="shui shui-a">
-				<div class="shui-c"></div>
-				<div class="shui-b"></div>
-			</div>
-		</div>
-	</div>
-	<div class="deng-box">
-		<div class="deng">
-			<div class="xian"></div>
-			<div class="deng-a">
-				<div class="deng-b">
-					<div class="deng-t">新</div>
-				</div>
-			</div>
-			<div class="shui shui-a">
-				<div class="shui-c"></div>
-				<div class="shui-b"></div>
-			</div>
-		</div>
-	</div>
+        <div class="deng">
+            <div class="xian"></div>
+            <div class="deng-a">
+                <div class="deng-b">
+                    <div class="deng-t">度</div>
+                </div>
+            </div>
+            <div class="shui shui-a">
+                <div class="shui-c"></div>
+                <div class="shui-b"></div>
+            </div>
+        </div>
+    </div>
+    <div class="deng-box3">
+        <div class="deng">
+            <div class="xian"></div>
+            <div class="deng-a">
+                <div class="deng-b">
+                    <div class="deng-t">欢</div>
+                </div>
+            </div>
+            <div class="shui shui-a">
+                <div class="shui-c"></div>
+                <div class="shui-b"></div>
+            </div>
+        </div>
+    </div>
+    <div class="deng-box1">
+        <div class="deng">
+            <div class="xian"></div>
+            <div class="deng-a">
+                <div class="deng-b">
+                    <div class="deng-t">春</div>
+                </div>
+            </div>
+            <div class="shui shui-a">
+                <div class="shui-c"></div>
+                <div class="shui-b"></div>
+            </div>
+        </div>
+    </div>
+    <div class="deng-box">
+        <div class="deng">
+            <div class="xian"></div>
+            <div class="deng-a">
+                <div class="deng-b">
+                    <div class="deng-t">新</div>
+                </div>
+            </div>
+            <div class="shui shui-a">
+                <div class="shui-c"></div>
+                <div class="shui-b"></div>
+            </div>
+        </div>
+    </div>
     {% endif %}
     <!-- 节日灯笼 End   -->
-    <!-- 深/浅色模式 -->
-    <script>
-        function updateTheme() {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const cards = document.querySelectorAll('.card');
-            
-            cards.forEach(card => {
-                if (prefersDark) {
-                    card.classList.remove('light');
-                    card.classList.add('dark');
-                } else {
-                    card.classList.remove('dark');
-                    card.classList.add('light');
-                }
-            });
-        }
-    
-        updateTheme();
-    
-        // 监听系统变化
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
-    
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme) {
-                const cards = document.querySelectorAll('.card');
-                cards.forEach(card => {
-                    card.classList.remove('light', 'dark');
-                    card.classList.add(savedTheme);
-                });
-            }
-    </script>
-    <!-- 深/浅色模式 End -->
 </body>
 
 </html>
