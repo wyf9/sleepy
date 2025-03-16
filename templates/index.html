@@ -7,7 +7,7 @@
     <title>{{ page_title }}</title>
     <meta name="description" content="{{ page_desc }}">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="lantern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 
@@ -66,6 +66,23 @@
                 <p id="hitokoto">
                     <a href="#" id="hitokoto_text">一言获取中~</a>
                 </p>
+                <script defer>
+                    const hitokotoElement = document.querySelector('#hitokoto_text');
+                    try {
+                        fetch('https://v1.hitokoto.cn')
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(`[Hitokoto] enabled and got response`);
+                                hitokotoElement.href = `https://hitokoto.cn/?uuid=${data.uuid}`;
+                                hitokotoElement.innerText = data.hitokoto;
+                                hitokotoElement.title = `-- ${data.from_who} 《${data.from}》`
+                            })
+                    }
+                    catch (error) {
+                        console.error(`[Hitokoto] fetch error: ${error}`);
+                        hitokotoElement.innerText = '一言获取失败 :(';
+                    }
+                </script>
             </div>
             {% endif %}
             {{ more_text | safe }}
@@ -151,5 +168,42 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- 音乐播放器 Start -->
+    <script src="{{ url_for('static', filename='mplayer.js') }}" defer></script>
+    <div id="player-container">
+        <div id="player">
+            <div class="playlist-input">
+                <input type="text" id="playlistId" placeholder="请输入网易云歌单ID">
+                <button id="loadPlaylist"><i class="fas fa-arrow-down"></i></button>
+            </div>
+            <div class="main" style="display: none;">
+                <div class="return-input" title="切换歌单">
+                    <i class="fas fa-redo"></i>
+                </div>
+				<div style="height: 15px;"></div>
+                <div style="display: flex; align-items: center;">
+                    <img src="" class="cover" alt="封面">
+                    <div class="info">
+                        <div class="song-title">歌曲标题</div>
+                        <div class="artist">歌手</div>
+                    </div>
+                    <button id="showList"><i class="fas fa-list"></i></button>
+                </div>
+                <div class="controls">
+                    <button id="prev"><i class="fas fa-step-backward"></i></button>
+                    <button id="playPause"><i class="fas fa-play"></i></button>
+                    <button id="next"><i class="fas fa-step-forward"></i></button>
+                    <input type="range" id="progress" value="0">
+                </div>
+                <div class="song-list">
+                    <!-- 歌曲列表动态生成 -->
+                </div>
+            </div>
+            <div class="loader"></div>
+        </div>
+        <button id="toggle-btn"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <!-- 音乐播放器 End -->
 </body>
 </html>
