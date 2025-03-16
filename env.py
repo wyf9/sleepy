@@ -14,6 +14,7 @@ def getenv(key: str, default, typeobj: object = str) -> any:
 
     :param key: 键
     :param typeobj: 类型对象 (str / int / bool)
+    :param default: 默认值 (未读取到此项配置时使用)
     '''
     got_value = os.getenv(key)
     if got_value is None:
@@ -34,7 +35,6 @@ class _main:
     timezone: str = getenv('sleepy_main_timezone', 'Asia/Shanghai', str)
     checkdata_interval: int = getenv('sleepy_main_checkdata_interval', 30, int)
     secret: str = getenv('SLEEPY_SECRET', '', str)
-    log_level: str = getenv('sleepy_main_log_level', 'INFO', str)
 
 
 class _page:
@@ -50,6 +50,8 @@ class _page:
     more_text: str = getenv('sleepy_page_more_text', '', str)
     hitokoto: bool = getenv('sleepy_page_hitokoto', True, bool)
     canvas: bool = getenv('sleepy_page_canvas', True, bool)
+    moonlight: bool = getenv('sleepy_page_moonlight', True, bool)
+    lantern: bool = getenv('sleepy_page_lantern', True, bool)
 
 
 class _status:
@@ -67,6 +69,8 @@ class _util:
     '''
     metrics: bool = getenv('sleepy_util_metrics', True, bool)
     auto_switch_status: bool = getenv('sleepy_util_auto_switch_status', True, bool)
+    steam_legacy_enabled: bool = getenv('sleepy_util_steam_legacy_enabled', False, bool)
+    steam_enabled: bool = getenv('sleepy_util_steam_enabled', False, bool)
     steam_key: str = getenv('sleepy_util_steam_key', '', str)
     steam_ids: str = getenv('sleepy_util_steam_ids', '', str)
 

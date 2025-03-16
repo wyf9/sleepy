@@ -1,56 +1,50 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import time
+import json5
+import importlib
 import pytz
 import flask
 from datetime import datetime
 from markupsafe import escape
-import json5
-import time
-from data import data as data_init
+
 import utils as u
 import env
-
-import logging
-logging.basicConfig(
-            level=env.main.logLevel,
-            datefmt="%Y-%m-%d %H:%M:%S",
-            format="%(asctime)s - %(levelname)s - %(message)s",
-            handlers=[logging.StreamHandler()]
-        )
-# logging.info("Starting server...")
-
+from data import data as data_init
+from setting import status_list
 
 try:
-    d = data_init()
-    METRICS_ENABLED = False
+    # init flask app
     app = flask.Flask(__name__)
+
+    # disable flask access log
+    from logging import getLogger
+    flask_default_logger = getLogger('werkzeug')
+    flask_default_logger.disabled = True
+
+    # init data
+    d = data_init()
     d.load()
     d.start_timer_check(data_check_interval=env.main.checkdata_interval)  # 启动定时保存
-    try:
-        with open('status_list.jsonc', encoding='utf-8') as f:
-            status_list = json5.load(f)
-    except FileNotFoundError:
-        u.error("File 'status_list.jsonc' not found!")
-        exit(1)
-except Exception as e:
-    u.error(f"Error initing: {e}")
-    exit(1)
 
     # metrics?
     if env.util.metrics:
-        logging.info('Note: metrics enabled, open /metrics to see your count.')
-        METRICS_ENABLED = True
+        u.info('[metrics] metrics enabled, open /metrics to see your count.')
         d.metrics_init()
+except Exception as e:
+    u.error(f"Error initing: {e}")
+    exit(1)
 except KeyboardInterrupt:
     logging.warning('Interrupt init')
     exit(0)
 except u.SleepyException as e:
-    logging.warning(f'==========\n{e}')
+    u.error(f'==========\n{e}')
     exit(1)
 except:
     logging.error('Unexpected Error!')
     raise
+
 
 # --- Functions
 
@@ -59,6 +53,7 @@ except:
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
     在日志中显示 ip, 并记录 metrics 信息
+    如 Header 中 User-Agent 为 SleepyPlugin/(每次启动使用随机 uuid) 则不进行任何记录
 
     :param req: `flask.request` 对象, 用于取 ip
     :param msg: 信息 (一般是路径, 同时作为 metrics 的项名)
@@ -74,11 +69,13 @@ def showip():  # type: ignore / (req: flask.request, msg)
         ip2 = None
         u.info(f'- Request: {ip1} : {path}')
     # --- count
-    if METRICS_ENABLED:
+    if env.util.metrics:
         d.record_metrics(path)
 
 
 # --- Templates
+
+
 @app.route('/')
 def index():
     '''
@@ -88,15 +85,14 @@ def index():
     try:
         stat = status_list[d.data['status']]
     except:
-        print("索引超出范围，使用默认值")
-        print("索引超出范围，使用默认值")
+        print(f"索引 {d.data['status']} 超出范围, 使用默认值")
         stat = {
-            'name': '85',
+            'name': 'Unknown',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
     more_text: str = env.page.more_text
-    if METRICS_ENABLED:
+    if env.util.metrics:
         more_text = more_text.format(
             visit_today=d.data['metrics']['today'].get('/', 0),
             visit_month=d.data['metrics']['month'].get('/', 0),
@@ -113,6 +109,11 @@ def index():
         more_text=more_text,
         hitokoto=env.page.hitokoto,
         canvas=env.page.canvas,
+        moonlight=env.page.moonlight,
+        lantern=env.page.lantern,
+
+        steam_legacy_enabled=env.util.steam_legacy_enabled,
+        steam_enabled=env.util.steam_enabled,
         steamkey=env.util.steam_key,
         steamids=env.util.steam_ids,
 
@@ -132,12 +133,21 @@ def git_hub():
     return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle'+'epy', 301)
 
 
-@app.route('/steam')
-def test():
-    return flask.render_template(
-        'steamstatus.html',
-        steamids=env.util.steam_ids
-    )
+@app.route('/none')
+def none():
+    '''
+    返回 204 No Content, 可用于 Uptime Kuma 等工具监控服务器状态使用
+    '''
+    return '', 204
+
+
+if env.util.steam_enabled:
+    @app.route('/steam')
+    def steam():
+        return flask.render_template(
+            'steam.html',
+            steamids=env.util.steam_ids
+        )
 
 
 @app.route('/style.css')
@@ -154,6 +164,21 @@ def style_css():
     ))
     response.mimetype = 'text/css'
     return response
+
+@app.route('/lantern.css')
+def lantern_css():
+    '''
+    /lantern.css
+    - Method: **GET**
+    '''
+
+    response = flask.make_response(flask.render_template(
+        'lantern.css',
+    ))
+    response.mimetype = 'text/css'
+    return response
+
+
 # --- Read-only
 
 
@@ -168,7 +193,6 @@ def query(ret_as_dict: bool = False):
     '''
     st = d.data['status']
     try:
-        stinfo = status_list[st]
         stinfo = status_list[st]
     except:
         stinfo = {
@@ -206,8 +230,8 @@ def get_status_list():
     - Method: **GET**
     '''
     stlst = status_list
-    stlst = status_list
     return u.format_dict(stlst)
+
 
 # --- Status API
 
@@ -215,7 +239,7 @@ def get_status_list():
 @app.route('/set')
 def set_normal():
     '''
-    普通的 set 设置状态
+    设置状态
     - http[s]://<your-domain>[:your-port]/set?secret=<your-secret>&status=<a-number>
     - Method: **GET**
     '''
@@ -243,6 +267,8 @@ def set_normal():
 
 
 # --- Device API
+
+
 @app.route('/device/set', methods=['GET', 'POST'])
 def device_set():
     '''
@@ -263,6 +289,8 @@ def device_set():
         secret = escape(flask.request.args.get('secret'))
         if secret == env.main.secret:
             devices: dict = d.dget('device_status')
+            if not device_using:
+                app_name = ''
             devices[device_id] = {
                 'show_name': device_show_name,
                 'using': device_using,
@@ -289,7 +317,6 @@ def device_set():
             )
         if secret == env.main.secret:
             devices: dict = d.dget('device_status')
-            # L245~247同理
             if not device_using:
                 app_name = ''
             devices[device_id] = {
@@ -307,7 +334,7 @@ def device_set():
     else:
         return u.reterr(
             code='invaild request',
-            message='only supports GET and POST method!'
+            message='This endpoint only supports GET and POST method!'
         )
     return u.format_dict({
         'success': True,
@@ -374,8 +401,7 @@ def private_mode():
     '''
     secret = escape(flask.request.args.get('secret'))
     if secret == env.main.secret:
-        private = escape(flask.request.args.get('private'))
-        private = u.tobool(private)
+        private = u.tobool(escape(flask.request.args.get('private')))
         if private == None:
             return u.reterr(
                 code='invaild request',
@@ -392,27 +418,6 @@ def private_mode():
         'success': True,
         'code': 'OK'
     })
-
-# --- Storage API
-
-# @app.route('/reload_config')
-# def reload_config():
-#     '''
-#     从 `config.jsonc` 重载配置
-#     - Method: **GET**
-#     '''
-#     secret = escape(flask.request.args.get('secret'))
-
-#     if secret == e.main.secret:
-#         return u.format_dict({
-#             'success': True,
-#             'code': 'OK',
-#         })
-#     else:
-#         return u.reterr(
-#             code='not authorized',
-#             message='invalid secret'
-#         )
 
 
 @app.route('/save_data')
@@ -474,13 +479,15 @@ def events():
             time.sleep(1)  # 每秒检查一次更新
 
     response = flask.Response(event_stream(), mimetype="text/event-stream")
-    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Cache-Control"] = "no-cache"  # 禁用缓存
     response.headers["X-Accel-Buffering"] = "no"  # 禁用 Nginx 缓冲
     return response
 
 
 # --- (Special) Metrics API
-if METRICS_ENABLED:
+
+
+if env.util.metrics:
     @app.route('/metrics')
     def metrics():
         '''
@@ -492,13 +499,16 @@ if METRICS_ENABLED:
 
 
 # --- End
+
+
 if __name__ == '__main__':
-    print(f"===================hi {env.page.user}!===================")
+    u.info(f'=============== hi {env.page.user}! ===============')
+    u.info(f'Starting server: {f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}{" (debug enabled)" if env.main.flask_debug else ""}')
     app.run(  # 启↗动↘
         host=env.main.host,
         port=env.main.port,
         debug=env.main.flask_debug
     )
-    print('Server exited, saving data...')
+    u.info('Server exited, saving data...')
     d.save()
-    print('Bye.')
+    u.info('Bye.')

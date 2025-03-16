@@ -1,8 +1,6 @@
 __pycache__/
+.env
 data.json
-data.*.json
-config.jsonc
-config.*.jsonc
 *.test.*
 *.local.*
 .venv/

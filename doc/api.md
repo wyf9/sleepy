@@ -53,7 +53,7 @@
 }
 ```
 
-> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可在 config.jsonc 中修改
+> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可在配置中修改
 
 ### status-list
 
@@ -87,7 +87,7 @@
 ]
 ```
 
-> 就是返回 `config.jsonc` 中的 `status_list` 列表
+> 就是返回 `setting/status_list.json` 的内容
 
 ### metrics
 
@@ -101,13 +101,8 @@
 * 无需鉴权
 
 > [!TIP]
-> 本接口较特殊: 如服务器关闭了统计 *(`config.jsonc` 中的 `metrics` 为 `false`)*, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果 <br/>
+> 本接口较特殊: 如服务器关闭了统计, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果 <br/>
 > ~~*我也不知道自己怎么想的*~~
-
-> 在需要鉴权的路由中，鉴权通过后才会计入统计
-
-> [!WARNING]
-> 目前 data.py 逻辑可能存在问题，会导致 metrics 数据无故被清空，原因未知
 
 #### Response
 
@@ -153,6 +148,7 @@
 | ------------------- | -------------------------------------- | ----- | -------- |
 | [Jump](#status-set) | `/set?secret=<secret>&status=<status>` | `GET` | 设置状态 |
 
+> 已移除旧的 `/set/<secret>/<status>` 接口
 
 ### status-set
 
@@ -166,7 +162,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<status>`: 状态码 *(`int`)*
 
 #### Response
@@ -223,7 +219,7 @@
 
 > `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>`
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<id>`: 设备标识符
 - `<show_name>`: 显示名称
 - `<using>`: 是否正在使用
@@ -279,7 +275,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<device_id>`: 设备标识符
 
 #### Response
@@ -318,7 +314,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 
 #### Response
 
@@ -349,7 +345,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<isprivate>`: bool (仅接受 `true` / `false`), 开关状态
 
 #### Response
@@ -380,41 +376,11 @@
 
 [Back to # api](#api)
 
-|                                | 路径                             | 方法  | 作用                 |
-| ------------------------------ | -------------------------------- | ----- | -------------------- |
-| [Jump](#storage-reload-config) | `/reload_config?secret=<secret>` | `GET` | 重载配置             |
-| [Jump](#storage-save-data)     | `/save_data?secret=<secret>`     | `GET` | 保存内存中的状态信息 |
+|                            | 路径                         | 方法  | 作用                 |
+| -------------------------- | ---------------------------- | ----- | -------------------- |
+| [Jump](#storage-save-data) | `/save_data?secret=<secret>` | `GET` | 保存内存中的状态信息 |
 
-### storage-reload-config
-
-[Back to ## storage](#storage)
-
-> `/reload_config?secret=<secret>`
-
-重新从 `config.jsonc` 加载配置
-
-* Method: GET
-
-#### Params
-
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
-
-#### Response
-
-```jsonc
-// 成功
-{
-    "success": true,
-    "code": "OK",
-}
-
-// 失败 - 密钥错误
-{
-    "success": false,
-    "code": "not authorized",
-    "message": "invaild secret"
-}
-```
+> 已移除 `/reload_config` 接口, 现在需要重启服务以重载配置
 
 ### storage-save-data
 
@@ -428,7 +394,7 @@
 
 #### Params
 
-- `<secret>`: 在 `config.jsonc` 中配置的 `secret`
+- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 
 #### Response
 

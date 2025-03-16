@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+
+
+<head>
+  <link async rel="preload" as="style"
+    href="https://community.cloudflare.steamstatic.com/public/shared/css/shared_global.css"
+    onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://community.cloudflare.steamstatic.com/public/shared/css/shared_global.css">
+  </noscript>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+    integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script defer async>
+    $(function () {
+      let searchParams = new URLSearchParams(window.location.search);
+      let corsHost = "https://steam-miniprofile-cors.glitch.me/"
+      let steamId = searchParams.get('accountId') ? searchParams.get('accountId') : '{{ steamids }}';
+      let interactive = searchParams.get('interactive') ? searchParams.get('interactive') : false;
+      let vanityId = searchParams.get('vanityId') ? searchParams.get('vanityId') : '';
+      // For list of available languages, check out README on https://github.com/gamer2810/steam-miniprofile
+      let language = searchParams.get('lang') ? searchParams.get('lang') : 'schinese';
+      let featuredGame = searchParams.get('appId') ? searchParams.get('appId') : '';
+      let corsURL = `${corsHost}https%3A%2F%2Fsteamcommunity.com%2Fminiprofile%2F${steamId}?l=${language}&appId=${featuredGame}`;
+      let steamURL = `https://steamcommunity.com/id/${vanityId}`;
+      
+      if(steamId === '{{ steamids }}') {
+        steamId = '{{ steamids }}';
+      }
+
+      $.get(corsURL, function (data) {
+        $("#includedContent").html(data).hide();
+        if ($("#includedContent").children().text().length != 0) {
+          $(".default").fadeOut("fast", function () {
+            $(".default").replaceWith(data);
+            $(".default").fadeIn("fast");
+          });
+
+          window.parent.postMessage(
+            {
+              state:"loaded"
+            }, {
+            targetOrigin: '*',
+          })
+        }
+        
+        if(interactive && vanityId) {
+          document.body.style.cursor = "pointer";
+          $(document).on('click', 'div.miniprofile_container', function(e){ 
+              e.preventDefault(); 
+              var url = $(this).attr('href'); 
+              window.open(steamURL, '_blank');
+          });
+        }
+      });
+
+    });
+  </script>
+</head>
+
+<body style="height: fit-content; width: fit-content;">
+  <div id="includedContent"></div>
+  <!-- default miniprofile while waiting for the real one to load -->
+  <!-- cache to help with load time -->
+  <div class="miniprofile_container default">
+    <!-- Background -->
+    <div class="miniprofile_background">
+      <img class="miniprofile_backgroundblur"
+        src="https://avatars.akamai.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb.jpg">
+    </div>
+    <div class="miniprofile_playersection ">
+      <!-- Player avatar/name stuff -->
+      <div class="playersection_avatar border_color_offline">
+        <img src="https://avatars.akamai.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg"
+          srcset="https://avatars.akamai.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg 1x, https://avatars.akamai.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg 2x">
+      </div>
+      <div class="player_content">
+        <span class="persona offline">Loading</span>
+        <span class="friend_status_offline">Offline</span>
+      </div>
+    </div>
+    <div class="miniprofile_detailssection  not_in_game miniprofile_backdrop">
+      <div class="miniprofile_featuredcontainer">
+        <img
+          src="https://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/206440/67e23690ce7aad7e097d828463fb0adf4932a5ab.png"
+          class="badge_icon">
+        <div class="description">
+          <div class="name">Unknown</div>
+          <div class="xp">? XP</div>
+        </div>
+      </div>
+      <div class="miniprofile_featuredcontainer">
+        <div class="friendPlayerLevel lvl_0"><span class="friendPlayerLevelNum">?</span></div>
+        <div class="description">
+          <div class="name">Steam Level</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</body>
+
+</html>

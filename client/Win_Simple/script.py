@@ -20,8 +20,8 @@ class AppConfig:
 [settings]
 # 服务地址, 末尾不带 /
 SERVER = http://localhost:7860
-# 密钥
-SECRET = ""
+# 密钥，不要引号！
+SECRET = 
 DEVICE_ID = Win_Simple
 # 前台显示名称
 DEVICE_SHOW_NAME = MyComputer
