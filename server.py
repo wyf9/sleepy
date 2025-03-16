@@ -36,17 +36,19 @@ except Exception as e:
     u.error(f"Error initing: {e}")
     exit(1)
 except KeyboardInterrupt:
-    u.warning('Interrupt init')
+    logging.warning('Interrupt init')
     exit(0)
 except u.SleepyException as e:
     u.error(f'==========\n{e}')
     exit(1)
 except:
-    u.error('Unexpected Error!')
+    logging.error('Unexpected Error!')
     raise
 
 
 # --- Functions
+
+
 @app.before_request
 def showip():  # type: ignore / (req: flask.request, msg)
     '''
@@ -129,6 +131,24 @@ def git_hub():
     这里谁来了都改不了!
     '''
     return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle'+'epy', 301)
+
+
+@app.route('/none')
+def none():
+    '''
+    返回 204 No Content, 可用于 Uptime Kuma 等工具监控服务器状态使用
+    '''
+    return '', 204
+
+
+if env.util.steam_enabled:
+    @app.route('/steam')
+    def steam():
+        return flask.render_template(
+            'steam.html',
+            steamids=env.util.steam_ids
+        )
+
 
 @app.route('/style.css')
 def style_css():
