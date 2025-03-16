@@ -6,4 +6,5 @@ data.json
 .venv/
 client/Win_Simple/build/
 client/Win_Simple/*.spec
+.env
 client/Win_Simple/dist/config.ini

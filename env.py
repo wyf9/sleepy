@@ -51,7 +51,7 @@ class _page:
     hitokoto: bool = getenv('sleepy_page_hitokoto', True, bool)
     canvas: bool = getenv('sleepy_page_canvas', True, bool)
     moonlight: bool = getenv('sleepy_page_moonlight', True, bool)
-    lantern: bool = getenv('sleepy_page_lantern', True, bool)
+    lantern: bool = getenv('sleepy_page_lantern', False, bool)
 
 
 class _status:

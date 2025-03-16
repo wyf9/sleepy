@@ -7,6 +7,7 @@
     <title>{{ page_title }}</title>
     <meta name="description" content="{{ page_desc }}">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="lantern.css">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 
@@ -14,150 +15,64 @@
     <div class="container">
         <div class="card light" id="user_status">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
+            
             <!-- Moonlight Start -->
             {% if moonlight %}
             <script src="{{ url_for('static', filename='moonlight.js') }}" defer></script>
             <button id="moonlight" style="background: none; border: none; cursor: pointer;">
-                <!-- 版权所有 &copy; https://www.iconfont.cn/user/detail?uid=8623109&nid=9eLPALIxYUDV -->
+                <!-- 版权所有 勿删) https://www.iconfont.cn/user/detail?uid=8623109&nid=9eLPALIxYUDV -->
                 <svg t="1741008747639" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="2611" width="200" height="200">
-                    <path
-                        d="M624 888H304c-110.4 0-200-89.6-200-200s89.6-200 200-200c14 0 27.6 1.2 41.2 4.4C386.4 378 495.6 296 624 296c163.2 0 296 132.8 296 296s-132.8 296-296 296z m-319.2-352H304c-84 0-152 68-152 152s68 152 152 152h320c136.8 0 248-111.2 248-248s-111.2-248-248-248-248 111.2-248 248c0 13.2-10.8 24-24 24s-24-10.8-24-24c0-18 1.6-36 4.8-53.2-9.2-2-18.4-2.8-28-2.8z"
-                        p-id="2612"></path>
-                    <path
-                        d="M188 579.6c-3.2 0-6.4-0.8-9.2-2-82.4-34.8-143.2-107.6-163.6-194.8-2-8 0.4-16.4 6.4-22.4 5.6-6 14-8.4 22.4-6.4 16.8 4 34.4 6 52 6 127.6 0 232-104.4 232-232 0-17.6-2-35.2-6-52.4-1.6-8 0.8-16.4 6.4-22.4 6-5.6 14.4-8 22.4-6.4 128 29.6 217.2 141.6 216.8 272.8 0 4.4 0 9.2-0.4 14.4-1.2 13.2-13.2 22.8-26.4 21.6-13.2-1.2-22.8-13.2-21.6-26.4 0.4-2.8 0.4-6 0.4-9.6 0-96.4-58-180.4-145.2-215.2 1.2 8 1.6 15.6 1.6 23.6-0.4 154.4-126 280-280 280-7.6 0-15.6-0.4-23.2-1.2 22.8 56.4 67.6 102.4 124.4 126.4 12.4 5.2 18 19.2 12.8 31.6-3.6 9.2-12.8 14.8-22 14.8z"
-                        p-id="2613"></path>
+                    <path d="M624 888H304c-110.4 0-200-89.6-200-200s89.6-200 200-200c14 0 27.6 1.2 41.2 4.4C386.4 378 495.6 296 624 296c163.2 0 296 132.8 296 296s-132.8 296-296 296z m-319.2-352H304c-84 0-152 68-152 152s68 152 152 152h320c136.8 0 248-111.2 248-248s-111.2-248-248-248-248 111.2-248 248c0 13.2-10.8 24-24 24s-24-10.8-24-24c0-18 1.6-36 4.8-53.2-9.2-2-18.4-2.8-28-2.8z" p-id="2612"></path>
+                    <path d="M188 579.6c-3.2 0-6.4-0.8-9.2-2-82.4-34.8-143.2-107.6-163.6-194.8-2-8 0.4-16.4 6.4-22.4 5.6-6 14-8.4 22.4-6.4 16.8 4 34.4 6 52 6 127.6 0 232-104.4 232-232 0-17.6-2-35.2-6-52.4-1.6-8 0.8-16.4 6.4-22.4 6-5.6 14.4-8 22.4-6.4 128 29.6 217.2 141.6 216.8 272.8 0 4.4 0 9.2-0.4 14.4-1.2 13.2-13.2 22.8-26.4 21.6-13.2-1.2-22.8-13.2-21.6-26.4 0.4-2.8 0.4-6 0.4-9.6 0-96.4-58-180.4-145.2-215.2 1.2 8 1.6 15.6 1.6 23.6-0.4 154.4-126 280-280 280-7.6 0-15.6-0.4-23.2-1.2 22.8 56.4 67.6 102.4 124.4 126.4 12.4 5.2 18 19.2 12.8 31.6-3.6 9.2-12.8 14.8-22 14.8z" p-id="2613"></path>
                 </svg>
             </button>
             {% endif %}
             <!-- Moonlight End -->
 
-            <!--
-            slider 暂未使用
+            <!-- 滑块透明度 -->
             <button id="slider">
                 <svg t="1741527882713" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="2640" width="200" height="200">
-                    <path
-                        d="M384 187.8V160c0-17.7-14.3-32-32-32H160c-17.7 0-32 14.3-32 32v27.8c0 2.2-1.8 4-4 4H0v64h124c2.2 0 4 1.8 4 4V288c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28.3c0-2.2 1.8-4 4-4h636v-64H388c-2.2 0.1-4-1.7-4-3.9zM316 256H196c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM768 476v-28c0-17.7-14.3-32-32-32H544c-17.7 0-32 14.3-32 32v28c0 2.2-1.8 4-4 4H0v64h508c2.2 0 4 1.8 4 4v28c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28c0-2.2 1.8-4 4-4h252v-64H772c-2.2 0-4-1.8-4-4z m-68 68H580c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM480 764.3V736c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v28.3c0 2.2-1.8 4-4 4H0v64h220c2.2 0 4 1.8 4 4V864c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-27.8c0-2.2 1.8-4 4-4h540v-64H484c-2.2 0.1-4-1.7-4-3.9zM412 832H292c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4z"
-                        p-id="2641"></path>
+                    <path d="M384 187.8V160c0-17.7-14.3-32-32-32H160c-17.7 0-32 14.3-32 32v27.8c0 2.2-1.8 4-4 4H0v64h124c2.2 0 4 1.8 4 4V288c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28.3c0-2.2 1.8-4 4-4h636v-64H388c-2.2 0.1-4-1.7-4-3.9zM316 256H196c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM768 476v-28c0-17.7-14.3-32-32-32H544c-17.7 0-32 14.3-32 32v28c0 2.2-1.8 4-4 4H0v64h508c2.2 0 4 1.8 4 4v28c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28c0-2.2 1.8-4 4-4h252v-64H772c-2.2 0-4-1.8-4-4z m-68 68H580c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM480 764.3V736c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v28.3c0 2.2-1.8 4-4 4H0v64h220c2.2 0 4 1.8 4 4V864c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-27.8c0-2.2 1.8-4 4-4h540v-64H484c-2.2 0.1-4-1.7-4-3.9zM412 832H292c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4z" p-id="2641"></path>
                 </svg>
+                <input type="range" id="sliderRange" min="0" max="1" value="0.5" step="0.01">
             </button>
-            <script defer>
-                document.getElementById('slider').addEventListener('click', () => alert('还没做~\n(帮我想想应该把透明度设置放在这还是保持原位)'));
-            </script>
-            -->
-            <h3><i><b>{{ user }}'s</b></i> Status:<br><a id="status" style="font-size: 1.2em;">{{ status_name }}</a>
-            </h3>
-            <p id="additional-info" style="font-size: 1em;">{{ status_desc | safe }}</p>
-            <!-- <hr /> 由 get.js 控制 -->
+
+            <h3><i><b>{{ user }}'s</b></i> Status:<br><a id="status">{{ status_name }}</a></h3>
+            <p id="additional-info">{{ status_desc | safe }}</p>
             <p id="device-status">[设备状态列表]</p>
-            <!-- Steam Game Playing Status (legacy) Start -->
+
+            <!-- Steam 状态模块 -->
             {% if steam_legacy_enabled %}
             <p id="steam-legacy"></p>
-            <script defer>
-                function getSteamUserInfo(userData) {
-                    if (!userData.response || !userData.response.players || userData.response.players.length === 0) {
-                        return { error: "No player data found." };
-                    }
-                    const player = userData.response.players[0];
-                    const nickname = player.personaname;
-                    // const onlineStatus = player.personastate === 1 ? "在线" : "离线";
-                    const gameStatus = player.gameextrainfo ? `正在玩: ${player.gameextrainfo}` : "未在游戏中";
-                    const gameid = player.gameid ? player.gameid : -1;
-                    return {
-                        nickname,
-                        // onlineStatus,
-                        gameStatus,
-                        gameid
-                    };
-                }
-                const steamkey = '{{ steamkey }}';
-                const steamids = '{{ steamids }}';
-                if (steamkey && !isNaN(steamids)) {
-                    const steam = document.getElementById('steam-legacy');
-                    //也许这里需要反代
-                    //const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
-                    //https://store.steampowered.com/app/2358720
-                    //const steamapi = "https://a.858efb39d39c.workers.dev"; // 且用且珍惜
-                    const steamapi = "https://proxy.mooncc.cn/http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2";
-                    const quresteaam = `${steamapi}/?key=${steamkey}&steamids=${steamids}`;
-                    (async () => {
-                        try {
-                            const response = await fetch(quresteaam);
-                            const data = await response.json();
-                            console.log(`Steam info response: ${data}`);
-                            const steamInfo = getSteamUserInfo(data);
-                            if (steamInfo.gameid !== -1) {
-                                steam.innerHTML = `<p><span>${steamInfo.nickname}</span> <a target="_blank" href="https://store.steampowered.com/app/${steamInfo.gameid}">${steamInfo.gameStatus}</a></p>`;
-                            } else {
-                                steam.innerHTML = `<p><span>${steamInfo.nickname}</span> ${steamInfo.gameStatus}</p>`;
-                            }
-
-                        } catch (error) {
-                            console.error(`Fetch steam info error: ${error}`);
-                            steam.innerHTML = '';
-                        }
-                    })();
-
-                } else {
-                    console.log('Steam info disabled');
-                }
-            </script>
             {% endif %}
-            <!-- Steam Game Playing Status (legacy) End -->
-            <!-- Steam Card (new) Start -->
+            
             {% if steam_enabled %}
             <hr />
-            <h3><b>
-                    <p id="device-status"><i>Steam</i> Status</p>
-                </b></h3>
+            <h3><b><p id="device-status"><i>Steam</i> Status</p></b></h3>
             <div class="steam" id="steam">
                 <iframe src="/steam" style="border: dashed skyblue;" name="steam_iframe" scrolling="no" frameborder="1"
                     marginheight="0px" marginwidth="0px" height="210px" width="310px" allowfullscreen></iframe>
             </div>
             {% endif %}
-            <!-- Steam Card (new) End -->
 
-            <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
             <p id="last-updated">最后更新: {{ last_updated }}</p>
-
         </div>
 
         <div class="card light" id="more_text">
-            <!-- Hitokoto Start -->
             {% if hitokoto %}
             <div>
                 <p id="hitokoto">
                     <a href="#" id="hitokoto_text">一言获取中~</a>
                 </p>
-                <script defer>
-                    const hitokotoElement = document.querySelector('#hitokoto_text');
-                    try {
-                        fetch('https://v1.hitokoto.cn')
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log(`[Hitokoto] enabled and got response`);
-                                hitokotoElement.href = `https://hitokoto.cn/?uuid=${data.uuid}`;
-                                hitokotoElement.innerText = data.hitokoto;
-                                hitokotoElement.title = `-- ${data.from_who} 《${data.from}》`
-                            })
-                    }
-                    catch (error) {
-                        console.error(`[Hitokoto] fetch error: ${error}`);
-                        hitokotoElement.innerText = '一言获取失败 :(';
-                    }
-                </script>
             </div>
             {% endif %}
-            <!-- Hitokoto End -->
             {{ more_text | safe }}
-            <p>你可以通过这个页面视奸 <b>{{ user }}</b>。
-                <br>
+            <p>你可以通过这个页面视奸 <b>{{ user }}</b>。<br>
                 <a href="{{ repo }}" target="_blank" style="color: rgb(0, 255, 0);">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
-                        style="vertical-align: middle; width: 1em;">
-                        <path
-                            d="M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32h82.7L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32H320zM80 32C35.8 32 0 67.8 0 112V432c0 44.2 35.8 80 80 80H400c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32V432c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16H192c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:1em;">
+                        <path d="M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32h82.7L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32H320zM80 32C35.8 32 0 67.8 0 112V432c0 44.2 35.8 80 80 80H400c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32V432c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16H192c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z"/>
                     </svg>
                     {{ learn_more | safe }}
                 </a>
@@ -166,101 +81,75 @@
     </div>
 
     <script>
-        const statusElement = document.getElementById('status');
-        statusElement.classList.add('{{ status_color }}');
+        document.getElementById('status').classList.add('{{ status_color }}');
     </script>
 
+    <!-- 动态加载的脚本 -->
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
+    {% if canvas %}<script src="{{ url_for('static', filename='canvas.js') }}" defer></script>{% endif %}
 
-    {% if canvas %}
-    <script src="{{ url_for('static', filename='canvas.js') }}" defer></script>
-    {% endif %}
-	
-	<!-- 节日灯笼 Start -->
+    <!-- 节日灯笼 -->
     {% if lantern %}
-	<div class="xnkl">
-		<div class="deng-box2">
-			<div class="deng">
-				<div class="xian"></div>
-				<div class="deng-a">
-					<div class="deng-b">
-						<div class="deng-t">度</div>
-					</div>
-				</div>
-				<div class="shui shui-a">
-					<div class="shui-c"></div>
-					<div class="shui-b"></div>
-				</div>
-			</div>
-		</div>
-		<div class="deng-box3">
-			<div class="deng">
-				<div class="xian"></div>
-				<div class="deng-a">
-					<div class="deng-b">
-						<div class="deng-t">欢</div>
-					</div>
-				</div>
-				<div class="shui shui-a">
-					<div class="shui-c"></div>
-					<div class="shui-b"></div>
-				</div>
-			</div>
-		</div>
-		<div class="deng-box1">
-			<div class="deng">
-				<div class="xian"></div>
-				<div class="deng-a">
-					<div class="deng-b">
-						<div class="deng-t">春</div>
-					</div>
-				</div>
-				<div class="shui shui-a">
-					<div class="shui-c"></div>
-					<div class="shui-b"></div>
-				</div>
-			</div>
-		</div>
-		<div class="deng-box">
-			<div class="deng">
-				<div class="xian"></div>
-				<div class="deng-a">
-					<div class="deng-b">
-						<div class="deng-t">新</div>
-					</div>
-				</div>
-				<div class="shui shui-a">
-					<div class="shui-c"></div>
-					<div class="shui-b"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-    {% endif %}
-    <!-- 节日灯笼 End   -->
-    <!-- 主题跟随系统 -->
-    <script>
-        function updateTheme() {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const cards = document.querySelectorAll('.card');
-            
-            cards.forEach(card => {
-                if (prefersDark) {
-                    card.classList.remove('light');
-                    card.classList.add('dark');
-                } else {
-                    card.classList.remove('dark');
-                    card.classList.add('light');
-                }
-            });
-        }
-    
-        updateTheme();
-    
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
-    
-    </script>
-    <!-- 主题跟随系统 End -->
-</body>
 
+    <div class="lantern">
+
+        <div class="deng-box2">
+            <div class="deng">
+                <div class="xian"></div>
+                <div class="deng-a">
+                    <div class="deng-b">
+                        <div class="deng-t">度</div>
+                    </div>
+                </div>
+                <div class="shui shui-a">
+                    <div class="shui-c"></div>
+                    <div class="shui-b"></div>
+                </div>
+            </div>
+        </div>
+        <div class="deng-box3">
+            <div class="deng">
+                <div class="xian"></div>
+                <div class="deng-a">
+                    <div class="deng-b">
+                        <div class="deng-t">欢</div>
+                    </div>
+                </div>
+                <div class="shui shui-a">
+                    <div class="shui-c"></div>
+                    <div class="shui-b"></div>
+                </div>
+            </div>
+        </div>
+        <div class="deng-box1">
+            <div class="deng">
+                <div class="xian"></div>
+                <div class="deng-a">
+                    <div class="deng-b">
+                        <div class="deng-t">春</div>
+                    </div>
+                </div>
+                <div class="shui shui-a">
+                    <div class="shui-c"></div>
+                    <div class="shui-b"></div>
+                </div>
+            </div>
+        </div>
+        <div class="deng-box">
+            <div class="deng">
+                <div class="xian"></div>
+                <div class="deng-a">
+                    <div class="deng-b">
+                        <div class="deng-t">新</div>
+                    </div>
+                </div>
+                <div class="shui shui-a">
+                    <div class="shui-c"></div>
+                    <div class="shui-b"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</body>
 </html>
