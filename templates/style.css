@@ -1,6 +1,12 @@
 /*
 WARNING: 不要使用格式化代码 (本文件内) / DON'T USE CODE FORMATTER IN THIS FILE
 */
+:root {
+    /* 定义基础主题色（不含透明度） */
+    --light-bg-rgb: 240, 248, 255; /* 原 light 背景色 */
+    --dark-bg-rgb: 26, 21, 20;     /* 原 dark 背景色 */
+    --card-alpha: 0.6;             /* 初始透明度 */
+  }
 rt {
     font-size: 0.6em;
 }
@@ -20,6 +26,9 @@ button {
     cursor: pointer;
   }
   
+div p{
+    opacity: 0.8;
+}  
 #moonlight{
     position: absolute;
     right: 10px;
@@ -50,14 +59,14 @@ body {
 }
 
 .light {
-    background-color: rgba(240, 248, 255, 0.6); /* 增加不透明度 */
+    background-color: rgba(var(--light-bg-rgb), var(--card-alpha)); /* 动态透明度 */
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* 增强阴影 */
     color: black;
     border: 1px solid rgba(255, 255, 255, 0.6); /* 更明显的边框 */
 }
 
 .dark {
-    background-color: rgba(26, 21, 20, 0.65); /* 增加不透明度 */
+    background-color: rgba(var(--dark-bg-rgb), var(--card-alpha)); /* 动态透明度 */
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); /* 更强阴影 */
     color: white;
     border: 1px solid rgba(60, 60, 60, 0.8); /* 暗色边框 */
@@ -76,6 +85,7 @@ body {
     -webkit-backdrop-filter: blur(15px);
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.3); 
+    /* background-color: rgba(240, 248, 255, var(--card-alpha, 0.8)); */
     position: relative;
     box-shadow: 0 8px 32px rgb(174 137 245 / 20%), inset 0 0 6px 1px rgb(185 210 216 / 10%);
     transition: all 0.5s;
@@ -144,6 +154,14 @@ body {
 
 }
 
+#sliderRange{
+    display: none;
+    position: absolute;
+    border: none;
+    top: 10px;
+    left: 60px;
+    filter: invert(0.8);
+}
 /* 增强文本可读性 */
 .dark a, .dark .awake {
     color: rgb(100, 255, 100); /* 更亮的绿色 */
