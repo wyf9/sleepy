@@ -1,0 +1,20 @@
+[
+    "/",
+    "/steam",
+    "/style.css",
+    "/query",
+    "/status_list",
+    "/set",
+    "/device/set",
+    "/device/remove",
+    "/device/clear",
+    "/device/private_mode",
+    "/save_data",
+    "/events",
+    "/metrics",
+    "/static/canvas.js",
+    "/static/get.js",
+    "/static/moonlight.js",
+    "/static/favicon.ico",
+    "/robots.txt"
+]
