@@ -50,6 +50,7 @@ class _page:
     more_text: str = getenv('sleepy_page_more_text', '', str)
     hitokoto: bool = getenv('sleepy_page_hitokoto', True, bool)
     canvas: bool = getenv('sleepy_page_canvas', True, bool)
+    moonlight: bool = getenv('sleepy_page_moonlight', True, bool)
 
 
 class _status:

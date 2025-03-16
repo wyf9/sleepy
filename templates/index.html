@@ -14,6 +14,9 @@
     <div class="container">
         <div class="card light" id="user_status">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
+            <!-- Moonlight Start -->
+            {% if moonlight %}
+            <script src="{{ url_for('static', filename='moonlight.js') }}" defer></script>
             <button id="moonlight" style="background: none; border: none; cursor: pointer;">
                 <!-- 版权所有 &copy; https://www.iconfont.cn/user/detail?uid=8623109&nid=9eLPALIxYUDV -->
                 <svg t="1741008747639" class="icon" viewBox="0 0 1024 1024" version="1.1"
@@ -26,6 +29,11 @@
                         p-id="2613"></path>
                 </svg>
             </button>
+            {% endif %}
+            <!-- Moonlight End -->
+
+            <!--
+            slider 暂未使用
             <button id="slider">
                 <svg t="1741527882713" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="2640" width="200" height="200">
@@ -34,9 +42,10 @@
                         p-id="2641"></path>
                 </svg>
             </button>
-            <script>
+            <script defer>
                 document.getElementById('slider').addEventListener('click', () => alert('还没做~\n(帮我想想应该把透明度设置放在这还是保持原位)'));
             </script>
+            -->
             <h3><i><b>{{ user }}'s</b></i> Status:<br><a id="status" style="font-size: 1.2em;">{{ status_name }}</a>
             </h3>
             <p id="additional-info" style="font-size: 1em;">{{ status_desc | safe }}</p>
@@ -45,7 +54,7 @@
             <!-- Steam Game Playing Status (legacy) Start -->
             {% if steam_legacy_enabled %}
             <p id="steam-legacy"></p>
-            <script>
+            <script defer>
                 function getSteamUserInfo(userData) {
                     if (!userData.response || !userData.response.players || userData.response.players.length === 0) {
                         return { error: "No player data found." };
@@ -103,7 +112,7 @@
                     <p id="device-status"><i>Steam</i> Status</p>
                 </b></h3>
             <div class="steam" id="steam">
-                <iframe src="/steam" style="border: dashed skyblue;" name="myiFrame" scrolling="no" frameborder="1"
+                <iframe src="/steam" style="border: dashed skyblue;" name="steam_iframe" scrolling="no" frameborder="1"
                     marginheight="0px" marginwidth="0px" height="210px" width="310px" allowfullscreen></iframe>
             </div>
             {% endif %}
@@ -121,7 +130,7 @@
                 <p id="hitokoto">
                     <a href="#" id="hitokoto_text">一言获取中~</a>
                 </p>
-                <script>
+                <script defer>
                     const hitokotoElement = document.querySelector('#hitokoto_text');
                     try {
                         fetch('https://v1.hitokoto.cn')
@@ -160,15 +169,11 @@
         const statusElement = document.getElementById('status');
         statusElement.classList.add('{{ status_color }}');
     </script>
-    <!-- ~~方便调试~~ 你用 flask 怎么就不能调试了() -->
-    <!-- <script src="../static/moonlight.js"></script>
-    <script src="../static/canvas.js"></script> -->
-    <script src="{{ url_for('static', filename='moonlight.js') }}"></script>
+
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
 
-    <!-- 仅在 canvas 为 True 时加载 canvas.js -->
     {% if canvas %}
-    <script src="{{ url_for('static', filename='canvas.js') }}"></script>
+    <script src="{{ url_for('static', filename='canvas.js') }}" defer></script>
     {% endif %}
 </body>
 

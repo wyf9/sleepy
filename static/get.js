@@ -138,77 +138,73 @@ function setupEventSource() {
     evtSource.addEventListener('update', function (event) {
         lastEventTime = Date.now(); // 更新最后收到消息的时间
 
-        if (document.visibilityState == 'visible') {
-            console.log('收到数据更新');
-            const data = JSON.parse(event.data);
+        console.log('收到数据更新');
+        const data = JSON.parse(event.data);
 
-            // 处理更新数据
-            if (data.success) {
-                // 更新状态
-                if (statusElement) {
-                    statusElement.textContent = data.info.name;
-                    document.getElementById('additional-info').innerHTML = data.info.desc;
-                    let last_status = statusElement.classList.item(0);
-                    statusElement.classList.remove(last_status);
-                    statusElement.classList.add(data.info.color);
-                }
+        // 处理更新数据
+        if (data.success) {
+            // 更新状态
+            if (statusElement) {
+                statusElement.textContent = data.info.name;
+                document.getElementById('additional-info').innerHTML = data.info.desc;
+                let last_status = statusElement.classList.item(0);
+                statusElement.classList.remove(last_status);
+                statusElement.classList.add(data.info.color);
+            }
 
-                // 更新设备状态
-                var deviceStatus = '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>';
-                const devices = Object.values(data.device);
+            // 更新设备状态
+            var deviceStatus = '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>';
+            const devices = Object.values(data.device);
 
-                for (let device of devices) {
-                    let device_app;
-                    if (device.using) {
-                        const escapedAppName = escapeHtml(device.app_name);
-                        const jsShowName = escapeJs(device.show_name);
-                        const jsAppName = escapeJs(device.app_name);
-                        const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
-                        const escapedJsCode = escapeHtml(jsCode);
+            for (let device of devices) {
+                let device_app;
+                if (device.using) {
+                    const escapedAppName = escapeHtml(device.app_name);
+                    const jsShowName = escapeJs(device.show_name);
+                    const jsAppName = escapeJs(device.app_name);
+                    const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
+                    const escapedJsCode = escapeHtml(jsCode);
 
-                        device_app = `
+                    device_app = `
 <a class="awake" 
     title="${escapedAppName}" 
     href="javascript:${escapedJsCode}">
 ${sliceText(escapedAppName, data.device_status_slice)}
 </a>`;
-                    } else {
-                        device_app = '<a class="sleeping">未在使用</a>';
-                    }
-                    deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
+                } else {
+                    device_app = '<a class="sleeping">未在使用</a>';
                 }
-                
-                if (deviceStatus == '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>') {
-                    deviceStatus = '';
-                }
+                deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
+            }
 
-                const deviceStatusElement = document.getElementById('device-status');
-                if (deviceStatusElement) {
-                    deviceStatusElement.innerHTML = deviceStatus;
-                }
+            if (deviceStatus == '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>') {
+                deviceStatus = '';
+            }
 
-                // 更新最后更新时间
-                const timenow = getFormattedDate(new Date());
-                if (lastUpdatedElement) {
-                    lastUpdatedElement.innerHTML = `
+            const deviceStatusElement = document.getElementById('device-status');
+            if (deviceStatusElement) {
+                deviceStatusElement.innerHTML = deviceStatus;
+            }
+
+            // 更新最后更新时间
+            const timenow = getFormattedDate(new Date());
+            if (lastUpdatedElement) {
+                lastUpdatedElement.innerHTML = `
 最后更新:
 <a class="awake" 
 title="服务器时区: ${data.timezone}" 
 href="javascript:alert('浏览器最后更新时间: ${timenow}\\n数据最后更新时间 (基于服务器时区): ${data.last_updated}\\n服务端时区: ${data.timezone}')">
 ${data.last_updated}
 </a>`;
-                }
-            } else {
-                if (statusElement) {
-                    statusElement.textContent = '[!错误!]';
-                    document.getElementById('additional-info').textContent = data.info || '未知错误';
-                    let last_status = statusElement.classList.item(0);
-                    statusElement.classList.remove(last_status);
-                    statusElement.classList.add('error');
-                }
             }
         } else {
-            console.log('tab not visible, skip update');
+            if (statusElement) {
+                statusElement.textContent = '[!错误!]';
+                document.getElementById('additional-info').textContent = data.info || '未知错误';
+                let last_status = statusElement.classList.item(0);
+                statusElement.classList.remove(last_status);
+                statusElement.classList.add('error');
+            }
         }
     });
 

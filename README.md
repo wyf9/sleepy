@@ -25,7 +25,7 @@
 - [ ] ~~更多状态存储选项 (如 Redis)~~
 
 > [!TIP]
-> **最新开发进度/ TODOs 见: [Discord Server](https://discord.gg/DyBY6gwkeg)** / [Telegram Group](https://t.me/wyf9_sleepy) / [QQ Group]()<br/>
+> **最新开发进度/ TODOs 见: [Discord](https://discord.gg/DyBY6gwkeg)** / [Telegram](https://t.me/wyf9_sleepy) / [QQ](https://qm.qq.com/q/uItkv96Wn6)<br/>
 > 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
 
 对智能家居 / Home Assistant 感兴趣的朋友，一定要看看 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): [maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!

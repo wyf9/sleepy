@@ -109,6 +109,7 @@ def index():
         more_text=more_text,
         hitokoto=env.page.hitokoto,
         canvas=env.page.canvas,
+        moonlight=env.page.moonlight,
 
         steam_legacy_enabled=env.util.steam_legacy_enabled,
         steam_enabled=env.util.steam_enabled,
