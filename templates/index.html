@@ -237,6 +237,38 @@
 	</div>
     {% endif %}
     <!-- 节日灯笼 End   -->
+    <!-- 深/浅色模式 -->
+    <script>
+        function updateTheme() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const cards = document.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                if (prefersDark) {
+                    card.classList.remove('light');
+                    card.classList.add('dark');
+                } else {
+                    card.classList.remove('dark');
+                    card.classList.add('light');
+                }
+            });
+        }
+    
+        updateTheme();
+    
+        // 监听系统变化
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+    
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                const cards = document.querySelectorAll('.card');
+                cards.forEach(card => {
+                    card.classList.remove('light', 'dark');
+                    card.classList.add(savedTheme);
+                });
+            }
+    </script>
+    <!-- 深/浅色模式 End -->
 </body>
 
 </html>
