@@ -1,5 +1,8 @@
 const MLswitch = document.getElementById('moonlight');
+const sliderInput = document.getElementById('sliderRange');
 
+
+// ================= 主题系统 =================
 // 保存主题偏好
 function saveThemePreference(isDark) {
     localStorage.setItem('themePref', isDark ? 'dark' : 'light');
@@ -21,27 +24,17 @@ function applyTheme(theme) {
     });
 }
 
-// 增加不透明度控制
-function adjustOpacity(increase) {
-    document.querySelectorAll('.card').forEach(card => {
-        let opacity = parseFloat(getComputedStyle(card).opacity);
-        opacity = increase ? Math.min(1, opacity + 0.1) : Math.max(0.3, opacity - 0.1);
-        card.style.opacity = opacity;
-        localStorage.setItem('cardOpacity', opacity);
-    });
-}
-
-// 应用保存的不透明度
+// ================= 透明度系统 =================
+// 应用保存的透明度
 function applySavedOpacity() {
     const savedOpacity = localStorage.getItem('cardOpacity');
     if (savedOpacity) {
-        document.querySelectorAll('.card').forEach(card => {
-            card.style.opacity = savedOpacity;
-        });
+        document.documentElement.style.setProperty('--card-alpha', savedOpacity);
+        if (sliderInput) sliderInput.value = savedOpacity;
     }
 }
 
-// 初始化
+// ================= 初始化 =================
 document.addEventListener('DOMContentLoaded', () => {
     // 应用保存的主题
     const savedTheme = getThemePreference();
@@ -49,36 +42,93 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTheme(savedTheme);
     }
 
-    // 应用保存的不透明度
+    // 应用保存的透明度
     applySavedOpacity();
 
-    // 添加控制面板
-    const controlPanel = document.createElement('div');
-    controlPanel.className = 'theme-controls';
-    controlPanel.innerHTML = `
-        <div class="opacity-controls">
-            <button id="decrease-opacity">-</button>
-            <span>不透明度</span>
-            <button id="increase-opacity">+</button>
-        </div>
-    `;
-    document.body.appendChild(controlPanel);
-
-    // 添加事件监听
-    document.getElementById('decrease-opacity').addEventListener('click', () => adjustOpacity(false));
-    document.getElementById('increase-opacity').addEventListener('click', () => adjustOpacity(true));
 });
 
-// 原有的主题切换功能
+
+// ================= 主题切换事件 =================
 MLswitch.onclick = function () {
     document.querySelectorAll('.light, .dark').forEach(el => {
-        if (el.classList.contains('light')) {
-            el.classList.replace('light', 'dark');
-            saveThemePreference(true);
-        } else {
-            el.classList.replace('dark', 'light');
-            saveThemePreference(false);
-        }
+        el.classList.toggle('light');
+        el.classList.toggle('dark');
     });
+    saveThemePreference(document.querySelector('.dark') !== null);
 };
 
+// ================= 滑块交互逻辑 =================
+document.addEventListener('DOMContentLoaded', () => {
+    const sliderInput = document.getElementById('sliderRange');
+    let timeoutId = null, isDragging = false;
+
+    if (sliderInput) {
+        // 点击按钮显示 / 隐藏滑块
+        document.getElementById('slider').addEventListener('click', (e) => {
+            e.stopPropagation(); // 阻止冒泡，防止 `document` 误触发 `click`
+            sliderInput.style.display = sliderInput.style.display === 'block' ? 'none' : 'block';
+
+            if (sliderInput.style.display === 'block') {
+                startHideTimer();
+            }
+        });
+
+        // 用户开始拖动滑块
+        ['mousedown', 'touchstart'].forEach(eventType => {
+            sliderInput.addEventListener(eventType, function (e) {
+                e.stopPropagation(); // 防止事件冒泡
+                isDragging = true;
+                clearTimeout(timeoutId); // 停止隐藏倒计时
+            });
+        });
+
+        // 用户松手，滑块不会立即隐藏
+        ['mouseup', 'touchend'].forEach(eventType => {
+            sliderInput.addEventListener(eventType, function (e) {
+                e.stopPropagation(); // 防止事件冒泡
+                isDragging = false;
+
+                // **松手后，延迟 3 秒再开始隐藏倒计时**
+                setTimeout(() => {
+                    if (!isDragging) startHideTimer();
+                }, 3000);
+            });
+        });
+
+        // 用户拖动滑块时更新透明度
+        sliderInput.addEventListener('input', function (e) {
+            e.stopPropagation();
+            const alpha = e.target.value;
+            document.documentElement.style.setProperty('--card-alpha', alpha);
+            localStorage.setItem('cardOpacity', alpha);
+
+            if (!isDragging) resetHideTimer();
+        });
+
+        // **修正：点击滑块本身时，不隐藏**
+        sliderInput.addEventListener('click', (e) => {
+            e.stopPropagation(); // 阻止冒泡，防止 `document` 误触发 `click`
+        });
+
+        // **点击滑块外部时，5 秒后才隐藏滑块**
+        document.addEventListener('click', (e) => {
+            if (!sliderInput.contains(e.target)) {
+                startHideTimer();
+            }
+        });
+    }
+
+    function startHideTimer() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            if (!isDragging) {
+                sliderInput.style.display = 'none';
+            }
+        }, 5000);
+    }
+
+    function resetHideTimer() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(startHideTimer, 500);
+    }
+});
