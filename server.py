@@ -165,19 +165,6 @@ def style_css():
     response.mimetype = 'text/css'
     return response
 
-@app.route('/lantern.css')
-def lantern_css():
-    '''
-    /lantern.css
-    - Method: **GET**
-    '''
-
-    response = flask.make_response(flask.render_template(
-        'lantern.css',
-    ))
-    response.mimetype = 'text/css'
-    return response
-
 
 # --- Read-only
 

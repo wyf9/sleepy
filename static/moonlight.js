@@ -1,6 +1,7 @@
 const MLswitch = document.getElementById('moonlight');
 const sliderInput = document.getElementById('sliderRange');
 
+
 // ================= 主题系统 =================
 // 保存主题偏好
 function saveThemePreference(isDark) {
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applySavedOpacity();
 
 });
+
 
 // ================= 主题切换事件 =================
 MLswitch.onclick = function () {
