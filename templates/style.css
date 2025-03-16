@@ -257,30 +257,34 @@ body {
 	pointer-events: none
 }
 
-.deng-box1 .deng,.deng-box3 .deng {
-	position: relative;
-	width: 120px;
-	height: 90px;
-	margin: 50px;
-	background: #d8000f;
-	background: rgba(216,0,15,.8);
-	border-radius: 50% 50%;
-	-webkit-transform-origin: 50% -100px;
-	-webkit-animation: swing 5s infinite ease-in-out;
-	box-shadow: -5px 5px 30px 4px #fc903d
+.deng-box1 .deng, .deng-box3 .deng {
+    position: relative;
+    width: 120px;
+    height: 90px;
+    margin: 50px;
+    background: #d8000f;
+    background: rgba(216, 0, 15, .8);
+    border-radius: 50% 50%;
+    -webkit-transform-origin: 50% -100px;
+    transform-origin: 50% -100px; /* 添加标准属性 */
+    -webkit-animation: swing 5s infinite ease-in-out;
+    animation: swing 5s infinite ease-in-out; /* 添加标准属性 */
+    box-shadow: -5px 5px 30px 4px #fc903d;
 }
 
 .deng {
-	position: relative;
-	width: 120px;
-	height: 90px;
-	margin: 50px;
-	background: #d8000f;
-	background: rgba(216,0,15,.8);
-	border-radius: 50% 50%;
-	-webkit-transform-origin: 50% -100px;
-	-webkit-animation: swing 3s infinite ease-in-out;
-	box-shadow: -5px 5px 50px 4px #fa6c00
+    position: relative;
+    width: 120px;
+    height: 90px;
+    margin: 50px;
+    background: #d8000f;
+    background: rgba(216, 0, 15, .8);
+    border-radius: 50% 50%;
+    -webkit-transform-origin: 50% -100px;
+    transform-origin: 50% -100px; /* 添加标准属性 */
+    -webkit-animation: swing 3s infinite ease-in-out;
+    animation: swing 3s infinite ease-in-out; /* 添加标准属性 */
+    box-shadow: -5px 5px 50px 4px #fa6c00;
 }
 
 .deng-a {
@@ -313,14 +317,16 @@ body {
 }
 
 .shui-a {
-	position: relative;
-	width: 5px;
-	height: 20px;
-	margin: -5px 0 0 59px;
-	-webkit-animation: swing 4s infinite ease-in-out;
-	-webkit-transform-origin: 50% -45px;
-	background: orange;
-	border-radius: 0 0 5px 5px
+    position: relative;
+    width: 5px;
+    height: 20px;
+    margin: -5px 0 0 59px;
+    -webkit-animation: swing 4s infinite ease-in-out; /* 兼容旧版 WebKit 浏览器 */
+    animation: swing 4s infinite ease-in-out; /* 标准属性 */
+    -webkit-transform-origin: 50% -45px; /* 兼容旧版 WebKit 浏览器 */
+    transform-origin: 50% -45px; /* 标准属性 */
+    background: orange;
+    border-radius: 0 0 5px 5px;
 }
 
 .shui-b {
@@ -386,15 +392,313 @@ body {
 	background: 0 0!important
 }
 
+/* 兼容旧版 Firefox */
 @-moz-keyframes swing {
-	0%{-moz-transform: rotate(-10deg)}
-	50%{-moz-transform: rotate(10deg)}
-	100%{-moz-transform: rotate(-10deg)}
+    0% { -moz-transform: rotate(-10deg); }
+    50% { -moz-transform: rotate(10deg); }
+    100% { -moz-transform: rotate(-10deg); }
 }
 
+/* 兼容旧版 Webkit 浏览器 */
 @-webkit-keyframes swing {
-	0%{-webkit-transform: rotate(-10deg)}
-	50%{-webkit-transform: rotate(10deg)}
-	100%{-webkit-transform: rotate(-10deg)}
+    0% { -webkit-transform: rotate(-10deg); }
+    50% { -webkit-transform: rotate(10deg); }
+    100% { -webkit-transform: rotate(-10deg); }
+}
+
+/* 标准关键帧规则 */
+@keyframes swing {
+    0% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+    100% { transform: rotate(-10deg); }
 }
 /* 节日灯笼 End   */
+
+/* 音乐播放器CSS Start */
+:root {
+    --bg-color: rgba(255, 255, 255, 0.95);
+    --text-color: #333;
+    --secondary-color: #666;
+    --control-bg: rgba(0, 0, 0, 0.1);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --border-color: rgba(127, 127, 127, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: rgba(30, 30, 30, 0.95);
+        --text-color: #fff;
+        --secondary-color: #aaa;
+        --control-bg: rgba(255, 255, 255, 0.1);
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 播放器容器 */
+#player-container {
+    position: fixed;
+    left: 0;
+    bottom: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    transition: 0.3s;
+}
+
+/* 主播放器 */
+#player {
+    width: 320px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    padding: 15px;
+    font-family: 'Segoe UI', sans-serif;
+    transition: 0.3s;
+    margin-left: -320px;
+    opacity: 0;
+    pointer-events: none;
+    border: 1px solid var(--border-color);
+}
+
+#player.active {
+    margin-left: 0;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 歌曲列表 */
+.song-list {
+    position: absolute;
+    bottom: calc(100% + 10px);  /* 调整到播放器上方 */
+    left: 0;
+    right: 0;
+    max-height: 50vh;  /* 可视区域高度限制 */
+    overflow-y: auto;
+    background: var(--bg-color);
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    display: none;
+    z-index: 1001;
+    padding: 8px 0;
+}
+
+.song-list.show {
+    display: block;
+}
+
+.song-item {
+    padding: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.song-item:hover {
+    background: var(--control-bg);
+}
+
+.song-item.active {
+    background: var(--control-bg);
+}
+
+.song-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.song-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-artist {
+    font-size: 0.8em;
+    color: var(--secondary-color);
+}
+
+/* 折叠状态 */
+#player.collapsed {
+    margin-left: -320px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 展开/收起按钮 */
+#toggle-btn {
+    width: 40px;
+    height: 40px;
+    background: var(--bg-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    transition: 0.3s;
+    margin-left: 10px;
+}
+
+#toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+/* 封面样式 */
+.cover {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    margin-right: 15px;
+    animation: rotate 20s linear infinite;
+    animation-play-state: paused;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.playing .cover {
+    animation-play-state: running;
+}
+
+/* 歌曲信息 */
+.info {
+    flex: 1;
+    min-width: 0;
+}
+
+.song-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist {
+    font-size: 0.9em;
+    color: var(--secondary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 控制栏 */
+.controls {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 控制栏按钮 */
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: 0.3s;
+    color: var(--text-color);
+    -webkit-appearance: none; /* 兼容 WebKit 内核浏览器 */
+    appearance: none;          /* 标准属性，提升兼容性 */
+}
+
+button:hover {
+    background: var(--control-bg);
+}
+
+/* 进度条滑块 */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* 兼容 WebKit 内核浏览器 */
+    appearance: none;          /* 标准属性，提升兼容性 */
+    width: 12px;
+    height: 12px;
+    background: var(--text-color);
+    border-radius: 50%;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--text-color);
+    border-radius: 50%;
+}
+
+/* 输入区域 */
+.playlist-input {
+    transition: 0.3s;
+    display: flex;
+    gap: 10px;
+}
+
+.playlist-input.hidden {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#playlistId {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--control-bg);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-color);
+}
+
+/* 加载动画 */
+.loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--control-bg);
+    border-top: 3px solid var(--text-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 新增返回按钮样式 */
+.return-input {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--control-bg);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.return-input:hover {
+    transform: scale(1.1);
+}
+/* 音乐播放器CSS End */
