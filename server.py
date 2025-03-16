@@ -110,6 +110,7 @@ def index():
         hitokoto=env.page.hitokoto,
         canvas=env.page.canvas,
         moonlight=env.page.moonlight,
+        lantern=env.page.lantern,
 
         steam_legacy_enabled=env.util.steam_legacy_enabled,
         steam_enabled=env.util.steam_enabled,
@@ -160,6 +161,19 @@ def style_css():
         'style.css',
         bg=env.page.background,
 
+    ))
+    response.mimetype = 'text/css'
+    return response
+
+@app.route('/lantern.css')
+def lantern_css():
+    '''
+    /lantern.css
+    - Method: **GET**
+    '''
+
+    response = flask.make_response(flask.render_template(
+        'lantern.css',
     ))
     response.mimetype = 'text/css'
     return response
