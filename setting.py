@@ -1,8 +1,9 @@
 # coding: utf-8
 
+from os.path import join
+
 import json
 import utils as u
-
 
 class setting:
     '''
@@ -24,6 +25,5 @@ class setting:
         except Exception as e:
             u.exception(f'[setting] Error loading {filename}: {e}')
 
-
-status_list: list = setting('setting/status_list.json').content
-metrics_list: list = setting('setting/metrics_list.json').content
+status_list: list = setting(join(u.current_dir(),'setting/status_list.json')).content
+metrics_list: list = setting(join(u.current_dir() ,'setting/metrics_list.json')).content
