@@ -16,7 +16,7 @@ from setting import status_list
 
 try:
     # init flask app
-    app = flask.Flask(__name__)
+    app = flask.Flask(__name__,template_folder='static')
 
     # disable flask access log
     from logging import getLogger
@@ -36,13 +36,13 @@ except Exception as e:
     u.error(f"Error initing: {e}")
     exit(1)
 except KeyboardInterrupt:
-    logging.warning('Interrupt init')
+    u.warning('Interrupt init')
     exit(0)
 except u.SleepyException as e:
     u.error(f'==========\n{e}')
     exit(1)
 except:
-    logging.error('Unexpected Error!')
+    u.error('Unexpected Error!')
     raise
 
 
@@ -112,6 +112,7 @@ def index():
         moonlight=env.page.moonlight,
         lantern=env.page.lantern,
         mplayer=env.page.mplayer,
+        bg=env.page.background,
 
         steam_legacy_enabled=env.util.steam_legacy_enabled,
         steam_enabled=env.util.steam_enabled,
@@ -149,22 +150,6 @@ if env.util.steam_enabled:
             'steam.html',
             steamids=env.util.steam_ids
         )
-
-
-@app.route('/style.css')
-def style_css():
-    '''
-    /style.css
-    - Method: **GET**
-    '''
-
-    response = flask.make_response(flask.render_template(
-        'style.css',
-        bg=env.page.background,
-
-    ))
-    response.mimetype = 'text/css'
-    return response
 
 
 # --- Read-only
@@ -491,6 +476,7 @@ if env.util.metrics:
 
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
+    print(env.page.background)
     u.info(f'Starting server: {f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}{" (debug enabled)" if env.main.flask_debug else ""}')
     app.run(  # 启↗动↘
         host=env.main.host,

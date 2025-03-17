@@ -6,19 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page_title }}</title>
     <meta name="description" content="{{ page_desc }}">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="lantern.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- live server环境 -->
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="lantern.css">
+    <link rel="stylesheet" href="music.css">
+    <!-- flask环境 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='lantern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='music.css') }}">
+
+    <style>
+        body {
+            background: url('{{ bg }}') no-repeat center center fixed;
+        }
+    </style>
+
 </head>
 
 <body>
     <div class="container">
         <div class="card light" id="user_status">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
+
             <!-- Moonlight Start -->
             {% if moonlight %}
             <script src="{{ url_for('static', filename='moonlight.js') }}" defer></script>
-            <script src="../static/moonlight.js"></script>
             <button id="moonlight" style="background: none; border: none; cursor: pointer;">
                 <!-- 版权所有 勿删) https://www.iconfont.cn/user/detail?uid=8623109&nid=9eLPALIxYUDV -->
                 <svg t="1741008747639" class="icon" viewBox="0 0 1024 1024" version="1.1"
@@ -34,7 +48,6 @@
             {% endif %}
             <!-- Moonlight End -->
 
-
             <!-- 滑块透明度 -->
             <button id="slider">
                 <svg t="1741527882713" class="icon" viewBox="0 0 1024 1024" version="1.1"
@@ -43,90 +56,14 @@
                         d="M384 187.8V160c0-17.7-14.3-32-32-32H160c-17.7 0-32 14.3-32 32v27.8c0 2.2-1.8 4-4 4H0v64h124c2.2 0 4 1.8 4 4V288c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28.3c0-2.2 1.8-4 4-4h636v-64H388c-2.2 0.1-4-1.7-4-3.9zM316 256H196c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM768 476v-28c0-17.7-14.3-32-32-32H544c-17.7 0-32 14.3-32 32v28c0 2.2-1.8 4-4 4H0v64h508c2.2 0 4 1.8 4 4v28c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-28c0-2.2 1.8-4 4-4h252v-64H772c-2.2 0-4-1.8-4-4z m-68 68H580c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4zM480 764.3V736c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v28.3c0 2.2-1.8 4-4 4H0v64h220c2.2 0 4 1.8 4 4V864c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32v-27.8c0-2.2 1.8-4 4-4h540v-64H484c-2.2 0.1-4-1.7-4-3.9zM412 832H292c-2.2 0-4-1.8-4-4v-56c0-2.2 1.8-4 4-4h120c2.2 0 4 1.8 4 4v56c0 2.2-1.8 4-4 4z"
                         p-id="2641"></path>
                 </svg>
-                <input type="range" id="sliderRange" min="0.1" max="1" value="0.5" step="0.01">
+                <input type="range" id="sliderRange" min="0" max="1" value="0.5" step="0.01">
             </button>
-            <script defer>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const button = document.getElementById('slider');
-                    const sliderInput = document.getElementById('sliderRange');
-                    let timeoutId = null;
-                    let isDragging = false; // 新增拖动状态标记
 
-                    // 初始化透明度
-                    const savedOpacity = localStorage.getItem('cardOpacity');
-                    if (savedOpacity) {
-                        document.querySelectorAll('.card').forEach(card => {
-                            card.style.opacity = savedOpacity;
-                        });
-                        sliderInput.value = savedOpacity;
-                    }
-
-                    // 按钮点击逻辑
-                    button.addEventListener('click', (e) => {
-                        if (timeoutId) clearTimeout(timeoutId);
-                        const isVisible = sliderInput.style.display === 'block';
-                        sliderInput.style.display = isVisible ? 'none' : 'block';
-
-                        if (!isVisible) {
-                            startHideTimer(); // 初次显示时启动计时
-                        }
-                    });
-
-                    // 滑块交互逻辑
-                    sliderInput.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                    });
-
-                    // 拖动开始（鼠标按下/触摸开始）
-                    sliderInput.addEventListener('mousedown', () => {
-                        isDragging = true;
-                        clearTimeout(timeoutId); // 清除现有计时器
-                    });
-
-                    // 拖动结束（鼠标抬起/触摸结束）
-                    sliderInput.addEventListener('mouseup', () => {
-                        isDragging = false;
-                        startHideTimer(); // 重新启动计时器
-                    });
-                    // 初始化逻辑
-                    function applySavedOpacity() {
-                        const savedAlpha = localStorage.getItem('cardOpacity') || 0.6;
-                        document.documentElement.style.setProperty('--card-alpha', savedAlpha);
-                        document.getElementById('sliderRange').value = savedAlpha;
-                    }
-                    // 处理滑块值变化
-                    sliderInput.addEventListener("input", (e) => {
-                        const alpha = e.target.value;
-                        document.documentElement.style.setProperty('--card-alpha', alpha);
-                        localStorage.setItem('cardOpacity', alpha);
-
-                        // 如果正在拖动，不刷新计时器
-                        if (!isDragging) {
-                            resetHideTimer();
-                        }
-                    });
-
-                    // 工具函数：启动隐藏计时器
-                    function startHideTimer() {
-                        timeoutId = setTimeout(() => {
-                            sliderInput.style.display = 'none';
-                        }, 5000);
-                    }
-
-                    // 工具函数：重置隐藏计时器
-                    function resetHideTimer() {
-                        if (timeoutId) clearTimeout(timeoutId);
-                        startHideTimer();
-                    }
-                });
-            </script>
-
-            <h3><i><b>{{ user }}'s</b></i> Status:<br><a id="status" style="font-size: 1.2em;">{{ status_name }}</a>
-            </h3>
-            <p id="additional-info" style="font-size: 1em;">{{ status_desc | safe }}</p>
-            <!-- <hr /> 由 get.js 控制 -->
+            <h3><i><b>{{ user }}'s</b></i> Status:<br><a id="status">{{ status_name }}</a></h3>
+            <p id="additional-info">{{ status_desc | safe }}</p>
             <p id="device-status">[设备状态列表]</p>
-            <!-- Steam Game Playing Status (legacy) Start -->
+
+            <!-- Steam 状态模块 -->
             {% if steam_legacy_enabled %}
             <p id="steam-legacy"></p>
             <script defer>
@@ -179,8 +116,7 @@
                 }
             </script>
             {% endif %}
-            <!-- Steam Game Playing Status (legacy) End -->
-            <!-- Steam Card (new) Start -->
+
             {% if steam_enabled %}
             <hr />
             <h3><b>
@@ -191,15 +127,11 @@
                     marginheight="0px" marginwidth="0px" height="210px" width="310px" allowfullscreen></iframe>
             </div>
             {% endif %}
-            <!-- Steam Card (new) End -->
 
-            <!-- 最后更新: xxxx-xx-xx xx:xx:xx -->
             <p id="last-updated">最后更新: {{ last_updated }}</p>
-
         </div>
 
         <div class="card light" id="more_text">
-            <!-- Hitokoto Start -->
             {% if hitokoto %}
             <div>
                 <p id="hitokoto">
@@ -224,13 +156,10 @@
                 </script>
             </div>
             {% endif %}
-            <!-- Hitokoto End -->
             {{ more_text | safe }}
-            <p>你可以通过这个页面视奸 <b>{{ user }}</b>。
-                <br>
+            <p>你可以通过这个页面视奸 <b>{{ user }}</b>。<br>
                 <a href="{{ repo }}" target="_blank" style="color: rgb(0, 255, 0);">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
-                        style="vertical-align: middle; width: 1em;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:1em;">
                         <path
                             d="M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32h82.7L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32H320zM80 32C35.8 32 0 67.8 0 112V432c0 44.2 35.8 80 80 80H400c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32V432c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16H192c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z" />
                     </svg>
@@ -240,22 +169,106 @@
         </div>
     </div>
 
-    <script>
-        const statusElement = document.getElementById('status');
-        statusElement.classList.add('{{ status_color }}');
-    </script>
-
-    <script src="{{ url_for('static', filename='get.js') }}" defer></script>
-
-    {% if canvas %}
-    <script src="{{ url_for('static', filename='canvas.js') }}" defer></script>
-    {% endif %}
-
-    <!-- 节日灯笼 Start -->
+    <!-- 节日灯笼 -->
     {% if lantern %}
-   
+    <div class="lanterns">
+        <!-- 右侧灯笼 -->
+        <div class="lanterns__box lanterns__box--right">
+            <div class="lanterns__item" data-speed="fast" data-character="新">
+                <div class="lanterns__string"></div>
+                <div class="lanterns__body">
+                    <div class="lanterns__decorative"></div>
+                    <div class="lanterns__character">新</div>
+                </div>
+                <div class="lanterns__tassel"></div>
+            </div>
+        </div>
+
+        <!-- 右侧外灯笼 -->
+        <div class="lanterns__box lanterns__box--right-close">
+            <div class="lanterns__item" data-speed="slow" data-character="春">
+                <div class="lanterns__string"></div>
+                <div class="lanterns__body">
+                    <div class="lanterns__decorative"></div>
+                    <div class="lanterns__character">春</div>
+                </div>
+                <div class="lanterns__tassel"></div>
+            </div>
+        </div>
+
+        <!-- 左侧灯笼 -->
+        <div class="lanterns__box lanterns__box--left">
+            <div class="lanterns__item" data-speed="fast" data-character="度">
+                <div class="lanterns__string"></div>
+                <div class="lanterns__body">
+                    <div class="lanterns__decorative"></div>
+                    <div class="lanterns__character">度</div>
+                </div>
+                <div class="lanterns__tassel"></div>
+            </div>
+        </div>
+
+        <!-- 左侧外处灯笼 -->
+        <div class="lanterns__box lanterns__box--left-close">
+            <div class="lanterns__item" data-speed="slow" data-character="欢">
+                <div class="lanterns__string"></div>
+                <div class="lanterns__body">
+                    <div class="lanterns__decorative"></div>
+                    <div class="lanterns__character">欢</div>
+                </div>
+                <div class="lanterns__tassel"></div>
+            </div>
+        </div>
+    </div>
     {% endif %}
-    <!-- 节日灯笼 End   -->
+
+    <!-- 音乐播放器 Start -->
+    <div id="player-container">
+
+        <div id="player">
+            <div class="playlist-input">
+                <input type="text" id="playlistId" placeholder="请输入网易云歌单ID">
+                <button id="loadPlaylist"><i class="fas fa-arrow-down"></i></button>
+            </div>
+            <div class="main" style="display: none;">
+                <div class="return-input" title="切换歌单">
+                    <i class="fas fa-redo"></i>
+                </div>
+                <div style="height: 15px;"></div>
+                <div style="display: flex; align-items: center;">
+                    <img src="" class="cover" alt="封面">
+                    <div class="info">
+                        <div class="song-title">歌曲标题</div>
+                        <div class="artist">歌手</div>
+                    </div>
+                    <button id="showList"><i class="fas fa-list"></i></button>
+                </div>
+                <div class="controls">
+                    <button id="prev"><i class="fas fa-step-backward"></i></button>
+                    <button id="playPause"><i class="fas fa-play"></i></button>
+                    <button id="next"><i class="fas fa-step-forward"></i></button>
+                    <input type="range" id="progress" value="0">
+                </div>
+                <div class="song-list">
+                    <!-- 歌曲列表动态生成 -->
+                </div>
+            </div>
+            <div class="loader"></div>
+        </div>
+        <button id="toggle-btn"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <!-- 音乐播放器 End -->
+
+    <!-- 动态加载的脚本 -->
+    <script>
+        document.getElementById('status').classList.add('{{ status_color }}');
+    </script>
+    <script src="{{ url_for('static', filename='get.js') }}" defer></script>
+    {% if canvas %}
+    <script src="{{ url_for('static', filename='canvas.js') }}" defer></script>{% endif %}
+    <script src="{{ url_for('static', filename='mplayer.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='aplayer.js') }}" defer></script>
+
 </body>
 
 </html>
