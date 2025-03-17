@@ -62,6 +62,7 @@ class _status:
     device_slice: int = getenv('sleepy_status_device_slice', 30, int)
     show_loading: bool = getenv('sleepy_status_show_loading', True, bool)
     refresh_interval: int = getenv('sleepy_status_refresh_interval', 5000, int)
+    not_using: str = getenv('sleepy_status_not_using', '', str)
 
 
 class _util:
