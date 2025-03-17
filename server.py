@@ -3,7 +3,7 @@
 
 import time
 import json5
-import importlib
+# import importlib - ready for plugin?
 import pytz
 import flask
 from datetime import datetime
@@ -18,17 +18,18 @@ try:
     # init flask app
     app = flask.Flask(__name__,template_folder='static')
 
-    # disable flask access log
-    from logging import getLogger
-    flask_default_logger = getLogger('werkzeug')
-    flask_default_logger.disabled = True
+    # disable flask access log (if not debug)
+    if not env.main.flask_debug:
+        from logging import getLogger
+        flask_default_logger = getLogger('werkzeug')
+        flask_default_logger.disabled = True
 
     # init data
     d = data_init()
     d.load()
     d.start_timer_check(data_check_interval=env.main.checkdata_interval)  # 启动定时保存
 
-    # metrics?
+    # init metrics if enabled
     if env.util.metrics:
         u.info('[metrics] metrics enabled, open /metrics to see your count.')
         d.metrics_init()
@@ -103,6 +104,7 @@ def index():
         'index.html',
         page_title=env.page.title,
         page_desc=env.page.desc,
+        page_favicon=env.page.favicon,
         user=env.page.user,
         learn_more=env.page.learn_more,
         repo=env.page.repo,
@@ -262,8 +264,9 @@ def device_set():
         secret = escape(flask.request.args.get('secret'))
         if secret == env.main.secret:
             devices: dict = d.dget('device_status')
-            if not device_using:
-                app_name = ''
+            if (not device_using) and env.status.not_using:
+                # 如未在使用且锁定了提示，则替换
+                app_name = env.status.not_using
             devices[device_id] = {
                 'show_name': device_show_name,
                 'using': device_using,
@@ -290,8 +293,9 @@ def device_set():
             )
         if secret == env.main.secret:
             devices: dict = d.dget('device_status')
-            if not device_using:
-                app_name = ''
+            if (not device_using) and env.status.not_using:
+                # 如未在使用且锁定了提示，则替换
+                app_name = env.status.not_using
             devices[device_id] = {
                 'show_name': device_show_name,
                 'using': device_using,

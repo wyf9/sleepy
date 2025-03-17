@@ -158,8 +158,8 @@ function setupEventSource() {
 
             for (let device of devices) {
                 let device_app;
+                const escapedAppName = escapeHtml(device.app_name);
                 if (device.using) {
-                    const escapedAppName = escapeHtml(device.app_name);
                     const jsShowName = escapeJs(device.show_name);
                     const jsAppName = escapeJs(device.app_name);
                     const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
@@ -172,7 +172,10 @@ function setupEventSource() {
 ${sliceText(escapedAppName, data.device_status_slice)}
 </a>`;
                 } else {
-                    device_app = '<a class="sleeping">未在使用</a>';
+                    device_app = `
+<a class="sleeping">
+${sliceText(escapedAppName, data.device_status_slice)}
+</a>`
                 }
                 deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
             }
@@ -316,10 +319,8 @@ async function update() {
 
                         for (let device of devices) {
                             let device_app;
+                            const escapedAppName = escapeHtml(device.app_name);
                             if (device.using) {
-
-                                const escapedAppName = escapeHtml(device.app_name);
-
                                 const jsShowName = escapeJs(device.show_name);
                                 const jsAppName = escapeJs(device.app_name);
 
@@ -334,7 +335,10 @@ ${sliceText(escapedAppName, data.device_status_slice)}
 </a>
 `;
                             } else {
-                                device_app = '<a class="sleeping">未在使用</a>';
+                                device_app = `
+<a class="sleeping">
+${sliceText(escapedAppName, data.device_status_slice)}
+</a>`
                             }
                             deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
                         }

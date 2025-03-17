@@ -43,6 +43,7 @@ class _page:
     '''
     title: str = getenv('sleepy_page_title', 'User Alive?', str)
     desc: str = getenv('sleepy_page_desc', 'User\'s Online Status Page', str)
+    favicon: str = getenv('sleepy_page_favicon', '', str)
     user: str = getenv('sleepy_page_user', 'User', str)
     background: str = getenv('sleepy_page_background', 'https://imgapi.siiway.top/image', str)
     learn_more: str = getenv('sleepy_page_learn_more', 'GitHub Repo', str)
@@ -62,6 +63,7 @@ class _status:
     device_slice: int = getenv('sleepy_status_device_slice', 30, int)
     show_loading: bool = getenv('sleepy_status_show_loading', True, bool)
     refresh_interval: int = getenv('sleepy_status_refresh_interval', 5000, int)
+    not_using: str = getenv('sleepy_status_not_using', '', str)
 
 
 class _util:
