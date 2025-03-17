@@ -104,6 +104,7 @@ def index():
         'index.html',
         page_title=env.page.title,
         page_desc=env.page.desc,
+        page_favicon=env.page.favicon,
         user=env.page.user,
         learn_more=env.page.learn_more,
         repo=env.page.repo,

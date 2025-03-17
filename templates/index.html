@@ -8,7 +8,13 @@
     <meta name="description" content="{{ page_desc }}">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% if page_favicon %}
+    <!-- 如果指定了自定义 favicon url -->
+    <link rel="icon" href="{{ page_favicon }}">
+    {% else %}
+    <!-- 否则使用默认 favicon.ico -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    {% endif %}
 </head>
 
 <body>
