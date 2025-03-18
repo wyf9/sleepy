@@ -15,7 +15,9 @@ LASTWINDOW="inoryxin" # 这个变量是让电脑第一次开机进桌面不进�
 
 while true; do
 
-    PACKAGE_NAME=$(/usr/bin/hyprctl activewindow | grep "title:" | sed 's/title://g' | sed 's/^[[:space:]]*//')
+    HYPRCTL_BIN=$(which hyprctl)
+
+    PACKAGE_NAME=$($HYPRCTL_BIN activewindow | grep "title:" | sed 's/title://g' | sed 's/^[[:space:]]*//')
 
     echo "$PACKAGE_NAME"
 

@@ -2,7 +2,7 @@
 import os
 import utils as u
 from dotenv import load_dotenv, find_dotenv
-dotenv_filename = '.env'
+dotenv_filename = os.path.join(u.current_dir(), ".env")
 if not find_dotenv(filename=dotenv_filename):
     u.warning("未找到 .env 文件，将使用默认配置，部分功能可能失效！")
 load_dotenv(dotenv_path=dotenv_filename)

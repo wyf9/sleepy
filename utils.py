@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from flask import make_response, Response
+from pathlib import Path
 
 
 def info(log):
@@ -113,3 +114,7 @@ def exception(msg: str):
     :param msg: 错误描述
     '''
     raise SleepyException(msg)
+
+
+def current_dir():
+    return Path(__file__).parent

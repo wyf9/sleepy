@@ -22,14 +22,14 @@ class data:
     data_check_interval: int = 60
 
     def __init__(self):
-        with open('data.template.json', 'r', encoding='utf-8') as file:
+        with open(os.path.join(u.current_dir(), 'data.template.json'), 'r', encoding='utf-8') as file:
             self.preload_data = json.load(file)
-        if os.path.exists('data.json'):
+        if os.path.exists(os.path.join(u.current_dir(), 'data.json')):
             try:
                 self.load()
             except Exception as e:
                 u.warning(f'Error when loading data: {e}, try re-create')
-                os.remove('data.json')
+                os.remove(os.path.join(u.current_dir(), 'data.json'))
                 self.data = self.preload_data
                 self.save()
                 self.load()
@@ -56,11 +56,11 @@ class data:
 
         while attempts > 0:
             try:
-                if not os.path.exists('data.json'):
+                if not os.path.exists(os.path.join(u.current_dir(), 'data.json')):
                     u.warning('data.json not exist, try re-create')
                     self.data = self.preload_data
                     self.save()
-                with open('data.json', 'r', encoding='utf-8') as file:
+                with open(os.path.join(u.current_dir(), 'data.json'), 'r', encoding='utf-8') as file:
                     Data = json.load(file)
                     DATA: dict = {**preload, **Data}
                     if ret:
@@ -81,7 +81,7 @@ class data:
         保存配置
         '''
         try:
-            with open('data.json', 'w', encoding='utf-8') as file:
+            with open(os.path.join(u.current_dir(), 'data.json'), 'w', encoding='utf-8') as file:
                 json.dump(self.data, file, indent=4, ensure_ascii=False)
         except Exception as e:
             u.error(f'Failed to save data.json: {e}')
