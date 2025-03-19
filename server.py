@@ -16,7 +16,7 @@ from setting import status_list
 
 try:
     # init flask app
-    app = flask.Flask(__name__,template_folder='static')
+    app = flask.Flask(__name__, template_folder='static')
 
     # disable flask access log (if not debug)
     if not env.main.flask_debug:
@@ -51,7 +51,7 @@ except:
 
 
 @app.before_request
-def showip():  # type: ignore / (req: flask.request, msg)
+def showip():
     '''
     在日志中显示 ip, 并记录 metrics 信息
     如 Header 中 User-Agent 为 SleepyPlugin/(每次启动使用随机 uuid) 则不进行任何记录
@@ -480,7 +480,6 @@ if env.util.metrics:
 
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
-    print(env.page.background)
     u.info(f'Starting server: {f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}{" (debug enabled)" if env.main.flask_debug else ""}')
     app.run(  # 启↗动↘
         host=env.main.host,

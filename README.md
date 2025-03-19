@@ -6,9 +6,8 @@
 
 ## 功能
 
-- [x] 自行设置在线状态 *(活着 / 似了 等, 也可[自定义](./setting/README.md#status_listjson))*
-- [x] 实时更新设备使用状态 *(包括 是否正在使用 / 打开的应用名)*
-- [x] 实时更新设备打开应用 (名称)
+- [x] 自行设置在线状态 *(活着 / 似了 等, 也可 **[自定义](./setting/README.md#status_listjson)** 状态列表)*
+- [x] 实时更新设备使用状态 *(包括 是否正在使用 / 打开的应用名, 通过 **[client](./client/README.md)** 主动推送)*
 - [x] 美观的展示页面 [见 [Preview](#preview)]
 - [x] 开放的 Query / Metrics [接口](./doc/api.md), 方便统计
 
@@ -24,7 +23,7 @@
 
 HuggingFace 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space) ![](https://uptime.wyf9.top/api/badge/22/status) ![](https://uptime.wyf9.top/api/badge/22/uptime)
 
-> 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本 (**密钥 `wyf9test`**)
+> 区别: 演示站为 wyf9 个人站点; 两个预览站允许测试 API，且直接运行开发版本 (**密钥均为 `wyf9test`**)
 
 > [!WARNING]
 > 不要拿演示站做坏事 (比如 js 注入，已由 DeepSeek 强力修复) ~~，没准哪天我会加访问日志~~
