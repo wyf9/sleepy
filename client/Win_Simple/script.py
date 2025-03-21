@@ -30,7 +30,7 @@ CHECK_INTERVAL = 2
 # 控制台输出所用编码(utf-8选一个gb18030)
 ENCODING = utf-8
 # 当窗口标题为其中任意一项时将不更新（|分隔）
-SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 开始| Win_Simple.exe| 示例窗口1| 示例窗口2
+SKIPPED_NAMES = | 系统托盘溢出窗口。| 新通知| 任务切换| 快速设置| 通知中心| 搜索| Flow.Launcher| 任务视图| 任务栏| 「开始」菜单| Win_Simple.exe| 示例窗口1| 示例窗口2
 # 当窗口标题为其中任意一项时视为未在使用
 NOT_USING_NAMES = 我们喜欢这张图片，因此我们将它与你共享。| 示例窗口1| 示例窗口2
 # 是否反转窗口标题

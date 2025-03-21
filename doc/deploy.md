@@ -48,9 +48,10 @@ python3 start.py
 ```
 默认服务 http 端口: **`9010`**
 
-## Huggingface 部署
+## Huggingface 部署(推荐)
 
 > 适合没有服务器部署的同学使用
+> 有服务器也推荐，不怕被打
 
 只需三步:
 
@@ -62,7 +63,7 @@ python3 start.py
 > **在创建时请务必选择 Space 类型为公开 (`Public`)，否则无法获取部署地址 (他人无法访问)!** <br/>
 > *HUgging Face 部署如几天未访问将会休眠，建议使用定时请求平台 (如 `cron-job.org`, `Uptime Kuma` 等) 保活 Space*
 
-### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了 (已过时)
+### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
 
 <details>
 
@@ -72,8 +73,8 @@ python3 start.py
 **有的兄弟，有的！**
 这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作
 我怕教太多了你学不会，现在只要点
-[这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)  
-然后自己去注册一个账号
+[这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)    
+然后自己去注册一个账号  
 参考`.env.example`在Setting==>Variables and secrets添加环境变量配置
 然后在这里:
 ![链接](https://files.catbox.moe/svvdt6.png)
