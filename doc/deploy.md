@@ -61,7 +61,7 @@ python3 start.py
 
 > [!IMPORTANT]
 > **在创建时请务必选择 Space 类型为公开 (`Public`)，否则无法获取部署地址 (他人无法访问)!** <br/>
-> *HUgging Face 部署如几天未访问将会休眠，建议使用定时请求平台 (如 `cron-job.org`, `Uptime Kuma` 等) 保活 Space*
+> *HUgging Face 部署如48h未访问将会休眠，建议使用定时请求平台 (如 `cron-job.org`, `Uptime Kuma` 等) 保活 Space*
 
 ### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
 
