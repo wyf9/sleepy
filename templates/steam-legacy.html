@@ -1,0 +1,50 @@
+<p id="steam-legacy"></p>
+<script defer>
+    function getSteamUserInfo(userData) {
+        if (!userData.response || !userData.response.players || userData.response.players.length === 0) {
+            return { error: "No player data found." };
+        }
+        const player = userData.response.players[0];
+        const nickname = player.personaname;
+        // const onlineStatus = player.personastate === 1 ? "在线" : "离线";
+        const gameStatus = player.gameextrainfo ? `正在玩: ${player.gameextrainfo}` : "未在游戏中";
+        const gameid = player.gameid ? player.gameid : -1;
+        return {
+            nickname,
+            // onlineStatus,
+            gameStatus,
+            gameid
+        };
+    }
+    const steamkey = '{{ steamkey }}';
+    const steamids = '{{ steamids }}';
+    if (steamkey && !isNaN(steamids)) {
+        const steam = document.getElementById('steam-legacy');
+        //也许这里需要反代
+        //const steamapi = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1";
+        //https://store.steampowered.com/app/2358720
+        //const steamapi = "https://a.858efb39d39c.workers.dev"; // 且用且珍惜
+        const steamapi = "https://proxy.mooncc.cn/http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2";
+        const quresteaam = `${steamapi}/?key=${steamkey}&steamids=${steamids}`;
+        (async () => {
+            try {
+                const response = await fetch(quresteaam);
+                const data = await response.json();
+                console.log(`Steam info response: ${data}`);
+                const steamInfo = getSteamUserInfo(data);
+                if (steamInfo.gameid !== -1) {
+                    steam.innerHTML = `<p><span>${steamInfo.nickname}</span> <a target="_blank" href="https://store.steampowered.com/app/${steamInfo.gameid}">${steamInfo.gameStatus}</a></p>`;
+                } else {
+                    steam.innerHTML = `<p><span>${steamInfo.nickname}</span> ${steamInfo.gameStatus}</p>`;
+                }
+
+            } catch (error) {
+                console.error(`Fetch steam info error: ${error}`);
+                steam.innerHTML = '';
+            }
+        })();
+
+    } else {
+        console.log('Steam info disabled');
+    }
+</script>

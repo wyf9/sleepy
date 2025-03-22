@@ -146,15 +146,6 @@ def none():
     return '', 204
 
 
-if env.util.steam_enabled:
-    @app.route('/steam')
-    def steam():
-        return flask.render_template(
-            'steam.html',
-            steamids=env.util.steam_ids
-        )
-
-
 # --- Read-only
 
 
@@ -462,8 +453,7 @@ def events():
     return response
 
 
-# --- (Special) Metrics API
-
+# --- Special
 
 if env.util.metrics:
     @app.route('/metrics')
@@ -475,9 +465,15 @@ if env.util.metrics:
         resp = d.get_metrics_resp()
         return resp
 
+if env.util.steam_enabled:
+    @app.route('/steam-iframe')
+    def steam():
+        return flask.render_template(
+            'steam-iframe.html',
+            steamids=env.util.steam_ids
+        )
 
 # --- End
-
 
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
