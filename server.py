@@ -86,7 +86,7 @@ def index():
     try:
         stat = status_list[d.data['status']]
     except:
-        print(f"索引 {d.data['status']} 超出范围, 使用默认值")
+        u.warning(f"索引 {d.data['status']} 超出范围, 使用默认值")
         stat = {
             'name': 'Unknown',
             'desc': '未知的标识符，可能是配置问题。',

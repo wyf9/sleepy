@@ -1,13 +1,13 @@
 # 部署
 
 - [部署](#部署)
-  - [手动部署 (推荐)](#手动部署-推荐)
+  - [手动部署](#手动部署)
     - [安装](#安装)
     - [启动](#启动)
   - [Huggingface 部署](#huggingface-部署)
-    - [我承认你的代码写的确实很nb，但对我来说还是太吃操作了 (已过时)](#我承认你的代码写的确实很nb但对我来说还是太吃操作了-已过时)
+    - [我承认你的代码写的确实很nb，但对我来说还是太吃操作了](#我承认你的代码写的确实很nb但对我来说还是太吃操作了)
 
-## 手动部署 (推荐)
+## 手动部署
 
 本方式理论上全平台通用, 安装了 Python >= **3.6** 即可 (建议: **3.10+**)
 
@@ -48,20 +48,21 @@ python3 start.py
 ```
 默认服务 http 端口: **`9010`**
 
-## Huggingface 部署(推荐)
+## Huggingface 部署
 
-> 适合没有服务器部署的同学使用
-> 有服务器也推荐，不怕被打
+> 适合没有服务器部署的同学使用 <br/>
+> *有服务器也推荐，不怕被打* <br/>
+> *唯一的缺点: **不能使用自定义域名***
 
 只需三步:
 
-1. 复制 Space `wyf9/sleepy` ([点击直达](https://huggingface.co/spaces/wyf9/sleepy?duplicate=true&visibility=public))
+1. 复制 Space `wyf9/sleepy` (**[点击直达](https://huggingface.co/spaces/wyf9/sleepy?duplicate=true&visibility=public)**)
 2. 在复制页面设置 secret 和页面信息等环境变量
-3. 点击部署，等待完成后点击右上角三点 -> `Embed this space`，即可获得你的部署地址 (类似 `https://wyf9-sleepy.hf.space`)
+3. 点击部署，等待完成后点击右上角三点 -> `Embed this space`，即可获得你的部署地址 *(类似于: <https://wyf9-sleepy.hf.space>)*
 
 > [!IMPORTANT]
 > **在创建时请务必选择 Space 类型为公开 (`Public`)，否则无法获取部署地址 (他人无法访问)!** <br/>
-> *HUgging Face 部署如48h未访问将会休眠，建议使用定时请求平台 (如 `cron-job.org`, `Uptime Kuma` 等) 保活 Space*
+> *HUgging Face 部署如 48h 未访问将会休眠，建议使用定时请求平台 (如 `cron-job.org`, `Uptime Kuma` 等) 保活 Space*
 
 ### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
 

@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+import os
 from flask import make_response, Response
 from pathlib import Path
 
@@ -90,7 +91,7 @@ def tobool(string: str, throw: bool = False) -> bool:
 
 
 @property
-def show_404():
+def show_404() -> str:
     return '<!DOCTYPE HTML>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>', 404
 
 
@@ -107,7 +108,7 @@ class SleepyException(Exception):
         return self.msg
 
 
-def exception(msg: str):
+def exception(msg: str) -> SleepyException:
     '''
     抛出 SleepyException
 
@@ -116,5 +117,14 @@ def exception(msg: str):
     raise SleepyException(msg)
 
 
-def current_dir():
+def current_dir() -> Path:
+    '''
+    获取当前主程序所在目录
+    '''
     return Path(__file__).parent
+
+def get_path(path: str) -> Path:
+    '''
+    相对路径 (基于主程序目录) -> 绝对路径
+    '''
+    return Path(__file__).parent.joinpath(path)

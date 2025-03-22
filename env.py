@@ -1,8 +1,10 @@
 # coding: utf-8
 import os
-import utils as u
 from dotenv import load_dotenv, find_dotenv
-dotenv_filename = os.path.join(u.current_dir(), ".env")
+
+import utils as u
+
+dotenv_filename = u.get_path(".env")
 if not find_dotenv(filename=dotenv_filename):
     u.warning("未找到 .env 文件，将使用默认配置，部分功能可能失效！")
 load_dotenv(dotenv_path=dotenv_filename)
@@ -53,7 +55,7 @@ class _page:
     canvas: bool = getenv('sleepy_page_canvas', True, bool)
     moonlight: bool = getenv('sleepy_page_moonlight', True, bool)
     lantern: bool = getenv('sleepy_page_lantern', False, bool)
-    mplayer: bool = getenv('sleepy_page_mplayer', True, bool)
+    mplayer: bool = getenv('sleepy_page_mplayer', False, bool)
 
 
 class _status:
