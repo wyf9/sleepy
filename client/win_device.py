@@ -3,10 +3,11 @@
 win_device.py
 在 Windows 上获取窗口名称
 by: @wyf9, @pwnint, @kmizmal, @gongfuture
-依赖: pywin32, requests,
-媒体信息依赖: Python≤3.9:  winrt
-             Python≥3.10: winrt.windows.media.control, winrt.windows.foundation
-            (如果你嫌麻烦并且不在乎几十m的包占用, 也可以直接装winsdk :)
+基础依赖: pywin32, requests
+媒体信息依赖:
+ - Python≤3.9: winrt
+ - Python≥3.10: winrt.windows.media.control, winrt.windows.foundation
+ * (如果你嫌麻烦并且不在乎几十m的包占用, 也可以直接装winsdk :)
 '''
 
 # ----- Part: Import
@@ -43,7 +44,7 @@ ENCODING: str = 'gb18030'
 # 当窗口标题为其中任意一项时将不更新
 SKIPPED_NAMES: list = ['', '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '操作中心',
                        '日期和时间信息', '网络连接', '电池信息', '', '搜索', 'Flow.Launcher', '任务视图',
-                       '任务切换', 'Snipper - Snipaste', '喜欢这张图片吗?', 'Program Manager']
+                       '任务切换', 'Snipper - Snipaste', '喜欢这张图片吗?', 'Program Manager', '「开始」菜单']
 # 当窗口标题为其中任意一项时视为未在使用
 NOT_USING_NAMES: list = ['我们喜欢这张图片，因此我们将它与你共享。', '启动']
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
@@ -56,17 +57,14 @@ MOUSE_MOVE_THRESHOLD: int = 10
 DEBUG: bool = False
 # 代理地址 (<http/socks>://host:port), 设置为空字符串禁用
 PROXY: str = ''
-# --- 媒体信息配置
 # 是否启用媒体信息获取
 MEDIA_INFO_ENABLED: bool = True
-# 媒体信息显示模式: 'prefix' - 作为前缀添加到当前窗口名称, 'standalone' - 使用独立设备, 'both' - 都启用
+# 媒体信息显示模式: 'prefix' - 作为前缀添加到当前窗口名称, 'standalone' - 使用独立设备
 MEDIA_INFO_MODE: str = 'prefix'
 # 独立设备模式下的设备ID (仅当 MEDIA_INFO_MODE = 'standalone' 时有效)
 MEDIA_DEVICE_ID: str = 'media-device'
-# 独立设备模式下的显示名称
+# 独立设备模式下的显示名称 (仅当 MEDIA_INFO_MODE = 'standalone' 时有效)
 MEDIA_DEVICE_SHOW_NAME: str = '正在播放'
-# 媒体信息前缀最大长度（超出部分将被截断）
-MEDIA_PREFIX_MAX_LENGTH: int = 30
 # --- config end
 
 # ----- Part: Functions
@@ -334,7 +332,10 @@ last_media_content = ""  # 跟踪上一次的媒体内容
 
 
 def do_update():
+    # 全局变量
     global last_window, cached_window_title, is_mouse_idle, last_media_playing, last_media_content
+
+    # --- 窗口名称 / 媒体信息 (prefix) 部分
 
     # 获取当前窗口标题和鼠标状态
     current_window = win32gui.GetWindowText(win32gui.GetForegroundWindow())
@@ -357,12 +358,7 @@ def do_update():
         if is_playing and (title or artist):
             # 为 prefix 模式创建格式化后的媒体信息 [♪歌曲名]
             if title:
-                # 如果标题太长，进行截断
-                if len(title) > MEDIA_PREFIX_MAX_LENGTH - 4:  # 为[♪]和...留出空间
-                    truncated_title = title[:MEDIA_PREFIX_MAX_LENGTH - 7] + "..."
-                    prefix_media_info = f"[♪{truncated_title}]"
-                else:
-                    prefix_media_info = f"[♪{title}]"
+                prefix_media_info = f"[♪{title}]"
             else:
                 prefix_media_info = "[♪]"
 
@@ -370,17 +366,17 @@ def do_update():
             parts = []
             if title:
                 parts.append(f"♪{title}")
-            if artist:
+            if (artist and artist != title):
                 parts.append(artist)
-            if album:
+            if (album and album != title and album != artist):
                 parts.append(album)
 
-            standalone_media_info = "-".join(parts) if parts else "♪播放中"
+            standalone_media_info = " - ".join(parts) if parts else "♪播放中"
 
-            debug(f"检测到媒体: {title or ''} - {artist or ''} - {album or ''}")
+            debug(f"检测到媒体 - title: {title or ''} - artist: {artist or ''} - album: {album or ''}")
 
     # 处理媒体信息 (prefix 模式)
-    if MEDIA_INFO_ENABLED and prefix_media_info and (MEDIA_INFO_MODE == 'prefix' or MEDIA_INFO_MODE == 'both'):
+    if MEDIA_INFO_ENABLED and prefix_media_info and MEDIA_INFO_MODE == 'prefix':
         # 作为前缀添加到窗口名称
         window = f"{prefix_media_info} {window}"
 
@@ -417,15 +413,13 @@ def do_update():
 
         # 窗口名称检测 (跳过列表)
         if current_window in SKIPPED_NAMES:
-            debug(f'* in skip list: `{current_window}`, ', end='')
             if mouse_idle == is_mouse_idle:
                 # 鼠标状态未改变 -> 直接跳过
-                print('skipped', print_only=True)
+                debug(f'* in skip list: `{current_window}`, skipped')
                 return
             else:
                 # 鼠标状态改变 -> 将窗口名称设为上次 (非未在使用) 的名称
-                print(
-                    f'set app name to last window: `{last_window}`', print_only=True)
+                debug(f'* in skip list: `{current_window}`, set app name to last window: `{last_window}`')
                 window = last_window
 
         # 发送状态更新
@@ -445,22 +439,22 @@ def do_update():
         except Exception as e:
             print(f'Error: {e}')
     else:
-        debug('No state change, skipping update')
-        return
+        debug('No state change, skipping window name update')
+
+    # --- 媒体信息 (standalone) 部分
 
     # 如果使用独立设备模式展示媒体信息
-    if MEDIA_INFO_ENABLED and (MEDIA_INFO_MODE == 'standalone' or MEDIA_INFO_MODE == 'both'):
+    if MEDIA_INFO_ENABLED and MEDIA_INFO_MODE == 'standalone':
         try:
             # 确定当前媒体状态
             current_media_playing = bool(standalone_media_info)
             current_media_content = standalone_media_info if standalone_media_info else ""
 
             # 检测播放状态或歌曲内容是否变化
-            media_changed = (current_media_playing != last_media_playing) or \
-                (current_media_playing and current_media_content != last_media_content)
+            media_changed = (current_media_playing != last_media_playing) or (current_media_playing and current_media_content != last_media_content)
 
             if media_changed:
-                debug(f'Media changed: status {last_media_playing}->{current_media_playing}, content changed: {last_media_content != current_media_content}')
+                debug(f'Media changed: status: {last_media_playing} -> {current_media_playing}, content: {last_media_content != current_media_content}')
 
                 if current_media_playing:
                     # 从不播放变为播放或歌曲内容变化
@@ -487,29 +481,25 @@ def do_update():
             debug(f'Media Info Error: {e}')
 
 
-def main():
-    while True:
-        do_update()
-        sleep(CHECK_INTERVAL)
-
-
 if __name__ == '__main__':
     try:
-        main()
+        while True:
+            do_update()
+            sleep(CHECK_INTERVAL)
     except (KeyboardInterrupt, SystemExit) as e:
         # 如果中断或被 taskkill 则发送未在使用
         debug(f'Interrupt: {e}')
         try:
             resp = send_status(
                 using=False,
-                app_name=f'Client Exited: {e}',
-                id=DEVICE_ID,             # 添加设备ID
-                show_name=DEVICE_SHOW_NAME  # 添加显示名称
+                app_name=f'Client Exited',
+                id=DEVICE_ID,
+                show_name=DEVICE_SHOW_NAME
             )
             debug(f'Response: {resp.status_code} - {resp.json()}')
 
             # 如果启用了独立媒体设备，也发送该设备的退出状态
-            if MEDIA_INFO_ENABLED and (MEDIA_INFO_MODE == 'standalone' or MEDIA_INFO_MODE == 'both'):
+            if MEDIA_INFO_ENABLED and MEDIA_INFO_MODE == 'standalone':
                 media_resp = send_status(
                     using=False,
                     app_name='Media Client Exited',
