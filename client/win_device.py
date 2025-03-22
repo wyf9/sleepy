@@ -454,7 +454,7 @@ def do_update():
             media_changed = (current_media_playing != last_media_playing) or (current_media_playing and current_media_content != last_media_content)
 
             if media_changed:
-                debug(f'Media changed: status: {last_media_playing} -> {current_media_playing}, content: {last_media_content != current_media_content}')
+                debug(f'Media changed: status: {last_media_playing} -> {current_media_playing}, content: {last_media_content != current_media_content} - `{standalone_media_info}`')
 
                 if current_media_playing:
                     # 从不播放变为播放或歌曲内容变化

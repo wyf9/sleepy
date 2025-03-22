@@ -1,6 +1,5 @@
 from datetime import datetime
 import json
-import os
 from flask import make_response, Response
 from pathlib import Path
 

@@ -16,7 +16,7 @@ from setting import status_list
 
 try:
     # init flask app
-    app = flask.Flask(__name__, template_folder='static')
+    app = flask.Flask(__name__)
 
     # disable flask access log (if not debug)
     if not env.main.flask_debug:
