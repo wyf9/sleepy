@@ -8,15 +8,12 @@
     <meta name="description" content="{{ page_desc }}">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <!-- live server环境 -->
-    <link rel="stylesheet" href="main.css">
+    <!-- live server 环境 -->
+    <!-- <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="lantern.css">
-    <link rel="stylesheet" href="music.css">
-    <!-- flask环境 -->
+    <link rel="stylesheet" href="mplayer.css"> -->
+    <!-- flask 环境 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='lantern.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='music.css') }}">
-
     <style>
         body {
             background: url('{{ bg }}') no-repeat center center fixed;
@@ -34,7 +31,10 @@
             {% if moonlight %}
             <script src="{{ url_for('static', filename='moonlight.js') }}" defer></script>
             <button id="moonlight" style="background: none; border: none; cursor: pointer;">
-                <!-- 版权所有 勿删) https://www.iconfont.cn/user/detail?uid=8623109&nid=9eLPALIxYUDV -->
+                <!--
+                (右) 亮 / 暗色切换按钮
+                版权所有 勿删( https://www.iconfont.cn/user/detail?uid=8623109&nid=9eLPALIxYUDV
+                -->
                 <svg t="1741008747639" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="2611" width="200" height="200">
                     <path
@@ -45,11 +45,8 @@
                         p-id="2613"></path>
                 </svg>
             </button>
-            {% endif %}
-            <!-- Moonlight End -->
-
-            <!-- 滑块透明度 -->
             <button id="slider">
+                <!-- (左) 透明度滑块 -->
                 <svg t="1741527882713" class="icon" viewBox="0 0 1024 1024" version="1.1"
                     xmlns="http://www.w3.org/2000/svg" p-id="2640" width="200" height="200">
                     <path
@@ -58,6 +55,8 @@
                 </svg>
                 <input type="range" id="sliderRange" min="0" max="1" value="0.5" step="0.01">
             </button>
+            {% endif %}
+            <!-- Moonlight End -->
 
             <h3><i><b>{{ user }}'s</b></i> Status:<br><a id="status">{{ status_name }}</a></h3>
             <p id="additional-info">{{ status_desc | safe }}</p>
@@ -146,12 +145,15 @@
                                 console.log(`[Hitokoto] enabled and got response`);
                                 hitokotoElement.href = `https://hitokoto.cn/?uuid=${data.uuid}`;
                                 hitokotoElement.innerText = data.hitokoto;
-                                hitokotoElement.title = `-- ${data.from_who} 《${data.from}》`
+                                if (data.from || data.from_who) {
+                                    hitokotoElement.title = `—— ${data.from_who ? data.from_who : ''}${data.from ? ' 「' + data.from + '」' : ''}`;
+                                }
                             })
                     }
                     catch (error) {
                         console.error(`[Hitokoto] fetch error: ${error}`);
                         hitokotoElement.innerText = '一言获取失败 :(';
+                        hitokotoElement.title = `Error: ${error}`;
                     }
                 </script>
             </div>
@@ -171,6 +173,7 @@
 
     <!-- 节日灯笼 -->
     {% if lantern %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='lantern.css') }}">
     <div class="lanterns">
         <!-- 右侧灯笼 -->
         <div class="lanterns__box lanterns__box--right">
@@ -224,6 +227,7 @@
 
     <!-- 音乐播放器 Start -->
     {% if mplayer %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='mplayer.css') }}">
     <div id="player-container">
 
         <div id="player">
@@ -258,18 +262,21 @@
         </div>
         <button id="toggle-btn"><i class="fas fa-chevron-right"></i></button>
     </div>
+    <script src="{{ url_for('static', filename='mplayer.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='aplayer.js') }}" defer></script>
     {% endif %}
     <!-- 音乐播放器 End -->
 
-    <!-- 动态加载的脚本 -->
+    {% if canvas %}
+    <script src="{{ url_for('static', filename='canvas.js') }}" defer></script>
+    {% endif %}
+
+    <!-- 动态加载的脚本 / 获取状态 -->
     <script>
         document.getElementById('status').classList.add('{{ status_color }}');
     </script>
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
-    {% if canvas %}
-    <script src="{{ url_for('static', filename='canvas.js') }}" defer></script>{% endif %}
-    <script src="{{ url_for('static', filename='mplayer.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='aplayer.js') }}" defer></script>
+
 
 </body>
 

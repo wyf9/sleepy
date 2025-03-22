@@ -19,7 +19,7 @@ try:
     app = flask.Flask(__name__)
 
     # disable flask access log (if not debug)
-    if not env.main.flask_debug:
+    if not env.main.debug:
         from logging import getLogger
         flask_default_logger = getLogger('werkzeug')
         flask_default_logger.disabled = True
@@ -126,6 +126,7 @@ def index():
         status_desc=stat['desc'],
 
         last_updated=d.data['last_updated'],
+        debug=env.main.debug
     )
 
 
@@ -480,11 +481,11 @@ if env.util.metrics:
 
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
-    u.info(f'Starting server: {f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}{" (debug enabled)" if env.main.flask_debug else ""}')
+    u.info(f'Starting server: {f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
     app.run(  # 启↗动↘
         host=env.main.host,
         port=env.main.port,
-        debug=env.main.flask_debug
+        debug=env.main.debug
     )
     u.info('Server exited, saving data...')
     d.save()
