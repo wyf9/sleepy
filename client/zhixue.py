@@ -47,12 +47,13 @@ EXAM_ID: str = "" # 考试ID, 留空则为获取最新考试成绩
 # --- config end
 
 
-def get_zhixue_cookie(username, password):
+def get_zhixue_cookie(username, password, tlsysSessionId):
     """
     通过智学网 API 获取 Cookie
 
     :param username: 智学网用户名
     :param password: 智学网密码
+    :param tlsysSessionId: tlsysSessionId, 需自行浏览器Ctrl+Shift+I获取开发者工具获取
     :return: 包含登录 Cookie 的字符串
     """
     # 创建一个会话对象
@@ -80,8 +81,8 @@ def get_zhixue_cookie(username, password):
         print("登录成功，已获取 Cookie")
         # 将 cookies 字典转换为字符串
         cookie_str = "; ".join([f"{name}={value}" for name, value in session.cookies.get_dict().items()])
-        # 正确拼接 loginUserName
-        cookie_str = f"{cookie_str}; loginUserName={username}; tlsysSessionId=6fdbc103-6f4b-444d-8e3f-47771ec02021"
+        # 正确拼接 loginUserName 和 tlsysSessionId
+        cookie_str = f"{cookie_str}; loginUserName={username}; tlsysSessionId={tlsysSessionId}"
         return cookie_str
     else:
         print(f"登录失败，状态码: {response.status_code}")
@@ -205,7 +206,7 @@ def get_mark():
 
 if __name__ == "__main__":
     if COOKIE == "":  # 如果没有设置 COOKIE 则自动获取
-        COOKIE = get_zhixue_cookie(USERNAME, PASSWORD)
+        COOKIE = get_zhixue_cookie(USERNAME, PASSWORD, TLSYSSESSIONID)
     # 将 cookie 字符串转换为字典
     cookies = dict(item.split("=") for item in COOKIE.split("; "))
     zxw = login_cookie(cookies)
@@ -221,7 +222,7 @@ if __name__ == "__main__":
             '''
             # 检查是否需要更新 Cookie
             if cookie_update_time % 2 == 0:
-                COOKIE = get_zhixue_cookie(USERNAME, PASSWORD)
+                COOKIE = get_zhixue_cookie(USERNAME, PASSWORD, TLSYSSESSIONID)
                 cookies = dict(item.split("=") for item in COOKIE.split("; "))
                 zxw = login_cookie(cookies)
                 print("Cookie 已更新")
