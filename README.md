@@ -23,14 +23,16 @@
 
 HuggingFace 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space) ![](https://uptime.wyf9.top/api/badge/22/status) ![](https://uptime.wyf9.top/api/badge/22/uptime)
 
-> 区别: 演示站为 wyf9 个人站点; 两个预览站允许测试 API，且直接运行开发版本 (**密钥均为 `wyf9test`**)
+Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top/) ![](https://uptime.wyf9.top/api/badge/23/status) ![](https://uptime.wyf9.top/api/badge/23/uptime)
+
+> 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本 (**密钥均为 `wyf9test`**)
 
 > [!WARNING]
 > *不要拿演示站做坏事 (比如 js 注入，已由 DeepSeek 强力修复) ~~，没准哪天我会加访问日志~~*
 
 ## 部署 / 更新
 
-请移步 **[部署教程](./doc/deploy.md)** 或 **[更新教程](./doc/update.md)**
+请移步 **[部署教程](./doc/deploy.md)** 或 **[更新教程](./doc/update.md)** *(多图警告)*
 
 ## Client
 

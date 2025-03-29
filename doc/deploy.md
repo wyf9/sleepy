@@ -12,6 +12,8 @@
 
 本方式理论上全平台通用, 安装了 Python >= **3.6** 即可 (建议: **3.10+**)
 
+> 优点: 数据文件 (`data.json`) 可持久化，不会因为重启而被删除
+
 ### 安装
 
 1. Clone 本仓库 (建议先 Fork / Use this template)
@@ -30,11 +32,11 @@ pip install -r requirements.txt
 
 > *配置文件变化史: `data.json` -> `config.json` -> `config.jsonc` -> `.env`*
 
-在目录下新建 `.env` 文件 (参考 `.env.example` 填写), 也可以直接设置相应的环境变量
+在目录下新建 `.env` 文件 (参考 [`.env.example`](../.env.example) 填写), *也可以直接设置相应的环境变量*
 
 > [!IMPORTANT]
-> **[配置示例](./.env.example)** <br/>
-> **Windows 用户请确保 `.env` 文件以 UTF-8 编码而非 GBK 编码保存，否则读取可能出现问题!** *(如错误读入行尾注释)* <br/>
+> **[配置示例](../.env.example)** <br/>
+> **Windows 用户请确保 `.env` 文件以 UTF-8 编码而非 GBK 编码保存，否则读取可能出现问题!** *(如**错误读入行尾注释**)* <br/>
 > *注意: 环境变量的优先级**高于** `.env` 文件* <br/>
 
 ### 启动
@@ -54,13 +56,13 @@ python3 start.py
 ## Huggingface 部署
 
 > 适合没有服务器部署的同学使用 <br/>
-> *有服务器也推荐，不怕被打* <br/>
+> *~~有服务器也推荐，不怕被打~~* <br/>
 > *唯一的缺点: **不能使用自定义域名***
 
 只需三步:
 
 1. 复制 Space `wyf9/sleepy` (**[点击直达](https://huggingface.co/spaces/wyf9/sleepy?duplicate=true&visibility=public)**)
-2. 在复制页面设置 secret 和页面信息等环境变量
+2. 在复制页面设置 secret 和页面信息等环境变量 *[**[配置示例](../.env.example)**]*
 3. 点击部署，等待完成后点击右上角三点 -> `Embed this space`，即可获得你的部署地址 *(类似于: <https://wyf9-sleepy.hf.space>)*
 
 > [!IMPORTANT]
@@ -81,14 +83,34 @@ python3 start.py
 然后自己去注册一个账号  
 参考`.env.example`在Setting==>Variables and secrets添加环境变量配置
 然后在这里:
-![链接](https://files.catbox.moe/svvdt6.png)
+![链接](https://ghimg.siiway.top/sleepy/deploy/huggingface-1.1.png)
 就可以复制你的`URL`，填入你选择的 **[`/client`](./client/README.md)** 对应的url配置中即可快速开始
 
 </details>
 
 ## Vercel 部署
 
-> *部署过程较为麻烦* <br/>
-> 可以使用自定义域名，但限制较多 **(如无法使用 SSE)**
+> 可以使用自定义域名，但限制较多 **(如无法使用 SSE)** <br/>
+> *当前端检测到为 Vercel 部署时会回退到轮询方式更新*
 
-TODO
+1. Fork 本项目
+2. 打开 [`vercel.com/new`](https://vercel.com/new)，并按照提示授权访问 GitHub *(如未注册则注册)*
+3. 选择你的 Fork，点击 `Import`
+
+![vercel-1](https://ghimg.siiway.top/sleepy/deploy/vercel-1.1.png)
+
+4. 在导入界面设置环境变量 (其他配置保持默认)，点击 `Deploy` 部署 *[**[配置示例](../.env.example)**]*
+
+![vercel-2](https://ghimg.siiway.top/sleepy/deploy/vercel-2.1.png)
+
+即可完成部署，默认分配 `vercel.app` 域名
+
+5. ***[可选]*** 绑定自定义域名: `Settings` -> `Domains`
+
+![vercel-3](https://ghimg.siiway.top/sleepy/deploy/vercel-3.1.png)
+
+6. ***[可选]*** 添加更多环境变量: `Settings` -> `Environment Variables`
+
+![vercel-4](https://ghimg.siiway.top/sleepy/deploy/vercel-4.1.png)
+
+> 修改环境变量后需重新部署
