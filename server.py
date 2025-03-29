@@ -114,6 +114,7 @@ def index():
         moonlight=env.page.moonlight,
         lantern=env.page.lantern,
         mplayer=env.page.mplayer,
+        zhixue=env.page.zhixue,
         bg=env.page.background,
 
         steam_legacy_enabled=env.util.steam_legacy_enabled,

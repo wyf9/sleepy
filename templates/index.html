@@ -46,6 +46,11 @@
             <p id="last-updated">最后更新: {{ last_updated }}</p>
         </div>
 
+        <!-- (zhixue) 智学网分数 -->
+        {% if zhixue %}
+        {% include "zhixue.html" %}
+        {% endif %}
+
         <div class="card light" id="more_text">
             <!-- (hitokoto) 一言 -->
             {% if hitokoto %}
