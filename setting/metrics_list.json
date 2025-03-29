@@ -1,6 +1,5 @@
 [
     "/",
-    "/steam",
     "/style.css",
     "/query",
     "/status_list",
@@ -12,9 +11,7 @@
     "/save_data",
     "/events",
     "/metrics",
-    "/static/canvas.js",
     "/static/get.js",
-    "/static/moonlight.js",
     "/static/favicon.ico",
     "/robots.txt"
 ]
