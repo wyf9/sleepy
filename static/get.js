@@ -1,7 +1,14 @@
-// 实用函数
+// 获取 base url
+const routerIndex = window.location.href.indexOf('?');
+const baseUrl = window.location.href.slice(0, routerIndex > 0 ? routerIndex : window.location.href.length);
+
+// sleep (只能加 await 在 async 函数中使用)
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 
 function sliceText(text, maxLength) {
+    /*
+    截取指定长度文本
+    */
     if (text.length <= maxLength) {
         return text;
     }
@@ -30,6 +37,96 @@ function getFormattedDate(date) {
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
+async function checkVercelDeploy() {
+    /*
+    检查是否为 Vercel 部署 (经测试 Vercel 不支持 SSE)
+    测试方法: 请求 /none，检查返回 Headers 中是否包含 x-vercel-id
+    */
+    console.log(`[Vercel] 测试请求 ${baseUrl + 'none'} 中...`);
+    return await fetch(baseUrl + 'none', { timeout: 10000 })
+        .then(resp => {
+            xVercelId = resp.headers.get('x-vercel-id');
+            console.log(`[Vercel] 获取到 x-vercel-id: ${resp.headers.get('x-vercel-id')}`);
+            if (xVercelId) {
+                console.log(`[Vercel] 确定为 Vercel 部署`);
+                return true;
+            } else {
+                console.log(`[Vercel] 非 Vercel 部署`);
+                return false;
+            }
+        })
+        .catch(error => {
+            console.log(`[Vercel] 请求错误: ${error}`);
+        });
+}
+
+function updateElement(data) {
+    /*
+    正常更新状态使用
+    data: api / events 返回数据
+    */
+    const statusElement = document.getElementById('status');
+    const lastUpdatedElement = document.getElementById('last-updated');
+
+    // 更新状态
+    if (statusElement) {
+        statusElement.textContent = data.info.name;
+        document.getElementById('additional-info').innerHTML = data.info.desc;
+        let last_status = statusElement.classList.item(0);
+        statusElement.classList.remove(last_status);
+        statusElement.classList.add(data.info.color);
+    }
+
+    // 更新设备状态
+    var deviceStatus = '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>';
+    const devices = Object.values(data.device);
+
+    for (let device of devices) {
+        let device_app;
+        const escapedAppName = escapeHtml(device.app_name);
+        if (device.using) {
+            const jsShowName = escapeJs(device.show_name);
+            const jsAppName = escapeJs(device.app_name);
+            const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
+            const escapedJsCode = escapeHtml(jsCode);
+
+            device_app = `
+<a class="awake" 
+    title="${escapedAppName}" 
+    href="javascript:${escapedJsCode}">
+${sliceText(escapedAppName, data.device_status_slice)}
+</a>`;
+        } else {
+            device_app = `
+<a class="sleeping">
+${sliceText(escapedAppName, data.device_status_slice)}
+</a>`
+        }
+        deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
+    }
+
+    if (deviceStatus == '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>') {
+        deviceStatus = '';
+    }
+
+    const deviceStatusElement = document.getElementById('device-status');
+    if (deviceStatusElement) {
+        deviceStatusElement.innerHTML = deviceStatus;
+    }
+
+    // 更新最后更新时间
+    const timenow = getFormattedDate(new Date());
+    if (lastUpdatedElement) {
+        lastUpdatedElement.innerHTML = `
+最后更新:
+<a class="awake" 
+title="服务器时区: ${data.timezone}" 
+href="javascript:alert('浏览器最后更新时间: ${timenow}\\n数据最后更新时间 (基于服务器时区): ${data.last_updated}\\n服务端时区: ${data.timezone}')">
+${data.last_updated}
+</a>`;
+    }
+}
+
 // 全局变量 - 重要：保证所有函数可访问
 let evtSource = null;
 let reconnectInProgress = false;
@@ -37,17 +134,18 @@ let countdownInterval = null;
 let connectionCheckTimer = null;
 let lastEventTime = Date.now();
 let connectionAttempts = 0;
+let firstError = true; // 是否为 SSR 第一次出错 (如是则激活 Vercel 部署检测)
 const maxReconnectDelay = 30000; // 最大重连延迟时间为30秒
 
 // 重连函数
 function reconnectWithDelay(delay) {
     if (reconnectInProgress) {
-        console.log('已经在重连过程中，忽略此次请求');
+        console.log('[SSE] 已经在重连过程中，忽略此次请求');
         return;
     }
 
     reconnectInProgress = true;
-    console.log(`安排在${delay / 1000}秒后重连`);
+    console.log(`[SSE] 安排在${delay / 1000}秒后重连`);
 
     // 清除可能存在的倒计时
     if (countdownInterval) {
@@ -81,7 +179,7 @@ function reconnectWithDelay(delay) {
     }, 1000);
 
     setTimeout(() => {
-        console.log('开始重连...');
+        console.log('[SSE] 开始重连...');
         clearInterval(countdownInterval); // 清除倒计时
         setupEventSource();
         reconnectInProgress = false;
@@ -122,7 +220,7 @@ function setupEventSource() {
 
     // 监听连接打开事件
     evtSource.onopen = function () {
-        console.log('SSE连接已建立');
+        console.log('[SSE] 连接已建立');
         connectionAttempts = 0; // 重置重连计数
         lastEventTime = Date.now(); // 初始化最后事件时间
 
@@ -138,68 +236,12 @@ function setupEventSource() {
     evtSource.addEventListener('update', function (event) {
         lastEventTime = Date.now(); // 更新最后收到消息的时间
 
-        console.log('收到数据更新');
+        console.log('[SSE] 收到数据更新');
         const data = JSON.parse(event.data);
 
         // 处理更新数据
         if (data.success) {
-            // 更新状态
-            if (statusElement) {
-                statusElement.textContent = data.info.name;
-                document.getElementById('additional-info').innerHTML = data.info.desc;
-                let last_status = statusElement.classList.item(0);
-                statusElement.classList.remove(last_status);
-                statusElement.classList.add(data.info.color);
-            }
-
-            // 更新设备状态
-            var deviceStatus = '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>';
-            const devices = Object.values(data.device);
-
-            for (let device of devices) {
-                let device_app;
-                const escapedAppName = escapeHtml(device.app_name);
-                if (device.using) {
-                    const jsShowName = escapeJs(device.show_name);
-                    const jsAppName = escapeJs(device.app_name);
-                    const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
-                    const escapedJsCode = escapeHtml(jsCode);
-
-                    device_app = `
-<a class="awake" 
-    title="${escapedAppName}" 
-    href="javascript:${escapedJsCode}">
-${sliceText(escapedAppName, data.device_status_slice)}
-</a>`;
-                } else {
-                    device_app = `
-<a class="sleeping">
-${sliceText(escapedAppName, data.device_status_slice)}
-</a>`
-                }
-                deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
-            }
-
-            if (deviceStatus == '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>') {
-                deviceStatus = '';
-            }
-
-            const deviceStatusElement = document.getElementById('device-status');
-            if (deviceStatusElement) {
-                deviceStatusElement.innerHTML = deviceStatus;
-            }
-
-            // 更新最后更新时间
-            const timenow = getFormattedDate(new Date());
-            if (lastUpdatedElement) {
-                lastUpdatedElement.innerHTML = `
-最后更新:
-<a class="awake" 
-title="服务器时区: ${data.timezone}" 
-href="javascript:alert('浏览器最后更新时间: ${timenow}\\n数据最后更新时间 (基于服务器时区): ${data.last_updated}\\n服务端时区: ${data.timezone}')">
-${data.last_updated}
-</a>`;
-            }
+            updateElement(data);
         } else {
             if (statusElement) {
                 statusElement.textContent = '[!错误!]';
@@ -213,7 +255,7 @@ ${data.last_updated}
 
     // 监听心跳事件
     evtSource.addEventListener('heartbeat', function (event) {
-        console.log('收到心跳:', event.data);
+        console.log('[SSE] 收到心跳:', event.data);
         lastEventTime = Date.now(); // 更新最后收到消息的时间
 
         // 更新连接状态UI (如果有)
@@ -225,9 +267,30 @@ ${data.last_updated}
     });
 
     // 错误处理 - 立即开始重连
-    evtSource.onerror = function (e) {
-        console.error('SSE 错误', e);
+    evtSource.onerror = async function (e) {
+        console.error(`[SSE] 连接错误: ${e}`);
         evtSource.close();
+
+        // 如是第一次错误，检查是否为 Vercel 部署
+        if (firstError) {
+            if (await checkVercelDeploy()) {
+                // 如是，清除所有定时器，并回退到原始轮询函数
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+                if (connectionCheckTimer) {
+                    clearTimeout(connectionCheckTimer);
+                    connectionCheckTimer = null;
+                }
+                update();
+                return;
+            } else {
+                // 如不是，以后错误跳过检查
+                firstError = false;
+            }
+        }
+
 
         // 计算重连延迟时间 (指数退避)
         const reconnectDelay = Math.min(1000 * Math.pow(2, connectionAttempts), maxReconnectDelay);
@@ -244,7 +307,7 @@ ${data.last_updated}
 
         // 只有在连接正常但长时间未收到消息时才触发重连
         if (elapsedTime > 60000 && !reconnectInProgress) {
-            console.warn('长时间未收到服务器消息，正在重新连接...');
+            console.warn('[SSE] 长时间未收到服务器消息，正在重新连接...');
             evtSource.close();
 
             // 使用与onerror相同的重连逻辑
@@ -278,12 +341,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 检查浏览器是否支持SSE
     if (typeof (EventSource) !== "undefined") {
-        console.log('浏览器支持SSE，开始建立连接...');
+        console.log('[SSE] 浏览器支持SSE，开始建立连接...');
         // 初始建立连接
         setupEventSource();
     } else {
         // 浏览器不支持SSE，回退到轮询方案
-        console.log('浏览器不支持SSE，回退到轮询方案');
+        console.log('[SSE] 浏览器不支持SSE，回退到轮询方案');
         update();
     }
 });
@@ -291,76 +354,21 @@ document.addEventListener('DOMContentLoaded', function () {
 // 原始轮询函数 (仅作为后备方案)
 async function update() {
     let refresh_time = 5000;
-    let routerIndex = window.location.href.indexOf('?');
-    let url = window.location.href.slice(0, routerIndex > 0 ? routerIndex : window.location.href.length);
     while (true) {
         if (document.visibilityState == 'visible') {
-            console.log('tab visible, updating...');
+            console.log('[Update] 页面可见，更新中...');
             let success_flag = true;
             let errorinfo = '';
             const statusElement = document.getElementById('status');
             // --- show updating
             document.getElementById('last-updated').innerHTML = `正在更新状态, 请稍候... <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>`;
             // fetch data
-            fetch(url + 'query', { timeout: 10000 })
+            fetch(baseUrl + 'query', { timeout: 10000 })
                 .then(response => response.json())
                 .then(async (data) => {
-                    console.log(data);
+                    console.log(`[Update] 返回: ${data}`);
                     if (data.success) {
-                        // update status (status, additional-info)
-                        statusElement.textContent = data.info.name;
-                        document.getElementById('additional-info').innerHTML = data.info.desc;
-                        last_status = statusElement.classList.item(0);
-                        statusElement.classList.remove(last_status);
-                        statusElement.classList.add(data.info.color);
-                        // update device status (device-status)
-                        var deviceStatus = '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>';
-                        const devices = Object.values(data.device);
-
-                        for (let device of devices) {
-                            let device_app;
-                            const escapedAppName = escapeHtml(device.app_name);
-                            if (device.using) {
-                                const jsShowName = escapeJs(device.show_name);
-                                const jsAppName = escapeJs(device.app_name);
-
-                                const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
-                                const escapedJsCode = escapeHtml(jsCode);
-
-                                device_app = `
-<a class="awake" 
-    title="${escapedAppName}" 
-    href="javascript:${escapedJsCode}">
-${sliceText(escapedAppName, data.device_status_slice)}
-</a>
-`;
-                            } else {
-                                device_app = `
-<a class="sleeping">
-${sliceText(escapedAppName, data.device_status_slice)}
-</a>`
-                            }
-                            deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
-                        }
-                        if (deviceStatus == '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>') {
-                            deviceStatus = '';
-                        }
-                        document.getElementById('device-status').innerHTML = deviceStatus;
-                        // update last update time (last-updated)
-                        timenow = getFormattedDate(new Date());
-                        document.getElementById('last-updated').innerHTML = `
-最后更新:
-<a
-class="awake" 
-title="服务器时区: ${data.timezone}" 
-href="javascript:alert('
-浏览器最后更新时间: ${timenow}\\n
-数据最后更新时间 (基于服务器时区): ${data.last_updated}\\n
-服务端时区: ${data.timezone}
-')">
-${data.last_updated}
-</a>
-`;
+                        updateElement(data);
                         // update refresh time
                         refresh_time = data.refresh;
                     } else {
@@ -381,7 +389,7 @@ ${data.last_updated}
                 statusElement.classList.add('error');
             }
         } else {
-            console.log('tab not visible, skip update');
+            console.log('[Update] 页面不可见，跳过更新');
         }
 
         await sleep(refresh_time);

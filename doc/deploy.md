@@ -6,6 +6,7 @@
     - [启动](#启动)
   - [Huggingface 部署](#huggingface-部署)
     - [我承认你的代码写的确实很nb，但对我来说还是太吃操作了](#我承认你的代码写的确实很nb但对我来说还是太吃操作了)
+  - [Vercel 部署](#vercel-部署)
 
 ## 手动部署
 
@@ -64,7 +65,7 @@ python3 start.py
 
 > [!IMPORTANT]
 > **在创建时请务必选择 Space 类型为公开 (`Public`)，否则无法获取部署地址 (他人无法访问)!** <br/>
-> *HUgging Face 部署如 48h 未访问将会休眠，建议使用定时请求平台 (如 `cron-job.org`, `Uptime Kuma` 等) 保活 Space*
+> *Hugging Face Space 如 48h 未访问将会休眠，建议使用定时请求平台 (如 `cron-job.org`, `Uptime Kuma` 等) 定时请求 Space `/none`*
 
 ### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
 
@@ -84,3 +85,10 @@ python3 start.py
 就可以复制你的`URL`，填入你选择的 **[`/client`](./client/README.md)** 对应的url配置中即可快速开始
 
 </details>
+
+## Vercel 部署
+
+> *部署过程较为麻烦* <br/>
+> 可以使用自定义域名，但限制较多 **(如无法使用 SSE)**
+
+TODO

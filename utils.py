@@ -131,4 +131,4 @@ def get_path(path: str) -> Path:
         # 适配 Vercel 部署 (调整 data.json 路径为可写的 /tmp/)
         return '/tmp/sleepy_data.json'
     else:
-        return Path(__file__).parent.joinpath(path)
+        return str(Path(__file__).parent.joinpath(path))

@@ -30,20 +30,20 @@ Todo List:
 '''
 
 # ----- Part: Import
+from zhixuewang.account import login_cookie # type: ignore
 import os
 import requests
-from zhixuewang.account import login_cookie # type: ignore
 # ----- Part: Config
 
 # --- config start
-MODE: str = "auto" # 运行模式, auto: 自动更新模式, single: 单次运行模式
-USERNAME: str = "" # 智学网用户名，必填!!!
-PASSWORD: str = "" # 智学网密码，必填!!!
-LOGIN_URL: str = 'https://www.zhixue.com/login.html' # 智学网登录 API, 一般情况下无需修改
-LOGIN_PAGE_URL: str = 'https://www.zhixue.com/login.html' # 登录页面 URL, 一般情况下无需修改
-TLSYSSESSIONID: str = "" # TLSYSSESSIONID, 需自行浏览器Ctrl+Shift+I获取开发者工具获取, 必填!!!
-COOKIE:  str = "" # 智学网 Cookie, 留空则自动获取
-EXAM_ID: str = "" # 考试ID, 留空则为获取最新考试成绩
+MODE: str = "auto"  # 运行模式, auto: 自动更新模式, single: 单次运行模式
+USERNAME: str = ""  # 智学网用户名，必填!!!
+PASSWORD: str = ""  # 智学网密码，必填!!!
+LOGIN_URL: str = 'https://www.zhixue.com/login.html'  # 智学网登录 API, 一般情况下无需修改
+LOGIN_PAGE_URL: str = 'https://www.zhixue.com/login.html'  # 登录页面 URL, 一般情况下无需修改
+TLSYSSESSIONID: str = ""  # TLSYSSESSIONID, 需自行浏览器 Ctrl+Shift+I 打开开发者工具获取, 必填!!!
+COOKIE:  str = ""  # 智学网 Cookie, 留空则自动获取
+EXAM_ID: str = ""  # 考试ID, 留空则为获取最新考试成绩
 # --- config end
 
 
@@ -88,6 +88,7 @@ def get_zhixue_cookie(username, password, tlsysSessionId):
         print(f"登录失败，状态码: {response.status_code}")
         return None
 
+
 def get_full_score():
     '''
     获取智学网总分
@@ -99,14 +100,15 @@ def get_full_score():
         subjects = zxw.get_subjects()
     else:
         subjects = zxw.get_subjects(EXAM_ID)
-    
+
     # 初始化 full_score 变量
     full_score = 0
     # 遍历 subjects 列表，累加 standard_score
     for subject in subjects:
         full_score += subject.standard_score
-    
+
     return full_score
+
 
 def get_mark():
     '''
@@ -117,7 +119,7 @@ def get_mark():
     :return: mark: 智学网成绩
     '''
     if not EXAM_ID:
-        mark = zxw.get_self_mark() # 获取最新考试
+        mark = zxw.get_self_mark()  # 获取最新考试
     else:
         mark = zxw.get_self_mark(EXAM_ID)
     '''
@@ -212,7 +214,7 @@ if __name__ == "__main__":
     zxw = login_cookie(cookies)
 
     if MODE == "auto":  # 自动更新模式
-        import time # 引入 time 模块, 不是必用就在用的时候导啦~
+        import time  # 引入 time 模块, 不是必用就在用的时候导啦~
         # 初始化时间计数器
         cookie_update_time = 0
         while True:
