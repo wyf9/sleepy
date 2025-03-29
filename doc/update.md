@@ -7,16 +7,16 @@
 
 ## 手动部署
 
-先运行这两行命令:
+只需运行这两行命令:
 
 ```bash
 git pull # 拉取最新代码
 pip install -r requirements.txt # 安装依赖 (如果有新的)
 ```
 
-更新完成，启动即可.
+更新完成，重新启动即可.
 
-> 如有自定义需求，可以 [在这](https://github.com/wyf9/sleepy/commits/main/.env.example) 查看 [`.env.example`](../.env.example) 更新记录，并相应修改 `.env`
+> 可以 [在这](https://github.com/wyf9/sleepy/commits/main/.env.example) 查看 [`.env.example`](../.env.example) 更新记录，并相应修改 `.env` 文件
 
 ## Huggingface 部署
 

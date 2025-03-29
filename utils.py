@@ -56,7 +56,7 @@ def tobool(string: str, throw: bool = False) -> bool:
     '''
     将形似 `true`, `1`, `t`, `yes`, `y` 之类的内容转换为布尔值
 
-    :param throw: 控制不匹配时是否直接抛出错误
+    :param throw: 控制无匹配项时是否直接抛出错误
     :return: `True` or `False` or `None` (如果不在 `booldict` 内)
     '''
     booldict = {

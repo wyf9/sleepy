@@ -5,6 +5,43 @@
 3. [Device status 接口](#device)
 4. [Storage 接口](#storage)
 
+## 鉴权说明
+
+任何标记了需要鉴权的接口，都需要用下面三种方式的一种传入**与服务端一致**的 `secret` *(优先级从上到下)*:
+
+1. 请求 Body 的 `secret` 字符串 **(仅适用于 POST)**
+
+```json
+{
+    "secret": "MySecretCannotGuess",
+    // ...
+}
+```
+
+2. 请求 Param 的 `secret` 参数
+
+```url
+?secret=MySecretCannotGuess
+```
+
+3. 请求头 *(`Header`)* 的 `Sleepy-Secret`
+
+```http
+Sleepy-Secret: MySecretCannotGuess
+```
+
+> 服务端的 `secret` 即为在环境变量中配置的 `SLEEPY_SECRET`
+
+如 `secret` 错误，则会返回:
+
+```json
+{
+    "success": false, // 请求是否成功
+    "code": "not authorized", // 返回代码
+    "message": "invaild secret" // 详细信息
+}
+```
+
 ## Read-only
 
 [Back to # api](#api)
@@ -143,25 +180,23 @@
 
 [Back to # api](#api)
 
-|                     | 路径                                   | 方法  | 作用     |
-| ------------------- | -------------------------------------- | ----- | -------- |
-| [Jump](#status-set) | `/set?secret=<secret>&status=<status>` | `GET` | 设置状态 |
-
-> 已移除旧的 `/set/<secret>/<status>` 接口
+|                     | 路径                   | 方法  | 作用     |
+| ------------------- | ---------------------- | ----- | -------- |
+| [Jump](#status-set) | `/set?status=<status>` | `GET` | 设置状态 |
 
 ### status-set
 
 [Back to ## status](#status)
 
-> `/set?secret=<secret>&status=<status>`
+> `/set?status=<status>`
 
 设置当前状态
 
 * Method: GET
+* **需要鉴权**
 
 #### Params
 
-- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<status>`: 状态码 *(`int`)*
 
 #### Response
@@ -172,13 +207,6 @@
     "success": true, // 请求是否成功
     "code": "OK", // 返回代码
     "set_to": 0 // 设置到的状态码
-}
-
-// 失败 - 密钥错误
-{
-    "success": false, // 请求是否成功
-    "code": "not authorized", // 返回代码
-    "message": "invaild secret" // 详细信息
 }
 
 // 失败 - 请求无效
@@ -193,13 +221,13 @@
 
 [Back to # api](#api)
 
-|                              | 路径                                                                                          | 方法   | 作用                          |
-| ---------------------------- | --------------------------------------------------------------------------------------------- | ------ | ----------------------------- |
-| [Jump](#device-set)          | `/device/set`                                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
-|                              | `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
-| [Jump](#device-remove)       | `/device/remove?secret=<secret>&name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
-| [Jump](#device-clear)        | `/device/clear?secret=<secret>`                                                               | `GET`  | 清除所有设备的状态            |
-| [Jump](#device-private-mode) | `/device/private_mode?secret=<secret>&private=<isprivate>`                                    | `GET`  | 设置隐私模式                  |
+|                              | 路径                                                                          | 方法   | 作用                          |
+| ---------------------------- | ----------------------------------------------------------------------------- | ------ | ----------------------------- |
+| [Jump](#device-set)          | `/device/set`                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
+|                              | `/device/set?id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
+| [Jump](#device-remove)       | `/device/remove?name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
+| [Jump](#device-clear)        | `/device/clear`                                                               | `GET`  | 清除所有设备的状态            |
+| [Jump](#device-private-mode) | `/device/private_mode?private=<isprivate>`                                    | `GET`  | 设置隐私模式                  |
 
 ### device-set
 
@@ -210,15 +238,15 @@
 设置单个设备的状态
 
 * Method: GET / POST
+* **需要鉴权**
 
 #### Params (GET)
 
 > [!WARNING]
 > 使用 url params 传递参数在某些情况下 *(如内容包含特殊符号)* 可能导致非预期行为, 此处更建议使用 POST
 
-> `/device/set?secret=<secret>&id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>`
+> `/device/set?id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>`
 
-- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<id>`: 设备标识符
 - `<show_name>`: 显示名称
 - `<using>`: 是否正在使用
@@ -230,7 +258,6 @@
 
 ```jsonc
 {
-    "secret": "MySecretCannotGuess", // 密钥
     "id": "device-1", // 设备标识符
     "show_name": "MyDevice1", // 显示名称
     "using": true, // 是否正在使用
@@ -247,18 +274,11 @@
   "code": "OK"
 }
 
-// 失败 - 密钥错误
-{
-    "success": false,
-    "code": "not authorized",
-    "message": "invaild secret"
-}
-
-// 失败 - 缺少参数
+// 失败 - 缺少参数 / 参数类型错误
 {
     "success": false,
     "code": "bad request",
-    "message": "missing param"
+    "message": "missing param or wrong param type"
 }
 ```
 
@@ -266,15 +286,15 @@
 
 [Back to ## device](#device)
 
-> `/device/remove?secret=<secret>&id=<device_id>`
+> `/device/remove?id=<device_id>`
 
 移除单个设备的状态
 
 * Method: GET
+* **需要鉴权**
 
 #### Params
 
-- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<device_id>`: 设备标识符
 
 #### Response
@@ -292,28 +312,18 @@
     "code": "not found",
     "message": "cannot find item"
 }
-
-// 失败 - 密钥错误
-{
-    "success": false,
-    "code": "not authorized",
-    "message": "invaild secret"
-}
 ```
 
 ### device-clear
 
 [Back to ## device](#device)
 
-> `/device/clear?secret=<secret>`
+> `/device/clear`
 
 清除所有设备的状态
 
 * Method: GET
-
-#### Params
-
-- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
+* **需要鉴权**
 
 #### Response
 
@@ -323,28 +333,21 @@
     "success": true,
     "code": "OK"
 }
-
-// 失败 - 密钥错误
-{
-    "success": false,
-    "code": "not authorized",
-    "message": "invaild secret"
-}
 ```
 
 ### device-private-mode
 
 [Back to ## device](#device)
 
-> `/device/private_mode?secret=<secret>&private=<isprivate>`
+> `/device/private_mode?private=<isprivate>`
 
 设置隐私模式 *(即在 [`/query`](#query) 的返回中设置 `device` 项为空 (`{}`))*
 
 * Method: GET
+* **需要鉴权**
 
 #### Params
 
-- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
 - `<isprivate>`: bool (仅接受 `true` / `false`), 开关状态
 
 #### Response
@@ -354,13 +357,6 @@
 {
     "success": true,
     "code": "OK"
-}
-
-// 失败 - 密钥错误
-{
-    "success": false,
-    "code": "not authorized",
-    "message": "invaild secret"
 }
 
 // 失败 - 请求无效
@@ -375,9 +371,9 @@
 
 [Back to # api](#api)
 
-|                            | 路径                         | 方法  | 作用                 |
-| -------------------------- | ---------------------------- | ----- | -------------------- |
-| [Jump](#storage-save-data) | `/save_data?secret=<secret>` | `GET` | 保存内存中的状态信息 |
+|                            | 路径         | 方法  | 作用                 |
+| -------------------------- | ------------ | ----- | -------------------- |
+| [Jump](#storage-save-data) | `/save_data` | `GET` | 保存内存中的状态信息 |
 
 > 已移除 `/reload_config` 接口, 现在需要重启服务以重载配置
 
@@ -385,15 +381,12 @@
 
 [Back to ## storage](#storage)
 
-> `/save_data?secret=<secret>`
+> `/save_data`
 
 保存内存中的状态信息到 `data.json`
 
 * Method: GET
-
-#### Params
-
-- `<secret>`: 在环境变量中配置的 `SLEEPY_SECRET`
+* **需要鉴权**
 
 #### Response
 
@@ -407,13 +400,6 @@
         "device_status": {},
         "last_updated": "2024-12-21 13:58:38"
     }
-}
-
-// 失败 - 密钥错误
-{
-    "success": false,
-    "code": "not authorized",
-    "message": "invaild secret"
 }
 
 // 失败 - 保存出错

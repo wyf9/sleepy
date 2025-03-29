@@ -8,6 +8,7 @@ import pytz
 import flask
 from datetime import datetime
 from markupsafe import escape
+from functools import wraps  # 用于修饰器
 
 import utils as u
 import env
@@ -54,7 +55,7 @@ except:
 def showip():
     '''
     在日志中显示 ip, 并记录 metrics 信息
-    如 Header 中 User-Agent 为 SleepyPlugin/(每次启动使用随机 uuid) 则不进行任何记录
+    ~~如 Header 中 User-Agent 为 SleepyPlugin/(每次启动使用随机 uuid) 则不进行任何记录~~
 
     :param req: `flask.request` 对象, 用于取 ip
     :param msg: 信息 (一般是路径, 同时作为 metrics 的项名)
@@ -73,6 +74,32 @@ def showip():
     if env.util.metrics:
         d.record_metrics(path)
 
+
+def require_secret(view_func):
+    '''
+    require_secret 修饰器, 用于指定函数需要 secret 鉴权
+    '''
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        # 1. body
+        if flask.request.get_json(silent=True):
+            if flask.request.get_json(silent=True).get('secret') == env.main.secret:
+                u.debug('[Auth] Verify secret Success from Body')
+                return view_func(*args, **kwargs)
+        # 2. param
+        elif flask.request.args.get('secret') == env.main.secret:
+            u.debug('[Auth] Verify secret Success from Param')
+            return view_func(*args, **kwargs)
+        # 3. header
+        elif flask.request.headers.get('Sleepy-Secret') == env.main.secret:
+            u.debug('[Auth] Verify secret Success from Header')
+            return view_func(*args, **kwargs)
+        # -1. no any secret
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
+    return wrapped_view
 
 # --- Templates
 
@@ -114,7 +141,6 @@ def index():
         moonlight=env.page.moonlight,
         lantern=env.page.lantern,
         mplayer=env.page.mplayer,
-        zhixue=env.page.zhixue,
         bg=env.page.background,
 
         steam_legacy_enabled=env.util.steam_legacy_enabled,
@@ -205,10 +231,11 @@ def get_status_list():
 
 
 @app.route('/set')
+@require_secret
 def set_normal():
     '''
     设置状态
-    - http[s]://<your-domain>[:your-port]/set?secret=<your-secret>&status=<a-number>
+    - http[s]://<your-domain>[:your-port]/set?status=<a-number>
     - Method: **GET**
     '''
     status = escape(flask.request.args.get('status'))
@@ -219,24 +246,17 @@ def set_normal():
             code='bad request',
             message="argument 'status' must be int"
         )
-    secret = escape(flask.request.args.get('secret'))
-    if secret == env.main.secret:
-        d.dset('status', status)
-        return u.format_dict({
-            'success': True,
-            'code': 'OK',
-            'set_to': status
-        })
-    else:
-        return u.reterr(
-            code='not authorized',
-            message='invaild secret'
-        )
+    d.dset('status', status)
+    return u.format_dict({
+        'success': True,
+        'code': 'OK',
+        'set_to': status
+    })
 
 
 # --- Device API
 
-
+@require_secret
 @app.route('/device/set', methods=['GET', 'POST'])
 def device_set():
     '''
@@ -254,27 +274,9 @@ def device_set():
                 code='bad request',
                 message='missing param or wrong param type'
             )
-        secret = escape(flask.request.args.get('secret'))
-        if secret == env.main.secret:
-            devices: dict = d.dget('device_status')
-            if (not device_using) and env.status.not_using:
-                # 如未在使用且锁定了提示，则替换
-                app_name = env.status.not_using
-            devices[device_id] = {
-                'show_name': device_show_name,
-                'using': device_using,
-                'app_name': app_name
-            }
-            d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-        else:
-            return u.reterr(
-                code='not authorized',
-                message='invaild secret'
-            )
     elif flask.request.method == 'POST':
         req = flask.request.get_json()
         try:
-            secret = req['secret']
             device_id = req['id']
             device_show_name = req['show_name']
             device_using = u.tobool(req['using'], throw=True)
@@ -282,36 +284,25 @@ def device_set():
         except:
             return u.reterr(
                 code='bad request',
-                message='missing param'
+                message='missing param or wrong param type'
             )
-        if secret == env.main.secret:
-            devices: dict = d.dget('device_status')
-            if (not device_using) and env.status.not_using:
-                # 如未在使用且锁定了提示，则替换
-                app_name = env.status.not_using
-            devices[device_id] = {
-                'show_name': device_show_name,
-                'using': device_using,
-                'app_name': app_name
-            }
-            d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-            d.check_device_status()
-        else:
-            return u.reterr(
-                code='not authorized',
-                message='invaild secret'
-            )
-    else:
-        return u.reterr(
-            code='invaild request',
-            message='This endpoint only supports GET and POST method!'
-        )
+    devices: dict = d.dget('device_status')
+    if (not device_using) and env.status.not_using:
+        # 如未在使用且锁定了提示，则替换
+        app_name = env.status.not_using
+    devices[device_id] = {
+        'show_name': device_show_name,
+        'using': device_using,
+        'app_name': app_name
+    }
+    d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+    d.check_device_status()
     return u.format_dict({
         'success': True,
         'code': 'OK'
     })
 
-
+@require_secret
 @app.route('/device/remove')
 def remove_device():
     '''
@@ -319,21 +310,14 @@ def remove_device():
     - Method: **GET**
     '''
     device_id = escape(flask.request.args.get('id'))
-    secret = escape(flask.request.args.get('secret'))
-    if secret == env.main.secret:
-        try:
-            del d.data['device_status'][device_id]
-            d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-            d.check_device_status()
-        except KeyError:
-            return u.reterr(
-                code='not found',
-                message='cannot find item'
-            )
-    else:
+    try:
+        del d.data['device_status'][device_id]
+        d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        d.check_device_status()
+    except KeyError:
         return u.reterr(
-            code='not authorized',
-            message='invaild secret'
+            code='not found',
+            message='cannot find item'
         )
     return u.format_dict({
         'success': True,
@@ -341,80 +325,62 @@ def remove_device():
     })
 
 
+@require_secret
 @app.route('/device/clear')
 def clear_device():
     '''
     清除所有设备状态
     - Method: **GET**
     '''
-    secret = escape(flask.request.args.get('secret'))
-    if secret == env.main.secret:
-        d.data['device_status'] = {}
-        d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-        d.check_device_status()
-    else:
-        return u.reterr(
-            code='not authorized',
-            message='invaild secret'
-        )
+    d.data['device_status'] = {}
+    d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+    d.check_device_status()
     return u.format_dict({
         'success': True,
         'code': 'OK'
     })
 
 
+@require_secret
 @app.route('/device/private_mode')
 def private_mode():
     '''
     隐私模式, 即不在 /query 中显示设备状态 (仍可正常更新)
     - Method: **GET**
     '''
-    secret = escape(flask.request.args.get('secret'))
-    if secret == env.main.secret:
-        private = u.tobool(escape(flask.request.args.get('private')))
-        if private == None:
-            return u.reterr(
-                code='invaild request',
-                message='"private" arg only supports boolean type'
-            )
-        d.data['private_mode'] = private
-        d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-    else:
+    private = u.tobool(escape(flask.request.args.get('private')))
+    if private == None:
         return u.reterr(
-            code='not authorized',
-            message='invaild secret'
+            code='invaild request',
+            message='"private" arg only supports boolean type'
         )
+    d.data['private_mode'] = private
+    d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     return u.format_dict({
         'success': True,
         'code': 'OK'
     })
 
 
+@require_secret
 @app.route('/save_data')
 def save_data():
     '''
     保存内存中的状态信息到 `data.json`
     - Method: **GET**
     '''
-    secret = escape(flask.request.args.get('secret'))
-    if secret == env.main.secret:
-        try:
-            d.save()
-        except Exception as e:
-            return u.reterr(
-                code='exception',
-                message=f'{e}'
-            )
-        return u.format_dict({
-            'success': True,
-            'code': 'OK',
-            'data': d.data
-        })
-    else:
+    try:
+        d.save()
+    except Exception as e:
         return u.reterr(
-            code='not authorized',
-            message='invaild secret'
+            code='exception',
+            message=f'{e}'
         )
+    return u.format_dict({
+        'success': True,
+        'code': 'OK',
+        'data': d.data
+    })
 
 
 @app.route('/events')
