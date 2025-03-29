@@ -56,6 +56,7 @@ class _page:
     moonlight: bool = getenv('sleepy_page_moonlight', True, bool)
     lantern: bool = getenv('sleepy_page_lantern', False, bool)
     mplayer: bool = getenv('sleepy_page_mplayer', False, bool)
+    zhixue: bool = getenv('sleepy_page_zhixue', False, bool)
 
 
 class _status:
