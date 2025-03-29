@@ -40,6 +40,9 @@
   - [AppleShortcuts](#appleshortcuts)
     - [FullVer](#fullver)
     - [FastVer](#fastver)
+  - [Zhixuewang](#zhixuewang)
+    - [Configure](#configure-11)
+    - [Using](#using-9)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -355,6 +358,30 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 > [!TIP]
 > 手动更新 <br/>
 > 您可以将该快捷指令设置为操作按钮、控制中心按钮、锁定屏幕按钮、敲击 2 / 3 下背板指令来快捷使用
+
+## [Zhixuewang](./zhixue.py)
+
+> by: [@NiuFuyu855](https://github.com/NiuFuyu855)
+
+获取你的智学网成绩并展示在页面上
+
+依赖: `requests`, `zhixuewang`
+
+### Configure
+
+https://github.com/wyf9/sleepy/blob/73a5e3507c1ca0454bc39c685541d53d228df41f/client/zhixue.py#L38-L47
+
+同时需要添加环境变量:
+
+```env
+sleepy_page_zhixue = true
+```
+
+### Using
+
+需要将本脚本放在服务器的 `server.py` 同级目录运行，或编辑 L195-L197:
+
+https://github.com/wyf9/sleepy/blob/73a5e3507c1ca0454bc39c685541d53d228df41f/client/zhixue.py#L195-L197
 
 ## Other repos
 

@@ -1,5 +1,6 @@
 # API
 
+0. [鉴权说明](#鉴权说明)
 1. [只读接口](#read-only)
 2. [Status 接口](#status)
 3. [Device status 接口](#device)
@@ -11,7 +12,7 @@
 
 1. 请求 Body 的 `secret` 字符串 **(仅适用于 POST)**
 
-```json
+```jsonc
 {
     "secret": "MySecretCannotGuess",
     // ...
@@ -34,7 +35,7 @@ Sleepy-Secret: MySecretCannotGuess
 
 如 `secret` 错误，则会返回:
 
-```json
+```jsonc
 {
     "success": false, // 请求是否成功
     "code": "not authorized", // 返回代码

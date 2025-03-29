@@ -25,24 +25,3 @@ sleepy_page_more_text = "其他文本<br/>今日已被视奸 {visit_today} 次"
 其他文本
 今日已被视奸 114 次
 ```
-
-
-## 添加访问量统计 (Legacy)
-
-> [!WARNING]
-> 此统计站点会被刷访问量，不一定准确，故不推荐此方法
-
-主页: https://finicounter.eu.org/
-
-在 `sleepy_page_more_text` 环境变量中添加以下内容:
-
-```html
-<br/>本站访问次数: <span id='finicount_views'></span><script async src='https://finicounter.eu.org/finicounter.js'></script>
-```
-
-修改后应该是这样的:
-
-```ini
-# .env
-sleepy_page_more_text = "其他文本<br/>已被视奸 <span id='finicount_views'>(未知)</span> 次<script async src='https://finicounter.eu.org/finicounter.js'></script>"
-```
