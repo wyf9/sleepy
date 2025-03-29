@@ -27,6 +27,8 @@ pip install -r requirements.txt
 
 3. 编辑配置文件
 
+> *配置文件变化史: `data.json` -> `config.json` -> `config.jsonc` -> `.env`*
+
 在目录下新建 `.env` 文件 (参考 `.env.example` 填写), 也可以直接设置相应的环境变量
 
 > [!IMPORTANT]

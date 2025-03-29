@@ -116,14 +116,19 @@ def exception(msg: str) -> SleepyException:
     raise SleepyException(msg)
 
 
-def current_dir() -> Path:
+def current_dir() -> str:
     '''
     获取当前主程序所在目录
     '''
-    return Path(__file__).parent
+    return str(Path(__file__).parent)
+
 
 def get_path(path: str) -> Path:
     '''
     相对路径 (基于主程序目录) -> 绝对路径
     '''
-    return Path(__file__).parent.joinpath(path)
+    if current_dir().startswith('/var/task') and path == 'data.json':
+        # 适配 Vercel 部署 (调整 data.json 路径为可写的 /tmp/)
+        return '/tmp/sleepy_data.json'
+    else:
+        return Path(__file__).parent.joinpath(path)

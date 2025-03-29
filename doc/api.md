@@ -65,7 +65,6 @@
 
 * Method: GET
 * 无需鉴权
-* Alias: `/get/status_list` *(兼容旧版本)*
 
 #### Response
 

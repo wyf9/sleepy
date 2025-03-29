@@ -32,7 +32,7 @@ Todo List:
 # ----- Part: Import
 import os
 import requests
-from zhixuewang.account import login_cookie
+from zhixuewang.account import login_cookie # type: ignore
 # ----- Part: Config
 
 # --- config start
