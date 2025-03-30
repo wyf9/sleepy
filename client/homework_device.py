@@ -161,15 +161,6 @@ def private_mode(private: bool):
 # - storage
 
 
-def reload_config():
-    '''
-    /reload_config using GET
-    - reload config from server `config.jsonc`
-    '''
-    resp = get(f'{SERVER}/reload_config?secret={SECRET}')
-    print(f'[/reload_config] Response: {resp.status_code} - {resp.json()}')
-
-
 def save_data():
     '''
     /save_data using GET
