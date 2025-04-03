@@ -9,7 +9,10 @@ function sliceText(text, maxLength) {
     /*
     截取指定长度文本
     */
-    if (text.length <= maxLength) {
+    if (
+        text.length <= maxLength || // 文本长度小于指定截取长度
+        maxLength == 0 // 截取长度设置为 0 (禁用)
+    ) {
         return text;
     }
     return text.slice(0, maxLength - 3) + '...';
