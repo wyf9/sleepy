@@ -3,6 +3,8 @@ import json
 from flask import make_response, Response
 from pathlib import Path
 
+import os
+
 from _utils import *
 from env import main as mainenv
 
@@ -99,3 +101,32 @@ def get_path(path: str) -> Path:
         return '/tmp/sleepy_data.json'
     else:
         return str(Path(__file__).parent.joinpath(path))
+
+
+def list_dir(path: str, include_subfolder: bool = True, strict_exist: bool = False) -> list:
+    '''
+    列出目录下的**文件**
+
+    :param path: 目录路径
+    :param include_subfolder: 是否包括子目录的文件 *(递归查找)*
+    :param strict_exist: 目标目录不存在时是否抛出错误 *(为否则返回空列表)*
+    '''
+
+    try:
+        filelst = os.listdir(path)
+        for i in filelst:
+            fullname_i = Path(path).joinpath(i)
+            if os.path.isdir(fullname_i):
+                filelst.remove(i)
+                if include_subfolder:
+                    filelst.extend([
+                        i + n if i.endswith('/') or i.endswith('\\') else i + '/' + n
+                        for n in list_dir(fullname_i)
+                        ])
+    except FileNotFoundError:
+        if strict_exist:
+            raise
+        else:
+            return []
+    else:
+        return filelst
