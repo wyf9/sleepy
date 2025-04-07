@@ -1,7 +1,10 @@
 from datetime import datetime
 import json
-from flask import make_response, Response
+import sqlite3
+from flask import g, make_response, Response
 from pathlib import Path
+
+import os
 
 
 def info(log):
@@ -132,3 +135,20 @@ def get_path(path: str) -> Path:
         return '/tmp/sleepy_data.json'
     else:
         return str(Path(__file__).parent.joinpath(path))
+    
+def get_sql(path: str) -> list:
+    '''
+    从sql文件获取按分号分割的sql语句列表
+    '''
+    if not path.endswith('.sql'):
+        error('Get_sql func gets a non-sql file. Will return empty list.')
+        return []
+    
+    if not os.path.exists(path):
+        error(f"SQL file not exists: {path}. Will return empty list.")
+        return []
+
+    with open(path, 'r', encoding='utf-8') as f:
+        sql_script = f.read()
+    return [cmd.strip() for cmd in sql_script.split(';') if cmd.strip()]
+

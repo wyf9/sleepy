@@ -79,6 +79,9 @@ class _util:
     steam_enabled: bool = getenv('sleepy_util_steam_enabled', False, bool)
     steam_key: str = getenv('sleepy_util_steam_key', '', str)
     steam_ids: str = getenv('sleepy_util_steam_ids', '', str)
+    save_to_db: str = getenv('sleepy_util_save_to_db', '', str)
+    sqlite_name: str = getenv('sleepy_util_sqlite_name', 'usage', str)
+    manictime_load: str = getenv('sleepy_util_manictime_load', False, bool)
 
 
 main = _main()

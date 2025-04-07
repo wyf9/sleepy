@@ -1,0 +1,1 @@
+INSERT INTO Events (device_id,show_name,app_name,[using],start_time) VALUES (?,?,?,?,?)

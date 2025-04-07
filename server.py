@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import sqlite3
 import time
 import json5
 # import importlib - ready for plugin?
@@ -14,6 +15,12 @@ import utils as u
 import env
 from data import data as data_init
 from setting import status_list
+
+# app.py
+# from . import flask_ext
+from flask import g
+
+
 
 try:
     # init flask app
@@ -297,6 +304,8 @@ def device_set():
     }
     d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     d.check_device_status()
+    if env.util.save_to_db:
+        d.save_db(device_id)
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -439,6 +448,22 @@ if env.util.steam_enabled:
             'steam-iframe.html',
             steamids=env.util.steam_ids
         )
+
+if env.util.manictime_load:
+    @app.route('/sampleData/CustomTimeline', methods=['GET'])
+    def m_timeline():
+        '''
+        获取 ManicTime 格式的 xml 时间轴数据
+        - Method: **GET**
+        '''
+        from_time_str = flask.request.args.get('FromTime', '')
+        from_time = datetime.strptime(from_time_str, "%Y-%m-%dT%H:%M:%S")
+        to_time_str = flask.request.args.get('ToTime', '')
+        to_time = datetime.strptime(to_time_str, "%Y-%m-%dT%H:%M:%S")
+        device_id = flask.request.args.get('id', '')
+        xml_content = d.db_to_xml(device_id, 'Events', start_from=from_time, end_to=to_time)
+        return flask.Response(xml_content, mimetype='text/xml')
+
 
 # --- End
 
