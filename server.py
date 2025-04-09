@@ -45,7 +45,7 @@ except Exception as e:
     u.error(f"Error initing: {e}")
     exit(1)
 except KeyboardInterrupt:
-    u.warning('Interrupt init')
+    u.debug('Interrupt init')
     exit(0)
 except u.SleepyException as e:
     u.error(f'==========\n{e}')
@@ -120,7 +120,7 @@ def index():
     try:
         stat = status_list[d.data['status']]
     except:
-        u.warning(f"索引 {d.data['status']} 超出范围, 使用默认值")
+        u.debug(f"Index {d.data['status']} out of range!")
         stat = {
             'name': 'Unknown',
             'desc': '未知的标识符，可能是配置问题。',

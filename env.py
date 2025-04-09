@@ -1,12 +1,11 @@
 # coding: utf-8
 import os
-from dotenv import load_dotenv, find_dotenv
+from pathlib import Path
+from dotenv import load_dotenv
 
-import utils as u
+from _utils import tobool
 
-dotenv_filename = u.get_path(".env")
-if not find_dotenv(filename=dotenv_filename):
-    u.warning("未找到 .env 文件，将使用默认配置，部分功能可能失效！")
+dotenv_filename = str(Path(__file__).parent.joinpath('.env'))
 load_dotenv(dotenv_path=dotenv_filename)
 
 
@@ -23,7 +22,7 @@ def getenv(key: str, default, typeobj: object = str) -> any:
         return default
     else:
         if typeobj == bool:
-            return u.tobool(got_value)
+            return tobool(got_value)
         return typeobj(got_value)
 
 

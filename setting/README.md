@@ -31,7 +31,7 @@
 
 ## [`metrics_list.json`](./metrics_list.json)
 
-> 用于自定义 metrics 列表 (只有启用 metrics 功能, **且访问的路径在列表中**才会被计数)
+> 用于自定义访问统计的路径列表 (只有启用 metrics 功能, **且访问的路径在列表中**才会被计数)
 
 格式:
 
@@ -50,11 +50,8 @@
     "/save_data",
     "/events",
     "/metrics",
-    "/static/canvas.js",
-    "/static/get.js",
-    "/static/moonlight.js",
-    "/static/favicon.ico",
     "/robots.txt",
+    "[static]", // 特殊值, 匹配 static 目录中的所有文件
     "/custom_route" // 还可添加更多
 ]
 ```
