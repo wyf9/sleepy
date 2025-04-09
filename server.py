@@ -297,6 +297,7 @@ def device_set():
     if (not device_using) and env.status.not_using:
         # 如未在使用且锁定了提示，则替换
         app_name = env.status.not_using
+    last_app_name = devices[device_id]['app_name']
     devices[device_id] = {
         'show_name': device_show_name,
         'using': device_using,
@@ -305,7 +306,9 @@ def device_set():
     d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     d.check_device_status()
     if env.util.save_to_db:
-        d.save_db(device_id)
+        if last_app_name != app_name:
+            # 懒更新，可能用户设计了未切换app_name时亦发送请求，此时不存此条数据
+            d.save_db(device_id)
     return u.format_dict({
         'success': True,
         'code': 'OK'
