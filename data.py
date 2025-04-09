@@ -397,8 +397,8 @@ class data:
         
         if events:
             last_event = orm.get_orm().query(Event, '''SELECT * FROM Events WHERE device_id = ? AND id = ?''', (device_id, events[0].id - 1))
-        if last_event:
-            events.insert(0, last_event[0])
+            if last_event is not None:
+                events.insert(0, last_event[0])
         
         color_groups = orm.get_color_orm().find_matching_color_groups(events)
         color_groups_index = ColorGroupIndex(color_groups)
