@@ -1,6 +1,5 @@
 from datetime import datetime
 import json
-import sqlite3
 from flask import g, make_response, Response
 from pathlib import Path
 

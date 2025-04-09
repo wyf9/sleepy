@@ -1,16 +1,14 @@
 # coding: utf-8
 
-from dataclasses import dataclass
 import os
 import random
-from flask import g
 import pytz
 import json
 import threading
 from time import sleep
 from datetime import datetime
 
-from orm import AutoORM, ColorGroupIndex, ColorORM, Event
+from orm import ColorGroupIndex, Event
 import orm
 import utils as u
 import env as env
@@ -26,10 +24,6 @@ class data:
     data: dict
     preload_data: dict
     data_check_interval: int = 60
-    # g.db: sqlite3.Connection
-    # cursor: sqlite3.Cursor # 这二者亦可拆出来统一给orm管理，这一版暂时选择了留住没动
-    # orm: AutoORM
-    # color_orm: ColorORM
 
     def __init__(self):
         with open(u.get_path('data.template.json'), 'r', encoding='utf-8') as file:
@@ -285,9 +279,6 @@ class data:
                 cursor = db.cursor()
             except Exception as e:
                 u.warning(f'Error when connecting sqlite {env.util.sqlite_name}: {e}')
-            # self.orm = AutoORM(db_path, db)
-            # orm.get_color_orm() = ColorORM(self.orm)
-            
             cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Events'")
             if cursor.fetchone()[0] == 0:
                 u.info('No existing "Events" table, will create one.')
@@ -311,10 +302,9 @@ class data:
         :param id: 选择存储的设备
         '''
         db_path = f'{env.util.sqlite_name}.db'
-        u.info(f'[save_db] started, saving data to {env.util.save_to_db}.')
+        u.debug(f'[save_db] started, saving data to {env.util.save_to_db}.')
         if env.util.save_to_db == 'sqlite':
             ds_dict:dict = self.data["device_status"]
-            # ds_dict.items()
             device_dict:dict = ds_dict.get(device_id)
             if device_dict == None:
                 u.warning(f'[save_db] Status of this device not detected, will not save.')        
@@ -332,7 +322,7 @@ class data:
                         device_dict.get('using'),
                         datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
                     db.commit()
-                    u.info(f'[save_db] Successfully saving data to {env.util.save_to_db}.')
+                    u.debug(f'[save_db] Successfully saving data to {env.util.save_to_db}.')
                 except Exception as e:
                     db.rollback()
                     u.warning(f'[save_db] Error while inserting value into database: {e}')
@@ -348,34 +338,17 @@ class data:
                     
                     orm.get_color_orm().append_row(new_color_row)
                 cursor.close()
-                # try:
-                #     self.cursor.execute(
-                #         '''SELECT * FROM ColorGroup WHERE group_name = ?''',
-                #         (ds_dict["app_name"])
-                #     )
-                #     if self.cursor.fetchone() == None:
-                #         try:
-                #             self.cursor.execute(
-                #                 '''INSERT INTO ColorGroup (group_name, color_hex, set) VALUES (?, ?, ?)''',
-                #                 (ds_dict["app_name"],
-                #                     f'#{random.randint(0, 0xFFFFFF):06X}',
-                #                     0))
-                #             self.conn.commit()
-                #         except:
-                #             self.conn.rollback()
-                #             u.warning(f'[save_db] Error while inserting update value into database: {e}')
-                # except Exception as e:
-                #     u.warning(f'[save_db] Error while updating color table: {e}')
     
-    # @staticmethod
     def db_to_xml(self, device_id:str ,table:str='Events', start_from:datetime=None, end_to:datetime=None, ignore_sec=2) -> str:
         """将数据库中设备使用的信息转换为可被ManicTime接收的xml文件
 
         Args:
-            db_path (str): sqlite数据库的路径
-            xml_file (str): 输出xml文件的路径
-            ignore_sec (int): 忽略小于等于此时间秒数的事件
+            device_id (str): 设备标识符
+            start_from (datetime): 开始时间
+            end_to (datetime): 结束时间
         """
+            # ignore_sec (int): 忽略小于等于此时间秒数的事件
+        # 注：table参数和ignore_sec参数相关逻辑未完成，暂时留置
         import xml.etree.ElementTree as ET
         from xml.dom import minidom
         
@@ -442,14 +415,9 @@ class data:
             display_name_elem_g = ET.SubElement(group_elem, "DisplayName")
             display_name_elem_g.text = color_group.group_name
 
-
-
         xmlstr = minidom.parseString(ET.tostring(timeline)).toprettyxml(indent="  ")
 
         return xmlstr
         
     # --- check device heartbeat
     # TODO
-    
-
-    

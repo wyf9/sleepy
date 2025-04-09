@@ -62,14 +62,12 @@ class AutoORM:
     def __init__(self, db_path: str, conn: sqlite3.Connection = None):
         self.db_path = db_path
         if conn is None:
-            # u.warning('[AutoORM.__init__] Creating connection in orm, which is not expected.')
             try:
                 self.conn = get_db()
             except Exception as e:
                 u.warning('[AutoORM.__init__] ')
         else:
             self.conn = conn
-        # self.conn.row_factory = self._auto_mapper_factory
     
     def _auto_mapper_factory(self, model: Type[T]) -> callable:
         """动态生成行转换函数（基于模型类型注解）"""
@@ -124,15 +122,10 @@ class AutoORM:
 class ColorORM:
     orm: AutoORM
     max_GroupId_value: int
-    # cursor: sqlite3.Cursor
     
     def __init__(self) -> None:
         self.orm = get_orm()
         self.cursor = self.orm.conn.cursor()
-        # 获取 GroupId 最大值
-        # result = self.orm.query(ColorGroup,"SELECT MAX(GroupId) FROM colors")
-        # result = self.cursor.fetchone()
-        # self.max_GroupId_value = result[0] if result[0] is not None else 1
 
     def find_group_id(self, group_name: str) -> str | None:
         """在ColorGroup表中根据组名寻找GroupId，返回字符串，未找到则返回None"""
@@ -161,9 +154,6 @@ class ColorORM:
             u.warning(f'[ColorORM] Expected "row" to be a dict, but got {type(row).__name__}.')
 
         self.orm.conn.commit()
-        # self.cursor.execute("SELECT MAX(id) FROM ColorGroup")
-        # result = self.cursor.fetchone()
-        # self.max_GroupId_value = result[0] if result[0] is not None else 1
 
     def find_matching_color_groups(self, events: tuple[Event]) -> list[ColorGroup]:
         """给定一批 Event 数据类实例，从 ColorGroup 表中找出存在匹配 group_name 的记录"""
@@ -188,27 +178,6 @@ class ColorORM:
         self.cursor.close()
         self.orm.conn.close()
     
-          
-if __name__ == "__main__":
-    '''测试用例'''
-    orm = AutoORM('test.db')
-    
-    # 自动转换查询结果
-    events = orm.query(Event, 
-        "SELECT * FROM Events WHERE device_id = ?", 
-        ("test_device",)
-    )
-    
-    if events:
-        for event in events:
-            print(f"""
-            {event.device_id} 在 {event.start_time:%Y-%m-%d %H:%M} 
-            使用 {event.app_name}（状态：{'使用中' if event.using else '未使用'}）
-            """)
-    else:
-        print(f'events is {events}!')
-    
-    orm.close()
     
 def get_orm() -> AutoORM:
     db_path = f'{env.util.sqlite_name}.db'
@@ -226,4 +195,26 @@ def get_db() -> sqlite3.Connection:
     db_path = f'{env.util.sqlite_name}.db'
     if "db" not in g:
         g.db = sqlite3.connect(db_path)
+        u.info('[get_db] Database connected.')
     return g.db
+
+
+if __name__ == "__main__":
+    '''测试用例'''
+    orm = AutoORM('test.db')
+    
+    events = orm.query(Event, 
+        "SELECT * FROM Events WHERE device_id = ?", 
+        ("test_device",)
+    )
+    
+    if events:
+        for event in events:
+            print(f"""
+            {event.device_id} 在 {event.start_time:%Y-%m-%d %H:%M} 
+            使用 {event.app_name}（状态：{'使用中' if event.using else '未使用'}）
+            """)
+    else:
+        print(f'events is {events}!')
+    
+    orm.close()
