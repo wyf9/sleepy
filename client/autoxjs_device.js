@@ -1,7 +1,7 @@
 /*
 autoxjs_device.js
 使用 Autox.js 编写的安卓自动更新状态脚本
-by wyf9. all rights reserved. (?)
+by wyf9;
 Co-authored-by: NyaOH-Nahida - 新增捕捉退出事件，将退出脚本状态上报到服务器。
 */
 

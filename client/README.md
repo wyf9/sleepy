@@ -4,45 +4,46 @@
 
 - [/client](#client)
   - [CMDConsole](#cmdconsole)
-    - [Configure](#configure)
-    - [Using](#using)
+    - [配置](#配置)
+    - [使用](#使用)
   - [CmdConsoleMulti](#cmdconsolemulti)
-    - [Configure](#configure-1)
-    - [Using](#using-1)
+    - [配置](#配置-1)
+    - [使用](#使用-1)
   - [WinDevice](#windevice)
-    - [Configure](#configure-2)
-    - [Autostart](#autostart)
+    - [配置](#配置-2)
+    - [自启动](#自启动)
   - [AutoxjsScript](#autoxjsscript)
-    - [Configure](#configure-3)
-    - [Using](#using-2)
+    - [配置](#配置-3)
+    - [使用](#使用-2)
+    - [安卓低版本运行](#安卓低版本运行)
   - [BrowserScript](#browserscript)
-    - [Configure](#configure-4)
+    - [配置](#配置-4)
   - [HomeworkDevice](#homeworkdevice)
-    - [Configure](#configure-5)
-    - [Using](#using-3)
+    - [配置](#配置-5)
+    - [使用](#使用-3)
   - [MinecraftScript](#minecraftscript)
     - [Minescript](#minescript)
-    - [Configure](#configure-6)
-    - [Using](#using-4)
-    - [Autorun](#autorun)
+    - [配置](#配置-6)
+    - [使用](#使用-4)
+    - [自启](#自启)
   - [LinuxScriptKDE](#linuxscriptkde)
-    - [Configure](#configure-7)
-    - [Using](#using-5)
+    - [配置](#配置-7)
+    - [使用](#使用-5)
   - [LinuxScriptHyprland](#linuxscripthyprland)
-    - [Configure](#configure-8)
-    - [Using](#using-6)
+    - [配置](#配置-8)
+    - [使用](#使用-6)
   - [MagiskService](#magiskservice)
-    - [Configure](#configure-9)
-    - [Using](#using-7)
+    - [配置](#配置-9)
+    - [使用](#使用-7)
   - [Win\_Simple](#win_simple)
-    - [Configure](#configure-10)
-    - [Using](#using-8)
+    - [配置](#配置-10)
+    - [使用](#使用-8)
   - [AppleShortcuts](#appleshortcuts)
     - [FullVer](#fullver)
     - [FastVer](#fastver)
   - [Zhixuewang](#zhixuewang)
-    - [Configure](#configure-11)
-    - [Using](#using-9)
+    - [配置](#配置-11)
+    - [使用](#使用-9)
   - [Other repos](#other-repos)
 
 > [!TIP]
@@ -56,11 +57,11 @@
 
 依赖: `requests`
 
-### Configure
+### 配置
 
 https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console.py#L14-L21
 
-### Using
+### 使用
 
 启动脚本, 按照提示操作即可
 
@@ -70,11 +71,11 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 [CMDConsole](#cmdconsole) 的旧版本 (可选择多个服务)
 
-### Configure
+### 配置
 
 https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console_multi.py#L14-L23
 
-### Using
+### 使用
 
 同上, 多了一步选择服务
 
@@ -89,14 +90,14 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 依赖: `requests`, `pywin32`
 
-### Configure
+### 配置
 
 https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/client/win_device.py#L28-L70
 
 > PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
 > 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)
 
-### Autostart
+### 自启动
 
 `win_device_autostart.vbs`
 
@@ -122,11 +123,11 @@ https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/cli
 
 在使用前，请确保**已安装** Autox.js *且*授予**无障碍权限**
 
-### Configure
+### 配置
 
 https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/autoxjs_device.js#L8-L15
 
-### Using
+### 使用
 
 启动后可点击 Autox.js 右上角的日志图标查看日志
 
@@ -134,6 +135,32 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 - 当手机息屏 (应用名返回为空) 时视为未在使用
 - 当脚本退出时也会更新状态为未在使用 *(不包括 Autox.js 直接停止运行)*
+
+### 安卓低版本运行
+
+<!-- > 方法提供: [@][https://github.com/] - waiting for reply -->
+
+如果需要在较低的安卓版本运行，无法安装上面 repo 中的安装包，可以从下载站下载旧版本:
+
+http://www.autoxjs.com/topic/116/autox-js
+
+另外，此链接中的版本运行脚本会报错，可以参考 [这里](https://kimi.moonshot.cn/share/cvnt3n0nnlrcp7r98mmg) 的解决方案
+
+<details>
+<summary>点击展开</summary>
+
+之所以报错是因为 **AutoX.js 旧版本不支持 Javascript 中的模板字符串**
+
+解决方案就是手动将脚本中的模板字符串替换为 `+` 连接的形式，如:
+
+```js
+// Before
+console.log(`[sleepyc] ${msg}`);
+// After
+console.log('[sleepyc] ' + msg);
+```
+
+</details>
 
 ## [BrowserScript](./browser-script-2025.2.10.user.js)
 
@@ -145,7 +172,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 - [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/browser-script.user.js)
 
-### Configure
+### 配置
 
 https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/browser-script.user.js#L18-L25
 
@@ -157,11 +184,11 @@ https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/cli
 
 依赖: `requests`
 
-### Configure
+### 配置
 
 https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/homework_device.py#L5-L9
 
-### Using
+### 使用
 
 脚本提供了一些函数:
 
@@ -237,7 +264,7 @@ python="C:\Program Files\Python312\python.exe"
 
 2. 将 [`mc_script.py`](./mc_script.py) 复制到此目录, 并改名为 `sleepy.py` (也可为其他名字)
 
-### Configure
+### 配置
 
 需要配置两处:
 
@@ -249,13 +276,13 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L116
 
-### Using
+### 使用
 
 配置完成后重启 Minecraft 进入游戏, 按 `T` *(默认键位, 可能不同)* 打开聊天栏, 并输入: `\sleepy` **(即上面重命名后的文件名去掉 `.py` 后缀)* 回车启动
 
 停止: `\sleepy stop`
 
-### Autorun
+### 自启
 
 也可以配置自启, 只需在 `config.txt` 中新增一行:
 
@@ -271,11 +298,11 @@ autorun[*]=eval 'execute("\\sleepy")'
 
 如获取失败则视为未在使用，[变量计时参考](https://github.com/RikkaNaa/sleepy/commit/9d5b4fc2014b725df24304beaa9439a5eb07099b)
 
-### Configure
+### 配置
 
 https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_kde.py#L18-L28
 
-### Using
+### 使用
 
 可自行配置本脚本的自启动
 
@@ -287,11 +314,11 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 
 适用于 Linux Hyprland 桌面环境，无需任何依赖，开箱即用
 
-### Configure
+### 配置
 
 https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_hyprland.sh#L7-L12
 
-### Using
+### 使用
 
 直接启动即可
 
@@ -305,7 +332,7 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 
 适用于 Magisk Root 环境的服务脚本
 
-### Configure
+### 配置
 
 [./magisk/config.cfg](./magisk/config.cfg)
 
@@ -314,7 +341,7 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 > [!TIP]
 > 详见 [说明](./magisk/README.md)
 
-### Using
+### 使用
 
 刷入 [magisk.zip](./magisk/magisk.zip) 并重启即可
 
@@ -323,12 +350,12 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 > by: [@kmizmal](https://github.com/kmizmal) <br/>
 > Source: [`./Win_Simple/script.py`](./Win_Simple/script.py)
 
-### Configure
+### 配置
 
 配置文件 (首次打开自动在同级目录下创建): `config.ini`
 > `config.ini`里面注释写的很详细了，不再提供示例
 
-### Using
+### 使用
 
 下载后双击 `Win_Simple.exe` 初始化配置文件，然后在同级目录下的 `config.ini` 中填写配置
 
@@ -366,7 +393,7 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 
 依赖: `requests`, `zhixuewang`
 
-### Configure
+### 配置
 
 https://github.com/wyf9/sleepy/blob/73a5e3507c1ca0454bc39c685541d53d228df41f/client/zhixue.py#L38-L47
 
@@ -376,7 +403,7 @@ https://github.com/wyf9/sleepy/blob/73a5e3507c1ca0454bc39c685541d53d228df41f/cli
 sleepy_page_zhixue = true
 ```
 
-### Using
+### 使用
 
 需要将本脚本放在服务器的 `server.py` 同级目录运行，或编辑 L195-L197:
 
