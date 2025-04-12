@@ -82,8 +82,9 @@ def require_secret(view_func):
     @wraps(view_func)
     def wrapped_view(*args, **kwargs):
         # 1. body
-        if flask.request.get_json(silent=True):
-            if flask.request.get_json(silent=True).get('secret') == env.main.secret:
+        body: dict = flask.request.get_json(silent=True)
+        if body:
+            if body.get('secret') == env.main.secret:
                 u.debug('[Auth] Verify secret Success from Body')
                 return view_func(*args, **kwargs)
         # 2. param
@@ -95,10 +96,12 @@ def require_secret(view_func):
             u.debug('[Auth] Verify secret Success from Header')
             return view_func(*args, **kwargs)
         # -1. no any secret
-        return u.reterr(
-            code='not authorized',
-            message='invaild secret'
-        )
+        else:
+            u.debug('[Auth] Verify secret Failed')
+            return u.reterr(
+                code='not authorized',
+                message='invaild secret'
+            )
     return wrapped_view
 
 # --- Templates
@@ -256,8 +259,8 @@ def set_normal():
 
 # --- Device API
 
-@require_secret
 @app.route('/device/set', methods=['GET', 'POST'])
+@require_secret
 def device_set():
     '''
     设置单个设备的信息/打开应用
@@ -302,8 +305,9 @@ def device_set():
         'code': 'OK'
     })
 
-@require_secret
+
 @app.route('/device/remove')
+@require_secret
 def remove_device():
     '''
     移除单个设备的状态
@@ -325,8 +329,8 @@ def remove_device():
     })
 
 
-@require_secret
 @app.route('/device/clear')
+@require_secret
 def clear_device():
     '''
     清除所有设备状态
@@ -341,8 +345,8 @@ def clear_device():
     })
 
 
-@require_secret
 @app.route('/device/private_mode')
+@require_secret
 def private_mode():
     '''
     隐私模式, 即不在 /query 中显示设备状态 (仍可正常更新)
@@ -362,8 +366,8 @@ def private_mode():
     })
 
 
-@require_secret
 @app.route('/save_data')
+@require_secret
 def save_data():
     '''
     保存内存中的状态信息到 `data.json`
@@ -450,6 +454,7 @@ if __name__ == '__main__':
         port=env.main.port,
         debug=env.main.debug
     )
+    print()
     u.info('Server exited, saving data...')
     d.save()
     u.info('Bye.')
