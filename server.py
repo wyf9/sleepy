@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import sqlite3
 import time
 import json5
 # import importlib - ready for plugin?
@@ -14,6 +15,12 @@ import utils as u
 import env
 from data import data as data_init
 from setting import status_list
+
+# app.py
+# from . import flask_ext
+from flask import g
+
+
 
 try:
     # init flask app
@@ -293,6 +300,7 @@ def device_set():
     if (not device_using) and env.status.not_using:
         # 如未在使用且锁定了提示，则替换
         app_name = env.status.not_using
+    last_app_name = devices[device_id]['app_name']
     devices[device_id] = {
         'show_name': device_show_name,
         'using': device_using,
@@ -300,6 +308,10 @@ def device_set():
     }
     d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     d.check_device_status()
+    if env.util.save_to_db:
+        if last_app_name != app_name:
+            # 懒更新，可能用户设计了未切换app_name时亦发送请求，此时不存此条数据
+            d.save_db(device_id)
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -443,6 +455,22 @@ if env.util.steam_enabled:
             'steam-iframe.html',
             steamids=env.util.steam_ids
         )
+
+if env.util.manictime_load:
+    @app.route('/sampleData/CustomTimeline', methods=['GET'])
+    def m_timeline():
+        '''
+        获取 ManicTime 格式的 xml 时间轴数据
+        - Method: **GET**
+        '''
+        from_time_str = flask.request.args.get('FromTime', '')
+        from_time = datetime.strptime(from_time_str, "%Y-%m-%dT%H:%M:%S")
+        to_time_str = flask.request.args.get('ToTime', '')
+        to_time = datetime.strptime(to_time_str, "%Y-%m-%dT%H:%M:%S")
+        device_id = flask.request.args.get('id', '')
+        xml_content = d.db_to_xml(device_id, 'Events', start_from=from_time, end_to=to_time)
+        return flask.Response(xml_content, mimetype='text/xml')
+
 
 # --- End
 
