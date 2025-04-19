@@ -36,7 +36,7 @@ DEVICE_ID: str = 'device-1'
 # 前台显示名称
 DEVICE_SHOW_NAME: str = 'MyDevice1'
 # 检查间隔，以秒为单位
-CHECK_INTERVAL: int = 2
+CHECK_INTERVAL: int = 5
 # 是否忽略重复请求，即窗口未改变时不发送请求
 BYPASS_SAME_REQUEST: bool = True
 # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030

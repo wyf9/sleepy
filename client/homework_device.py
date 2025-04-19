@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import requests
+from time import sleep
 
 # --- config start
 SERVER = 'https://sleepy.example.com'  # 部署地址，末尾不带 `/`
@@ -31,46 +32,68 @@ def get(url: str, **kwargs):
     '''
     modified `requests.get()`
     '''
-    if PROXY:
-        return requests.get(
-            url=url,
-            proxies={
-                'all': PROXY
-            },
-            **kwargs
-        )
-    else:
-        return requests.get(
-            url=url,
-            **kwargs
-        )
+    retries = 5
+    while True:
+        try:
+            if PROXY:
+                return requests.get(
+                    url=url,
+                    proxies={
+                        'all': PROXY
+                    },
+                    **kwargs
+                )
+            else:
+                return requests.get(
+                    url=url,
+                    **kwargs
+                )
+        except Exception as e:
+            retries -= 1
+            if retries:
+                print(f'ing - Request error: {e}, retrying... ({retries} left)')
+                sleep(0.5)
+                continue
+            else:
+                raise
 
 
 def post(url: str, Json: dict, **kwargs):
     '''
     modified `requests.post()`
     '''
-    if PROXY:
-        return requests.post(
-            url=url,
-            json=Json,
-            proxies={
-                'all': PROXY
-            },
-            headers={
-                'Content-Type': 'application/json'
-            },
-            **kwargs
-        )
-    else:
-        return requests.post(
-            url=url,
-            json=Json,
-            headers={
-                'Content-Type': 'application/json'
-            },
-            **kwargs
-        )
+    retries = 5
+    while True:
+        try:
+            if PROXY:
+                return requests.post(
+                    url=url,
+                    json=Json,
+                    proxies={
+                        'all': PROXY
+                    },
+                    headers={
+                        'Content-Type': 'application/json'
+                    },
+                    **kwargs
+                )
+            else:
+                return requests.post(
+                    url=url,
+                    json=Json,
+                    headers={
+                        'Content-Type': 'application/json'
+                    },
+                    **kwargs
+                )
+        except Exception as e:
+            retries -= 1
+            if retries:
+                print(f'ing - Request error: {e}, retrying... ({retries} left)')
+                sleep(0.5)
+                continue
+            else:
+                raise
 
 # --- functions
 
