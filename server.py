@@ -3,7 +3,7 @@
 
 import time
 import json5
-# import importlib - ready for plugin?
+# import importlib  # for plugin
 import pytz
 import flask
 from datetime import datetime
@@ -188,14 +188,14 @@ def query(ret_as_dict: bool = False):
 
     :param ret_as_dict: 使函数直接返回 dict 而非 u.format_dict() 格式化后的 response
     '''
-    st = d.data['status']
+    st: int = d.data['status']
     try:
         stinfo = status_list[st]
     except:
         stinfo = {
             'id': -1,
-            'name': '164',
-            'desc': '未知的标识符，可能是配置问题。',
+            'name': '[未知]',
+            'desc': f'未知的标识符 {st}，可能是配置问题。',
             'color': 'error'
         }
     devicelst = d.data['device_status']
@@ -448,6 +448,13 @@ if env.util.steam_enabled:
 
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
+    # plugins
+    # u.info(f'Loading plugins...')
+    # all_plugins = u.list_dir(u.get_path('plugin'), include_subfolder=False, ext='.py')
+    # enabled_plugins = []
+    # for i in all_plugins:
+    #     pass
+    # launch
     u.info(f'Starting server: {f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
     app.run(  # 启↗动↘
         host=env.main.host,

@@ -45,7 +45,7 @@ ENCODING: str = 'gb18030'
 SKIPPED_NAMES: list = [
     '',  # 空字符串
     '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '操作中心', '日期和时间信息', '网络连接', '电池信息', '搜索', '任务视图', '任务切换', 'Program Manager',  # 桌面组件
-    'Flow.Launcher', 'Snipper - Snipaste'  # 其他程序
+    'Flow.Launcher', 'Snipper - Snipaste', 'Paster - Snipaste'  # 其他程序
 ]
 # 当窗口标题为其中任意一项时视为未在使用
 NOT_USING_NAMES: list = [
@@ -473,7 +473,7 @@ def do_update():
                     # 从播放变为不播放
                     media_resp = send_status(
                         using=False,
-                        app_name='No Media Playing',
+                        app_name='没有媒体播放',
                         id=MEDIA_DEVICE_ID,
                         show_name=MEDIA_DEVICE_SHOW_NAME
                     )
@@ -497,7 +497,7 @@ if __name__ == '__main__':
         try:
             resp = send_status(
                 using=False,
-                app_name=f'Client Exited',
+                app_name='未在使用',
                 id=DEVICE_ID,
                 show_name=DEVICE_SHOW_NAME
             )
@@ -507,7 +507,7 @@ if __name__ == '__main__':
             if MEDIA_INFO_ENABLED and MEDIA_INFO_MODE == 'standalone':
                 media_resp = send_status(
                     using=False,
-                    app_name='Media Client Exited',
+                    app_name='未在使用',
                     id=MEDIA_DEVICE_ID,
                     show_name=MEDIA_DEVICE_SHOW_NAME
                 )
