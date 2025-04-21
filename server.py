@@ -96,12 +96,11 @@ def require_secret(view_func):
             u.debug('[Auth] Verify secret Success from Header')
             return view_func(*args, **kwargs)
         # -1. no any secret
-        else:
-            u.debug('[Auth] Verify secret Failed')
-            return u.reterr(
-                code='not authorized',
-                message='invaild secret'
-            )
+        u.debug('[Auth] Verify secret Failed')
+        return u.reterr(
+            code='not authorized',
+            message='invaild secret'
+        )
     return wrapped_view
 
 # --- Templates

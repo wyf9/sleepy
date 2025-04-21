@@ -1,6 +1,9 @@
 # coding: utf-8
 # 存放 utils.py 和 env.py 都使用到的函数
 
+from pathlib import Path
+
+
 def tobool(string: str, throw: bool = False) -> bool:
     '''
     将形似 `true`, `1`, `t`, `yes`, `y` 之类的内容转换为布尔值
@@ -36,3 +39,21 @@ def tobool(string: str, throw: bool = False) -> bool:
         else:
             ret = None
     return ret
+
+
+def current_dir() -> str:
+    '''
+    获取当前主程序所在目录
+    '''
+    return str(Path(__file__).parent)
+
+
+def get_path(path: str) -> Path:
+    '''
+    相对路径 (基于主程序目录) -> 绝对路径
+    '''
+    if current_dir().startswith('/var/task') and path == 'data.json':
+        # 适配 Vercel 部署 (调整 data.json 路径为可写的 /tmp/)
+        return '/tmp/sleepy_data.json'
+    else:
+        return str(Path(__file__).parent.joinpath(path))

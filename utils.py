@@ -1,3 +1,4 @@
+# coding: utf-8
 from datetime import datetime
 import json
 from flask import make_response, Response
@@ -82,24 +83,6 @@ def exception(msg: str) -> SleepyException:
     :param msg: 错误描述
     '''
     raise SleepyException(msg)
-
-
-def current_dir() -> str:
-    '''
-    获取当前主程序所在目录
-    '''
-    return str(Path(__file__).parent)
-
-
-def get_path(path: str) -> Path:
-    '''
-    相对路径 (基于主程序目录) -> 绝对路径
-    '''
-    if current_dir().startswith('/var/task') and path == 'data.json':
-        # 适配 Vercel 部署 (调整 data.json 路径为可写的 /tmp/)
-        return '/tmp/sleepy_data.json'
-    else:
-        return str(Path(__file__).parent.joinpath(path))
 
 
 def list_dir(path: str, include_subfolder: bool = True, strict_exist: bool = False, ext: str = '') -> list:
