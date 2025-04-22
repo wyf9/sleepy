@@ -463,7 +463,6 @@ if __name__ == '__main__':
     # for i in all_plugins:
     #     pass
     # launch
-    # 使用本地地址和高端口号以避免权限问题
     host = env.main.host
     port = env.main.port
     u.info(f'Starting server: {host}:{port}{" (debug enabled)" if env.main.debug else ""}')
