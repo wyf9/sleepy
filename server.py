@@ -464,8 +464,8 @@ if __name__ == '__main__':
     #     pass
     # launch
     # 使用本地地址和高端口号以避免权限问题
-    host = '0.0.0.0'
-    port = 9010
+    host = env.main.host
+    port = env.main.port
     u.info(f'Starting server: {host}:{port}{" (debug enabled)" if env.main.debug else ""}')
     try:
         app.run(  # 启↗动↘
