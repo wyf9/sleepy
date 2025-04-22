@@ -93,8 +93,17 @@ def require_secret(view_func):
             return view_func(*args, **kwargs)
         # 3. header
         elif flask.request.headers.get('Sleepy-Secret') == env.main.secret:
-            u.debug('[Auth] Verify secret Success from Header')
+            u.debug('[Auth] Verify secret Success from Header Sleepy-Secret')
             return view_func(*args, **kwargs)
+        # 4. header - Bearer token
+        elif flask.request.headers.get('Authorization'):
+            auth_header = flask.request.headers.get('Authorization')
+            if auth_header.startswith('Bearer '):
+                token = auth_header[7:]
+                if token == env.main.secret:
+                    u.debug('[Auth] Verify Bearer token Success from Header Authorization')
+                    return view_func(*args, **kwargs)
+            u.debug('[Auth] Invalid Bearer token format or token')
         # -1. no any secret
         u.debug('[Auth] Verify secret Failed')
         return u.reterr(
@@ -447,19 +456,25 @@ if env.util.steam_enabled:
 
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
-    # plugins
+    # plugins - disabled
     # u.info(f'Loading plugins...')
     # all_plugins = u.list_dir(u.get_path('plugin'), include_subfolder=False, ext='.py')
     # enabled_plugins = []
     # for i in all_plugins:
     #     pass
     # launch
-    u.info(f'Starting server: {f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
-    app.run(  # 启↗动↘
-        host=env.main.host,
-        port=env.main.port,
-        debug=env.main.debug
-    )
+    host = env.main.host
+    port = env.main.port
+    u.info(f'Starting server: {host}:{port}{" (debug enabled)" if env.main.debug else ""}')
+    try:
+        app.run(  # 启↗动↘
+            host=env.main.host,
+            port=env.main.port,
+            debug=env.main.debug
+        )
+    except Exception as e:
+        u.error(f"Error starting server: {e}")
+        exit(1)
     print()
     u.info('Server exited, saving data...')
     d.save()
