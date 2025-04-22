@@ -91,10 +91,11 @@ def require_secret(view_func):
         elif flask.request.args.get('secret') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Param')
             return view_func(*args, **kwargs)
+        # 3. header
         elif flask.request.headers.get('Sleepy-Secret') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Header Sleepy-Secret')
             return view_func(*args, **kwargs)
-        # 3. header - Bearer token
+        # 4. header - Bearer token
         elif flask.request.headers.get('Authorization'):
             auth_header = flask.request.headers.get('Authorization')
             if auth_header.startswith('Bearer '):
@@ -468,8 +469,8 @@ if __name__ == '__main__':
     u.info(f'Starting server: {host}:{port}{" (debug enabled)" if env.main.debug else ""}')
     try:
         app.run(  # 启↗动↘
-            host=host,
-            port=port,
+            host=env.main.host,
+            port=env.main.port,
             debug=env.main.debug
         )
     except Exception as e:
