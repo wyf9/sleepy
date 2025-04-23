@@ -97,7 +97,7 @@ def require_secret(view_func):
             return view_func(*args, **kwargs)
 
         # 4. header - Bearer token
-        if flask.request.headers.get('Authorization'):
+        elif flask.request.headers.get('Authorization'):
             auth_header = flask.request.headers.get('Authorization')
             if auth_header.startswith('Bearer '):
                 token = auth_header[7:]
@@ -458,21 +458,22 @@ if env.util.steam_enabled:
 
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
-    # plugins - disabled
+    # --- plugins - undone
     # u.info(f'Loading plugins...')
     # all_plugins = u.list_dir(u.get_path('plugin'), include_subfolder=False, ext='.py')
     # enabled_plugins = []
     # for i in all_plugins:
     #     pass
-    # launch
-    host = env.main.host
-    port = env.main.port
-    u.info(f'Starting server: {host}:{port}{" (debug enabled)" if env.main.debug else ""}')
-    app.run(  # 启↗动↘
-        host=env.main.host,
-        port=env.main.port,
-        debug=env.main.debug
-    )
+    # --- launch
+    u.info(f'Starting server: {env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
+    try:
+        app.run(  # 启↗动↘
+            host=env.main.host,
+            port=env.main.port,
+            debug=env.main.debug
+        )
+    except Exception as e:
+        u.error(f"Error running server: {e}")
     print()
     u.info('Server exited, saving data...')
     d.save()
