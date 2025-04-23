@@ -8,8 +8,6 @@
     <meta name="description" content="{{ page_desc }}">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
     <link rel="icon" href="{{ page_favicon }}">
-    <!-- live server 环境: sorry but 已经拆分了 -->
-    <!-- flask 环境 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <style>
         body {
@@ -24,8 +22,8 @@
         <div class="card light" id="user_status">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
 
-            <!-- (moonlight) 透明度 / 暗色模式 -->
             {% if moonlight %}
+            <!-- (moonlight) 透明度 / 暗色模式 -->
             {% include "moonlight.html" %}
             {% endif %}
 
@@ -33,27 +31,27 @@
             <p id="additional-info">{{ status_desc | safe }}</p>
             <p id="device-status">[设备状态列表]</p>
 
-            <!-- (steam-legacy) 旧版 Steam 状态模块 (文字) -->
             {% if steam_legacy_enabled %}
+            <!-- (steam-legacy) 旧版 Steam 状态模块 (文字) -->
             {% include "steam-legacy.html" %}
             {% endif %}
 
-            <!-- (steam-new) 新版 Steam 状态模块 (iframe) -->
             {% if steam_enabled %}
+            <!-- (steam-new) 新版 Steam 状态模块 (iframe) -->
             {% include "steam-new.html" %}
             {% endif %}
 
             <p id="last-updated">最后更新: {{ last_updated }}</p>
         </div>
 
-        <!-- (zhixue) 智学网分数 -->
         {% if zhixue %}
+        <!-- (zhixue) 智学网分数 -->
         {% include "zhixue.html" %}
         {% endif %}
 
         <div class="card light" id="more_text">
-            <!-- (hitokoto) 一言 -->
             {% if hitokoto %}
+            <!-- (hitokoto) 一言 -->
             {% include "hitokoto.html" %}
             {% endif %}
             <!-- more_text START -->
@@ -73,18 +71,18 @@
         </div>
     </div>
 
-    <!-- (lantern) 节日灯笼 -->
     {% if lantern %}
+    <!-- (lantern) 节日灯笼 -->
     {% include "lantern.html" %}
     {% endif %}
 
-    <!-- (mplayer) 音乐播放器 -->
     {% if mplayer %}
+    <!-- (mplayer) 音乐播放器 -->
     {% include "mplayer.html" %}
     {% endif %}
 
-    <!-- (canvas) 粒子效果 -->
     {% if canvas %}
+    <!-- (canvas) 粒子效果 -->
     <script src="{{ url_for('static', filename='canvas.js') }}" defer></script>
     {% endif %}
 

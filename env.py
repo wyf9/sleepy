@@ -1,21 +1,19 @@
 # coding: utf-8
 import os
-from pathlib import Path
 from dotenv import load_dotenv
 
-from _utils import tobool
+from _utils import tobool, get_path
 
-dotenv_filename = str(Path(__file__).parent.joinpath('.env'))
-load_dotenv(dotenv_path=dotenv_filename)
+load_dotenv(dotenv_path=get_path('.env'))
 
 
-def getenv(key: str, default, typeobj: object = str) -> any:
+def getenv(key: str, default: any, typeobj: object) -> any:
     '''
     获取环境变量
 
     :param key: 键
-    :param typeobj: 类型对象 (str / int / bool)
     :param default: 默认值 (未读取到此项配置时使用)
+    :param typeobj: 类型对象 (str / int / bool)
     '''
     got_value = os.getenv(key)
     if got_value is None:
@@ -44,7 +42,7 @@ class _page:
     '''
     title: str = getenv('sleepy_page_title', 'User Alive?', str)
     desc: str = getenv('sleepy_page_desc', 'User\'s Online Status Page', str)
-    favicon: str = getenv('sleepy_page_favicon', '', str)
+    favicon: str = getenv('sleepy_page_favicon', './static/favicon.ico', str)
     user: str = getenv('sleepy_page_user', 'User', str)
     background: str = getenv('sleepy_page_background', 'https://imgapi.siiway.top/image', str)
     learn_more: str = getenv('sleepy_page_learn_more', 'GitHub Repo', str)

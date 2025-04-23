@@ -3,6 +3,7 @@ import requests as r
 import json
 import sys
 
+sys.path.append('./')
 sys.path.append('../')
 if True:
     import env
@@ -33,7 +34,7 @@ def post(path: str, data: dict):
         },
         json=data
     )
-    return f'GET {reqpath} {req.status_code}\n{req.text}'.replace(SECRET, '[SECRET]')
+    return f'POST {reqpath} {req.status_code}\n{req.text}'.replace(SECRET, '[SECRET]')
 
 
 if __name__ == '__main__':
@@ -50,8 +51,8 @@ if __name__ == '__main__':
                 out = post(*inp[2:].split(' ', 1))
             else:
                 out = eval(inp)
-            print(f'O > {out}')
+            print(f'O > {out.replace(SECRET, "[SECRET]")}')
         except Exception as e:
-            print(f'E - {e}')
+            print(f'E - {str(e).replace(SECRET, "[SECRET]")}')
         except KeyboardInterrupt:
             exit(0)

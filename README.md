@@ -12,8 +12,8 @@
 - [x] 开放的 Query / Metrics [接口](./doc/api.md), 方便统计
 
 > [!TIP]
-> **最新开发进度/ TODOs 见: [Discord](https://discord.gg/DyBY6gwkeg)** / [Telegram](https://t.me/wyf9_sleepy) / [QQ](https://qm.qq.com/q/uItkv96Wn6)<br/>
-> 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 [More contact](https://wyf9.top/#/contact) *(注明来意)*.
+> **最新 开发进度 / TODOs 见: [Discord](https://discord.gg/DyBY6gwkeg)** / [Telegram](https://t.me/wyf9_sleepy) / [QQ](https://qm.qq.com/q/uItkv96Wn6)<br/>
+> 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 *[More contact](https://wyf9.top/#/contact) (注明来意)*.
 
 ### Preview
 

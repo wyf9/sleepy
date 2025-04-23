@@ -9,25 +9,25 @@ from _utils import *
 from env import main as mainenv
 
 
-def info(log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ℹ️  [Info] {log}")
+def info(*log):
+    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ℹ️  [Info]", *log)
 
 
-def infon(log):
-    print(f"\n{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ℹ️  [Info] {log}")
+def infon(*log):
+    print(f"\n{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ℹ️  [Info]",*log)
 
 
-def warning(log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚠️  [Warning] {log}")
+def warning(*log):
+    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚠️  [Warning]",*log)
 
 
-def error(log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ❌  [Error] {log}")
+def error(*log):
+    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ❌  [Error]",*log)
 
 
-def debug(log):
+def debug(*log):
     if mainenv.debug:
-        print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚙️  [Debug] {log}")
+        print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚙️  [Debug]",*log)
 
 
 def format_dict(dic) -> Response:
