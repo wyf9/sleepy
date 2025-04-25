@@ -64,11 +64,10 @@ def showip():
     path = flask.request.path
     # --- log
     ip1 = flask.request.remote_addr
-    try:
-        ip2 = flask.request.headers['X-Forwarded-For']
+    ip2 = flask.request.headers.get('X-Forwarded-For')
+    if ip2:
         u.info(f'- Request: {ip1} / {ip2} : {path}')
-    except:
-        ip2 = None
+    else:
         u.info(f'- Request: {ip1} : {path}')
     # --- count
     if env.util.metrics:
@@ -83,23 +82,27 @@ def require_secret(view_func):
     def wrapped_view(*args, **kwargs):
         # 1. body
         body: dict = flask.request.get_json(silent=True) or {}
-        if body.get('secret') == env.main.secret:
+        if body and body.get('secret') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Body')
             return view_func(*args, **kwargs)
+
         # 2. param
         elif flask.request.args.get('secret') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Param')
             return view_func(*args, **kwargs)
+
         # 3. header (Sleepy-Secret)
-        # Sleepy-Secret: my-secret
+        # -> Sleepy-Secret: my-secret
         elif flask.request.headers.get('Sleepy-Secret') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Header (Sleepy-Secret)')
             return view_func(*args, **kwargs)
+
         # 4. header (Authorization)
-        # Authorization: Bearer my-secret
+        # -> Authorization: Bearer my-secret
         elif flask.request.headers.get('Authorization')[7:] == env.main.secret:
             u.debug('[Auth] Verify secret Success from Header (Authorization)')
             return view_func(*args, **kwargs)
+
         # -1. no any secret
         u.debug('[Auth] Verify secret Failed')
         return u.reterr(
@@ -452,19 +455,22 @@ if env.util.steam_enabled:
 
 if __name__ == '__main__':
     u.info(f'=============== hi {env.page.user}! ===============')
-    # plugins
+    # --- plugins - undone
     # u.info(f'Loading plugins...')
     # all_plugins = u.list_dir(u.get_path('plugin'), include_subfolder=False, ext='.py')
     # enabled_plugins = []
     # for i in all_plugins:
     #     pass
-    # launch
-    u.info(f'Starting server: {f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
-    app.run(  # 启↗动↘
-        host=env.main.host,
-        port=env.main.port,
-        debug=env.main.debug
-    )
+    # --- launch
+    u.info(f'Starting server: {env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
+    try:
+        app.run(  # 启↗动↘
+            host=env.main.host,
+            port=env.main.port,
+            debug=env.main.debug
+        )
+    except Exception as e:
+        u.error(f"Error running server: {e}")
     print()
     u.info('Server exited, saving data...')
     d.save()
