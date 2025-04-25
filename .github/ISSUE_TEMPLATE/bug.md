@@ -1,9 +1,8 @@
 ---
 name: Bug report / Bug 反馈
 about: Report a bug to us / 反馈一个 Bug
-title: "[Bug]"
+title: "[Bug] "
 labels: bug
-assignees: wyf9
 
 ---
 
