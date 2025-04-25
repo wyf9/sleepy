@@ -82,24 +82,29 @@ def require_secret(view_func):
     @wraps(view_func)
     def wrapped_view(*args, **kwargs):
         # 1. body
-        body: dict = flask.request.get_json(silent=True)
-        if body:
-            if body.get('secret') == env.main.secret:
-                u.debug('[Auth] Verify secret Success from Body')
-                return view_func(*args, **kwargs)
+        body: dict = flask.request.get_json(silent=True) or {}
+        if body.get('secret') == env.main.secret:
+            u.debug('[Auth] Verify secret Success from Body')
+            return view_func(*args, **kwargs)
         # 2. param
         elif flask.request.args.get('secret') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Param')
             return view_func(*args, **kwargs)
-        # 3. header
+        # 3. header (Sleepy-Secret)
+        # Sleepy-Secret: my-secret
         elif flask.request.headers.get('Sleepy-Secret') == env.main.secret:
-            u.debug('[Auth] Verify secret Success from Header')
+            u.debug('[Auth] Verify secret Success from Header (Sleepy-Secret)')
+            return view_func(*args, **kwargs)
+        # 4. header (Authorization)
+        # Authorization: Bearer my-secret
+        elif flask.request.headers.get('Authorization')[7:] == env.main.secret:
+            u.debug('[Auth] Verify secret Success from Header (Authorization)')
             return view_func(*args, **kwargs)
         # -1. no any secret
         u.debug('[Auth] Verify secret Failed')
         return u.reterr(
             code='not authorized',
-            message='invaild secret'
+            message='wrong secret'
         )
     return wrapped_view
 

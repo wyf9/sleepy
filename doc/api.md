@@ -8,9 +8,9 @@
 
 ## 鉴权说明
 
-任何标记了需要鉴权的接口，都需要用下面三种方式的一种传入**与服务端一致**的 `secret` *(优先级从上到下)*:
+任何标记了需要鉴权的接口，都需要用下面三种方式的一种传入 **与服务端一致** 的 `secret` *(优先级从上到下)*:
 
-1. 请求 Body 的 `secret` 字符串 **(仅适用于 POST)**
+1. 请求体 *(`Body`)* 的 `secret` ***(仅适用于 POST 请求)***
 
 ```jsonc
 {
@@ -19,7 +19,7 @@
 }
 ```
 
-2. 请求 Param 的 `secret` 参数
+2. 请求参数 *(`Param`)* 的 `secret`
 
 ```url
 ?secret=MySecretCannotGuess
@@ -31,6 +31,12 @@
 Sleepy-Secret: MySecretCannotGuess
 ```
 
+4. 请求头 *(`Header`)* 的 `Authorization` *(需要在 secret 前加 `Bearer `)*
+
+```http
+Authorization: Bearer MySecretCannotGuess
+```
+
 > 服务端的 `secret` 即为在环境变量中配置的 `SLEEPY_SECRET`
 
 如 `secret` 错误，则会返回:
@@ -39,7 +45,7 @@ Sleepy-Secret: MySecretCannotGuess
 {
     "success": false, // 请求是否成功
     "code": "not authorized", // 返回代码
-    "message": "invaild secret" // 详细信息
+    "message": "wrong secret" // 详细信息
 }
 ```
 
@@ -91,7 +97,7 @@ Sleepy-Secret: MySecretCannotGuess
 }
 ```
 
-> 其中日期/时间的时区默认为 `Asia/Shanghai`, 可在配置中修改
+> 返回中 **日期/时间** 的时区默认为 **`Asia/Shanghai`** *(即北京时间)*, 可在配置中修改
 
 ### status-list
 
