@@ -6,27 +6,26 @@ body:
   - type: input
     id: version
     attributes:
-      label: Version / 使用的版本
+      label: 使用的版本 / Version
       description: |
-        你使用的版本 (版本号 或 commit id)
-        查看 commit id: 执行命令 `git rev-parse HEAD`
-        The version you are using (version number or commit id).
-        Check commit id: Run the command `git rev-parse HEAD`
+        你使用的版本 (版本号 或 commit id) <br/>
+        *查看 commit id: 执行命令 `git rev-parse HEAD`* <br/>
+        The version you are using (version number or commit id). <br/>
+        *Check commit id: Run the command `git rev-parse HEAD`*
       placeholder: "e.g., 1.0.0 or abcdef1"
     validations:
       required: true
   - type: textarea
-    id: bug-description
+    id: description
     attributes:
-      label: Describe the bug / 描述 Bug 情况
+      label: 描述 Bug 情况 / Describe the bug
       description: 此 Bug 的表现或影响 / The manifestation or impact of the bug.
-      placeholder: "A clear and concise description of what the bug is."
     validations:
       required: true
   - type: textarea
     id: reproduction
     attributes:
-      label: How to reproduce / 如何复现
+      label: 如何复现 / How to reproduce
       description: 复现此 Bug 的步骤 / Steps to reproduce this bug.
       placeholder: |
         1. Go to '...'
@@ -36,27 +35,37 @@ body:
     validations:
       required: true
   - type: textarea
-    id: expected-behavior
+    id: expected
     attributes:
-      label: Expected behavior / 预期情况
+      label: 预期情况 / Expected behavior
       description: 清晰，简洁地描述预期情况下应该发生什么 / A clear and concise description of what you expected to happen.
     validations:
       required: false
   - type: textarea
-    id: screenshots-logs
+    id: logs
     attributes:
-      label: Screenshots or logs / 截屏或日志
+      label: 截屏或日志 / Screenshots or logs
       description: |
-        如果可以，添加截图或服务器日志来帮助解决问题 **(注意删除日志中的 secret)**
+        如果可以，添加截图或服务器日志来帮助解决问题 **(注意删除日志中的 secret)** <br/>
         If applicable, add screenshots or server logs to help explain your problem. **(remove secret in logs)**
     validations:
       required: false
   - type: textarea
-    id: additional-context
+    id: additional
     attributes:
-      label: Additional context / 其他内容
+      label: 其他内容 / Additional context
       description: 其他关于此问题的信息 / Any other context about the problem here.
     validations:
       required: false
-
-
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认提交 / Comfirm
+      description: |
+        1. 确认现有的 Issues 列表中没有重复的问题 / Make sure there's no duplicate. <br/>
+        2. 确认已经删除日志中的敏感信息 (如 secret) / Make sure there's no secret in logs.
+      options:
+        - label: 我确认检查了上面的事项，并创建此 Issue / I confirm to commit this issue.
+          required: true
+        - label: 我未认真查看上面所有内容，只是一味勾选所有复选框 / Don't check me.
+          required: false

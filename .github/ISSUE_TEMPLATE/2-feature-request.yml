@@ -6,21 +6,33 @@ body:
   - type: textarea
     id: problem
     attributes:
-      label: Is your feature request related to a problem? / 是否因为遇到问题而提出新功能？
-      description: A clear and concise description of what the problem is. / 清晰，简洁地描述此问题。
+      label: 是否因为遇到问题而提出新功能? / Is your feature request related to a problem?
+      description: 清晰，简洁地描述此问题 / A clear and concise description of what the problem is.
     validations:
-      required: true
+      required: false
   - type: textarea
     id: solution
     attributes:
-      label: Describe the solution you'd like / 描述你喜欢的解决方案
-      description: A clear and concise description of what you want to happen. / 清楚并简洁地描述你希望发生什么。
+      label: 描述你想要的解决方案 / Describe the solution you'd like
+      description: 清楚并简洁地描述你希望发生什么 / A clear and concise description of what you want to happen.
     validations:
       required: true
   - type: textarea
     id: context
     attributes:
-      label: Additional context / 更多内容
-      description: Add any other context or screenshots about the feature request here. / 在此添加关于此功能请求的更多信息 (或截图)。
+      label: 更多内容 / Additional context
+      description: 关于此功能请求的更多信息 (或截图, 日志) / Any other context, screenshots or logs about the feature request here.
     validations:
       required: false
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认提交 / Comfirm
+      description: |
+        1. 确认现有的 Issues 列表中没有重复的问题 / Make sure there's no duplicate. <br/>
+        2. 确认已经删除任何敏感信息 (如 secret) / Make sure there's no secret above.
+      options:
+        - label: 我确认检查了上面的事项，并创建此 Issue / I confirm to commit this issue.
+          required: true
+        - label: 我未认真查看上面所有内容，只是一味勾选所有复选框 / Don't check me.
+          required: false
