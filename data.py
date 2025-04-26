@@ -139,16 +139,16 @@ class data:
         else:
         '''
         return u.format_dict({
-                'time': f'{now}',
-                'timezone': env.main.timezone,
-                'today_is': self.data['metrics']['today_is'],
-                'month_is': self.data['metrics']['month_is'],
-                'year_is': self.data['metrics']['year_is'],
-                'today': self.data['metrics']['today'],
-                'month': self.data['metrics']['month'],
-                'year': self.data['metrics']['year'],
-                'total': self.data['metrics']['total']
-            })
+            'time': f'{now}',
+            'timezone': env.main.timezone,
+            'today_is': self.data['metrics']['today_is'],
+            'month_is': self.data['metrics']['month_is'],
+            'year_is': self.data['metrics']['year_is'],
+            'today': self.data['metrics']['today'],
+            'month': self.data['metrics']['month'],
+            'year': self.data['metrics']['year'],
+            'total': self.data['metrics']['total']
+        })
 
     def check_metrics_time(self) -> None:
         '''
