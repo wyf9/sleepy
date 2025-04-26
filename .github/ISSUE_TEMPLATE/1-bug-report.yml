@@ -1,0 +1,62 @@
+name: Bug report / Bug 反馈
+description: Report a bug to us / 反馈一个 Bug
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version / 使用的版本
+      description: |
+        你使用的版本 (版本号 或 commit id)
+        查看 commit id: 执行命令 `git rev-parse HEAD`
+        The version you are using (version number or commit id).
+        Check commit id: Run the command `git rev-parse HEAD`
+      placeholder: "e.g., 1.0.0 or abcdef1"
+    validations:
+      required: true
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug / 描述 Bug 情况
+      description: 此 Bug 的表现或影响 / The manifestation or impact of the bug.
+      placeholder: "A clear and concise description of what the bug is."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How to reproduce / 如何复现
+      description: 复现此 Bug 的步骤 / Steps to reproduce this bug.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior / 预期情况
+      description: 清晰，简洁地描述预期情况下应该发生什么 / A clear and concise description of what you expected to happen.
+    validations:
+      required: false
+  - type: textarea
+    id: screenshots-logs
+    attributes:
+      label: Screenshots or logs / 截屏或日志
+      description: |
+        如果可以，添加截图或服务器日志来帮助解决问题 **(注意删除日志中的 secret)**
+        If applicable, add screenshots or server logs to help explain your problem. **(remove secret in logs)**
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context / 其他内容
+      description: 其他关于此问题的信息 / Any other context about the problem here.
+    validations:
+      required: false
+
+
