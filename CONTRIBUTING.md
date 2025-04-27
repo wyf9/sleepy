@@ -61,6 +61,7 @@
 ### 特定平台配置 ###
 -> .github/ # GitHub 配置文件夹
   |-> ISSUE_TEMPLATE/ # Issue 模板
+  |-> PULL_REQUEST_TEMPLATE # PR 模板
 -> .vscode/ # VSCode 配置文件夹
 -> .gitignore # Git 忽略文件
 -> requirements.txt # Python 依赖列表
