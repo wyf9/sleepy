@@ -157,6 +157,7 @@ def index():
         steam_enabled=env.util.steam_enabled,
         steamkey=env.util.steam_key,
         steamids=env.util.steam_ids,
+        steam_refresh_interval=env.util.steam_refresh_interval,
 
         status_name=stat['name'],
         status_color=stat['color'],
@@ -448,7 +449,8 @@ if env.util.steam_enabled:
     def steam():
         return flask.render_template(
             'steam-iframe.html',
-            steamids=env.util.steam_ids
+            steamids=env.util.steam_ids,
+            steam_refresh_interval=env.util.steam_refresh_interval
         )
 
 # --- End

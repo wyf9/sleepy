@@ -76,6 +76,7 @@ class _util:
     steam_enabled: bool = getenv('sleepy_util_steam_enabled', False, bool)
     steam_key: str = getenv('sleepy_util_steam_key', '', str)
     steam_ids: str = getenv('sleepy_util_steam_ids', '', str)
+    steam_refresh_interval: int = getenv('sleepy_util_steam_refresh_interval', 20000, int)
 
 
 main = _main()

@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-
+<!--
+Steam Info (New)
+From: https://github.com/gamer2810/steam-miniprofile
+(Moded)
+-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
@@ -12,53 +16,86 @@
   <noscript>
     <link rel="stylesheet" href="https://community.cloudflare.steamstatic.com/public/shared/css/shared_global.css">
   </noscript>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
-    integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script defer async>
-    $(function () {
+  <script>
+    const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+    async function main() {
+      const container = document.getElementById('includedContent');
+      if (!container) {
+        console.error('Container element not found');
+        return;
+      }
+
+      const defaultProfile = document.querySelector('.default');
+      if (!defaultProfile) {
+        console.error('Default profile element not found');
+        return;
+      }
+
       let searchParams = new URLSearchParams(window.location.search);
-      let corsHost = "https://steam-miniprofile-cors.glitch.me/"
+      let corsHost = 'https://steam-miniprofile-cors.glitch.me/'
       let steamId = searchParams.get('accountId') ? searchParams.get('accountId') : '{{ steamids }}';
       let interactive = searchParams.get('interactive') ? searchParams.get('interactive') : false;
       let vanityId = searchParams.get('vanityId') ? searchParams.get('vanityId') : '';
-      // For list of available languages, check out README on https://github.com/gamer2810/steam-miniprofile
       let language = searchParams.get('lang') ? searchParams.get('lang') : 'schinese';
       let featuredGame = searchParams.get('appId') ? searchParams.get('appId') : '';
       let corsURL = `${corsHost}https%3A%2F%2Fsteamcommunity.com%2Fminiprofile%2F${steamId}?l=${language}&appId=${featuredGame}`;
       let steamURL = `https://steamcommunity.com/id/${vanityId}`;
-      
-      if(steamId === '{{ steamids }}') {
+
+      if (steamId === '{{ steamids }}') {
         steamId = '{{ steamids }}';
       }
+      console.log(`[Steam New] SteamID: ${steamId}`);
 
-      $.get(corsURL, function (data) {
-        $("#includedContent").html(data).hide();
-        if ($("#includedContent").children().text().length != 0) {
-          $(".default").fadeOut("fast", function () {
-            $(".default").replaceWith(data);
-            $(".default").fadeIn("fast");
-          });
+      let loaded = false;
+      const refresh_interval = Number('{{ steam_refresh_interval }}') || 20000;
 
-          window.parent.postMessage(
-            {
-              state:"loaded"
-            }, {
-            targetOrigin: '*',
-          })
-        }
-        
-        if(interactive && vanityId) {
-          document.body.style.cursor = "pointer";
-          $(document).on('click', 'div.miniprofile_container', function(e){ 
-              e.preventDefault(); 
-              var url = $(this).attr('href'); 
+      while (true) {
+        console.log('[Steam New] Getting steam info');
+        try {
+          const response = await fetch(corsURL);
+          if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
+          const data = await response.text();
+
+          container.innerHTML = data;
+          container.hidden = true;
+
+          // if ((container.children && container.children.textContent.length) !== 0) {
+            defaultProfile.classList.add('fade-out');
+            defaultProfile.replaceWith(...container.children);
+            defaultProfile.classList.remove('fade-out');
+            defaultProfile.classList.add('fade-in');
+
+            if (!loaded) {
+              window.parent.postMessage(
+                {
+                  state: "loaded"
+                }, {
+                targetOrigin: '*',
+              })
+              loaded = true;
+            }
+          // }
+
+          if (interactive && vanityId) {
+            document.body.style.cursor = "pointer";
+            document.addEventListener('click', 'div.miniprofile_container', function (e) {
+              e.preventDefault();
               window.open(steamURL, '_blank');
-          });
-        }
-      });
+            });
+          }
 
-    });
+          console.log(`[Steam New] Updated`);
+        } catch (error) {
+          console.error(`[Steam New] Fetch error: ${error}`);
+        }
+
+        console.log(`[Steam New] Sleep ${refresh_interval}ms...`);
+        await sleep(refresh_interval);
+      }
+    }
+
+    // 确保 dom 加载完成后再启动
+    document.addEventListener('DOMContentLoaded', main);
   </script>
 </head>
 
