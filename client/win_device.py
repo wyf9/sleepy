@@ -144,7 +144,7 @@ def get_media_info():
         async def get_media_info_async():
             session = await get_media_session()
             if not session:
-                return False, "", "", ""
+                return False, '', '', ''
 
             # 获取播放状态
             info = session.get_playback_info()
@@ -153,9 +153,12 @@ def get_media_info():
             # 获取媒体属性
             props = await session.try_get_media_properties_async()
 
-            title = props.title or ""
-            artist = props.artist or ""
-            album = props.album_title or ""
+            title = props.title or ''
+            artist = props.artist or ''
+            album = props.album_title or ''
+
+            if album == '<未知专辑名>':
+                album = ''
 
             return is_playing, title, artist, album
 
@@ -164,7 +167,7 @@ def get_media_info():
 
     except Exception as primary_error:
         debug(f"主要媒体信息获取方式失败: {primary_error}")
-        return False, "", "", ""
+        return False, '', '', ''
 
 # ----- Part: Send status
 
@@ -333,7 +336,7 @@ def check_mouse_idle() -> bool:
 
 
 last_media_playing = False  # 跟踪上一次的媒体播放状态
-last_media_content = ""  # 跟踪上一次的媒体内容
+last_media_content = ''  # 跟踪上一次的媒体内容
 
 
 def do_update():
@@ -416,7 +419,7 @@ def do_update():
             using = False
             debug(f'* not using: `{current_window}`')
 
-        # 窗口名称检测 (跳过列表)
+        # 窗口名称检查 (跳过列表)
         if current_window in SKIPPED_NAMES:
             if mouse_idle == is_mouse_idle:
                 # 鼠标状态未改变 -> 直接跳过
@@ -453,7 +456,7 @@ def do_update():
         try:
             # 确定当前媒体状态
             current_media_playing = bool(standalone_media_info)
-            current_media_content = standalone_media_info if standalone_media_info else ""
+            current_media_content = standalone_media_info if standalone_media_info else ''
 
             # 检测播放状态或歌曲内容是否变化
             media_changed = (current_media_playing != last_media_playing) or (current_media_playing and current_media_content != last_media_content)

@@ -6,6 +6,7 @@
     - [启动](#启动)
   - [Huggingface 部署](#huggingface-部署)
     - [我承认你的代码写的确实很nb，但对我来说还是太吃操作了](#我承认你的代码写的确实很nb但对我来说还是太吃操作了)
+    - [卡在 Deploying?](#卡在-deploying)
   - [Vercel 部署](#vercel-部署)
 
 ## 手动部署
@@ -85,6 +86,21 @@ python3 start.py
 然后在这里:
 ![链接](https://ghimg.siiway.top/sleepy/deploy/huggingface-1.1.png)
 就可以复制你的`URL`，填入你选择的 **[`/client`](./client/README.md)** 对应的url配置中即可快速开始
+
+</details>
+
+### 卡在 Deploying?
+
+<details>
+
+<summary>解决方法</summary>
+
+> [!TIP]
+> *对所有的 Hugging Face 仓库都有效*
+
+1. 点击右上角三点 -> `Duplicate this Space`，**复制** Space 并**填写好和之前一样的环境变量**
+2. 在 `Settings` 页面底部 `Delete this Space` 处**删除**旧 Space
+3. 在 `Settings` -> `Rename or transfer this space` 将新 Space **重命名**为旧 Space 的名称
 
 </details>
 

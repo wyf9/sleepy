@@ -12,6 +12,9 @@
   - [WinDevice](#windevice)
     - [配置](#配置-2)
     - [自启动](#自启动)
+      - [1. PM2](#1-pm2)
+      - [2. 自启脚本](#2-自启脚本)
+    - [无法获取网易云媒体信息](#无法获取网易云媒体信息)
   - [AutoxjsScript](#autoxjsscript)
     - [配置](#配置-3)
     - [使用](#使用-2)
@@ -94,20 +97,36 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/client/win_device.py#L28-L70
 
-> PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** <br/>
-> 如使用 PM2 出现乱码请手动设置编码环境变量 (自行搜索)
-
 ### 自启动
+
+有两种方式:
+
+#### 1. PM2
+
+可以使用 PM2 来自启动 / 管理进程 *(搜索: **[Windows PM2 自启](https://www.bing.com/search?q=Windows%20PM2%20%E8%87%AA%E5%90%AF)**)*
+
+> PM2 启动命令参考: `pm2 start python --name sleepywin -- -u win_device.py` <br/>
+> *如日志出现乱码请手动设置编码环境变量*
+
+<!-- **(不加 `-u` 参数会导致 `pm2 log` 命令没有输出)** -->
+
+#### 2. 自启脚本
 
 `win_device_autostart.vbs`
 
 自启脚本，使启动后不显示窗口 *(适用于不想用第三方软件托管进程的情况下)*
 
-1. 将 `win_device_autostart.vbs` 放入 `shell:startup` 文件夹
-2. 将 `win_device.py` 放入 `%UserProfile%` 文件夹
+1. 将 `win_device_autostart.vbs` 放入 `shell:startup` *(开始菜单 -> 启动)* 文件夹
+2. 将 `win_device.py` 放入 `%UserProfile%` *(用户主目录)* 文件夹
 
 > [!TIP]
 > `shell:startup` 和 `%UserProfile%` 两个文件夹可用运行窗口 (`Win+R`) 打开
+
+### 无法获取网易云媒体信息
+
+> **原因**: 网易云音乐不会设置 SMTC 状态，导致无法获取媒体信息
+
+**解决方法**: 安装 [BetterNCM](https://github.com/std-microblock/BetterNCM)，并安装 `InfLink` 插件，启用其中的 `SMTC` 功能即可正常获取
 
 ## [AutoxjsScript](./autoxjs_device.js)
 
