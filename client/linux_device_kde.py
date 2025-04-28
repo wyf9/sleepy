@@ -1,151 +1,207 @@
+#!/usr/bin/env python3
 # coding: utf-8
-'''
+"""
 linux_device_kde.py
 在 Linux (KDE) 上获取窗口名称
 by: @RikkaNaa
-依赖: kdotool, requests
-'''
+依赖: PyQt5, requests
+"""
 
-import subprocess
-from datetime import datetime
-from io import TextIOWrapper
-from sys import stdout
-from time import sleep, time
+import atexit
+import json
+import sys
+import time
 
-from requests import post
+import requests
+from PyQt5.QtCore import QCoreApplication, QTimer, QVariant
+from PyQt5.QtDBus import QDBusConnection, QDBusInterface, QDBusMessage
 
 # --- config start
-SERVER = 'http://localhost:9010'  # 服务地址, 末尾还是不带 /
-SECRET = 'wyf9test'  # 密钥
-DEVICE_ID = 'device-1'  # 设备标识符
-DEVICE_SHOW_NAME = 'MyDevice1'  # 前台显示名称
-STATUS_CHECK_INTERVAL = 2  # 状态检查间隔 (秒)
-HEARTBEAT_INTERVAL = 60  # 心跳发送间隔 (秒)
-ENCODING = 'utf-8'  # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-SKIPPED_NAMES = ['', 'plasmashell']  # 当窗口名为其中任意一项时将不更新
-NOT_USING_NAMES = ['[FAILED]']  # 当窗口名为其中任意一项时视为未在使用
+API_URL = "https://sleepy.wyf9.top/device/set"  # 你的完整 API 地址，以 `/device/set` 结尾
+SECRET = "绝对猜不出来的密码"  # 你的 secret
+ID = "kde-device"  # 你的设备 id, 唯一
+SHOW_NAME = "KDE PC"  # 你的设备名称, 将显示在网页上
+CHECK_INTERVAL = 5000  # 心跳检查间隔 (毫秒)
+HEARTBEAT_INTERVAL = 60000  # 心跳发送间隔 (毫秒)
 # --- config end
 
-stdout = TextIOWrapper(stdout.buffer, encoding=ENCODING)  # https://stackoverflow.com/a/3218048/28091753
-_print_ = print
+# --- logging
+def log(msg):
+    try:
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{timestamp}] [kde_device] {str(msg).replace(SECRET, '[REPLACED]')}")
+    except Exception:
+        print(f"[{timestamp}] [kde_device] {msg}")  # Fallback if replace fails
 
 
-def print(msg: str, **kwargs):
-    '''
-    修改后的 `print()` 函数，解决不刷新日志的问题
-    原: `_print_()`
-    '''
-    _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {msg}', flush=True, **kwargs)
+# --- state variables
+last_app_name = ""
+last_using = False
+last_send_time = 0  # Store as milliseconds
 
 
-def get_active_window_title():
-    '''
-    获取窗口标题, 如检测失败则为 `[FAILED]`
-    '''
-    result = subprocess.run(["kdotool", "getactivewindow", "getwindowname"], capture_output=True, text=True)
-    if result.returncode == 0:
-        window_name = result.stdout.replace("\n", "")
-        return window_name
-    else:
-        print(f'Return code isn\'t 0: {result.returncode}!')
-        return '[FAILED]'
+# --- send status function
+def send_status(using: bool, app_name: str, force_send: bool = False):
+    global last_app_name, last_using, last_send_time
+    current_time = int(time.time() * 1000)  # Use milliseconds
 
+    status_changed = (using != last_using) or (app_name != last_app_name)
+    should_send_heartbeat = current_time - last_send_time >= HEARTBEAT_INTERVAL
 
-Url = f'{SERVER}/device/set'
-last_window = ''
-last_send_time = 0  # 上次发送时间戳 (秒)
-
-
-def do_update(force_send=False):
-    """
-    进行更新
-    :param force_send: 是否强制发送 (用于心跳)
-    """
-    global last_window, last_send_time
-    window = get_active_window_title()
-    print(f"--- Checked Window: `{window}`")
-
-    # 检查跳过名称
-    is_skipped = False
-    for i in SKIPPED_NAMES:
-        if i == window:
-            print(f"* skipping: `{i}`")
-            is_skipped = True
-            break
-
-    # 如果被跳过，且与上次状态相同，则不处理
-    if is_skipped and window == last_window:
-        print("Skipped and unchanged, doing nothing.")
+    if force_send:
+        log("Heartbeat forced send.")
+        should_send_heartbeat = True  # Ensure heartbeat flag is true if forced
+    elif not status_changed and not should_send_heartbeat:
         return
-    # 如果被跳过，但与上次状态不同，则更新 last_window 但不发送 (除非是心跳强制发送)
-    if is_skipped and window != last_window and not force_send:
-        print("Skipped but changed, updating last_window only.")
-        last_window = window  # 更新状态以便下次比较
-        # 注意：这里不更新 last_send_time，允许心跳机制触发
-        return
-
-    # 判断是否在使用
-    using = True
-    for i in NOT_USING_NAMES:
-        if i == window:
-            print(f'* not using: `{i}`')
-            using = False
-            break
-
-    # 检查状态是否变化 或 是否到达心跳时间
-    status_changed = window != last_window
-    should_send_heartbeat = time() - last_send_time >= HEARTBEAT_INTERVAL
 
     if status_changed:
-        print(f"Status changed: '{last_window}' -> '{window}', using={using}")
+        log(f"Status changed: using={using}, app_name='{app_name}'")
     elif should_send_heartbeat:
-        print("Heartbeat interval reached, sending status.")
-    else:
-        # 状态未变且未到心跳时间，不发送
-        print("Status unchanged and heartbeat interval not reached, skipping send.")
-        return
+        log("Heartbeat interval reached, sending status.")
 
-    # POST to api
-    print(f"POST {Url}")
+    log(f"Sending status to {API_URL}")
+    payload = {"secret": SECRET, "id": ID, "show_name": SHOW_NAME, "using": using, "app_name": app_name}
+
     try:
-        resp = post(
-            url=Url,
-            json={"secret": SECRET, "id": DEVICE_ID, "show_name": DEVICE_SHOW_NAME, "using": using, "app_name": window},
-            headers={"Content-Type": "application/json"},
-        )
-        print(f"Response: {resp.status_code} - {resp.json()}")
-        # 仅在成功发送后更新 last_window 和 last_send_time
-        last_window = window
-        last_send_time = time()
+        response = requests.post(API_URL, json=payload, timeout=10)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+
+        log(f"Status sent successfully (HTTP {response.status_code}).")
+        # Update last state only on success
+        last_app_name = app_name
+        last_using = using
+        last_send_time = current_time
+
+    except requests.exceptions.RequestException as e:
+        log(f"Error: API request failed: {e}")
     except Exception as e:
-        print(f"Error: {e}")
-        # 发送失败时不更新，以便下次重试或触发心跳
+        log(f"Error: An unexpected error occurred during send: {e}")
 
-
-def main():
-    '''
-    主循环
-    '''
-    global last_send_time  # 确保可以在循环中访问
-    while True:
-        print("---------- Run Check")
-        try:
-            # 检查状态并根据需要发送
-            do_update()
-
-            # 额外检查是否需要强制发送心跳 (处理跳过状态的心跳)
-            if time() - last_send_time >= HEARTBEAT_INTERVAL:
-                print("Heartbeat interval reached for potentially skipped status, forcing send.")
-                do_update(force_send=True)  # 强制发送当前状态作为心跳
-
-        except Exception as e:
-            print(f"ERROR in main loop: {e}")
-
-        sleep(STATUS_CHECK_INTERVAL)  # 使用较短的检查间隔
-
-
-if __name__ == '__main__':
+# --- KDE D-Bus interaction
+def get_active_window_info():
     try:
-        main()
-    except KeyboardInterrupt as e:
-        print(f'Interrupt: {e}. Server will detect offline via heartbeat timeout.')
+        bus = QDBusConnection.sessionBus()
+        kwin_interface = QDBusInterface("org.kde.KWin", "/KWin", "org.kde.KWin", bus)
+
+        # Get active window ID
+        reply = kwin_interface.call("activeWindow")
+        if reply.type() == QDBusMessage.ErrorMessage:
+            log(f"Error calling activeWindow: {reply.errorMessage()}")
+            return None
+        window_id = reply.arguments()[0]
+
+        if window_id <= 0:  # No active window or invalid ID
+            log("No active window detected (ID <= 0).")
+            return None  # Treat as not using
+
+        # Get window info using the ID
+        reply = kwin_interface.call("getWindowInfo", QVariant(window_id))  # Pass ID as QVariant
+        if reply.type() == QDBusMessage.ErrorMessage:
+            log(f"Error calling getWindowInfo for ID {window_id}: {reply.errorMessage()}")
+            return None
+
+        window_info_json = reply.arguments()[0]
+
+        # Parse the JSON info
+        try:
+            window_info = json.loads(window_info_json)
+            app_name = window_info.get("resourceClass", "") or window_info.get("caption", "")
+            log(
+                f"Active window info: class='{window_info.get('resourceClass', '')}', caption='{window_info.get('caption', '')}' -> Using: '{app_name}'"
+            )
+            return app_name if app_name else "[No Name]"
+        except json.JSONDecodeError as e:
+            log(f"Error decoding window info JSON: {e}")
+            log(f"Raw JSON: {window_info_json}")
+            return "[JSON Error]"
+        except Exception as e:
+            log(f"Unexpected error parsing window info: {e}")
+            return "[Parse Error]"
+
+    except Exception as e:
+        log(f"Error interacting with D-Bus: {e}")
+        return None
+
+# --- D-Bus signal handler
+def on_active_window_changed(window_id):
+    log(f"Signal windowActivated received for ID: {window_id}")
+    try:
+        if window_id <= 0:
+            log("Window activated signal for invalid ID <= 0. Sending 'using: false'.")
+            send_status(False, "")
+            return
+
+        app_name = get_active_window_info()
+
+        if app_name is not None:
+            send_status(True, app_name)
+        else:
+            log("Failed to get info for newly activated window. Sending 'using: false'.")
+            send_status(False, "")
+    except Exception as e:
+        log(f"Error in on_active_window_changed handler: {e}")
+
+
+# --- Heartbeat check function
+def heartbeat_check():
+    current_time = int(time.time() * 1000)
+    if current_time - last_send_time >= HEARTBEAT_INTERVAL:
+        log("Heartbeat interval reached, triggering send.")
+        send_status(last_using, last_app_name, force_send=True)
+
+
+# --- Cleanup function on exit
+def cleanup():
+    log("Script exiting. Sending 'using: false' status.")
+    send_status(False, last_app_name, force_send=True)
+    log("Cleanup finished.")
+
+
+# --- main logic
+def main():
+    app = QCoreApplication(sys.argv)
+
+    if not QDBusConnection.sessionBus().isConnected():
+        log("Error: Cannot connect to D-Bus session bus.")
+        sys.exit(1)
+
+    # Connect to KWin's windowActivated signal
+    kwin_service = "org.kde.KWin"
+    kwin_path = "/KWin"
+    kwin_interface_name = "org.kde.KWin"
+
+    bus = QDBusConnection.sessionBus()
+    signal_connected = bus.connect(kwin_service, kwin_path, kwin_interface_name, "windowActivated", on_active_window_changed)
+
+    if not signal_connected:
+        log("Error: Failed to connect to KWin's windowActivated signal.")
+        signal_connected_alt = bus.connect(kwin_service, kwin_path, kwin_interface_name, "activeWindowChanged", on_active_window_changed)
+        if not signal_connected_alt:
+            log("Error: Also failed to connect to KWin's activeWindowChanged signal.")
+        else:
+            log("Connected to KWin's activeWindowChanged signal instead.")
+    else:
+        log("Connected to KWin's windowActivated signal.")
+
+    # Setup heartbeat timer
+    timer = QTimer()
+    timer.timeout.connect(heartbeat_check)
+    timer.start(CHECK_INTERVAL)
+    log(f"Heartbeat timer started ({CHECK_INTERVAL}ms interval).")
+
+    # Register cleanup function
+    atexit.register(cleanup)
+
+    # Send initial status
+    log("Sending initial status...")
+    initial_app_name = get_active_window_info()
+    if initial_app_name is not None:
+        send_status(True, initial_app_name, force_send=True)
+    else:
+        send_status(False, "", force_send=True)
+
+    log("Starting Qt event loop...")
+    sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    main()

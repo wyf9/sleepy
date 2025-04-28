@@ -63,10 +63,9 @@ function check_status() {
     return (retname);
 }
 
-function send_status(force_send = false) {
+function send_status() {
     /*
     检查并发送状态
-    :param force_send: 是否强制发送 (用于心跳)
     */
     var app_name = check_status();
     log(`Checked app_name: '${app_name}'`);
@@ -81,19 +80,6 @@ function send_status(force_send = false) {
         }
     }
 
-    // 如果被跳过，且与上次状态相同，则不处理
-    if (is_skipped && app_name === last_status) {
-        log('Skipped and unchanged, doing nothing.');
-        return;
-    }
-    // 如果被跳过，但与上次状态不同，则更新 last_status 但不发送 (除非是心跳强制发送)
-    if (is_skipped && app_name !== last_status && !force_send) {
-        log('Skipped but changed, updating last_status only.');
-        last_status = app_name; // 更新状态以便下次比较
-        // 注意：这里不更新 last_send_time，允许心跳机制触发
-        return;
-    }
-
     // 判断 using
     var using = true;
     if (app_name == '') {
@@ -105,33 +91,44 @@ function send_status(force_send = false) {
     var status_changed = (app_name !== last_status);
     var should_send_heartbeat = (Date.now() - last_send_time >= HEARTBEAT_INTERVAL);
 
-    if (status_changed) {
-        log(`Status changed: '${last_status}' -> '${app_name}', using: ${using}`);
-    } else if (should_send_heartbeat) {
-        log('Heartbeat interval reached, sending status.');
+    // 决定是否发送：状态改变 或 到达心跳时间
+    if (status_changed || should_send_heartbeat) {
+        if (status_changed) {
+            log(`Status changed: '${last_status}' -> '${app_name}', using: ${using}`);
+        } else { // Must be heartbeat
+            log('Heartbeat interval reached, sending status.');
+        }
+
+        // 如果状态是被跳过的，并且不是因为心跳强制发送，则只更新 last_status
+        // （心跳需要发送，即使是被跳过的状态）
+        if (is_skipped && !should_send_heartbeat) {
+             log('Skipped status changed, updating last_status only (not sending).');
+             last_status = app_name; // 更新状态以便下次比较
+             // 注意：这里不更新 last_send_time，允许心跳机制触发
+             return;
+        }
+
+        // POST to api
+        log(`POST ${API_URL}`);
+        try {
+            r = http.postJson(API_URL, {
+                'secret': SECRET,
+                'id': ID,
+                'show_name': SHOW_NAME,
+                'using': using,
+                'app_name': app_name
+            });
+            log(`response: ${r.body.string()}`);
+            // 仅在成功发送后更新 last_status 和 last_send_time
+            last_status = app_name;
+            last_send_time = Date.now();
+        } catch (e) {
+            error(`Error sending status: ${e}`);
+            // 发送失败时不更新，以便下次重试或触发心跳
+        }
     } else {
         // 状态未变且未到心跳时间，不发送
         log('Status unchanged and heartbeat interval not reached, skipping send.');
-        return;
-    }
-
-    // POST to api
-    log(`POST ${API_URL}`);
-    try {
-        r = http.postJson(API_URL, {
-            'secret': SECRET,
-            'id': ID,
-            'show_name': SHOW_NAME,
-            'using': using,
-            'app_name': app_name
-        });
-        log(`response: ${r.body.string()}`);
-        // 仅在成功发送后更新 last_status 和 last_send_time
-        last_status = app_name;
-        last_send_time = Date.now();
-    } catch (e) {
-        error(`Error sending status: ${e}`);
-        // 发送失败时不更新，以便下次重试或触发心跳
     }
 }
 
@@ -144,15 +141,8 @@ events.on("exit", function () {
 while (true) {
     log('---------- Run Check');
     try {
-        // 检查状态并根据需要发送
+        // 检查状态并根据需要发送 (心跳逻辑已包含在内)
         send_status();
-
-        // 额外检查是否需要强制发送心跳 (处理跳过状态的心跳)
-        if (Date.now() - last_send_time >= HEARTBEAT_INTERVAL) {
-             log('Heartbeat interval reached for potentially skipped status, forcing send.');
-             send_status(true); // 强制发送当前状态作为心跳
-        }
-
     } catch (e) {
         error(`ERROR in main loop: ${e}`);
     }

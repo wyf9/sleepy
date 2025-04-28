@@ -40,8 +40,6 @@ DEVICE_SHOW_NAME: str = 'MyDevice1'
 STATUS_CHECK_INTERVAL: int = 5
 # 心跳发送间隔 (秒)
 HEARTBEAT_INTERVAL: int = 60
-# 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-ENCODING: str = 'gb18030'
 # 当窗口标题为其中任意一项时将不更新 (检查原始标题)
 SKIPPED_NAMES: list = [
     '',  # 空字符串
@@ -75,8 +73,7 @@ MEDIA_DEVICE_SHOW_NAME: str = '正在播放'
 
 # ----- Part: Functions
 
-# stdout = TextIOWrapper(stdout.buffer, encoding=ENCODING)  # https://stackoverflow.com/a/3218048/28091753
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")  # 统一使用 utf-8
 _print_ = print
 
 
@@ -121,10 +118,15 @@ def reverse_app_name(name: str) -> str:
 # 导入拎出来优化性能 (?)
 if MEDIA_INFO_ENABLED:
     try:
+        from asyncio import run  # type: ignore
+
         import winrt.windows.media.control as media  # type: ignore
     except ImportError:
+        # 如果上面的导入失败 (例如旧版 winrt)，尝试备用导入 (虽然通常是一样的)
+        # 注意：如果基础的 winrt 包都装不上，这里还是会失败
+        from asyncio import run  # type: ignore
+
         import winrt.windows.media.control as media  # type: ignore
-    from asyncio import run  # type: ignore
 
 
 def get_media_info():
@@ -144,15 +146,23 @@ def get_media_info():
         # 使用异步函数包装整个操作
         async def get_media_info_async():
             session = await get_media_session()
+            # 如果没有活动的媒体会话，直接返回
             if not session:
                 return False, '', '', ''
 
             # 获取播放状态
             info = session.get_playback_info()
+            # 检查 info 是否有效 (某些情况下可能为 None)
+            if not info:
+                return False, "", "", ""
             is_playing = info.playback_status == media.GlobalSystemMediaTransportControlsSessionPlaybackStatus.PLAYING
 
             # 获取媒体属性
             props = await session.try_get_media_properties_async()
+            # 检查 props 是否有效
+            if not props:
+                # 如果获取属性失败，但仍在播放，至少返回播放状态
+                return is_playing, "", "", ""
 
             title = props.title or ''
             artist = props.artist or ''
@@ -166,9 +176,10 @@ def get_media_info():
         # 运行异步函数
         return run(get_media_info_async())
 
+    # 捕获所有可能的异常 (winrt 可能抛出各种 COM 或其他错误)
     except Exception as primary_error:
         debug(f"主要媒体信息获取方式失败: {primary_error}")
-        return False, '', '', ''
+        return False, "", "", ""
 
 # ----- Part: Send status
 
@@ -444,9 +455,9 @@ def do_update(force_send=False):
             # 检测播放状态或歌曲内容是否变化
             media_changed = (current_media_playing != last_media_playing) or (current_media_playing and current_media_content != last_media_content)
 
-            # standalone 模式也需要心跳，但独立于主设备
-            # 我们可以在每次主循环都检查并发送媒体状态，如果它正在播放
-            # 或者当它状态改变时发送
+            # standalone 模式也需要心跳。
+            # 当前简化逻辑：只要正在播放，每次检查都发送更新 (充当心跳)。
+            # 或者当播放状态/内容发生变化时发送更新。
             send_media_update = False
             media_app_name = "没有媒体播放"
             media_using = False
@@ -460,9 +471,9 @@ def do_update(force_send=False):
                     )
                     send_media_update = True
                 else:
-                    # 如果正在播放且内容未变，每次检查都发送心跳 (简化逻辑，避免单独计时器)
+                    # 如果正在播放且内容未变，每次检查都发送心跳
                     debug(f"Sending media heartbeat: `{current_media_content}`")
-                    send_media_update = True
+                    send_media_update = True  # 强制发送作为心跳
             elif last_media_playing:  # 从播放变为不播放
                 debug(f"Media stopped: status: {last_media_playing} -> {current_media_playing}")
                 send_media_update = True
@@ -470,9 +481,12 @@ def do_update(force_send=False):
             if send_media_update:
                 media_resp = send_status(using=media_using, app_name=media_app_name, id=MEDIA_DEVICE_ID, show_name=MEDIA_DEVICE_SHOW_NAME)
                 debug(f"Media Response: {media_resp.status_code}")
-                # 更新上一次的媒体状态和内容
-                last_media_playing = current_media_playing
-                last_media_content = current_media_content
+                # 更新上一次的媒体状态和内容 (仅在发送后更新，避免重复发送停止状态)
+                if media_resp.status_code == 200:
+                    last_media_playing = current_media_playing
+                    last_media_content = current_media_content
+                elif not DEBUG:
+                    print(f"Error! Media Response: {media_resp.status_code} - {media_resp.json()}")
 
         except Exception as e:
             debug(f"Media Info Error (standalone): {e}")
@@ -483,14 +497,9 @@ if __name__ == '__main__':
         while True:
             print("---------- Run Check")
             try:
-                # 检查状态并根据需要发送
+                # 检查状态并根据需要发送更新或心跳
+                # do_update 内部已包含心跳逻辑
                 do_update()
-
-                # 额外检查是否需要强制发送心跳 (处理跳过状态的心跳)
-                # 注意：last_send_time 只在成功发送后更新
-                if time.time() - last_send_time >= HEARTBEAT_INTERVAL:
-                    debug("Heartbeat interval potentially missed (e.g., due to skip), forcing check.")
-                    do_update(force_send=True)  # 强制检查并发送
 
             except Exception as loop_error:
                 print(f"ERROR in main loop: {loop_error}")

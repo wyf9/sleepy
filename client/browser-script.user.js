@@ -68,6 +68,10 @@
         }
     }
 
+    // ===== 全局变量记录上次上报状态 =====
+    let lastSentUsing = null;
+    let lastSentAppName = null;
+
     // ===== 发送上报请求 =====
     function sendRequest(using) {
         const pageTitle = document.title;
@@ -76,7 +80,41 @@
         // 黑名单检查
         if (BLACKLIST && BLACKLIST.length > 0 && checkBlacklist(pageTitle, pageUrl)) {
             log(`黑名单拦截：标题包含敏感词（${pageTitle}）或 URL 包含敏感词（${pageUrl}）`);
-            return;
+            // 如果之前是 using: true，现在因为黑名单停止，需要发送一次 using: false
+            if (lastSentUsing === true) {
+                 // 构造请求数据 (强制发送 using: false)
+                const showName = SHOW_NAME || getBrowserName();
+                const fallbackTitle = getFallbackTitle(); // 获取一个非黑名单的标题
+                const postData = {
+                    secret: SECRET,
+                    id: ID,
+                    show_name: showName,
+                    using: false,
+                    app_name: fallbackTitle // 使用备用标题避免再次触发黑名单
+                };
+                // 发送 POST 请求
+                GM_xmlhttpRequest({
+                    method: 'POST',
+                    url: API_URL,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify(postData),
+                    onload: (response) => {
+                        log(`API Response (Blacklist Stop): ${response.responseText}`);
+                        if (response.status === 200) {
+                            lastSentUsing = false;
+                            lastSentAppName = fallbackTitle;
+                        } else {
+                            error(`API 请求失败 (Blacklist Stop): ${response.status} ${response.statusText}`);
+                        }
+                    },
+                    onerror: (errInfo) => {
+                        error(`API 请求出错 (Blacklist Stop): ${errInfo}`);
+                    }
+                });
+            }
+            return; // 阻止后续正常上报
         }
 
         // 统一获取页面标题：若标题为空则采用备用标题
@@ -85,6 +123,13 @@
 
         // 显示名称：使用配置或浏览器名称
         const showName = SHOW_NAME || getBrowserName();
+
+        // ===== 优化：检查状态是否改变 =====
+        if (using === lastSentUsing && appName === lastSentAppName) {
+            log('状态未改变，跳过上报。');
+            return;
+        }
+        // ===============================
 
         // 构造请求数据
         const postData = {
@@ -105,7 +150,11 @@
             data: JSON.stringify(postData),
             onload: (response) => {
                 log(`API Response: ${response.responseText}`);
-                if (response.status !== 200) {
+                if (response.status === 200) {
+                    // 仅在成功发送后更新状态记录
+                    lastSentUsing = using;
+                    lastSentAppName = appName;
+                } else {
                     error(`API 请求失败: ${response.status} ${response.statusText}`);
                 }
             },
@@ -116,8 +165,47 @@
     }
 
     // ===== 事件监听 =====
+    // 页面加载完成后立即发送一次状态
     window.addEventListener('DOMContentLoaded', () => sendRequest(true));
+    // 监听标题变化 (更精确的方式，但并非所有情况都触发)
+    const titleObserver = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            if (mutation.target === document.querySelector('title')) {
+                log('标题发生变化，触发上报。');
+                sendRequest(true); // 假设标题变化时用户仍在活跃使用
+            }
+        });
+    });
+    titleObserver.observe(document.querySelector('title'), { childList: true });
+
+    // 监听窗口焦点变化
     window.addEventListener('focus', () => sendRequest(true));
     window.addEventListener('blur', () => sendRequest(false));
-    window.addEventListener('beforeunload', () => sendRequest(false));
+
+    // 页面关闭前尝试发送
+    window.addEventListener('beforeunload', () => {
+        // 尝试同步发送，增加成功率 (注意：部分浏览器可能不支持或限制同步 XHR)
+        try {
+            const appName = (document.title || '').trim() ? document.title : getFallbackTitle();
+            const showName = SHOW_NAME || getBrowserName();
+            const postData = {
+                secret: SECRET,
+                id: ID,
+                show_name: showName,
+                using: false,
+                app_name: appName
+            };
+            // 检查是否进入黑名单，如果是，则不发送
+            if (!(BLACKLIST && BLACKLIST.length > 0 && checkBlacklist(document.title, window.location.href))) {
+                 navigator.sendBeacon(API_URL, JSON.stringify(postData));
+                 log('使用 sendBeacon 尝试发送 beforeunload 状态');
+            } else {
+                 log('beforeunload 时处于黑名单，不发送。');
+            }
+        } catch (e) {
+            error('sendBeacon failed: ' + e);
+            // Fallback or just log, as beforeunload is unreliable
+            sendRequest(false); // 尝试原始异步方式
+        }
+    });
 })();

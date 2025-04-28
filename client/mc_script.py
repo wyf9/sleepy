@@ -8,11 +8,13 @@ by: @wyf9
 '''
 
 # 不要使用格式化!!! 会打乱顺序!!!
+import json
 import sys
 import time
 
 # sys.path.append(r'C:\Users\wyf01\AppData\Roaming\Python\Python312\site-packages')  # 如提示找不到库, 在此将你的 site-packages 目录添加至局部 PATH
 from requests import post
+import requests
 from system.lib import minescript as mc  # type: ignore / 写好记得把 system 前面的 . 去掉, 否则会报错
 
 # --- config start
@@ -104,9 +106,10 @@ def do_update(app_name):
 
     :param app_name: 从 `get_info()` 获取
     :return 0: 成功
-    :return 1: 请求时出错
-    :return 2: 返回中 `success` 不为 `true`
+    :return 1: 请求时出错 (网络或超时)
+    :return 2: 返回中 `success` 不为 `true` 或 API 返回非 200 状态码
     :return 3: 状态未变且未到心跳时间，跳过发送
+    :return 4: JSON 解析错误
     """
     global last_status, last_send_time
 
@@ -136,20 +139,40 @@ def do_update(app_name):
                 "app_name": app_name,
             },
             headers={"Content-Type": "application/json"},
+            timeout=10,  # Add timeout
         )
+        # Check HTTP status code first
+        resp.raise_for_status()  # Raises HTTPError for 4xx/5xx responses
+
         Json = resp.json()
         log(f'Response: {resp.status_code} - {Json}')
-        if Json['success'] == True:
+
+        if Json.get("success") == True:
             # 仅在成功发送后更新 last_status 和 last_send_time
             last_status = app_name
             last_send_time = time.time()
             return 0  # 成功
         else:
-            log(f'Warning: return not success: {Json}')
+            log(f"Warning: API returned success=false: {Json}", important=True)
             return 2  # 返回中 `success` 不为 `true`
-    except Exception as e:
-        log(f'Error: {e}', important=True)
+
+    except requests.exceptions.HTTPError as e:
+        # Handle 4xx/5xx errors specifically
+        log(f"Error: HTTP Error: {e.response.status_code} - {e.response.text}", important=True)
+        return 2  # API 返回非 200 状态码
+    except requests.exceptions.RequestException as e:
+        # Handle other network/connection/timeout errors
+        log(f"Error: Request failed: {e}", important=True)
         return 1  # 请求时出错
+    except json.JSONDecodeError as e:
+        # Handle cases where the response is not valid JSON
+        log(f"Error: Failed to decode JSON response: {e}", important=True)
+        log(f"Raw response text: {resp.text}", important=True)
+        return 4  # JSON 解析错误
+    except Exception as e:
+        # Catch any other unexpected errors during the process
+        log(f"Error: An unexpected error occurred: {e}", important=True)
+        return 1  # Treat as general request error for simplicity
 
 
 log('Started')
