@@ -6,12 +6,13 @@ from pathlib import Path
 
 def tobool(string: str, throw: bool = False) -> bool:
     '''
-    将形似 `true`, `1`, `t`, `yes`, `y` 之类的内容转换为布尔值
+    将形似 `true`, `1`, `yes` 之类的内容转换为布尔值
 
     :param throw: 控制无匹配项时是否直接抛出错误
     :return: `True` or `False` or `None` (如果不在 `booldict` 内)
     '''
     booldict = {
+        # 此列表中的项会转换为对应的布尔值
         'true': True,
         'false': False,
         '1': True,
@@ -26,10 +27,8 @@ def tobool(string: str, throw: bool = False) -> bool:
         'off': False,
         'enable': True,
         'disable': False,
-        'active': True,
-        'inactive': False,
-        'positive': True,
-        'negative': False
+        'v': True,
+        'x': False
     }
     try:
         ret = booldict[str(string).lower()]

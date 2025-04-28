@@ -157,7 +157,7 @@ def get_media_info():
             artist = props.artist or ''
             album = props.album_title or ''
 
-            if album == '<未知专辑名>':
+            if '未知唱片集' in album or '<' in album and '>' in album:
                 album = ''
 
             return is_playing, title, artist, album

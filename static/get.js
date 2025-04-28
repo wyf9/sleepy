@@ -48,8 +48,8 @@ async function checkVercelDeploy() {
     console.log(`[Vercel] 测试请求 ${baseUrl + 'none'} 中...`);
     return await fetch(baseUrl + 'none', { timeout: 10000 })
         .then(resp => {
-            xVercelId = resp.headers.get('x-vercel-id');
-            console.log(`[Vercel] 获取到 x-vercel-id: ${resp.headers.get('x-vercel-id')}`);
+            const xVercelId = resp.headers.get('x-vercel-id');
+            console.log(`[Vercel] 获取到 x-vercel-id: ${xVercelId}`);
             if (xVercelId) {
                 console.log(`[Vercel] 确定为 Vercel 部署`);
                 return true;
@@ -138,7 +138,7 @@ let connectionCheckTimer = null;
 let lastEventTime = Date.now();
 let connectionAttempts = 0;
 let firstError = true; // 是否为 SSR 第一次出错 (如是则激活 Vercel 部署检测)
-const maxReconnectDelay = 30000; // 最大重连延迟时间为30秒
+const maxReconnectDelay = 30000; // 最大重连延迟时间为 30 秒
 
 // 重连函数
 function reconnectWithDelay(delay) {

@@ -40,10 +40,10 @@ class _page:
     '''
     (page) 页面内容配置
     '''
-    title: str = getenv('sleepy_page_title', 'User Alive?', str)
-    desc: str = getenv('sleepy_page_desc', 'User\'s Online Status Page', str)
-    favicon: str = getenv('sleepy_page_favicon', './static/favicon.ico', str)
     user: str = getenv('sleepy_page_user', 'User', str)
+    title: str = getenv('sleepy_page_title', f'{user} Alive?', str)
+    desc: str = getenv('sleepy_page_desc', f'{user}\'s Online Status Page', str)
+    favicon: str = getenv('sleepy_page_favicon', './static/favicon.ico', str)
     background: str = getenv('sleepy_page_background', 'https://imgapi.siiway.top/image', str)
     learn_more: str = getenv('sleepy_page_learn_more', 'GitHub Repo', str)
     repo: str = getenv('sleepy_page_repo', 'https://github.com/wyf9/sleepy', str)
