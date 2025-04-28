@@ -1,12 +1,15 @@
 # coding: utf-8
+import configparser
+import logging
 import os
 import sys
-import configparser
-import requests
-import logging
 import threading
-import win32gui,win32con,win32api # type: ignore
-from time import time, sleep
+from time import sleep, time
+
+import requests
+import win32api  # type: ignore
+import win32con
+import win32gui
 
 #cd client/Win_Simple
 #pyinstaller -F -n Win_Simple.exe --icon=zmal.ico --hidden-import=win32gui --hidden-import=win32con --hidden-import=win32api --hidden-import=requests script.py
@@ -45,6 +48,8 @@ LOGLEVEL = INFO
 LOG_FILE = False
 # 黑名单配置（竖线分隔）
 BLACKLIST = ExampleApp|Privacy Information
+# 心跳间隔（秒）
+HEARTBEAT_INTERVAL = 60
 """
     
     def __init__(self):
@@ -88,9 +93,12 @@ BLACKLIST = ExampleApp|Privacy Information
             
             # 黑名单配置
             self.blacklist = self._parse_list('BLACKLIST', fallback=['User1', 'User2'])
-        
+
+            # 心跳间隔配置
+            self.heartbeat_interval = self.config.getint("settings", "HEARTBEAT_INTERVAL", fallback=60)
+
         except Exception as e:
-            logging.error(f'配置文件打不开惹: {str(e)}')
+            logging.error(f"配置文件打不开惹: {str(e)}")
             sys.exit(1)
     
     def _parse_list(self, key: str, fallback="") -> list:
@@ -165,7 +173,8 @@ class DeviceMonitor:
         self.config = config
         self.state = state
         self._setup_logging()
-    
+        self.last_send_time = 0  # 添加上次发送时间戳
+
     def _setup_logging(self):
         """初始化日志配置"""
         handlers = [logging.StreamHandler()]
@@ -199,12 +208,18 @@ class DeviceMonitor:
             )
             resp.raise_for_status()
             self.state.last_window = window
+            self.last_send_time = time()  # 更新发送时间
         except requests.RequestException as e:
-            logging.warning(f'主人反省一下自己干了什么: {str(e)}')
+            logging.warning(f"主人反省一下自己干了什么: {str(e)}")
     
     def _should_update(self, new_window: str, mouse_idle: bool) -> bool:
         """判断是否需要更新状态"""
-        return (mouse_idle != self.state.is_mouse_idle) or (new_window != self.state.last_window)
+        # 状态变化 或 到达心跳间隔
+        status_changed = (mouse_idle != self.state.is_mouse_idle) or (new_window != self.state.last_window)
+        heartbeat_due = (time() - self.last_send_time) >= self.config.heartbeat_interval
+        if heartbeat_due and not status_changed:
+            logging.debug("Heartbeat interval reached, forcing send.")
+        return status_changed or heartbeat_due
     
     def _handle_skipped_window(self, window: str) -> str:
         """处理需要跳过的窗口"""
@@ -237,7 +252,11 @@ class DeviceMonitor:
                 logging.info(f'{using},主人在 {processed_window}')
                 self.send_state(using, processed_window)
         except Exception as e:
-            self.send_state(False, [str(e)])
+            # 避免因错误导致无法发送心跳，尝试发送离线状态
+            try:
+                self.send_state(False, f"[Error: {str(e)}]")
+            except Exception as send_err:
+                logging.error(f"呼呼呼~ 发送错误状态也失败了: {str(send_err)}")
             logging.error(f'呼呼呼~{str(e)}')
 
 # --------------------------

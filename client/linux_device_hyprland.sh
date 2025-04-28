@@ -11,7 +11,9 @@ DEVICE_ID="desktop" # 设备 id, 唯一
 DEVICE_SHOW_NAME="祈歆的电脑" # 设备显示名称
 # --- config end
 
-LASTWINDOW="inoryxin" # 这个变量是让电脑第一次开机进桌面不进行任何操作是变为未使用状态时
+LASTWINDOW=""
+LAST_SEND_TIME=0 # 上次发送时间戳 (秒)
+HEARTBEAT_INTERVAL=60 # 心跳间隔 (秒)
 
 while true; do
 
@@ -37,10 +39,20 @@ while true; do
     "app_name": "'$PACKAGE_NAME'"
 }'
 
+    CURRENT_TIME=$(date +%s)
+
     if [ "$PACKAGE_NAME" = "$LASTWINDOW" ]; then
         echo "window not change, bypass"
+        # --- 添加心跳检查 ---
+        if [ $((CURRENT_TIME - LAST_SEND_TIME)) -ge $HEARTBEAT_INTERVAL ]; then
+            echo "Heartbeat interval reached, sending current status: $PACKAGE_NAME"
+            curl -X POST "$URL" -H "Content-Type: application/json" -d "$json_data"
+            LAST_SEND_TIME=$CURRENT_TIME # 更新发送时间
+        fi
+        # --- 结束添加 ---
     else
         curl -X POST "$URL" -H "Content-Type: application/json" -d "$json_data"
+        LAST_SEND_TIME=$CURRENT_TIME # 更新发送时间
     fi
 
     LASTWINDOW="$PACKAGE_NAME"

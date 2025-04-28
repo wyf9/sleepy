@@ -20,7 +20,8 @@ SERVER = 'https://sleepy.example.com'  # 服务器地址, 末尾不带 /
 SECRET = 'this_is_a_strong_key'  # 密钥
 DEVICE_ID = 'device-1'  # 设备 id, 唯一
 DEVICE_SHOW_NAME = 'MyDevice1'  # 设备前台显示名称
-CHECK_INTERVAL = 60  # 监测间隔 (秒), 改为 60 秒
+STATUS_CHECK_INTERVAL = 5  # 状态检查间隔 (秒)
+HEARTBEAT_INTERVAL = 60  # 心跳发送间隔 (秒)
 BYPASS_SAME_REQUEST = False  # 是否忽略相同请求, 改为 False
 DEBUG = False  # 调试模式, 开启以获得更多输出
 # --- config end
@@ -95,38 +96,54 @@ def get_info():
 
 
 last_status = ''
+last_send_time = 0  # 上次发送时间戳 (秒)
 
 
 def do_update(app_name):
-    '''
+    """
     进行一次更新
 
     :param app_name: 从 `get_info()` 获取
     :return 0: 成功
     :return 1: 请求时出错
     :return 2: 返回中 `success` 不为 `true`
-    '''
-    # POST to api
-    # 仅在状态实际改变时记录日志，避免心跳刷屏
-    if app_name != last_status:
-        log(f"Status changed: '{last_status}' -> '{app_name}'")
-    else:
-        log("Sending heartbeat with unchanged status.")
+    :return 3: 状态未变且未到心跳时间，跳过发送
+    """
+    global last_status, last_send_time
 
+    # 检查状态是否变化 或 是否到达心跳时间
+    status_changed = app_name != last_status
+    should_send_heartbeat = time.time() - last_send_time >= HEARTBEAT_INTERVAL
+
+    if status_changed:
+        log(f"Status changed: '{last_status}' -> '{app_name}'")
+    elif should_send_heartbeat:
+        log("Heartbeat interval reached, sending status.")
+    else:
+        # 状态未变且未到心跳时间，不发送
+        log("Status unchanged and heartbeat interval not reached, skipping send.")
+        return 3  # 跳过发送
+
+    # POST to api
     log(f'POST {Url}')
     try:
-        resp = post(url=Url, json={
-            'secret': SECRET,
-            'id': DEVICE_ID,
-            'show_name': DEVICE_SHOW_NAME,
-            'using': True,
-            'app_name': app_name
-        }, headers={
-            'Content-Type': 'application/json'
-        })
+        resp = post(
+            url=Url,
+            json={
+                "secret": SECRET,
+                "id": DEVICE_ID,
+                "show_name": DEVICE_SHOW_NAME,
+                "using": True,  # MC 脚本默认视为在使用
+                "app_name": app_name,
+            },
+            headers={"Content-Type": "application/json"},
+        )
         Json = resp.json()
         log(f'Response: {resp.status_code} - {Json}')
         if Json['success'] == True:
+            # 仅在成功发送后更新 last_status 和 last_send_time
+            last_status = app_name
+            last_send_time = time.time()
             return 0  # 成功
         else:
             log(f'Warning: return not success: {Json}')
@@ -139,9 +156,15 @@ def do_update(app_name):
 log('Started')
 
 while True:
-    app_name = get_info()
-    # --- Modify: Remove status check, always update ---
-    ret = do_update(app_name=app_name)
-    if ret == 0:  # 仅在成功时更新 last_status
-        last_status = app_name
-    time.sleep(CHECK_INTERVAL)
+    log("---------- Run Check")
+    try:
+        app_name = get_info()
+        ret = do_update(app_name=app_name)
+        # 注意：mc_script 没有跳过状态的概念，所以不需要强制发送心跳
+        # 如果 do_update 返回 0 (成功)，last_status 和 last_send_time 已被更新
+        # 如果 do_update 返回 3 (跳过)，则不更新
+        # 如果 do_update 返回 1 或 2 (失败)，则不更新，下次循环会重试或发送心跳
+    except Exception as e:
+        log(f"ERROR in main loop: {e}", important=True)
+
+    time.sleep(STATUS_CHECK_INTERVAL)  # 使用较短的检查间隔

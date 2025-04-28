@@ -241,7 +241,7 @@ Authorization: Bearer MySecretCannotGuess
 
 > `/device/set`
 
-设置或更新单个设备的状态。**客户端需要定期调用此接口 (即使状态没有变化) 作为心跳，以告知服务器设备仍然在线。** 服务器会记录每次调用的时间戳，如果超过预设的超时时间 (环境变量 `SLEEPY_STATUS_DEVICE_OFFLINE_TIMEOUT`) 没有收到来自某个设备的心跳，则会自动将该设备标记为离线 (`using=false`, `app_name='[Offline]'`)。
+设置或更新单个设备的状态。**客户端需要定期调用此接口 (即使状态没有变化) 作为心跳，以告知服务器设备仍然在线。** 服务器会记录每次调用的时间戳 (`last_heartbeat`)。如果超过预设的超时时间 (环境变量 `sleepy_status_device_offline_timeout`) 没有收到来自某个设备的心跳，则会自动将该设备标记为离线 (`using=false`, `app_name='[Offline]'`)。
 
 * Method: GET / POST
 * **需要鉴权**
