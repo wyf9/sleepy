@@ -20,9 +20,8 @@ SERVER = 'https://sleepy.example.com'  # 服务器地址, 末尾不带 /
 SECRET = 'this_is_a_strong_key'  # 密钥
 DEVICE_ID = 'device-1'  # 设备 id, 唯一
 DEVICE_SHOW_NAME = 'MyDevice1'  # 设备前台显示名称
-STATUS_CHECK_INTERVAL = 5  # 状态检查间隔 (秒)
+STATUS_CHECK_INTERVAL = 10  # 状态检查间隔 (秒)
 HEARTBEAT_INTERVAL = 60  # 心跳发送间隔 (秒)
-BYPASS_SAME_REQUEST = False  # 是否忽略相同请求, 改为 False
 DEBUG = False  # 调试模式, 开启以获得更多输出
 # --- config end
 

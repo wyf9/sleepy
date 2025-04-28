@@ -10,7 +10,7 @@ const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址
 const SECRET = '绝对猜不出来的密码'; // 你的 secret
 const ID = 'a-device'; // 你的设备 id, 唯一
 const SHOW_NAME = '一个设备'; // 你的设备名称, 将显示在网页上
-const STATUS_CHECK_INTERVAL = 5000; // 状态检查间隔 (毫秒)
+const STATUS_CHECK_INTERVAL = 3000; // 状态检查间隔 (毫秒)
 const HEARTBEAT_INTERVAL = 60000; // 心跳发送间隔 (毫秒)
 const SKIPPED_NAMES = ['系统界面', '系统界面组件', '手机管家', '平板管家', 'System UI', 'Security tools'] // 获取到的软件名包含列表中之一时忽略
 // config end
