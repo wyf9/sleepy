@@ -2,16 +2,18 @@
 # coding: utf-8
 
 import time
-import json5
-# import importlib  # for plugin
-import pytz
-import flask
 from datetime import datetime
-from markupsafe import escape
 from functools import wraps  # 用于修饰器
 
-import utils as u
+import flask
+import json5
+
+# import importlib  # for plugin
+import pytz
+from markupsafe import escape
+
 import env
+import utils as u
 from data import data as data_init
 from setting import status_list
 
@@ -146,6 +148,7 @@ def index():
         learn_more=env.page.learn_more,
         repo=env.page.repo,
         more_text=more_text,
+        sorted=env.page.sorted,
         hitokoto=env.page.hitokoto,
         canvas=env.page.canvas,
         moonlight=env.page.moonlight,
@@ -206,7 +209,10 @@ def query(ret_as_dict: bool = False):
             'desc': f'未知的标识符 {st}，可能是配置问题。',
             'color': 'error'
         }
-    devicelst = d.data['device_status']
+    if env.page.sorted:
+        devicelst = dict(sorted(d.data["device_status"].items()))
+    else:
+        devicelst = d.data["device_status"]
     if d.data['private_mode']:
         devicelst = {}
     timenow = datetime.now(pytz.timezone(env.main.timezone))
