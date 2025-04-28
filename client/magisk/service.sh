@@ -91,6 +91,9 @@ send_status() {
 
 # ========== 主流程 ==========
 LAST_PACKAGE=""
+LAST_SEND_TIME=0 # 上次发送时间戳 (秒)
+HEARTBEAT_INTERVAL=60 # 心跳间隔 (秒)
+
 > "$LOG_PATH"
 log "===== 服务启动 ====="
 
@@ -107,6 +110,8 @@ log "开！"
 
 # ========== 核心逻辑 ==========
 while true; do
+  CURRENT_TIME=$(date +%s)
+
   isLock=$(dumpsys window policy | sed -n 's/.*showing=\([a-z]*\).*/\1/p')
   echo "isLock: $isLock"
   if [ "$isLock" = "true" ]; then
@@ -135,7 +140,12 @@ while true; do
     log "状态变化: ${LAST_PACKAGE:-none} → ${PACKAGE_NAME}"
     send_status "$PACKAGE_NAME"
     LAST_PACKAGE="$PACKAGE_NAME"
+    LAST_SEND_TIME=$CURRENT_TIME # 更新发送时间
+  elif [ $((CURRENT_TIME - LAST_SEND_TIME)) -ge $HEARTBEAT_INTERVAL ]; then
+    log "心跳间隔到达，发送当前状态: ${PACKAGE_NAME:-none}"
+    send_status "$PACKAGE_NAME"
+    LAST_SEND_TIME=$CURRENT_TIME # 更新发送时间
   fi
-  
+
   is_game "$PACKAGE_NAME"
 done

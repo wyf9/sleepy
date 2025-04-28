@@ -7,9 +7,9 @@
 by @wyf9
 '''
 
-import requests
 import json
-global server
+
+import requests
 
 # --- config start
 # 密钥
@@ -25,12 +25,13 @@ def get(url):
     for t1 in range(RETRY):
         t = t1 + 1
         try:
-            x = requests.get(url)
+            x = requests.get(url, timeout=10)  # Added timeout
+            x.raise_for_status()  # Raise HTTPError for bad responses
             return x.text
-        except:
-            print(f'Retrying... {t}/{RETRY}')
+        except requests.exceptions.RequestException as e:  # Catch specific exceptions
+            print(f"Request failed: {e}. Retrying... {t}/{RETRY}")
             if t >= RETRY:
-                print('Max retry limit!')
+                print("Max retry limit reached!")
                 raise
             continue
 
@@ -39,59 +40,63 @@ def loadjson(url):
     raw = get(url)
     try:
         return json.loads(raw)
-    except json.decoder.JSONDecodeError:
-        print('Error decoding json!\nRaw data:\n"""')
-        print(raw)
-        print('"""')
+    except json.decoder.JSONDecodeError as e:
+        print(f'Error decoding json: {e}\nRaw data:\n"""\n{raw}\n"""')
         raise
-    except:
-        print('Error:')
+    except Exception as e:  # Catch other potential errors
+        print(f"Unexpected error loading JSON: {e}")
         raise
 
 
 def main():
-    #     print('\n---\nSelect Server:')
-    #     serverlst_show = ''
-    #     for n1 in range(len(SERVER_LIST)):
-    #         n = n1 + 1
-    #         serverlst_show += f'    {n}. {SERVER_LIST[n1]}\n'
-    #     print(f'''
-    #     0. Quit
-    # {serverlst_show}''')
-    #     while True:
-    #         try:
-    #             inp = int(input('> '))
-    #             if inp == 0:
-    #                 return 0
-    #             else:
-    #                 server = SERVER_LIST[inp - 1]
-    #                 print(f'Selected server: {server}')
-    #                 break
-    #         except:
-    #             print('invaild input')
+    print(f"Using server: {SERVER}")
 
     print('\n---\nStatus now:')
-    stnow = loadjson(f'{SERVER}/query')
     try:
-        print(f'success: [{stnow["success"]}], status: [{stnow["status"]}], info_name: [{stnow["info"]["name"]}], info_desc: [{stnow["info"]["desc"]}], info_color: [{stnow["info"]["color"]}]')
-    except KeyError:
-        print(f'RawData: {stnow}')
+        stnow = loadjson(f"{SERVER}/query")
+        # Use .get() for safer dictionary access
+        success = stnow.get("success", "N/A")
+        status = stnow.get("status", "N/A")
+        info = stnow.get("info", {})
+        info_name = info.get("name", "N/A")
+        info_desc = info.get("desc", "N/A")
+        info_color = info.get("color", "N/A")
+        print(f"success: [{success}], status: [{status}], info_name: [{info_name}], info_desc: [{info_desc}], info_color: [{info_color}]")
+    except Exception as e:
+        print(f"Failed to get or parse current status: {e}")
 
     print('\n---\nSelect status:')
-
-    stlst = loadjson(f'{SERVER}/status_list')
-    for n in stlst:
-        print(f'{n["id"]} - {n["name"]} - {n["desc"]}')
-
-    st = input('\n> ')
-    ret = loadjson(f'{SERVER}/set?secret={SECRET}&status={st}')
     try:
-        print(f'success: [{ret["success"]}], code: [{ret["code"]}], set_to: [{ret["set_to"]}]')
-    except:
-        print(f'RawData: {ret}')
-    input('\n---\nPress Enter to exit.')
+        stlst = loadjson(f"{SERVER}/status_list")
+        # Use f-string and .get() for safer list printing
+        status_options = [f"{n.get('id', '?')} - {n.get('name', 'Unknown')} - {n.get('desc', 'No description')}" for n in stlst]
+        print("\n".join(status_options))
+    except Exception as e:
+        print(f"Failed to get or parse status list: {e}")
+        return 1  # Exit if status list cannot be loaded
+
+    st = input("\n> Status ID to set: ")
+    try:
+        ret = loadjson(f"{SERVER}/set?secret={SECRET}&status={st}")
+        # Use .get() for safer dictionary access
+        success = ret.get("success", "N/A")
+        code = ret.get("code", "N/A")
+        set_to = ret.get("set_to", "N/A")
+        message = ret.get("message", "")  # Get potential error message
+        print(f"success: [{success}], code: [{code}], set_to: [{set_to}] {message}")
+    except Exception as e:
+        print(f"Failed to set status or parse response: {e}")
+        return 1  # Indicate error on failure
     return 0
 
 
 if __name__ == "__main__":
-    main()
+    exit_code = 1  # Default exit code to error
+    try:
+        exit_code = main()
+    except requests.exceptions.RequestException as e:
+        print(f"Network Error: {e}")
+    except Exception as e:
+        print(f"Main ERROR! {e}")
+    input("\n---\nPress Enter to exit.")  # Moved here
+    exit(exit_code)  # Exit with the code from main() or 1 if error occurred

@@ -8,19 +8,22 @@ by: @wyf9
 '''
 
 # 不要使用格式化!!! 会打乱顺序!!!
-import time
-from system.lib import minescript as mc  # type: ignore / 写好记得把 system 前面的 . 去掉, 否则会报错
+import json
 import sys
+import time
+
 # sys.path.append(r'C:\Users\wyf01\AppData\Roaming\Python\Python312\site-packages')  # 如提示找不到库, 在此将你的 site-packages 目录添加至局部 PATH
 from requests import post
+import requests
+from system.lib import minescript as mc  # type: ignore / 写好记得把 system 前面的 . 去掉, 否则会报错
 
 # --- config start
 SERVER = 'https://sleepy.example.com'  # 服务器地址, 末尾不带 /
 SECRET = 'this_is_a_strong_key'  # 密钥
 DEVICE_ID = 'device-1'  # 设备 id, 唯一
 DEVICE_SHOW_NAME = 'MyDevice1'  # 设备前台显示名称
-CHECK_INTERVAL = 10  # 监测间隔 (秒)
-BYPASS_SAME_REQUEST = True  # 是否忽略相同请求
+STATUS_CHECK_INTERVAL = 10  # 状态检查间隔 (秒)
+HEARTBEAT_INTERVAL = 60  # 心跳发送间隔 (秒)
 DEBUG = False  # 调试模式, 开启以获得更多输出
 # --- config end
 
@@ -32,9 +35,10 @@ def log(msg: str, important: bool = False) -> None:
 
 Url = f'{SERVER}/device/set'
 
+# --- Modify: Remove stop request sending ---
 try:
     if sys.argv[1].lower() == 'stop':
-        log('Stopping.', important=True)
+        log("Stopping script. Server will detect offline via heartbeat timeout.", important=True)
         self_id = 0
         # kill jobs (except self)
         for i in mc.job_info():
@@ -42,34 +46,7 @@ try:
                 if i.self:
                     self_id = i.job_id
                 else:
-                    mc.execute(f'\\killjob {i.job_id}')
-        # send stop request
-        error_info = ''
-        for i in range(3):
-            try:
-                resp = post(url=Url, json={
-                    'secret': SECRET,
-                    'id': DEVICE_ID,
-                    'show_name': DEVICE_SHOW_NAME,
-                    'using': False,
-                    'app_name': '[Stopped]'
-                }, headers={
-                    'Content-Type': 'application/json'
-                })
-                Json = resp.json()
-                log(f'Response: {resp.status_code} - {Json}')
-                if Json['success'] == True:
-                    break
-                else:
-                    log(f'return not success: {Json}')
-                    error_info = f'(Response) {resp.status_code} {Json}'
-                    continue
-            except Exception as e:
-                log(f'Error: {e}')
-                error_info = f'(Exception) {e}'
-                continue
-        if not error_info:
-            log(f'WARNING: send request failed: {error_info}')
+                    mc.execute(f"\\killjob {i.job_id}")
         if self_id:
             # kill self
             mc.execute(f'\\killjob {self_id}')
@@ -78,6 +55,7 @@ try:
         exit(0)
 except:
     pass
+# --- End Modify ---
 # -----
 
 
@@ -119,50 +97,96 @@ def get_info():
 
 
 last_status = ''
+last_send_time = 0  # 上次发送时间戳 (秒)
 
 
 def do_update(app_name):
-    '''
+    """
     进行一次更新
 
     :param app_name: 从 `get_info()` 获取
     :return 0: 成功
-    :return 1: 请求时出错
-    :return 2: 返回中 `success` 不为 `true`
-    '''
+    :return 1: 请求时出错 (网络或超时)
+    :return 2: 返回中 `success` 不为 `true` 或 API 返回非 200 状态码
+    :return 3: 状态未变且未到心跳时间，跳过发送
+    :return 4: JSON 解析错误
+    """
+    global last_status, last_send_time
+
+    # 检查状态是否变化 或 是否到达心跳时间
+    status_changed = app_name != last_status
+    should_send_heartbeat = time.time() - last_send_time >= HEARTBEAT_INTERVAL
+
+    if status_changed:
+        log(f"Status changed: '{last_status}' -> '{app_name}'")
+    elif should_send_heartbeat:
+        log("Heartbeat interval reached, sending status.")
+    else:
+        # 状态未变且未到心跳时间，不发送
+        log("Status unchanged and heartbeat interval not reached, skipping send.")
+        return 3  # 跳过发送
+
     # POST to api
     log(f'POST {Url}')
     try:
-        resp = post(url=Url, json={
-            'secret': SECRET,
-            'id': DEVICE_ID,
-            'show_name': DEVICE_SHOW_NAME,
-            'using': True,
-            'app_name': app_name
-        }, headers={
-            'Content-Type': 'application/json'
-        })
+        resp = post(
+            url=Url,
+            json={
+                "secret": SECRET,
+                "id": DEVICE_ID,
+                "show_name": DEVICE_SHOW_NAME,
+                "using": True,  # MC 脚本默认视为在使用
+                "app_name": app_name,
+            },
+            headers={"Content-Type": "application/json"},
+            timeout=10,  # Add timeout
+        )
+        # Check HTTP status code first
+        resp.raise_for_status()  # Raises HTTPError for 4xx/5xx responses
+
         Json = resp.json()
         log(f'Response: {resp.status_code} - {Json}')
-        if Json['success'] == True:
+
+        if Json.get("success") == True:
+            # 仅在成功发送后更新 last_status 和 last_send_time
+            last_status = app_name
+            last_send_time = time.time()
             return 0  # 成功
         else:
-            log(f'Warning: return not success: {Json}')
+            log(f"Warning: API returned success=false: {Json}", important=True)
             return 2  # 返回中 `success` 不为 `true`
-    except Exception as e:
-        log(f'Error: {e}', important=True)
+
+    except requests.exceptions.HTTPError as e:
+        # Handle 4xx/5xx errors specifically
+        log(f"Error: HTTP Error: {e.response.status_code} - {e.response.text}", important=True)
+        return 2  # API 返回非 200 状态码
+    except requests.exceptions.RequestException as e:
+        # Handle other network/connection/timeout errors
+        log(f"Error: Request failed: {e}", important=True)
         return 1  # 请求时出错
+    except json.JSONDecodeError as e:
+        # Handle cases where the response is not valid JSON
+        log(f"Error: Failed to decode JSON response: {e}", important=True)
+        log(f"Raw response text: {resp.text}", important=True)
+        return 4  # JSON 解析错误
+    except Exception as e:
+        # Catch any other unexpected errors during the process
+        log(f"Error: An unexpected error occurred: {e}", important=True)
+        return 1  # Treat as general request error for simplicity
 
 
 log('Started')
 
 while True:
-    app_name = get_info()
-    if app_name != last_status:
-        # 与上次不同, 更新
-        log(f'App name: {app_name}')
+    log("---------- Run Check")
+    try:
+        app_name = get_info()
         ret = do_update(app_name=app_name)
-        if not ret:
-            # 失败时不更新上次信息, 以便 interval 后重试
-            last_status = app_name
-    time.sleep(CHECK_INTERVAL)
+        # 注意：mc_script 没有跳过状态的概念，所以不需要强制发送心跳
+        # 如果 do_update 返回 0 (成功)，last_status 和 last_send_time 已被更新
+        # 如果 do_update 返回 3 (跳过)，则不更新
+        # 如果 do_update 返回 1 或 2 (失败)，则不更新，下次循环会重试或发送心跳
+    except Exception as e:
+        log(f"ERROR in main loop: {e}", important=True)
+
+    time.sleep(STATUS_CHECK_INTERVAL)  # 使用较短的检查间隔

@@ -307,11 +307,21 @@ def device_set():
     if (not device_using) and env.status.not_using:
         # 如未在使用且锁定了提示，则替换
         app_name = env.status.not_using
-    devices[device_id] = {
-        'show_name': device_show_name,
-        'using': device_using,
-        'app_name': app_name
-    }
+
+    # --- Modify: Add/Update last_heartbeat timestamp ---
+    # 获取设备当前信息（如果存在），以保留其他可能的字段
+    current_device_info = devices.get(device_id, {})
+    current_device_info.update(
+        {
+            "show_name": device_show_name,
+            "using": device_using,
+            "app_name": app_name,
+            "last_heartbeat": time.time(),  # 记录或更新时间戳
+        }
+    )
+    devices[device_id] = current_device_info
+    # --- End Modify ---
+
     d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     d.check_device_status()
     return u.format_dict({

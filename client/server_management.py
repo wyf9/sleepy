@@ -9,16 +9,18 @@ by @Claude 3.7 Sonnet Thinking
 #! SECRET出错不会报错，需要鉴权的操作都会失败，但是不显示失败
 # * 传参用法在最后面
 
-import requests
-import json
-import sys
 import argparse
+import json
 import shlex
-from typing import Dict, List, Union, Any, Optional
+import sys
+from typing import Dict, List, Optional
+
+import requests
 
 # 尝试导入 PrettyTable，如果不可用则提供简易替代
 try:
-    from prettytable import PrettyTable # type: ignore - 编辑器忽略未安装警告
+    from prettytable import PrettyTable  # type: ignore - 编辑器忽略未安装警告
+
     PRETTYTABLE_AVAILABLE = True
 except ImportError:
     PRETTYTABLE_AVAILABLE = False
@@ -27,9 +29,9 @@ except ImportError:
 
 # --- config start
 # 密钥
-SECRET = ''
+SECRET = ""
 # 服务地址, 末尾不加 `/`
-SERVER = 'http://127.0.0.1:9010'
+SERVER = "http://127.0.0.1:9010"
 # 请求重试次数
 RETRY = 3
 # 是否显示原始 JSON 响应
@@ -42,7 +44,7 @@ class SleepyManager:
 
     def __init__(self, server: str, secret: str, retry: int = 3):
         """初始化 SleepyManager"""
-        self.server = server.rstrip('/')
+        self.server = server.rstrip("/")
         self.secret = secret
         self.retry = retry
         self._cached_devices = None
@@ -53,26 +55,20 @@ class SleepyManager:
         url = f"{self.server}/{path.lstrip('/')}"
 
         # 如果是 GET 请求且没有 params，初始化一个空字典
-        if method.upper() == 'GET' and params is None:
+        if method.upper() == "GET" and params is None:
             params = {}
 
         # 如果需要身份验证且未在参数中指定密钥
-        if params is not None and 'secret' not in params:
-            params['secret'] = self.secret
+        if params is not None and "secret" not in params:
+            params["secret"] = self.secret
 
         # 如果是 POST 请求且需要 JSON 数据
-        if method.upper() == 'POST' and json_data is not None and 'secret' not in json_data:
-            json_data['secret'] = self.secret
+        if method.upper() == "POST" and json_data is not None and "secret" not in json_data:
+            json_data["secret"] = self.secret
 
         for attempt in range(self.retry):
             try:
-                response = requests.request(
-                    method=method,
-                    url=url,
-                    params=params,
-                    json=json_data,
-                    timeout=10
-                )
+                response = requests.request(method=method, url=url, params=params, json=json_data, timeout=10)
                 response.raise_for_status()
                 return response.json()
             except requests.RequestException as e:
@@ -85,13 +81,13 @@ class SleepyManager:
 
     def query(self) -> Dict:
         """获取当前状态"""
-        result = self._request('GET', 'query')
-        self._cached_devices = result.get('device', {})
+        result = self._request("GET", "query")
+        self._cached_devices = result.get("device", {})
         return result
 
     def status_list(self) -> List[Dict]:
         """获取可用状态列表"""
-        result = self._request('GET', 'status_list')
+        result = self._request("GET", "status_list")
         self._cached_status_list = result
         return result
 
@@ -109,37 +105,28 @@ class SleepyManager:
 
     def metrics(self) -> Dict:
         """获取统计信息"""
-        return self._request('GET', 'metrics')
+        return self._request("GET", "metrics")
 
     # ------ Status APIs ------
 
     def set_status(self, status: int) -> Dict:
         """设置当前状态"""
-        return self._request('GET', 'set', params={'status': status})
+        return self._request("GET", "set", params={"status": status})
 
     # ------ Device APIs ------
 
     def device_set(self, id: str, show_name: str, using: bool, app_name: str) -> Dict:
         """设置单个设备的状态"""
-        data = {
-            'id': id,
-            'show_name': show_name,
-            'using': using,
-            'app_name': app_name
-        }
-        result = self._request('POST', 'device/set', json_data=data)
+        data = {"id": id, "show_name": show_name, "using": using, "app_name": app_name}
+        result = self._request("POST", "device/set", json_data=data)
         # 更新设备缓存
         if self._cached_devices is not None:
-            self._cached_devices[id] = {
-                'show_name': show_name,
-                'using': using,
-                'app_name': app_name
-            }
+            self._cached_devices[id] = {"show_name": show_name, "using": using, "app_name": app_name}
         return result
 
     def device_remove(self, device_id: str) -> Dict:
         """移除单个设备的状态"""
-        result = self._request('GET', 'device/remove', params={'id': device_id})
+        result = self._request("GET", "device/remove", params={"id": device_id})
         # 更新设备缓存
         if self._cached_devices is not None and device_id in self._cached_devices:
             del self._cached_devices[device_id]
@@ -147,20 +134,20 @@ class SleepyManager:
 
     def device_clear(self) -> Dict:
         """清除所有设备的状态"""
-        result = self._request('GET', 'device/clear')
+        result = self._request("GET", "device/clear")
         # 清空设备缓存
         self._cached_devices = {}
         return result
 
     def device_private_mode(self, is_private: bool) -> Dict:
         """设置隐私模式"""
-        return self._request('GET', 'device/private_mode', params={'private': str(is_private).lower()})
+        return self._request("GET", "device/private_mode", params={"private": str(is_private).lower()})
 
     # ------ Storage APIs ------
 
     def save_data(self) -> Dict:
         """保存内存中的状态信息到 data.json"""
-        return self._request('GET', 'save_data')
+        return self._request("GET", "save_data")
 
 
 class SimplePrinter:
@@ -209,10 +196,10 @@ class SimplePrinter:
         result = []
         for device_id, info in device_data.items():
             row = {
-                'id': device_id,
-                'show_name': info.get('show_name', ''),
-                'using': "使用中" if info.get('using', False) else "空闲",
-                'app_name': info.get('app_name', '')
+                "id": device_id,
+                "show_name": info.get("show_name", ""),
+                "using": "使用中" if info.get("using", False) else "空闲",
+                "app_name": info.get("app_name", ""),
             }
             result.append(row)
         return result
@@ -222,11 +209,7 @@ class SimplePrinter:
         """将状态列表格式化为表格数据"""
         result = []
         for status in status_list:
-            row = {
-                'id': status.get('id', ''),
-                'name': status.get('name', ''),
-                'description': status.get('description', '')
-            }
+            row = {"id": status.get("id", ""), "name": status.get("name", ""), "description": status.get("description", "")}
             result.append(row)
         return result
 
@@ -250,12 +233,7 @@ class SimplePrinter:
             return
 
         device_list = SimplePrinter.format_device_status(devices)
-        headers = {
-            'id': '设备ID',
-            'show_name': '显示名称',
-            'using': '状态',
-            'app_name': '应用名称'
-        }
+        headers = {"id": "设备ID", "show_name": "显示名称", "using": "状态", "app_name": "应用名称"}
         SimplePrinter.print_table(device_list, headers)
 
     @staticmethod
@@ -266,11 +244,7 @@ class SimplePrinter:
             return
 
         formatted_list = SimplePrinter.format_status_list(status_list)
-        headers = {
-            'id': '状态ID',
-            'name': '状态名称',
-            'description': '说明'
-        }
+        headers = {"id": "状态ID", "name": "状态名称", "description": "说明"}
         SimplePrinter.print_table(formatted_list, headers)
 
     @staticmethod
@@ -285,7 +259,7 @@ class SimplePrinter:
         print(f"API总调用次数: {metrics.get('total_api_calls', 0)}")
 
         # 状态统计
-        status_stats = metrics.get('status_stats', {})
+        status_stats = metrics.get("status_stats", {})
         if status_stats:
             print("\n状态使用统计:")
             for status_id, info in status_stats.items():
@@ -325,48 +299,28 @@ class SleepyManagerCLI:
         try:
             self.manager.query()
             self.manager.status_list()
-        except:
-            pass
-
-
-class SleepyManagerCLI:
-    """命令行交互界面类"""
-
-    def __init__(self, manager: SleepyManager = None):
-        """初始化CLI界面"""
-        if manager is None:
-            manager = SleepyManager(SERVER, SECRET, RETRY)
-        self.manager = manager
-
-        # 预加载可用状态和设备信息以用于命令提示
-        try:
-            self.manager.query()
-            self.manager.status_list()
-        except:
+        except Exception as e:
+            print(f"警告: 预加载信息失败: {e}")
             pass
 
         # 命令处理映射
         self.commands = {
             # 基本信息查询命令
-            'query': self.cmd_query,
-            'status_list': self.cmd_status_list,
-            'metrics': self.cmd_metrics,
-
+            "query": self.cmd_query,
+            "status_list": self.cmd_status_list,
+            "metrics": self.cmd_metrics,
             # 状态设置命令
-            'set': self.cmd_set_status,
-
+            "set": self.cmd_set_status,
             # 设备管理命令
-            'device_set': self.cmd_device_set,
-            'device_remove': self.cmd_device_remove,
-            'device_clear': self.cmd_device_clear,
-            'device_private_mode': self.cmd_device_private_mode,
-
+            "device_set": self.cmd_device_set,
+            "device_remove": self.cmd_device_remove,
+            "device_clear": self.cmd_device_clear,
+            "device_private_mode": self.cmd_device_private_mode,
             # 存储操作命令
-            'save_data': self.cmd_save_data,
-
+            "save_data": self.cmd_save_data,
             # 帮助
-            'help': self.cmd_help,
-            '?': self.cmd_help,
+            "help": self.cmd_help,
+            "?": self.cmd_help,
         }
 
     def show_status_options(self) -> None:
@@ -381,11 +335,20 @@ class SleepyManagerCLI:
         devices = self.manager.get_cached_devices()
         SimplePrinter.print_devices(devices)
 
+    def _parse_bool(self, value_str: str) -> bool:
+        """解析布尔值输入 (true, false, 1, 0, yes, no, y, n)"""
+        val = value_str.lower()
+        if val in ("true", "1", "yes", "y"):
+            return True
+        if val in ("false", "0", "no", "n"):
+            return False
+        raise ValueError(f"无法将 '{value_str}' 解析为布尔值 (true/false)")
+
     # ------ 命令处理函数 ------
 
     def cmd_query(self, args: List[str]) -> None:
         """查询当前状态"""
-        if args and args[0] in ['-h', '--help']:
+        if args and args[0] in ["-h", "--help"]:
             print("用法: query")
             print("功能: 查询当前状态信息，包括状态、设备等")
             return
@@ -398,7 +361,7 @@ class SleepyManagerCLI:
 
     def cmd_status_list(self, args: List[str]) -> None:
         """获取可用状态列表"""
-        if args and args[0] in ['-h', '--help']:
+        if args and args[0] in ["-h", "--help"]:
             print("用法: status_list")
             print("功能: 列出所有可用的状态选项")
             return
@@ -411,7 +374,7 @@ class SleepyManagerCLI:
 
     def cmd_metrics(self, args: List[str]) -> None:
         """获取统计信息"""
-        if args and args[0] in ['-h', '--help']:
+        if args and args[0] in ["-h", "--help"]:
             print("用法: metrics")
             print("功能: 显示系统统计信息，包括运行时间和状态使用统计等")
             return
@@ -424,7 +387,7 @@ class SleepyManagerCLI:
 
     def cmd_set_status(self, args: List[str]) -> None:
         """设置当前状态"""
-        if not args or args[0] in ['-h', '--help']:
+        if not args or args[0] in ["-h", "--help"]:
             print("用法: set <状态ID>")
             print("功能: 设置当前状态")
             self.show_status_options()
@@ -442,10 +405,10 @@ class SleepyManagerCLI:
 
     def cmd_device_set(self, args: List[str]) -> None:
         """设置设备状态"""
-        if len(args) < 4 or args[0] in ['-h', '--help']:
-            print("用法: device_set <设备ID> <显示名称> <是否使用中:true|false> <应用名称>")
+        if len(args) < 4 or args[0] in ["-h", "--help"]:
+            print("用法: device_set <设备ID> <显示名称> <是否使用中:true|false|1|0|yes|no> <应用名称>")
             print("功能: 设置指定设备的状态信息")
-            print("\n示例: device_set my_pc \"我的电脑\" true \"VS Code\"")
+            print('\n示例: device_set my_pc "我的电脑" true "VS Code"')
 
             # 显示当前设备列表以便参考
             if self.manager.get_cached_devices():
@@ -456,17 +419,19 @@ class SleepyManagerCLI:
         try:
             device_id = args[0]
             show_name = args[1]
-            using = args[2].lower() == 'true'
+            using = self._parse_bool(args[2])
             app_name = args[3]
 
             result = self.manager.device_set(device_id, show_name, using, app_name)
             SimplePrinter.print_api_result(result, f"设备 {device_id} 状态已更新")
+        except ValueError as e:
+            print(f"错误: 无效的布尔值 '{args[2]}'. {e}")
         except Exception as e:
             print(f"设置设备状态失败: {e}")
 
     def cmd_device_remove(self, args: List[str]) -> None:
         """移除设备"""
-        if not args or args[0] in ['-h', '--help']:
+        if not args or args[0] in ["-h", "--help"]:
             print("用法: device_remove <设备ID>")
             print("功能: 移除指定的设备")
 
@@ -486,7 +451,7 @@ class SleepyManagerCLI:
 
     def cmd_device_clear(self, args: List[str]) -> None:
         """清除所有设备"""
-        if args and args[0] in ['-h', '--help']:
+        if args and args[0] in ["-h", "--help"]:
             print("用法: device_clear")
             print("功能: 清除所有设备信息")
             return
@@ -499,22 +464,24 @@ class SleepyManagerCLI:
 
     def cmd_device_private_mode(self, args: List[str]) -> None:
         """设置隐私模式"""
-        if not args or args[0] in ['-h', '--help']:
-            print("用法: device_private_mode <true|false>")
+        if not args or args[0] in ["-h", "--help"]:
+            print("用法: device_private_mode <true|false|1|0|yes|no>")
             print("功能: 启用或禁用隐私模式")
             return
 
         try:
-            is_private = args[0].lower() == 'true'
+            is_private = self._parse_bool(args[0])
             result = self.manager.device_private_mode(is_private)
             mode_str = "启用" if is_private else "禁用"
             SimplePrinter.print_api_result(result, f"隐私模式已{mode_str}")
+        except ValueError as e:
+            print(f"错误: 无效的布尔值 '{args[0]}'. {e}")
         except Exception as e:
             print(f"设置隐私模式失败: {e}")
 
     def cmd_save_data(self, args: List[str]) -> None:
         """保存数据"""
-        if args and args[0] in ['-h', '--help']:
+        if args and args[0] in ["-h", "--help"]:
             print("用法: save_data")
             print("功能: 保存当前状态到 data.json")
             return
@@ -528,11 +495,9 @@ class SleepyManagerCLI:
     def cmd_help(self, args: List[str]) -> None:
         """显示帮助信息"""
         if args:
-            # 显示特定命令的帮助
             cmd = args[0]
             if cmd in self.commands:
-                # 调用对应命令的帮助
-                self.commands[cmd](['-h'])
+                self.commands[cmd](["-h"])
             else:
                 print(f"未知命令: {cmd}")
             return
@@ -540,7 +505,6 @@ class SleepyManagerCLI:
         print("\nSleepy管理器 命令帮助:")
         print("=====================")
 
-        # 分类显示命令
         print("\n== 信息查询命令 ==")
         print("query              - 查询当前状态")
         print("status_list        - 列出所有可用状态")
@@ -572,30 +536,27 @@ class SleepyManagerCLI:
 
         while True:
             try:
-                # 获取用户输入
                 user_input = input("\n> ")
 
-                # 处理退出命令
-                if user_input.lower() in ['exit', 'quit']:
+                if user_input.lower() in ["exit", "quit"]:
                     print("再见!")
                     break
 
-                # 跳过空输入
                 if not user_input.strip():
                     continue
 
-                # 解析命令和参数
                 parts = shlex.split(user_input)
                 cmd = parts[0].lower()
                 args = parts[1:] if len(parts) > 1 else []
 
-                # 执行命令
                 self.run_single_command(cmd, args)
 
             except KeyboardInterrupt:
-                print("\n操作已中断")
-                #! 控制台中断不会退出
-                continue
+                print("\n操作已中断。正在退出...")
+                break
+            except EOFError:
+                print("\n输入结束。正在退出...")
+                break
             except Exception as e:
                 print(f"错误: {e}")
                 continue
@@ -608,7 +569,6 @@ class SleepyManagerCLI:
             print(f"未知命令: {cmd}")
             print("输入 'help' 查看可用命令列表")
 
-    # 运行单次命令（非交互式）
     def execute_command(self, cmd: str, args: List[str]) -> None:
         """执行单个命令并返回结果（用于非交互式模式）"""
         self.run_single_command(cmd, args)
@@ -616,32 +576,22 @@ class SleepyManagerCLI:
 
 def parse_arguments():
     """解析命令行参数"""
-    parser = argparse.ArgumentParser(
-        description="Sleepy 管理工具",
-        formatter_class=argparse.RawDescriptionHelpFormatter
-    )
+    parser = argparse.ArgumentParser(description="Sleepy 管理工具", formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    # 服务器和认证选项
     parser.add_argument("--server", "-s", default=SERVER,
                         help=f"服务器地址 (默认: {SERVER})")
-    parser.add_argument("--secret", "-k", default=SECRET,
-                        help=f"API密钥")
+    parser.add_argument("--secret", "-k", default=SECRET, help="API密钥")
     parser.add_argument("--retry", "-r", type=int, default=RETRY,
                         help=f"API请求重试次数 (默认: {RETRY})")
     parser.add_argument("--raw-json", action="store_true",
                         help="显示原始JSON响应")
 
-    # 运行模式
     mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument("-i", "--interactive", action="store_true",
-                            help="启动交互式命令行模式")
-    mode_group.add_argument("-c", "--command",
-                            help="执行单个命令并退出")
+    mode_group.add_argument("-i", "--interactive", action="store_true", help="启动交互式命令行模式")
+    mode_group.add_argument("-c", "--command", help="执行单个命令并退出")
 
-    # 解析参数
     args, unknown_args = parser.parse_known_args()
 
-    # 处理 --command 后面的额外参数
     command_args = []
     if args.command:
         command_args = unknown_args
@@ -651,31 +601,30 @@ def parse_arguments():
 
 def main():
     """主函数"""
-    # 解析命令行参数
     args, command_args = parse_arguments()
 
-    # 更新全局配置
     global SERVER, SECRET, RETRY, SHOW_RAW_JSON
     if args.server:
         SERVER = args.server
     if args.secret:
         SECRET = args.secret
+    if not SECRET:
+        print("错误: API 密钥 (SECRET) 未通过配置或 --secret 参数提供。")
+        sys.exit(1)
     if args.retry:
         RETRY = args.retry
     if args.raw_json:
         SHOW_RAW_JSON = True
 
     try:
-        # 创建管理器实例
         manager = SleepyManager(SERVER, SECRET, RETRY)
         cli = SleepyManagerCLI(manager)
 
-        # 根据参数决定运行模式
         if args.command:
-            # 单命令模式
             cli.execute_command(args.command, command_args)
+        elif args.interactive:
+            cli.run_interactive()
         else:
-            # 交互式模式
             cli.run_interactive()
 
     except KeyboardInterrupt:

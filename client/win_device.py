@@ -12,17 +12,18 @@ by: @wyf9, @pwnint, @kmizmal, @gongfuture
 
 # ----- Part: Import
 
-import sys
 import io
-from time import sleep
+import sys
+import threading
 import time  # 改用 time 模块以获取更精确的时间
 from datetime import datetime
-from requests import post
-import threading
+from time import sleep
+
 import win32api  # type: ignore - 勿删，用于强忽略非 windows 系统上 vscode 找不到模块的警告
 import win32con  # type: ignore
 import win32gui  # type: ignore
 from pywintypes import error as pywinerror  # type: ignore
+from requests import post
 
 # ----- Part: Config
 
@@ -35,19 +36,17 @@ SECRET: str = 'wyf9test'
 DEVICE_ID: str = 'device-1'
 # 前台显示名称
 DEVICE_SHOW_NAME: str = 'MyDevice1'
-# 检查间隔，以秒为单位
-CHECK_INTERVAL: int = 5
-# 是否忽略重复请求，即窗口未改变时不发送请求
-BYPASS_SAME_REQUEST: bool = True
-# 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
-ENCODING: str = 'gb18030'
-# 当窗口标题为其中任意一项时将不更新
+# 状态检查间隔 (秒)
+STATUS_CHECK_INTERVAL: int = 5
+# 心跳发送间隔 (秒)
+HEARTBEAT_INTERVAL: int = 60
+# 当窗口标题为其中任意一项时将不更新 (检查原始标题)
 SKIPPED_NAMES: list = [
     '',  # 空字符串
     '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '操作中心', '日期和时间信息', '网络连接', '电池信息', '搜索', '任务视图', '任务切换', 'Program Manager',  # 桌面组件
     'Flow.Launcher', 'Snipper - Snipaste', 'Paster - Snipaste'  # 其他程序
 ]
-# 当窗口标题为其中任意一项时视为未在使用
+# 当窗口标题为其中任意一项时视为未在使用 (检查原始标题)
 NOT_USING_NAMES: list = [
     '启动', '「开始」菜单',  # 开始菜单
     '我们喜欢这张图片，因此我们将它与你共享。', '就像你看到的图像一样？选择以下选项', '喜欢这张图片吗?'  # 锁屏界面
@@ -74,8 +73,7 @@ MEDIA_DEVICE_SHOW_NAME: str = '正在播放'
 
 # ----- Part: Functions
 
-# stdout = TextIOWrapper(stdout.buffer, encoding=ENCODING)  # https://stackoverflow.com/a/3218048/28091753
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")  # 统一使用 utf-8
 _print_ = print
 
 
@@ -120,10 +118,15 @@ def reverse_app_name(name: str) -> str:
 # 导入拎出来优化性能 (?)
 if MEDIA_INFO_ENABLED:
     try:
+        from asyncio import run  # type: ignore
+
         import winrt.windows.media.control as media  # type: ignore
     except ImportError:
+        # 如果上面的导入失败 (例如旧版 winrt)，尝试备用导入 (虽然通常是一样的)
+        # 注意：如果基础的 winrt 包都装不上，这里还是会失败
+        from asyncio import run  # type: ignore
+
         import winrt.windows.media.control as media  # type: ignore
-    from asyncio import run  # type: ignore
 
 
 def get_media_info():
@@ -143,15 +146,23 @@ def get_media_info():
         # 使用异步函数包装整个操作
         async def get_media_info_async():
             session = await get_media_session()
+            # 如果没有活动的媒体会话，直接返回
             if not session:
                 return False, '', '', ''
 
             # 获取播放状态
             info = session.get_playback_info()
+            # 检查 info 是否有效 (某些情况下可能为 None)
+            if not info:
+                return False, "", "", ""
             is_playing = info.playback_status == media.GlobalSystemMediaTransportControlsSessionPlaybackStatus.PLAYING
 
             # 获取媒体属性
             props = await session.try_get_media_properties_async()
+            # 检查 props 是否有效
+            if not props:
+                # 如果获取属性失败，但仍在播放，至少返回播放状态
+                return is_playing, "", "", ""
 
             title = props.title or ''
             artist = props.artist or ''
@@ -165,15 +176,17 @@ def get_media_info():
         # 运行异步函数
         return run(get_media_info_async())
 
+    # 捕获所有可能的异常 (winrt 可能抛出各种 COM 或其他错误)
     except Exception as primary_error:
         debug(f"主要媒体信息获取方式失败: {primary_error}")
-        return False, '', '', ''
+        return False, "", "", ""
 
 # ----- Part: Send status
 
 
 Url = f'{SERVER}/device/set'
-last_window = ''
+last_window = ""  # 上次成功发送的窗口状态 (处理后)
+last_send_time = 0  # 上次成功发送的时间戳 (秒)
 
 
 def send_status(using: bool = True, app_name: str = '', id: str = DEVICE_ID, show_name: str = DEVICE_SHOW_NAME, **kwargs):
@@ -218,19 +231,7 @@ def on_shutdown(hwnd, msg, wparam, lparam):
     关机监听回调
     '''
     if msg == win32con.WM_QUERYENDSESSION:
-        print("Received logout event, sending not using...")
-        try:
-            resp = send_status(
-                using=False,
-                app_name="要关机了喵",
-                id=DEVICE_ID,
-                show_name=DEVICE_SHOW_NAME
-            )
-            debug(f'Response: {resp.status_code} - {resp.json()}')
-            if resp.status_code != 200:
-                print(f'Error! Response: {resp.status_code} - {resp.json()}')
-        except Exception as e:
-            print(f'Exception: {e}')
+        print("Received logout event. Server will detect offline via heartbeat timeout.")
         return True  # 允许关机或注销
     return 0  # 其他消息
 
@@ -313,11 +314,6 @@ def check_mouse_idle() -> bool:
         last_mouse_move_time = current_time
         if is_mouse_idle:
             is_mouse_idle = False
-        #     actual_distance = distance_squared ** 0.5  # 仅在状态变化时计算实际距离用于日志
-        #     print(
-        #         f'Mouse wake up: moved {actual_distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
-        # else:
-        #     debug(f'Mouse moving: {distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
         return False
 
     # 检查是否超过静止时间
@@ -339,37 +335,36 @@ last_media_playing = False  # 跟踪上一次的媒体播放状态
 last_media_content = ''  # 跟踪上一次的媒体内容
 
 
-def do_update():
+def do_update(force_send=False):
+    """
+    检查状态并根据需要发送更新或心跳
+    :param force_send: 是否强制发送 (用于心跳)
+    """
     # 全局变量
-    global last_window, cached_window_title, is_mouse_idle, last_media_playing, last_media_content
+    global last_window, last_send_time, cached_window_title, is_mouse_idle, last_media_playing, last_media_content
 
-    # --- 窗口名称 / 媒体信息 (prefix) 部分
-
-    # 获取当前窗口标题和鼠标状态
-    current_window = win32gui.GetWindowText(win32gui.GetForegroundWindow())
-    # 如果启用了反转应用名称功能，则反转窗口标题
-    if REVERSE_APP_NAME and ' - ' in current_window:
-        current_window = reverse_app_name(current_window)
+    # --- 1. 获取原始状态 ---
+    current_window_raw = win32gui.GetWindowText(win32gui.GetForegroundWindow())
     mouse_idle = check_mouse_idle()
-    debug(f'--- Window: `{current_window}`, mouse_idle: {mouse_idle}')
+    debug(f"--- Raw state: Window=`{current_window_raw}`, mouse_idle={mouse_idle}")
 
-    # 始终保持同步的状态变量
-    window = current_window
+    # --- 2. 处理状态 (媒体前缀, 反转, 空闲) ---
+    window_processed = current_window_raw
     using = True
 
-    # 获取媒体信息
+    # 获取媒体信息 (可能用于前缀或独立设备)
     prefix_media_info = None
     standalone_media_info = None
-
+    media_is_playing = False
     if MEDIA_INFO_ENABLED:
         is_playing, title, artist, album = get_media_info()
+        media_is_playing = is_playing  # 保存播放状态供 standalone 使用
         if is_playing and (title or artist):
             # 为 prefix 模式创建格式化后的媒体信息 [♪歌曲名]
             if title:
                 prefix_media_info = f"[♪{title}]"
             else:
                 prefix_media_info = "[♪]"
-
             # 为 standalone 模式创建格式化后的媒体信息 ♪歌曲名-歌手-专辑
             parts = []
             if title:
@@ -378,145 +373,137 @@ def do_update():
                 parts.append(artist)
             if (album and album != title and album != artist):
                 parts.append(album)
-
             standalone_media_info = " - ".join(parts) if parts else "♪播放中"
+            debug(f"Media detected - title: {title or ''} - artist: {artist or ''} - album: {album or ''}")
 
-            debug(f"检测到媒体 - title: {title or ''} - artist: {artist or ''} - album: {album or ''}")
+    # 应用反转
+    if REVERSE_APP_NAME and " - " in window_processed:
+        window_processed = reverse_app_name(window_processed)
 
-    # 处理媒体信息 (prefix 模式)
+    # 应用媒体前缀 (如果启用)
     if MEDIA_INFO_ENABLED and prefix_media_info and MEDIA_INFO_MODE == 'prefix':
-        # 作为前缀添加到窗口名称
-        window = f"{prefix_media_info} {window}"
+        window_processed = f"{prefix_media_info} {window_processed}"
 
-    # 鼠标空闲状态处理（优先级最高）
+    # 应用鼠标空闲状态 (最高优先级)
     if mouse_idle:
-        # 缓存非空闲时的窗口标题
-        if not is_mouse_idle:
-            cached_window_title = current_window
+        if not is_mouse_idle:  # 刚进入空闲
+            cached_window_title = window_processed  # 缓存进入空闲前的状态
             print('Caching window title before idle')
-        # 设置空闲状态
+        window_processed = ""  # 空闲时发送空状态
         using = False
-        window = ''
-        is_mouse_idle = True
+        is_mouse_idle = True  # 确保状态被标记为空闲
     else:
-        # 从空闲恢复
-        if is_mouse_idle:
-            window = cached_window_title
-            using = True
+        if is_mouse_idle:  # 刚从空闲恢复
             is_mouse_idle = False
-            print('Restoring window title from idle')
-
-    # 是否需要发送更新
-    should_update = (
-        mouse_idle != is_mouse_idle or  # 鼠标状态改变
-        window != last_window or  # 窗口改变
-        not BYPASS_SAME_REQUEST  # 强制更新模式
-    )
-
-    if should_update:
-        # 窗口名称检查 (未使用列表)
-        if current_window in NOT_USING_NAMES:
+            print("Mouse is active again")
+        # 检查 NOT_USING_NAMES (仅在非空闲时检查)
+        if current_window_raw in NOT_USING_NAMES:
             using = False
-            debug(f'* not using: `{current_window}`')
+            debug(f"* not using (raw name): `{current_window_raw}`")
 
-        # 窗口名称检查 (跳过列表)
-        if current_window in SKIPPED_NAMES:
-            if mouse_idle == is_mouse_idle:
-                # 鼠标状态未改变 -> 直接跳过
-                debug(f'* in skip list: `{current_window}`, skipped')
-                return
-            else:
-                # 鼠标状态改变 -> 将窗口名称设为上次 (非未在使用) 的名称
-                debug(f'* in skip list: `{current_window}`, set app name to last window: `{last_window}`')
-                window = last_window
+    debug(f"--- Processed state: Window=`{window_processed}`, using={using}")
 
-        # 发送状态更新
-        print(
-            f'Sending update: using = {using}, app_name = "{window}", idle = {mouse_idle}')
-        try:
-            resp = send_status(
-                using=using,
-                app_name=window,
-                id=DEVICE_ID,
-                show_name=DEVICE_SHOW_NAME
-            )
-            debug(f'Response: {resp.status_code} - {resp.json()}')
-            if resp.status_code != 200 and not DEBUG:
-                print(f'Error! Response: {resp.status_code} - {resp.json()}')
-            last_window = window
-        except Exception as e:
-            print(f'Error: {e}')
+    # --- 3. 决定是否发送主设备更新 ---
+    is_skipped = current_window_raw in SKIPPED_NAMES  # 使用原始名称检查跳过
+    status_changed = window_processed != last_window  # 比较处理后的名称
+    should_send_heartbeat = time.time() - last_send_time >= HEARTBEAT_INTERVAL
+
+    should_send_main = False
+    reason = ""
+
+    if is_skipped:
+        if window_processed == last_window:
+            reason = "Skipped and unchanged."
+        elif not force_send:
+            reason = "Skipped but changed, updating last_window only."
+            last_window = window_processed  # 更新本地状态但不发送
+        else:  # force_send is True
+            reason = "Skipped, but forcing send for heartbeat."
+            should_send_main = True
+    elif status_changed:
+        reason = f"Status changed: '{last_window}' -> '{window_processed}'"
+        should_send_main = True
+    elif should_send_heartbeat:
+        reason = "Heartbeat interval reached."
+        should_send_main = True
     else:
-        debug('No state change, skipping window name update')
+        reason = "Status unchanged and heartbeat interval not reached."
 
-    # --- 媒体信息 (standalone) 部分
+    debug(f"Send decision: {should_send_main}. Reason: {reason}")
 
-    # 如果使用独立设备模式展示媒体信息
+    # --- 4. 发送主设备更新 (如果需要) ---
+    if should_send_main:
+        print(f'Sending main update: using={using}, app_name="{window_processed}"')
+        try:
+            resp = send_status(using=using, app_name=window_processed, id=DEVICE_ID, show_name=DEVICE_SHOW_NAME)
+            debug(f"Main Response: {resp.status_code} - {resp.json()}")
+            if resp.status_code == 200:
+                last_window = window_processed  # 仅在成功发送时更新
+                last_send_time = time.time()
+            elif not DEBUG:
+                print(f"Error! Main Response: {resp.status_code} - {resp.json()}")
+        except Exception as e:
+            print(f"Error sending main status: {e}")
+
+    # --- 5. 处理媒体信息 (standalone 模式) ---
     if MEDIA_INFO_ENABLED and MEDIA_INFO_MODE == 'standalone':
         try:
             # 确定当前媒体状态
-            current_media_playing = bool(standalone_media_info)
+            current_media_playing = media_is_playing  # 使用之前获取的状态
             current_media_content = standalone_media_info if standalone_media_info else ''
 
             # 检测播放状态或歌曲内容是否变化
             media_changed = (current_media_playing != last_media_playing) or (current_media_playing and current_media_content != last_media_content)
 
-            if media_changed:
-                debug(f'Media changed: status: {last_media_playing} -> {current_media_playing}, content: {last_media_content != current_media_content} - `{standalone_media_info}`')
+            # standalone 模式也需要心跳。
+            # 当前简化逻辑：只要正在播放，每次检查都发送更新 (充当心跳)。
+            # 或者当播放状态/内容发生变化时发送更新。
+            send_media_update = False
+            media_app_name = "没有媒体播放"
+            media_using = False
 
-                if current_media_playing:
-                    # 从不播放变为播放或歌曲内容变化
-                    media_resp = send_status(
-                        using=True,
-                        app_name=standalone_media_info,
-                        id=MEDIA_DEVICE_ID,
-                        show_name=MEDIA_DEVICE_SHOW_NAME
+            if current_media_playing:
+                media_app_name = current_media_content
+                media_using = True
+                if media_changed:
+                    debug(
+                        f"Media changed: status: {last_media_playing} -> {current_media_playing}, content changed: {current_media_content != last_media_content} - `{current_media_content}`"
                     )
+                    send_media_update = True
                 else:
-                    # 从播放变为不播放
-                    media_resp = send_status(
-                        using=False,
-                        app_name='没有媒体播放',
-                        id=MEDIA_DEVICE_ID,
-                        show_name=MEDIA_DEVICE_SHOW_NAME
-                    )
-                debug(f'Media Response: {media_resp.status_code}')
+                    # 如果正在播放且内容未变，每次检查都发送心跳
+                    debug(f"Sending media heartbeat: `{current_media_content}`")
+                    send_media_update = True  # 强制发送作为心跳
+            elif last_media_playing:  # 从播放变为不播放
+                debug(f"Media stopped: status: {last_media_playing} -> {current_media_playing}")
+                send_media_update = True
 
-                # 更新上一次的媒体状态和内容
-                last_media_playing = current_media_playing
-                last_media_content = current_media_content
+            if send_media_update:
+                media_resp = send_status(using=media_using, app_name=media_app_name, id=MEDIA_DEVICE_ID, show_name=MEDIA_DEVICE_SHOW_NAME)
+                debug(f"Media Response: {media_resp.status_code}")
+                # 更新上一次的媒体状态和内容 (仅在发送后更新，避免重复发送停止状态)
+                if media_resp.status_code == 200:
+                    last_media_playing = current_media_playing
+                    last_media_content = current_media_content
+                elif not DEBUG:
+                    print(f"Error! Media Response: {media_resp.status_code} - {media_resp.json()}")
+
         except Exception as e:
-            debug(f'Media Info Error: {e}')
+            debug(f"Media Info Error (standalone): {e}")
 
 
 if __name__ == '__main__':
     try:
         while True:
-            do_update()
-            sleep(CHECK_INTERVAL)
+            print("---------- Run Check")
+            try:
+                # 检查状态并根据需要发送更新或心跳
+                # do_update 内部已包含心跳逻辑
+                do_update()
+
+            except Exception as loop_error:
+                print(f"ERROR in main loop: {loop_error}")
+
+            sleep(STATUS_CHECK_INTERVAL)  # 使用较短的检查间隔
     except (KeyboardInterrupt, SystemExit) as e:
-        # 如果中断或被 taskkill 则发送未在使用
-        debug(f'Interrupt: {e}')
-        try:
-            resp = send_status(
-                using=False,
-                app_name='未在使用',
-                id=DEVICE_ID,
-                show_name=DEVICE_SHOW_NAME
-            )
-            debug(f'Response: {resp.status_code} - {resp.json()}')
-
-            # 如果启用了独立媒体设备，也发送该设备的退出状态
-            if MEDIA_INFO_ENABLED and MEDIA_INFO_MODE == 'standalone':
-                media_resp = send_status(
-                    using=False,
-                    app_name='未在使用',
-                    id=MEDIA_DEVICE_ID,
-                    show_name=MEDIA_DEVICE_SHOW_NAME
-                )
-                debug(f'Media Response: {media_resp.status_code}')
-
-            if resp.status_code != 200:
-                print(f'Error! Response: {resp.status_code} - {resp.json()}')
-        except Exception as e:
-            print(f'Exception: {e}')
+        debug(f"Interrupt: {e}. Server will detect offline via heartbeat timeout.")

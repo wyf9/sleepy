@@ -1,8 +1,9 @@
 # coding: utf-8
 import os
+
 from dotenv import load_dotenv
 
-from _utils import tobool, get_path
+from _utils import get_path, tobool
 
 load_dotenv(dotenv_path=get_path('.env'))
 
@@ -65,6 +66,8 @@ class _status:
     show_loading: bool = getenv('sleepy_status_show_loading', True, bool)
     refresh_interval: int = getenv('sleepy_status_refresh_interval', 5000, int)
     not_using: str = getenv('sleepy_status_not_using', '', str)
+    # 设备心跳超时时间 (秒), 超过此时间未收到设备消息则判定为离线
+    device_offline_timeout: int = getenv("sleepy_status_device_offline_timeout", 180, int)
 
 
 class _util:
