@@ -10,7 +10,7 @@ const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址
 const SECRET = '绝对猜不出来的密码'; // 你的 secret
 const ID = 'a-device'; // 你的设备 id, 唯一
 const SHOW_NAME = '一个设备'; // 你的设备名称, 将显示在网页上
-const CHECK_INTERVAL = '3000'; // 检查间隔 (毫秒, 1000ms=1s)
+const CHECK_INTERVAL = '60000'; // 检查间隔 (毫秒, 1000ms=1s), 改为 60 秒
 const SKIPPED_NAMES = ['系统界面', '系统界面组件', '手机管家', '平板管家', 'System UI', 'Security tools'] // 获取到的软件名包含列表中之一时忽略
 // config end
 
@@ -67,48 +67,30 @@ function send_status() {
     var app_name = check_status();
     log(`ret app_name: '${app_name}'`);
 
-    // 判断是否与上次相同
-    if (app_name == last_status) {
-        log('same as last status, bypass request');
-        return;
-    }
-
     // 判断是否在忽略列表中
     for (let i = 0; i < SKIPPED_NAMES.length; i++) {
         if (app_name.includes(SKIPPED_NAMES[i])) {
             log(`bypass because of: '${SKIPPED_NAMES[i]}'`);
+            // 如果跳过，仍然需要更新 last_status，否则下次非跳过状态也会被认为是变化
+            last_status = app_name;
             return;
         }
     }
 
-    last_status = app_name;
-    // 判断 using
+    // 判断 using (仅在 app_name 实际变化或首次运行时更新 last_status)
+    var using = true;
     if (app_name == '') {
         log('using: false');
-        var using = false;
+        using = false;
+    }
+    // 只有在状态实际改变时才记录日志，避免心跳刷屏
+    if (app_name !== last_status) {
+        log(`Status changed: '${last_status}' -> '${app_name}'`);
+        log(`using: ${using}`);
     } else {
-        log('using: true');
-        var using = true;
+        log('Sending heartbeat with unchanged status.');
     }
 
-    // POST to api
-    log(`Status string: '${app_name}'`);
-    log(`POST ${API_URL}`);
-    r = http.postJson(API_URL, {
-        'secret': SECRET,
-        'id': ID,
-        'show_name': SHOW_NAME,
-        'using': using,
-        'app_name': app_name
-    });
-    log(`response: ${r.body.string()}`);
-}
-
-
-// 程序退出后上报停止事件
-events.on("exit", function () {
-    log("Script exits, uploading using = false");
-    toast("[sleepy] 脚本已停止, 上报中");
     // POST to api
     log(`POST ${API_URL}`);
     try {
@@ -116,15 +98,22 @@ events.on("exit", function () {
             'secret': SECRET,
             'id': ID,
             'show_name': SHOW_NAME,
-            'using': false,
-            'app_name': '[Client Exited]' // using 为 false 时前端不会显示这个, 而是 '未在使用'
+            'using': using,
+            'app_name': app_name
         });
         log(`response: ${r.body.string()}`);
-        toast("[sleepy] 上报成功");
+        // 仅在成功发送后更新 last_status
+        last_status = app_name;
     } catch (e) {
-        error(`Error when uploading: ${e}`);
-        toast(`[sleepy] 上报失败! 请检查控制台日志`);
+        error(`Error sending status: ${e}`);
+        // 发送失败时不更新 last_status，以便下次重试
     }
+}
+
+// 程序退出后上报停止事件
+events.on("exit", function () {
+    log("Script exits. Server will detect offline via heartbeat timeout.");
+    toast("[sleepy] 脚本已停止");
 });
 
 while (true) {

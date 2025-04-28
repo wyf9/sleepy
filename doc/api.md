@@ -230,10 +230,9 @@ Authorization: Bearer MySecretCannotGuess
 
 |                              | 路径                                                                          | 方法   | 作用                          |
 | ---------------------------- | ----------------------------------------------------------------------------- | ------ | ----------------------------- |
-| [Jump](#device-set)          | `/device/set`                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
-|                              | `/device/set?id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
-| [Jump](#device-remove)       | `/device/remove?name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
-| [Jump](#device-clear)        | `/device/clear`                                                               | `GET`  | 清除所有设备的状态            |
+| [Jump](#device-set)          | `/device/set`                                                                 | `POST` / `GET` | 设置/更新单个设备的状态 (心跳) |
+| [Jump](#device-remove)       | `/device/remove?id=<device_id>`                                               | `GET`  | **手动**移除单个设备的状态    |
+| [Jump](#device-clear)        | `/device/clear`                                                               | `GET`  | **手动**清除所有设备的状态    |
 | [Jump](#device-private-mode) | `/device/private_mode?private=<isprivate>`                                    | `GET`  | 设置隐私模式                  |
 
 ### device-set
@@ -242,7 +241,7 @@ Authorization: Bearer MySecretCannotGuess
 
 > `/device/set`
 
-设置单个设备的状态
+设置或更新单个设备的状态。**客户端需要定期调用此接口 (即使状态没有变化) 作为心跳，以告知服务器设备仍然在线。** 服务器会记录每次调用的时间戳，如果超过预设的超时时间 (环境变量 `SLEEPY_STATUS_DEVICE_OFFLINE_TIMEOUT`) 没有收到来自某个设备的心跳，则会自动将该设备标记为离线 (`using=false`, `app_name='[Offline]'`)。
 
 * Method: GET / POST
 * **需要鉴权**
@@ -254,10 +253,10 @@ Authorization: Bearer MySecretCannotGuess
 
 > `/device/set?id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>`
 
-- `<id>`: 设备标识符
-- `<show_name>`: 显示名称
-- `<using>`: 是否正在使用
-- `<app_name>`: 正在使用应用的名称
+* `<id>`: 设备标识符
+* `<show_name>`: 显示名称
+* `<using>`: 是否正在使用 (例如，屏幕是否亮起，用户是否活跃)
+* `<app_name>`: 正在使用应用的名称 (或当前状态描述)
 
 #### Body (POST)
 
@@ -295,14 +294,14 @@ Authorization: Bearer MySecretCannotGuess
 
 > `/device/remove?id=<device_id>`
 
-移除单个设备的状态
+**手动**移除服务器记录的单个设备的状态。注意：如果对应的客户端仍在运行并发送心跳，该设备状态会再次出现。此接口主要用于清理不再使用的设备记录。设备离线状态通常由服务器心跳超时自动处理。
 
 * Method: GET
 * **需要鉴权**
 
 #### Params
 
-- `<device_id>`: 设备标识符
+* `<device_id>`: 设备标识符
 
 #### Response
 
@@ -327,7 +326,7 @@ Authorization: Bearer MySecretCannotGuess
 
 > `/device/clear`
 
-清除所有设备的状态
+**手动**清除服务器记录的所有设备的状态。注意：如果客户端仍在运行并发送心跳，设备状态会再次出现。此接口主要用于完全重置设备列表。设备离线状态通常由服务器心跳超时自动处理。
 
 * Method: GET
 * **需要鉴权**

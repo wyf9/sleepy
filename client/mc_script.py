@@ -8,19 +8,20 @@ by: @wyf9
 '''
 
 # 不要使用格式化!!! 会打乱顺序!!!
-import time
-from system.lib import minescript as mc  # type: ignore / 写好记得把 system 前面的 . 去掉, 否则会报错
 import sys
+import time
+
 # sys.path.append(r'C:\Users\wyf01\AppData\Roaming\Python\Python312\site-packages')  # 如提示找不到库, 在此将你的 site-packages 目录添加至局部 PATH
 from requests import post
+from system.lib import minescript as mc  # type: ignore / 写好记得把 system 前面的 . 去掉, 否则会报错
 
 # --- config start
 SERVER = 'https://sleepy.example.com'  # 服务器地址, 末尾不带 /
 SECRET = 'this_is_a_strong_key'  # 密钥
 DEVICE_ID = 'device-1'  # 设备 id, 唯一
 DEVICE_SHOW_NAME = 'MyDevice1'  # 设备前台显示名称
-CHECK_INTERVAL = 10  # 监测间隔 (秒)
-BYPASS_SAME_REQUEST = True  # 是否忽略相同请求
+CHECK_INTERVAL = 60  # 监测间隔 (秒), 改为 60 秒
+BYPASS_SAME_REQUEST = False  # 是否忽略相同请求, 改为 False
 DEBUG = False  # 调试模式, 开启以获得更多输出
 # --- config end
 
@@ -32,9 +33,10 @@ def log(msg: str, important: bool = False) -> None:
 
 Url = f'{SERVER}/device/set'
 
+# --- Modify: Remove stop request sending ---
 try:
     if sys.argv[1].lower() == 'stop':
-        log('Stopping.', important=True)
+        log("Stopping script. Server will detect offline via heartbeat timeout.", important=True)
         self_id = 0
         # kill jobs (except self)
         for i in mc.job_info():
@@ -42,34 +44,7 @@ try:
                 if i.self:
                     self_id = i.job_id
                 else:
-                    mc.execute(f'\\killjob {i.job_id}')
-        # send stop request
-        error_info = ''
-        for i in range(3):
-            try:
-                resp = post(url=Url, json={
-                    'secret': SECRET,
-                    'id': DEVICE_ID,
-                    'show_name': DEVICE_SHOW_NAME,
-                    'using': False,
-                    'app_name': '[Stopped]'
-                }, headers={
-                    'Content-Type': 'application/json'
-                })
-                Json = resp.json()
-                log(f'Response: {resp.status_code} - {Json}')
-                if Json['success'] == True:
-                    break
-                else:
-                    log(f'return not success: {Json}')
-                    error_info = f'(Response) {resp.status_code} {Json}'
-                    continue
-            except Exception as e:
-                log(f'Error: {e}')
-                error_info = f'(Exception) {e}'
-                continue
-        if not error_info:
-            log(f'WARNING: send request failed: {error_info}')
+                    mc.execute(f"\\killjob {i.job_id}")
         if self_id:
             # kill self
             mc.execute(f'\\killjob {self_id}')
@@ -78,6 +53,7 @@ try:
         exit(0)
 except:
     pass
+# --- End Modify ---
 # -----
 
 
@@ -131,6 +107,12 @@ def do_update(app_name):
     :return 2: 返回中 `success` 不为 `true`
     '''
     # POST to api
+    # 仅在状态实际改变时记录日志，避免心跳刷屏
+    if app_name != last_status:
+        log(f"Status changed: '{last_status}' -> '{app_name}'")
+    else:
+        log("Sending heartbeat with unchanged status.")
+
     log(f'POST {Url}')
     try:
         resp = post(url=Url, json={
@@ -158,11 +140,8 @@ log('Started')
 
 while True:
     app_name = get_info()
-    if app_name != last_status:
-        # 与上次不同, 更新
-        log(f'App name: {app_name}')
-        ret = do_update(app_name=app_name)
-        if not ret:
-            # 失败时不更新上次信息, 以便 interval 后重试
-            last_status = app_name
+    # --- Modify: Remove status check, always update ---
+    ret = do_update(app_name=app_name)
+    if ret == 0:  # 仅在成功时更新 last_status
+        last_status = app_name
     time.sleep(CHECK_INTERVAL)

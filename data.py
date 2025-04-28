@@ -1,14 +1,20 @@
 # coding: utf-8
 
-import os
-import pytz
 import json
+import os
 import threading
-from time import sleep
+
+# --- Add ---
+import time
 from datetime import datetime
 
-import utils as u
+# --- End Add ---
+from time import sleep
+
+import pytz
+
 import env as env
+import utils as u
 from setting import metrics_list
 
 
@@ -187,7 +193,7 @@ class data:
         '''
 
         # check metrics list
-        if not path in metrics_list:
+        if path not in metrics_list:
             return
 
         self.check_metrics_time()
@@ -251,13 +257,42 @@ class data:
         while True:
             sleep(self.data_check_interval)
             try:
+                # --- Add: Heartbeat Check ---
+                now = time.time()
+                offline_timeout = env.status.device_offline_timeout
+                devices_changed = False
+                if "device_status" in self.data:
+                    # 使用 list() 复制字典的 items，允许在迭代期间修改原始字典
+                    for device_id, device_info in list(self.data["device_status"].items()):
+                        last_heartbeat = device_info.get("last_heartbeat", 0)
+                        # 检查是否超时
+                        if now - last_heartbeat > offline_timeout:
+                            # 仅当设备当前状态不是 [Offline] 时才标记并记录日志
+                            if device_info.get("using", False) or device_info.get("app_name") != "[Offline]":
+                                u.info(
+                                    f"[timer_check] Device {device_id} timed out ({now - last_heartbeat:.0f}s > {offline_timeout}s). Marking as offline."
+                                )
+                                device_info["using"] = False
+                                device_info["app_name"] = "[Offline]"
+                                # 更新主状态的 last_updated 时间戳
+                                self.data["last_updated"] = datetime.now(pytz.timezone(env.main.timezone)).strftime("%Y-%m-%d %H:%M:%S")
+                                devices_changed = True
+                # --- End Add ---
+
                 self.check_metrics_time()  # 检测是否跨日
                 self.check_device_status(trigged_by_timer=True)  # 检测设备状态并更新 status
+
+                # --- Modify: Save if data changed OR devices timed out ---
                 file_data = self.load(ret=True)
-                if file_data != self.data:
+                # 比较相关部分，如果仅发生超时，则排除可能不同的时间戳
+                current_data_comparable = {k: v for k, v in self.data.items() if k != "metrics"}  # 指标可能会频繁更改
+                file_data_comparable = {k: v for k, v in file_data.items() if k != "metrics"}
+
+                if file_data_comparable != current_data_comparable or devices_changed:
+                    u.debug("[timer_check] Data changed, saving...")
                     self.save()
+                # --- End Modify ---
             except Exception as e:
                 u.warning(f'[timer_check] Error: {e}, retrying.')
 
     # --- check device heartbeat
-    # TODO

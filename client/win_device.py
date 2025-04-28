@@ -12,17 +12,18 @@ by: @wyf9, @pwnint, @kmizmal, @gongfuture
 
 # ----- Part: Import
 
-import sys
 import io
-from time import sleep
+import sys
+import threading
 import time  # 改用 time 模块以获取更精确的时间
 from datetime import datetime
-from requests import post
-import threading
+from time import sleep
+
 import win32api  # type: ignore - 勿删，用于强忽略非 windows 系统上 vscode 找不到模块的警告
 import win32con  # type: ignore
 import win32gui  # type: ignore
 from pywintypes import error as pywinerror  # type: ignore
+from requests import post
 
 # ----- Part: Config
 
@@ -35,10 +36,8 @@ SECRET: str = 'wyf9test'
 DEVICE_ID: str = 'device-1'
 # 前台显示名称
 DEVICE_SHOW_NAME: str = 'MyDevice1'
-# 检查间隔，以秒为单位
-CHECK_INTERVAL: int = 5
-# 是否忽略重复请求，即窗口未改变时不发送请求
-BYPASS_SAME_REQUEST: bool = True
+# 检查间隔，以秒为单位 (建议小于服务端超时时间的三分之一, 例如 60 秒)
+CHECK_INTERVAL: int = 60
 # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
 ENCODING: str = 'gb18030'
 # 当窗口标题为其中任意一项时将不更新
@@ -218,19 +217,7 @@ def on_shutdown(hwnd, msg, wparam, lparam):
     关机监听回调
     '''
     if msg == win32con.WM_QUERYENDSESSION:
-        print("Received logout event, sending not using...")
-        try:
-            resp = send_status(
-                using=False,
-                app_name="要关机了喵",
-                id=DEVICE_ID,
-                show_name=DEVICE_SHOW_NAME
-            )
-            debug(f'Response: {resp.status_code} - {resp.json()}')
-            if resp.status_code != 200:
-                print(f'Error! Response: {resp.status_code} - {resp.json()}')
-        except Exception as e:
-            print(f'Exception: {e}')
+        print("Received logout event. Server will detect offline via heartbeat timeout.")
         return True  # 允许关机或注销
     return 0  # 其他消息
 
@@ -313,11 +300,6 @@ def check_mouse_idle() -> bool:
         last_mouse_move_time = current_time
         if is_mouse_idle:
             is_mouse_idle = False
-        #     actual_distance = distance_squared ** 0.5  # 仅在状态变化时计算实际距离用于日志
-        #     print(
-        #         f'Mouse wake up: moved {actual_distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
-        # else:
-        #     debug(f'Mouse moving: {distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
         return False
 
     # 检查是否超过静止时间
@@ -406,31 +388,26 @@ def do_update():
             is_mouse_idle = False
             print('Restoring window title from idle')
 
-    # 是否需要发送更新
-    should_update = (
-        mouse_idle != is_mouse_idle or  # 鼠标状态改变
-        window != last_window or  # 窗口改变
-        not BYPASS_SAME_REQUEST  # 强制更新模式
-    )
+    # 窗口名称检查 (未使用列表) - 仍然相关，用于设置 'using' 标志
+    if current_window in NOT_USING_NAMES:
+        using = False
+        debug(f"* not using: `{current_window}`")
 
-    if should_update:
-        # 窗口名称检查 (未使用列表)
-        if current_window in NOT_USING_NAMES:
-            using = False
-            debug(f'* not using: `{current_window}`')
+    # 窗口名称检查 (跳过列表) - 仍然相关，以避免发送跳过的名称
+    send_main_update = True  # 默认发送主设备更新
+    if current_window in SKIPPED_NAMES:
+        if not mouse_idle and window != last_window:
+            debug(f"* in skip list: `{current_window}`, but not idle. Sending last known: `{last_window}`")
+            window = last_window  # 发送上一个有效的名称
+        elif mouse_idle:
+            debug(f"* in skip list: `{current_window}`, but idle. Sending idle status.")
+        else:
+            # 未闲置，窗口被跳过，且与上次发送的跳过窗口相同。不发送主更新。
+            debug(f"* in skip list and unchanged: `{current_window}`, skipping main send.")
+            send_main_update = False  # 不发送主设备更新
 
-        # 窗口名称检查 (跳过列表)
-        if current_window in SKIPPED_NAMES:
-            if mouse_idle == is_mouse_idle:
-                # 鼠标状态未改变 -> 直接跳过
-                debug(f'* in skip list: `{current_window}`, skipped')
-                return
-            else:
-                # 鼠标状态改变 -> 将窗口名称设为上次 (非未在使用) 的名称
-                debug(f'* in skip list: `{current_window}`, set app name to last window: `{last_window}`')
-                window = last_window
-
-        # 发送状态更新
+    # 总是发送状态以确保心跳，除非被跳过
+    if send_main_update:
         print(
             f'Sending update: using = {using}, app_name = "{window}", idle = {mouse_idle}')
         try:
@@ -443,15 +420,11 @@ def do_update():
             debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code != 200 and not DEBUG:
                 print(f'Error! Response: {resp.status_code} - {resp.json()}')
-            last_window = window
+            last_window = window  # 仅在成功发送时更新 last_window
         except Exception as e:
-            print(f'Error: {e}')
-    else:
-        debug('No state change, skipping window name update')
+            print(f"Error: {e}")
 
-    # --- 媒体信息 (standalone) 部分
-
-    # 如果使用独立设备模式展示媒体信息
+    # --- 媒体信息 (standalone) 部分 ---
     if MEDIA_INFO_ENABLED and MEDIA_INFO_MODE == 'standalone':
         try:
             # 确定当前媒体状态
@@ -485,6 +458,11 @@ def do_update():
                 # 更新上一次的媒体状态和内容
                 last_media_playing = current_media_playing
                 last_media_content = current_media_content
+            # 如果正在播放且状态未变，也发送心跳
+            elif current_media_playing:
+                debug(f"Sending media heartbeat: `{standalone_media_info}`")
+                media_resp = send_status(using=True, app_name=standalone_media_info, id=MEDIA_DEVICE_ID, show_name=MEDIA_DEVICE_SHOW_NAME)
+                debug(f"Media Heartbeat Response: {media_resp.status_code}")
         except Exception as e:
             debug(f'Media Info Error: {e}')
 
@@ -495,28 +473,4 @@ if __name__ == '__main__':
             do_update()
             sleep(CHECK_INTERVAL)
     except (KeyboardInterrupt, SystemExit) as e:
-        # 如果中断或被 taskkill 则发送未在使用
-        debug(f'Interrupt: {e}')
-        try:
-            resp = send_status(
-                using=False,
-                app_name='未在使用',
-                id=DEVICE_ID,
-                show_name=DEVICE_SHOW_NAME
-            )
-            debug(f'Response: {resp.status_code} - {resp.json()}')
-
-            # 如果启用了独立媒体设备，也发送该设备的退出状态
-            if MEDIA_INFO_ENABLED and MEDIA_INFO_MODE == 'standalone':
-                media_resp = send_status(
-                    using=False,
-                    app_name='未在使用',
-                    id=MEDIA_DEVICE_ID,
-                    show_name=MEDIA_DEVICE_SHOW_NAME
-                )
-                debug(f'Media Response: {media_resp.status_code}')
-
-            if resp.status_code != 200:
-                print(f'Error! Response: {resp.status_code} - {resp.json()}')
-        except Exception as e:
-            print(f'Exception: {e}')
+        debug(f"Interrupt: {e}. Server will detect offline via heartbeat timeout.")

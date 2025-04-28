@@ -20,8 +20,8 @@ SERVER = 'http://localhost:9010'  # 服务地址, 末尾还是不带 /
 SECRET = 'wyf9test'  # 密钥
 DEVICE_ID = 'device-1'  # 设备标识符
 DEVICE_SHOW_NAME = 'MyDevice1'  # 前台显示名称
-CHECK_INTERVAL = 2  # 检查间隔，以秒为单位
-BYPASS_SAME_REQUEST = True  # 是否忽略重复请求
+CHECK_INTERVAL = 60  # 检查间隔，以秒为单位, 改为 60 秒
+BYPASS_SAME_REQUEST = False  # 是否忽略重复请求, 改为 False
 ENCODING = 'utf-8'  # 控制台输出所用编码，避免编码出错，可选 utf-8 或 gb18030
 SKIPPED_NAMES = ['', 'plasmashell']  # 当窗口名为其中任意一项时将不更新
 NOT_USING_NAMES = ['[FAILED]']  # 当窗口名为其中任意一项时视为未在使用
@@ -43,8 +43,6 @@ def get_active_window_title():
     '''
     获取窗口标题, 如检测失败则为 `[FAILED]`
     '''
-    # window_title = subprocess.check_output(["kdotool", "getactivewindow", "getwindowname"]).strip()
-    # return window_title.decode()
     result = subprocess.run(["kdotool", "getactivewindow", "getwindowname"], capture_output=True, text=True)
     if result.returncode == 0:
         window_name = result.stdout.replace("\n", "")
@@ -66,16 +64,20 @@ def do_update():
     window = get_active_window_title()
     print(f'--- Window: `{window}`')
 
-    # 检测重复名称
-    if (BYPASS_SAME_REQUEST and window == last_window):
-        print('window not change, bypass')
-        return
-
     # 检查跳过名称
+    send_update = True
     for i in SKIPPED_NAMES:
         if i == window:
             print(f'* skipped: `{i}`')
-            return
+            # 如果跳过且与上次相同，则不发送
+            if window == last_window:
+                print('skipped and unchanged, bypass send')
+                send_update = False
+            # 否则，更新 last_window 但不发送
+            else:
+                 last_window = window # 更新 last_window 以避免下次误判为变化
+                 send_update = False
+            break # 找到一个跳过项就足够了
 
     # 判断是否在使用
     using = True
@@ -83,51 +85,33 @@ def do_update():
         if i == window:
             print(f'* not using: `{i}`')
             using = False
+            break # 找到一个即可
 
-    # POST to api
-    print(f'POST {Url}')
-    try:
-        resp = post(url=Url, json={
-            'secret': SECRET,
-            'id': DEVICE_ID,
-            'show_name': DEVICE_SHOW_NAME,
-            'using': using,
-            'app_name': window
-        }, headers={
-            'Content-Type': 'application/json'
-        })
-        print(f'Response: {resp.status_code} - {resp.json()}')
-    except Exception as e:
-        print(f'Error: {e}')
-    last_window = window
+    # POST to api (if not skipped)
+    if send_update:
+        # 仅在状态实际改变时记录日志，避免心跳刷屏
+        if window != last_window:
+             print(f'Status changed: '{last_window}' -> '{window}', using={using}')
+        else:
+             print('Sending heartbeat with unchanged status.')
 
-
-def interrupt_req():
-    '''
-    在中断时发送 未在使用 请求
-    '''
-    try:
-        resp = post(url=Url, json={
-            'secret': SECRET,
-            'id': DEVICE_ID,
-            'show_name': DEVICE_SHOW_NAME,
-            'using': False,
-            'app_name': 'Kill or Shutdown'
-        }, headers={
-            'Content-Type': 'application/json'
-        })
-        print(f'Response: {resp.status_code} - {resp.json()}')
-    except Exception as e:
-        print(f'Error: {e}')
-
-
-def sigterm_handler(signum, frame):
-    '''
-    处理 SIGTERM
-    '''
-    print('SIGTERM received')
-    interrupt_req()
-    exit(0)
+        print(f'POST {Url}')
+        try:
+            resp = post(url=Url, json={
+                'secret': SECRET,
+                'id': DEVICE_ID,
+                'show_name': DEVICE_SHOW_NAME,
+                'using': using,
+                'app_name': window
+            }, headers={
+                'Content-Type': 'application/json'
+            })
+            print(f'Response: {resp.status_code} - {resp.json()}')
+            # 仅在成功发送后更新 last_window
+            last_window = window
+        except Exception as e:
+            print(f'Error: {e}')
+            # 发送失败时不更新 last_window
 
 
 def main():
@@ -141,9 +125,6 @@ def main():
 
 if __name__ == '__main__':
     try:
-        signal.signal(signal.SIGTERM, sigterm_handler)  # 注册 handler
         main()
     except KeyboardInterrupt as e:
-        # 如果中断则发送未在使用
-        print(f'Interrupt: {e}')
-        interrupt_req()
+        print(f'Interrupt: {e}. Server will detect offline via heartbeat timeout.')
