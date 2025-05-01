@@ -49,6 +49,7 @@ class _page:
     repo: str = getenv('sleepy_page_repo', 'https://github.com/wyf9/sleepy', str)
     more_text: str = getenv('sleepy_page_more_text', '', str)
     sorted: bool = getenv('sleepy_page_sorted', False, bool)
+    using_first: bool = getenv('sleepy_page_using_first', False, bool)
     hitokoto: bool = getenv('sleepy_page_hitokoto', True, bool)
     canvas: bool = getenv('sleepy_page_canvas', True, bool)
     moonlight: bool = getenv('sleepy_page_moonlight', True, bool)

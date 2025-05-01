@@ -51,8 +51,8 @@ if __name__ == '__main__':
                 out = post(*inp[2:].split(' ', 1))
             else:
                 out = eval(inp)
-            print(f'O > {out.replace(SECRET, "[SECRET]")}')
+            print(f'O > {out}'.replace(SECRET, "[SECRET]"))
         except Exception as e:
-            print(f'E - {str(e).replace(SECRET, "[SECRET]")}')
+            print(f'E - {str(e)}'.replace(SECRET, "[SECRET]"))
         except KeyboardInterrupt:
             exit(0)

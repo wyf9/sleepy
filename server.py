@@ -148,7 +148,6 @@ def index():
         learn_more=env.page.learn_more,
         repo=env.page.repo,
         more_text=more_text,
-        sorted=env.page.sorted,
         hitokoto=env.page.hitokoto,
         canvas=env.page.canvas,
         moonlight=env.page.moonlight,
@@ -197,8 +196,9 @@ def query(ret_as_dict: bool = False):
     - 无需鉴权
     - Method: **GET**
 
-    :param ret_as_dict: 使函数直接返回 dict 而非 u.format_dict() 格式化后的 response
+    :param ret_as_dict: 使函数直接返回 dict 而非 `u.format_dict()` 格式化后的 response
     '''
+    # 获取手动状态
     st: int = d.data['status']
     try:
         stinfo = status_list[st]
@@ -209,12 +209,30 @@ def query(ret_as_dict: bool = False):
             'desc': f'未知的标识符 {st}，可能是配置问题。',
             'color': 'error'
         }
-    if env.page.sorted:
-        devicelst = dict(sorted(d.data["device_status"].items()))
-    else:
-        devicelst = d.data["device_status"]
+    # 获取设备状态
     if d.data['private_mode']:
+        # 隐私模式
         devicelst = {}
+    elif env.page.using_first:
+        # 使用中优先
+        devicelst = {}  # devicelst = device_using
+        device_not_using = {}
+        for n in d.data['device_status']:
+            i = d.data['device_status'][n]
+            if i['using']:
+                devicelst[n] = i
+            else:
+                device_not_using[n] = i
+        if env.page.sorted:
+            devicelst = dict(sorted(devicelst.items()))
+            device_not_using = dict(sorted(device_not_using.items()))
+        devicelst.update(device_not_using)  # append not_using items to end
+    else:
+        # 正常获取
+        devicelst: dict = d.data['device_status']
+        if env.page.sorted:
+            devicelst = dict(sorted(devicelst.items()))
+
     timenow = datetime.now(pytz.timezone(env.main.timezone))
     ret = {
         'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
