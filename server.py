@@ -122,15 +122,17 @@ def index():
     根目录返回 html
     - Method: **GET**
     '''
+    # 获取手动状态
     try:
-        stat = status_list[d.data['status']]
+        status: dict = status_list[d.data['status']]
     except:
-        u.debug(f"Index {d.data['status']} out of range!")
-        stat = {
+        u.warning(f"Index {d.data['status']} out of range!")
+        status = {
             'name': 'Unknown',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
         }
+    # 获取更多信息 (more_text)
     more_text: str = env.page.more_text
     if env.util.metrics:
         more_text = more_text.format(
@@ -139,34 +141,13 @@ def index():
             visit_year=d.data['metrics']['year'].get('/', 0),
             visit_total=d.data['metrics']['total'].get('/', 0)
         )
+    # 返回 html
     return flask.render_template(
         'index.html',
-        page_title=env.page.title,
-        page_desc=env.page.desc,
-        page_favicon=env.page.favicon,
-        user=env.page.user,
-        learn_more=env.page.learn_more,
-        repo=env.page.repo,
+        env=env,
         more_text=more_text,
-        hitokoto=env.page.hitokoto,
-        canvas=env.page.canvas,
-        moonlight=env.page.moonlight,
-        lantern=env.page.lantern,
-        mplayer=env.page.mplayer,
-        bg=env.page.background,
-
-        steam_legacy_enabled=env.util.steam_legacy_enabled,
-        steam_enabled=env.util.steam_enabled,
-        steamkey=env.util.steam_key,
-        steamids=env.util.steam_ids,
-        steam_refresh_interval=env.util.steam_refresh_interval,
-
-        status_name=stat['name'],
-        status_color=stat['color'],
-        status_desc=stat['desc'],
-
-        last_updated=d.data['last_updated'],
-        debug=env.main.debug
+        status=status,
+        last_updated=d.data['last_updated']
     )
 
 
@@ -473,6 +454,7 @@ if env.util.steam_enabled:
     def steam():
         return flask.render_template(
             'steam-iframe.html',
+            env=env,
             steamids=env.util.steam_ids,
             steam_refresh_interval=env.util.steam_refresh_interval
         )

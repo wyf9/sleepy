@@ -22,8 +22,8 @@
             gameid,
         };
     }
-    const steamkey = '{{ steamkey }}';
-    const steamids = '{{ steamids }}';
+    const steamkey = '{{ env.util.steam_key }}';
+    const steamids = '{{ env.util.steam_ids }}';
     if (steamkey && !isNaN(steamids)) {
         const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
         const steam = document.getElementById('steam-legacy');
@@ -34,7 +34,7 @@
 
         const steamapi = "https://proxy.mooncc.cn/http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2";
         const queryurl = `${steamapi}/?key=${steamkey}&steamids=${steamids}`;
-        const refresh_interval = Number('{{ steam_refresh_interval }}') || 20000;
+        const refresh_interval = Number('{{ env.util.steam_refresh_interval }}') || 20000;
         console.log(`[Steam Legacy] SteamIDs: ${steamids}`);
         (async () => {
             while (True) {
