@@ -42,6 +42,7 @@ Authorization: Bearer MySecretCannotGuess
 如 `secret` 错误，则会返回:
 
 ```jsonc
+// 401 Unauthorized
 {
     "success": false, // 请求是否成功
     "code": "not authorized", // 返回代码
@@ -74,6 +75,7 @@ Authorization: Bearer MySecretCannotGuess
 #### Response
 
 ```jsonc
+// 200 OK
 {
     "time": "2024-12-28 00:21:24", // 服务端时间
     "timezone": "Asia/Shanghai", // 服务端配置的时区
@@ -113,6 +115,7 @@ Authorization: Bearer MySecretCannotGuess
 #### Response
 
 ```jsonc
+// 200 OK
 [
     {
         "id": 0, // 索引，取决于配置文件中的有无
@@ -150,6 +153,7 @@ Authorization: Bearer MySecretCannotGuess
 #### Response
 
 ```jsonc
+// 200 OK
 {
     "time": "2025-01-22 08:40:48.564728+08:00", // 服务端时间
     "timezone": "Asia/Shanghai", // 时区
@@ -209,14 +213,14 @@ Authorization: Bearer MySecretCannotGuess
 #### Response
 
 ```jsonc
-// 成功
+// 200 OK | 成功
 {
     "success": true, // 请求是否成功
     "code": "OK", // 返回代码
     "set_to": 0 // 设置到的状态码
 }
 
-// 失败 - 请求无效
+// 400 Bad Request | 失败 - 请求无效
 {
     "success": false, // 请求是否成功
     "code": "bad request", // 返回代码
@@ -275,13 +279,13 @@ Authorization: Bearer MySecretCannotGuess
 #### Response
 
 ```jsonc
-// 成功
+// 200 OK | 成功
 {
   "success": true,
   "code": "OK"
 }
 
-// 失败 - 缺少参数 / 参数类型错误
+// 400 Bad Request | 失败 - 缺少参数 / 参数类型错误
 {
     "success": false,
     "code": "bad request",
@@ -307,13 +311,13 @@ Authorization: Bearer MySecretCannotGuess
 #### Response
 
 ```jsonc
-// 成功
+// 200 OK | 成功
 {
     "success": true,
     "code": "OK"
 }
 
-// 失败 - 不存在 (也不算失败了?)
+// 404 Not Found | 失败 - 不存在 (也不算失败了?)
 {
     "success": false,
     "code": "not found",
@@ -335,7 +339,7 @@ Authorization: Bearer MySecretCannotGuess
 #### Response
 
 ```jsonc
-// 成功
+// 200 OK | 成功
 {
     "success": true,
     "code": "OK"
@@ -360,13 +364,13 @@ Authorization: Bearer MySecretCannotGuess
 #### Response
 
 ```jsonc
-// 成功
+// 200 OK | 成功
 {
     "success": true,
     "code": "OK"
 }
 
-// 失败 - 请求无效
+// 400 Bad Request | 失败 - 请求无效
 {
     "success": false,
     "code": "invaild request",
@@ -398,7 +402,7 @@ Authorization: Bearer MySecretCannotGuess
 #### Response
 
 ```jsonc
-// 成功
+// 200 OK | 成功
 {
     "success": true,
     "code": "OK",
@@ -409,7 +413,7 @@ Authorization: Bearer MySecretCannotGuess
     }
 }
 
-// 失败 - 保存出错
+// 500 Internal Server Error | 失败 - 保存出错
 {
     "success": false,
     "code": "exception",

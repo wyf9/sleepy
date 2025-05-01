@@ -7,8 +7,6 @@ from functools import wraps  # 用于修饰器
 
 import flask
 import json5
-
-# import importlib  # for plugin
 import pytz
 from markupsafe import escape
 
@@ -34,7 +32,7 @@ try:
 
     # init metrics if enabled
     if env.util.metrics:
-        u.info('[metrics] metrics enabled, open /metrics to see your count.')
+        u.info('[metrics] metrics enabled, open /metrics to see the count.')
         d.metrics_init()
 except Exception as e:
     u.error(f"Error initing: {e}")
@@ -83,12 +81,14 @@ def require_secret(view_func):
     @wraps(view_func)
     def wrapped_view(*args, **kwargs):
         # 1. body
+        # -> {"secret": "my-secret"}
         body: dict = flask.request.get_json(silent=True) or {}
         if body and body.get('secret') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Body')
             return view_func(*args, **kwargs)
 
         # 2. param
+        # -> ?secret=my-secret
         elif flask.request.args.get('secret') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Param')
             return view_func(*args, **kwargs)
@@ -106,11 +106,12 @@ def require_secret(view_func):
             return view_func(*args, **kwargs)
 
         # -1. no any secret
-        u.debug('[Auth] Verify secret Failed')
-        return u.reterr(
-            code='not authorized',
-            message='wrong secret'
-        )
+        else:
+            u.debug('[Auth] Verify secret Failed')
+            return u.reterr(
+                code='not authorized',
+                message='wrong secret'
+            ), 401
     return wrapped_view
 
 # --- Templates
@@ -148,7 +149,7 @@ def index():
         more_text=more_text,
         status=status,
         last_updated=d.data['last_updated']
-    )
+    ), 200
 
 
 @app.route('/'+'git'+'hub')
@@ -214,6 +215,7 @@ def query(ret_as_dict: bool = False):
         if env.page.sorted:
             devicelst = dict(sorted(devicelst.items()))
 
+    # 构造返回
     timenow = datetime.now(pytz.timezone(env.main.timezone))
     ret = {
         'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
@@ -229,7 +231,7 @@ def query(ret_as_dict: bool = False):
     if ret_as_dict:
         return ret
     else:
-        return u.format_dict(ret)
+        return u.format_dict(ret), 200
 
 
 @app.route('/status_list')
@@ -240,7 +242,7 @@ def get_status_list():
     - Method: **GET**
     '''
     stlst = status_list
-    return u.format_dict(stlst)
+    return u.format_dict(stlst), 200
 
 
 # --- Status API
@@ -261,13 +263,13 @@ def set_normal():
         return u.reterr(
             code='bad request',
             message="argument 'status' must be int"
-        )
+        ), 400
     d.dset('status', status)
     return u.format_dict({
         'success': True,
         'code': 'OK',
         'set_to': status
-    })
+    }), 200
 
 
 # --- Device API
@@ -289,7 +291,7 @@ def device_set():
             return u.reterr(
                 code='bad request',
                 message='missing param or wrong param type'
-            )
+            ), 400
     elif flask.request.method == 'POST':
         req = flask.request.get_json()
         try:
@@ -301,7 +303,7 @@ def device_set():
             return u.reterr(
                 code='bad request',
                 message='missing param or wrong param type'
-            )
+            ), 400
     devices: dict = d.dget('device_status')
     if (not device_using) and env.status.not_using:
         # 如未在使用且锁定了提示，则替换
@@ -316,7 +318,7 @@ def device_set():
     return u.format_dict({
         'success': True,
         'code': 'OK'
-    })
+    }), 200
 
 
 @app.route('/device/remove')
@@ -335,11 +337,11 @@ def remove_device():
         return u.reterr(
             code='not found',
             message='cannot find item'
-        )
+        ), 404
     return u.format_dict({
         'success': True,
         'code': 'OK'
-    })
+    }), 200
 
 
 @app.route('/device/clear')
@@ -355,7 +357,7 @@ def clear_device():
     return u.format_dict({
         'success': True,
         'code': 'OK'
-    })
+    }), 200
 
 
 @app.route('/device/private_mode')
@@ -370,13 +372,13 @@ def private_mode():
         return u.reterr(
             code='invaild request',
             message='"private" arg only supports boolean type'
-        )
+        ), 400
     d.data['private_mode'] = private
     d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     return u.format_dict({
         'success': True,
         'code': 'OK'
-    })
+    }), 200
 
 
 @app.route('/save_data')
@@ -392,12 +394,12 @@ def save_data():
         return u.reterr(
             code='exception',
             message=f'{e}'
-        )
+        ), 500
     return u.format_dict({
         'success': True,
         'code': 'OK',
         'data': d.data
-    })
+    }), 200
 
 
 @app.route('/events')
@@ -431,7 +433,7 @@ def events():
 
             time.sleep(1)  # 每秒检查一次更新
 
-    response = flask.Response(event_stream(), mimetype="text/event-stream")
+    response = flask.Response(event_stream(), mimetype="text/event-stream", status=200)
     response.headers["Cache-Control"] = "no-cache"  # 禁用缓存
     response.headers["X-Accel-Buffering"] = "no"  # 禁用 Nginx 缓冲
     return response
@@ -447,7 +449,7 @@ if env.util.metrics:
         - Method: **GET**
         '''
         resp = d.get_metrics_resp()
-        return resp
+        return resp, 200
 
 if env.util.steam_enabled:
     @app.route('/steam-iframe')
@@ -457,7 +459,7 @@ if env.util.steam_enabled:
             env=env,
             steamids=env.util.steam_ids,
             steam_refresh_interval=env.util.steam_refresh_interval
-        )
+        ), 200
 
 # --- End
 
