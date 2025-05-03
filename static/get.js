@@ -134,6 +134,7 @@ ${data.last_updated}
 let evtSource = null;
 let reconnectInProgress = false;
 let countdownInterval = null;
+let delayInterval = null;
 let connectionCheckTimer = null;
 let lastEventTime = Date.now();
 let connectionAttempts = 0;
@@ -169,25 +170,38 @@ function reconnectWithDelay(delay) {
     let remainingSeconds = Math.floor(delay / 1000);
     const lastUpdatedElement = document.getElementById('last-updated');
     if (lastUpdatedElement) {
-        lastUpdatedElement.innerHTML = `连接服务器失败，${remainingSeconds} 秒后重新连接... <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>`;
+        lastUpdatedElement.innerHTML = `连接服务器失败，${remainingSeconds} 秒后重新连接... <a href="javascript:reconnectNow();" target="_self" style="color: rgb(0, 255, 0);">立即重连</a>`;
     }
 
     countdownInterval = setInterval(() => {
         remainingSeconds--;
         if (remainingSeconds > 0 && lastUpdatedElement) {
-            lastUpdatedElement.innerHTML = `连接服务器失败，${remainingSeconds} 秒后重新连接... <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>`;
+            lastUpdatedElement.innerHTML = `连接服务器失败，${remainingSeconds} 秒后重新连接... <a href="javascript:reconnectNow();" target="_self" style="color: rgb(0, 255, 0);">立即重连</a>`;
         } else if (remainingSeconds <= 0) {
             clearInterval(countdownInterval);
         }
     }, 1000);
 
-    setTimeout(() => {
-        console.log('[SSE] 开始重连...');
-        clearInterval(countdownInterval); // 清除倒计时
-        setupEventSource();
-        reconnectInProgress = false;
+    delayInterval = setTimeout(() => {
+        if (reconnectInProgress) {
+            console.log('[SSE] 开始重连...');
+            clearInterval(countdownInterval); // 清除倒计时
+            setupEventSource();
+            reconnectInProgress = false;
+        }
     }, delay);
 }
+
+// 立即重连函数
+function reconnectNow() {
+    console.log('[SSE] 用户选择立即重连');
+    clearInterval(delayInterval); // 清除当前倒计时
+    clearInterval(countdownInterval);
+    connectionAttempts = 0; // 重置重连计数
+    setupEventSource(); // 立即尝试重新连接
+    reconnectInProgress = false;
+}
+
 
 // 建立SSE连接
 function setupEventSource() {
@@ -226,13 +240,6 @@ function setupEventSource() {
         console.log('[SSE] 连接已建立');
         connectionAttempts = 0; // 重置重连计数
         lastEventTime = Date.now(); // 初始化最后事件时间
-
-        // 更新连接状态UI (如果有)
-        const connectionStatus = document.getElementById('connection-status');
-        if (connectionStatus) {
-            connectionStatus.textContent = '连接正常';
-            connectionStatus.style.color = '#00ff00';
-        }
     };
 
     // 监听更新事件
@@ -240,7 +247,7 @@ function setupEventSource() {
         lastEventTime = Date.now(); // 更新最后收到消息的时间
 
         const data = JSON.parse(event.data);
-        console.log(`[SSE] 收到数据更新: ${data}`);
+        console.log(`[SSE] 收到数据更新:`, data);
 
         // 处理更新数据
         if (data.success) {
@@ -258,15 +265,8 @@ function setupEventSource() {
 
     // 监听心跳事件
     evtSource.addEventListener('heartbeat', function (event) {
-        console.log(`[SSE] 收到心跳: ${JSON.parse(event.data)}`);
+        console.log(`[SSE] 收到心跳: ${event.data}`);
         lastEventTime = Date.now(); // 更新最后收到消息的时间
-
-        // 更新连接状态UI (如果有)
-        const connectionStatus = document.getElementById('connection-status');
-        if (connectionStatus) {
-            connectionStatus.textContent = '连接正常';
-            connectionStatus.style.color = '#00ff00';
-        }
     });
 
     // 错误处理 - 立即开始重连
@@ -309,7 +309,7 @@ function setupEventSource() {
         const elapsedTime = currentTime - lastEventTime;
 
         // 只有在连接正常但长时间未收到消息时才触发重连
-        if (elapsedTime > 60000 && !reconnectInProgress) {
+        if (elapsedTime > 120 * 1000 && !reconnectInProgress) {
             console.warn('[SSE] 长时间未收到服务器消息，正在重新连接...');
             evtSource.close();
 
