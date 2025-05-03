@@ -86,10 +86,10 @@ div p {
   position: relative;
   box-shadow: 0 8px 32px rgb(174 137 245 / 20%),
     inset 0 0 6px 1px rgb(185 210 216 / 10%);
-  transition: all 0.5s;
+  transition: all 0.25s;
 }
 .card:hover {
-  transition: all 0.3s;
+  transition: all 0.15s;
   transform: translateY(-5px);
   box-shadow: 0 12px 40px rgba(206, 140, 210, 0.2);
 }
