@@ -8,6 +8,7 @@ by: @NiuFuyu855
  - time (仅在自动更新模式下使用)
  - zhixuewang (https://github.com/anwenhu/zhixuewang-python)
      - Docs: https://zxdoc.risconn.com/
+     - Adapted Version: 1.3.4
      * use command `pip install zhixuewang` to install
 '''
 
@@ -22,6 +23,7 @@ Todo List:
 '''
 更新日志:
 - v1.0.0: 初始版本, 支持智学网 Cookie 自动获取和手动设置, 支持智学网 Cookie 自动更新, 支持智学网选择自动更新和单次运行模式
+- v1.0.1: 适配了最新版本(1.3.4)zhixuewang库，修复了“ValueError: 在指定考试的情况下，应当指定学年”的逆天报错（这次库更新真的可有可无吧我觉得，真的太逆天了！），并修复了若干bug
 '''
 
 '''
@@ -30,23 +32,24 @@ Todo List:
 '''
 
 # ----- Part: Import
-from zhixuewang.account import login_cookie # type: ignore
 import os
 import requests
-# ----- Part: Config
+from zhixuewang.account import login_cookie
 
+# ----- Part: Config
 # --- config start
-MODE: str = "auto"  # 运行模式, auto: 自动更新模式, single: 单次运行模式
-USERNAME: str = ""  # 智学网用户名，必填!!!
-PASSWORD: str = ""  # 智学网密码，必填!!!
-LOGIN_URL: str = 'https://www.zhixue.com/login.html'  # 智学网登录 API, 一般情况下无需修改
-LOGIN_PAGE_URL: str = 'https://www.zhixue.com/login.html'  # 登录页面 URL, 一般情况下无需修改
-TLSYSSESSIONID: str = ""  # TLSYSSESSIONID, 需自行浏览器 Ctrl+Shift+I 打开开发者工具获取, 必填!!!
-COOKIE:  str = ""  # 智学网 Cookie, 留空则自动获取
-EXAM_ID: str = ""  # 考试ID, 留空则为获取最新考试成绩
+MODE: str = "auto" # 运行模式, auto: 自动更新模式, single: 单次运行模式
+USERNAME: str = "" # 智学网用户名，必填!!!
+PASSWORD: str = "" # 智学网密码，必填!!!
+LOGIN_URL: str = 'https://www.zhixue.com/login.html' # 智学网登录 API, 一般情况下无需修改
+LOGIN_PAGE_URL: str = 'https://www.zhixue.com/login.html' # 登录页面 URL, 一般情况下无需修改
+TLSYSSESSIONID: str = "" # tlsysSessionId, 需自行浏览器Ctrl+Shift+I获取开发者工具获取, 必填!!!
+COOKIE:  str = "" # 智学网 Cookie, 留空则自动获取
+EXAM_ID: str = "" # 考试ID, 留空则为获取最新考试成绩
+ACADEMIC_YEAR: str = "" #考试学年（不要瞎填！），填EXAM_ID后可选填此项，不填默认最新学年！！可通过zxw.get_academic_year()获取所有学年
 # --- config end
 
-
+# ----- Part: Main
 def get_zhixue_cookie(username, password, tlsysSessionId):
     """
     通过智学网 API 获取 Cookie
@@ -88,7 +91,6 @@ def get_zhixue_cookie(username, password, tlsysSessionId):
         print(f"登录失败，状态码: {response.status_code}")
         return None
 
-
 def get_full_score():
     '''
     获取智学网总分
@@ -100,17 +102,16 @@ def get_full_score():
         subjects = zxw.get_subjects()
     else:
         subjects = zxw.get_subjects(EXAM_ID)
-
+    
     # 初始化 full_score 变量
     full_score = 0
     # 遍历 subjects 列表，累加 standard_score
     for subject in subjects:
         full_score += subject.standard_score
-
+    
     return full_score
 
-
-def get_mark():
+def get_mark(EXAM_ID, ACADEMIC_YEAR):
     '''
     获取智学网成绩
     并返回成绩字符串于/static/zhixue.txt中
@@ -119,9 +120,11 @@ def get_mark():
     :return: mark: 智学网成绩
     '''
     if not EXAM_ID:
-        mark = zxw.get_self_mark()  # 获取最新考试
+        mark = zxw.get_self_mark() # 获取最新考试
     else:
-        mark = zxw.get_self_mark(EXAM_ID)
+        if not ACADEMIC_YEAR:
+            ACADEMIC_YEAR = zxw._get_latest_valid_academic_year()
+        mark = zxw.get_self_mark(EXAM_ID, True, ACADEMIC_YEAR) # EXAM_ID 为指定考试ID时，需要指定 AcademicYear (!Important! 库版本1.3.4时新增)
     '''
     Example:
     XXX-扬州市第一中学2024-2025学年第二学期 3月教学质量调研评估 高二                                                              
@@ -214,7 +217,7 @@ if __name__ == "__main__":
     zxw = login_cookie(cookies)
 
     if MODE == "auto":  # 自动更新模式
-        import time  # 引入 time 模块, 不是必用就在用的时候导啦~
+        import time # 引入 time 模块, 不是必用就在用的时候导啦~
         # 初始化时间计数器
         cookie_update_time = 0
         while True:
@@ -223,20 +226,20 @@ if __name__ == "__main__":
             每 60 分钟更新一次 Cookie
             '''
             # 检查是否需要更新 Cookie
-            if cookie_update_time % 2 == 0:
+            if cookie_update_time % 2 == 0 and cookie_update_time != 0:
                 COOKIE = get_zhixue_cookie(USERNAME, PASSWORD, TLSYSSESSIONID)
                 cookies = dict(item.split("=") for item in COOKIE.split("; "))
                 zxw = login_cookie(cookies)
                 print("Cookie 已更新")
 
-            get_mark()  # 获取成绩 并写入文件
+            get_mark(EXAM_ID, ACADEMIC_YEAR)  # 获取成绩 并写入文件
             print("成绩已更新")
             # 等待 30 分钟
             time.sleep(30 * 60)
             cookie_update_time += 1
 
     elif MODE == "single":  # 单次运行模式
-        get_mark()  # 获取成绩 并写入文件
+        get_mark(EXAM_ID, ACADEMIC_YEAR)  # 获取成绩 并写入文件
         print("Done!")
 
     else:
