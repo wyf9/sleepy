@@ -241,8 +241,7 @@ def get_status_list():
     - 无需鉴权
     - Method: **GET**
     '''
-    stlst = status_list
-    return u.format_dict(stlst), 200
+    return u.format_dict(status_list), 200
 
 
 # --- Status API

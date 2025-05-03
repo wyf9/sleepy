@@ -31,14 +31,9 @@
             <p id="additional-info">{{ status['desc'] | safe }}</p>
             <p id="device-status">[设备状态列表]</p>
 
-            {% if env.util.steam_legacy_enabled %}
-            <!-- (steam-legacy) 旧版 Steam 状态模块 (文字) -->
-            {% include "steam-legacy.html" %}
-            {% endif %}
-
             {% if env.util.steam_enabled %}
-            <!-- (steam-new) 新版 Steam 状态模块 (iframe) -->
-            {% include "steam-new.html" %}
+            <!-- (steam) Steam 状态模块 (iframe) -->
+            {% include "steam.html" %}
             {% endif %}
 
             <p id="last-updated">最后更新: {{ last_updated }}</p>

@@ -64,12 +64,10 @@
 
 ## (util) 可选功能
 
-| 环境变量                             | 类型 | 默认值 | 说明与提示                                                                                                           |
-| ------------------------------------ | ---- | ------ | -------------------------------------------------------------------------------------------------------------------- |
-| `sleepy_util_metrics`                | bool | true   | 控制是否启用内置的访问计数功能，并启用 `/metrics` 接口                                                               |
-| `sleepy_util_auto_switch_status`     | bool | true   | 是否启用自动切换状态 *(当状态为 `0` (活着) 且所有设备都未在使用时自动切换为 `1` (似了))*                             |
-| `sleepy_util_steam_legacy_enabled`   | bool | false  | 是否启用旧版 Steam 状态 *(纯文字显示，需同时配置 `sleepy_util_steam_key` 和 `sleepy_util_steam_ids`)* **不建议使用** |
-| `sleepy_util_steam_enabled`          | bool | false  | 是否启用新版 Steam 状态 *(iframe 卡片显示，只需配置 `sleepy_util_steam_ids`)* **(推荐使用)**                         |
-| `sleepy_util_steam_key`              | str  | ` `    | Steam Web API 密钥，可在 [这里](https://steamcommunity.com/dev/apikey) 申请                                          |
-| `sleepy_util_steam_ids`              | str  | ` `    | 你的 Steam 账号 ID *(应为一串数字)*                                                                                  |
-| `sleepy_util_steam_refresh_interval` | int  | 20000  | 刷新 Steam 状态的频率 (**毫秒**，*建议至少设置为 10000ms，过低可能触发速率限制*)                                     |
+| 环境变量                             | 类型 | 默认值 | 说明与提示                                                                               |
+| ------------------------------------ | ---- | ------ | ---------------------------------------------------------------------------------------- |
+| `sleepy_util_metrics`                | bool | true   | 控制是否启用内置的访问计数功能，并启用 `/metrics` 接口                                   |
+| `sleepy_util_auto_switch_status`     | bool | true   | 是否启用自动切换状态 *(当状态为 `0` (活着) 且所有设备都未在使用时自动切换为 `1` (似了))* |
+| `sleepy_util_steam_enabled`          | bool | false  | 是否启用新版 Steam 状态 *(iframe 卡片显示，需配置 `sleepy_util_steam_ids`)*              |
+| `sleepy_util_steam_ids`              | str  | ` `    | 你的 Steam 账号 ID *(应为一串数字)*                                                      |
+| `sleepy_util_steam_refresh_interval` | int  | 20000  | 刷新 Steam 状态的频率 (**毫秒**，*建议至少设置为 10000ms，过低可能触发速率限制*)         |

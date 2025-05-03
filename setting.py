@@ -34,6 +34,10 @@ class setting:
 status_list: list = setting('status_list').content
 metrics_list: list = setting('metrics_list').content
 
+# status_list 中自动补全 id
+for i in range(len(status_list)):
+    status_list[i]['id'] = i
+
 # metrics_list 中 [static] 处理
 if '[static]' in metrics_list:
     metrics_list.remove('[static]')
