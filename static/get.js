@@ -60,6 +60,7 @@ async function checkVercelDeploy() {
         })
         .catch(error => {
             console.log(`[Vercel] 请求错误: ${error}`);
+            return false;
         });
 }
 

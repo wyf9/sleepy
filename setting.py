@@ -1,6 +1,8 @@
 # coding: utf-8
 
 import json
+import json5
+
 import utils as u
 
 
@@ -11,8 +13,12 @@ class setting:
     '''
     config: dict
 
-    def __init__(self, filename: str):
-        self.load(filename)
+    def __init__(self, name: str):
+        try:
+            # load user setting
+            self.load(u.get_path(f'setting/{name}.json'))
+        except:
+            self.load(u.get_path(f'setting/{name}.default.jsonc'))
 
     def load(self, filename: str):
         '''
@@ -20,13 +26,13 @@ class setting:
         '''
         try:
             with open(filename, 'r', encoding='utf-8') as file:
-                self.content = json.load(file)
+                self.content = json5.load(file)
         except Exception as e:
             u.exception(f'[setting] Error loading {filename}: {e}')
 
 
-status_list: list = setting(u.get_path('setting/status_list.json')).content
-metrics_list: list = setting(u.get_path('setting/metrics_list.json')).content
+status_list: list = setting('status_list').content
+metrics_list: list = setting('metrics_list').content
 
 # metrics_list 中 [static] 处理
 if '[static]' in metrics_list:

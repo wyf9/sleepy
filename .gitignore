@@ -10,9 +10,5 @@ data.json
 *.local.*
 .venv/
 
-# For Client
-# - Win_Simple
-client/Win_Simple/build/
-client/Win_Simple/*.spec
-client/Win_Simple/dist/config.ini
+# Others
 .vscode/launch.json

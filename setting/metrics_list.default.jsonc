@@ -12,5 +12,6 @@
     "/events",
     "/metrics",
     "/robots.txt",
-    "[static]"
+    "[static]" // 特殊值, 匹配 static 目录中的所有文件
+    // 还可添加更多
 ]
