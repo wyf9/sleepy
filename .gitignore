@@ -1,7 +1,8 @@
 # Python Cache
 __pycache__/
 
-# Env and Data
+# Config and Data
+config.yaml
 .env
 data.json
 

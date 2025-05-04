@@ -19,7 +19,7 @@
 
 <body>
     <div class="container">
-        <div class="card light" id="user_status">
+        <div class="card light" id="user-status">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
 
             {% if env.page.moonlight %}
@@ -39,12 +39,18 @@
             <p id="last-updated">最后更新: {{ last_updated }}</p>
         </div>
 
+        <div class="card light" id="test">
+            test content <br />
+            114514
+            1919810
+        </div>
+
         {% if zhixue %}
         <!-- (zhixue) 智学网分数 -->
         {% include "zhixue.html" %}
         {% endif %}
 
-        <div class="card light" id="more_text">
+        <div class="card light" id="more-text">
             {% if env.page.hitokoto %}
             <!-- (hitokoto) 一言 -->
             {% include "hitokoto.html" %}
