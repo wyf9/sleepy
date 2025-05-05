@@ -5,13 +5,13 @@ from os import name, path, system
 from sys import argv
 from time import sleep
 
-Server_Path = 'server.py'  # server.py 相对路径
-Sleep_Time = 5  # 等待时间 (s)
+SERVER_PATH = 'server.py'  # server.py 相对路径
+WAIT_TIME = 5  # 等待时间 (s)
 
 c = 0  # count
 selfn = argv[0]  # self
 dirn = path.dirname(selfn)  # self dir
-server = path.join(dirn, Server_Path)  # server.py path
+server = path.join(dirn, SERVER_PATH)  # server.py path
 print(f'[Start] Server path: {server}')
 while True:
     c += 1
@@ -22,5 +22,6 @@ while True:
     else:
         # not Windows
         r = system(f'python3 {server}')
-    print(f'[Start] #{c} exited with code {r}\nwaiting {Sleep_Time}s')
-    sleep(Sleep_Time)
+    print(f'[Start] #{c} exited with code {r}')
+    print(f'[Start] wait {WAIT_TIME}s')
+    sleep(WAIT_TIME)

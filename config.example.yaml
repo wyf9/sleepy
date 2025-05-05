@@ -55,7 +55,7 @@ status:
 #   steam_refresh_interval: 20000 # Steam 状态刷新间隔 (毫秒)
 
 metrics:
-  enabled: true # 是否启用 metrics 接口 (用于统计接口调用次数)
+  enabled: true # 是否启用统计功能
   allow_list: # 将计入统计的路径列表
     - "/"
     - "/style.css"

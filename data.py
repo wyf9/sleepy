@@ -22,7 +22,7 @@ class data:
     data_check_interval: int = 60
 
     def __init__(self):
-        with open(u.get_path('data.template.jsonc'), 'r', encoding='utf-8') as file:
+        with open(u.get_path('data.example.jsonc'), 'r', encoding='utf-8') as file:
             self.preload_data = json5.load(file)
         if os.path.exists(u.get_path('data.json')):
             try:

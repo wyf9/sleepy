@@ -17,13 +17,13 @@
 
 ### Preview
 
-演示站 (*较*稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top) ![](https://uptime.wyf9.top/api/badge/9/status) ![](https://uptime.wyf9.top/api/badge/9/uptime)
+演示站 (*较*稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
-开发预览 (*不保证可用*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top) ![](https://uptime.wyf9.top/api/badge/10/status) ![](https://uptime.wyf9.top/api/badge/10/uptime)
+开发预览 (*不保证可用*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
-HuggingFace 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space) ![](https://uptime.wyf9.top/api/badge/22/status) ![](https://uptime.wyf9.top/api/badge/22/uptime)
+HuggingFace 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
 
-Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top) ![](https://uptime.wyf9.top/api/badge/23/status) ![](https://uptime.wyf9.top/api/badge/23/uptime)
+Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
 
 > 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本 (**密钥均为 `wyf9test`**)
 
