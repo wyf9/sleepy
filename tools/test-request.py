@@ -6,10 +6,10 @@ import sys
 sys.path.append('./')
 sys.path.append('../')
 if True:
-    import env
+    import config as c
 
-BASE = f'http://{f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}'
-SECRET = env.main.secret
+BASE = f'http://{f"[{c.main.host}]" if ":" in c.main.host else c.main.host}:{c.main.port}'
+SECRET = c.main.secret
 
 
 def get(path: str):
@@ -23,7 +23,7 @@ def get(path: str):
     return f'GET {reqpath} {req.status_code}\n{req.text}'.replace(SECRET, '[SECRET]')
 
 
-def post(path: str, data: dict):
+def post(path: str, data: dict | str):
     if type(data) == str:
         data = json.loads(data)
     reqpath = f'{BASE}{path if path.startswith("/") else "/" + path}'

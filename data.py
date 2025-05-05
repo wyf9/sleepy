@@ -9,8 +9,7 @@ from time import sleep
 from datetime import datetime
 
 import utils as u
-import env as env
-from setting import metrics_list
+import config as c
 
 
 class data:
@@ -44,7 +43,7 @@ class data:
 
     # --- Storage functions
 
-    def load(self, ret: bool = False, preload: dict = {}, error_count: int = 5) -> dict:
+    def load(self, ret: bool = False, preload: dict = {}, error_count: int = 5) -> dict | None:
         '''
         加载状态
 
@@ -87,22 +86,6 @@ class data:
         except Exception as e:
             u.error(f'Failed to save data.json: {e}')
 
-    def dset(self, name, value):
-        '''
-        设置一个值
-        '''
-        self.data[name] = value
-
-    def dget(self, name, default=None):
-        '''
-        读取一个值
-        '''
-        try:
-            gotdata = self.data[name]
-        except KeyError:
-            gotdata = default
-        return gotdata
-
     # --- Metrics
 
     def metrics_init(self):
@@ -122,7 +105,7 @@ class data:
             self.record_metrics()
 
     def get_metrics_resp(self, json_only: bool = False):
-        now = datetime.now(pytz.timezone(env.main.timezone))
+        now = datetime.now(pytz.timezone(c.main.timezone))
         '''
         if json_only:
             # 仅用于调试
@@ -141,7 +124,7 @@ class data:
         '''
         return u.format_dict({
             'time': f'{now}',
-            'timezone': env.main.timezone,
+            'timezone': c.main.timezone,
             'today_is': self.data['metrics']['today_is'],
             'month_is': self.data['metrics']['month_is'],
             'year_is': self.data['metrics']['year_is'],
@@ -155,11 +138,11 @@ class data:
         '''
         跨 日 / 月 / 年 检测
         '''
-        if not env.util.metrics:
+        if not c.metrics.enabled:
             return
 
         # get time now
-        now = datetime.now(pytz.timezone(env.main.timezone))
+        now = datetime.now(pytz.timezone(c.main.timezone))
         year_is = str(now.year)
         month_is = f'{now.year}-{now.month}'
         today_is = f'{now.year}-{now.month}-{now.day}'
@@ -180,7 +163,7 @@ class data:
             self.data['metrics']['year_is'] = year_is
             self.data['metrics']['year'] = {}
 
-    def record_metrics(self, path: str = None) -> None:
+    def record_metrics(self, path: str | None = None) -> None:
         '''
         记录调用
 
@@ -188,7 +171,7 @@ class data:
         '''
 
         # check metrics list
-        if not path in metrics_list:
+        if not path in c.metrics.allow_list:
             return
 
         self.check_metrics_time()
@@ -224,7 +207,7 @@ class data:
         '''
         device_status: dict = self.data.get('device_status', {})
         current_status: int = self.data.get('status', 0)  # 获取当前 status，默认为 0
-        auto_switch_enabled: bool = env.util.auto_switch_status
+        auto_switch_enabled: bool = False  # c.util.auto_switch_status
 
         # 检查是否启用自动切换功能，并且当前 status 为 0 或 1
         last_status = self.data['status']

@@ -10,17 +10,16 @@ import json5
 import pytz
 from markupsafe import escape
 
-import env
+import config as c
 import utils as u
 from data import data as data_init
-from setting import status_list
 
 try:
     # init flask app
     app = flask.Flask(__name__)
 
     # disable flask access log (if not debug)
-    if not env.main.debug:
+    if not c.main.debug:
         from logging import getLogger
         flask_default_logger = getLogger('werkzeug')
         flask_default_logger.disabled = True
@@ -28,21 +27,21 @@ try:
     # init data
     d = data_init()
     d.load()
-    d.start_timer_check(data_check_interval=env.main.checkdata_interval)  # 启动定时保存
+    d.start_timer_check(data_check_interval=c.main.checkdata_interval)  # 启动定时保存
 
     # init metrics if enabled
-    if env.util.metrics:
+    if c.metrics.enabled:
         u.info('[metrics] metrics enabled, open /metrics to see the count.')
         d.metrics_init()
+except u.SleepyException as e:
+    u.error(e)
+    exit(1)
 except Exception as e:
     u.error(f"Error initing: {e}")
     exit(1)
 except KeyboardInterrupt:
     u.debug('Interrupt init')
     exit(0)
-except u.SleepyException as e:
-    u.error(f'==========\n{e}')
-    exit(1)
 except:
     u.error('Unexpected Error!')
     raise
@@ -70,7 +69,7 @@ def showip():
     else:
         u.info(f'- Request: {ip1} : {path}')
     # --- count
-    if env.util.metrics:
+    if c.metrics.enabled:
         d.record_metrics(path)
 
 
@@ -83,25 +82,25 @@ def require_secret(view_func):
         # 1. body
         # -> {"secret": "my-secret"}
         body: dict = flask.request.get_json(silent=True) or {}
-        if body and body.get('secret') == env.main.secret:
+        if body and body.get('secret') == c.main.secret:
             u.debug('[Auth] Verify secret Success from Body')
             return view_func(*args, **kwargs)
 
         # 2. param
         # -> ?secret=my-secret
-        elif flask.request.args.get('secret') == env.main.secret:
+        elif flask.request.args.get('secret') == c.main.secret:
             u.debug('[Auth] Verify secret Success from Param')
             return view_func(*args, **kwargs)
 
         # 3. header (Sleepy-Secret)
         # -> Sleepy-Secret: my-secret
-        elif flask.request.headers.get('Sleepy-Secret') == env.main.secret:
+        elif flask.request.headers.get('Sleepy-Secret') == c.main.secret:
             u.debug('[Auth] Verify secret Success from Header (Sleepy-Secret)')
             return view_func(*args, **kwargs)
 
         # 4. header (Authorization)
         # -> Authorization: Bearer my-secret
-        elif flask.request.headers.get('Authorization')[7:] == env.main.secret:
+        elif flask.request.headers.get('Authorization', '')[7:] == c.main.secret:
             u.debug('[Auth] Verify secret Success from Header (Authorization)')
             return view_func(*args, **kwargs)
 
@@ -125,7 +124,7 @@ def index():
     '''
     # 获取手动状态
     try:
-        status: dict = status_list[d.data['status']]
+        status: dict = c.status.status_list[d.data['status']]
     except:
         u.warning(f"Index {d.data['status']} out of range!")
         status = {
@@ -134,8 +133,8 @@ def index():
             'color': 'error'
         }
     # 获取更多信息 (more_text)
-    more_text: str = env.page.more_text
-    if env.util.metrics:
+    more_text: str = c.page.more_text
+    if c.metrics.enabled:
         more_text = more_text.format(
             visit_today=d.data['metrics']['today'].get('/', 0),
             visit_month=d.data['metrics']['month'].get('/', 0),
@@ -145,7 +144,7 @@ def index():
     # 返回 html
     return flask.render_template(
         'index.html',
-        env=env,
+        c=c,
         more_text=more_text,
         status=status,
         last_updated=d.data['last_updated']
@@ -183,7 +182,7 @@ def query(ret_as_dict: bool = False):
     # 获取手动状态
     st: int = d.data['status']
     try:
-        stinfo = status_list[st]
+        stinfo = c.status.status_list[st]
     except:
         stinfo = {
             'id': -1,
@@ -195,7 +194,7 @@ def query(ret_as_dict: bool = False):
     if d.data['private_mode']:
         # 隐私模式
         devicelst = {}
-    elif env.page.using_first:
+    elif c.status.using_first:
         # 使用中优先
         devicelst = {}  # devicelst = device_using
         device_not_using = {}
@@ -205,28 +204,28 @@ def query(ret_as_dict: bool = False):
                 devicelst[n] = i
             else:
                 device_not_using[n] = i
-        if env.page.sorted:
+        if c.status.sorted:
             devicelst = dict(sorted(devicelst.items()))
             device_not_using = dict(sorted(device_not_using.items()))
         devicelst.update(device_not_using)  # append not_using items to end
     else:
         # 正常获取
         devicelst: dict = d.data['device_status']
-        if env.page.sorted:
+        if c.status.sorted:
             devicelst = dict(sorted(devicelst.items()))
 
     # 构造返回
-    timenow = datetime.now(pytz.timezone(env.main.timezone))
+    timenow = datetime.now(pytz.timezone(c.main.timezone))
     ret = {
         'time': timenow.strftime('%Y-%m-%d %H:%M:%S'),
-        'timezone': env.main.timezone,
+        'timezone': c.main.timezone,
         'success': True,
         'status': st,
         'info': stinfo,
         'device': devicelst,
-        'device_status_slice': env.status.device_slice,
+        'device_status_slice': c.status.device_slice,
         'last_updated': d.data['last_updated'],
-        'refresh': env.status.refresh_interval
+        'refresh': c.status.refresh_interval
     }
     if ret_as_dict:
         return ret
@@ -241,7 +240,7 @@ def get_status_list():
     - 无需鉴权
     - Method: **GET**
     '''
-    return u.format_dict(status_list), 200
+    return u.format_dict(c.status.status_list), 200
 
 
 # --- Status API
@@ -263,7 +262,7 @@ def set_normal():
             code='bad request',
             message="argument 'status' must be int"
         ), 400
-    d.dset('status', status)
+    d.data['status'] = status
     return u.format_dict({
         'success': True,
         'code': 'OK',
@@ -303,16 +302,16 @@ def device_set():
                 code='bad request',
                 message='missing param or wrong param type'
             ), 400
-    devices: dict = d.dget('device_status')
-    if (not device_using) and env.status.not_using:
+    devices: dict = d.data['device_status']
+    if (not device_using) and c.status.not_using:
         # 如未在使用且锁定了提示，则替换
-        app_name = env.status.not_using
+        app_name = c.status.not_using
     devices[device_id] = {
         'show_name': device_show_name,
         'using': device_using,
         'app_name': app_name
     }
-    d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+    d.data['last_updated'] = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     d.check_device_status()
     return u.format_dict({
         'success': True,
@@ -330,7 +329,7 @@ def remove_device():
     device_id = escape(flask.request.args.get('id'))
     try:
         del d.data['device_status'][device_id]
-        d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        d.data['last_updated'] = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         d.check_device_status()
     except KeyError:
         return u.reterr(
@@ -351,7 +350,7 @@ def clear_device():
     - Method: **GET**
     '''
     d.data['device_status'] = {}
-    d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+    d.data['last_updated'] = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     d.check_device_status()
     return u.format_dict({
         'success': True,
@@ -373,7 +372,7 @@ def private_mode():
             message='"private" arg only supports boolean type'
         ), 400
     d.data['private_mode'] = private
-    d.data['last_updated'] = datetime.now(pytz.timezone(env.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+    d.data['last_updated'] = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -426,7 +425,7 @@ def events():
                 yield f"event: update\ndata: {json5.dumps(ret, quote_keys=True)}\n\n"
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
-                timenow = datetime.now(pytz.timezone(env.main.timezone))
+                timenow = datetime.now(pytz.timezone(c.main.timezone))
                 yield f"event: heartbeat\ndata: {timenow.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
                 last_heartbeat = current_time
 
@@ -440,7 +439,7 @@ def events():
 
 # --- Special
 
-if env.util.metrics:
+if c.metrics.enabled:
     @app.route('/metrics')
     def metrics():
         '''
@@ -450,20 +449,20 @@ if env.util.metrics:
         resp = d.get_metrics_resp()
         return resp, 200
 
-if env.util.steam_enabled:
-    @app.route('/steam-iframe')
-    def steam():
-        return flask.render_template(
-            'steam-iframe.html',
-            env=env,
-            steamids=env.util.steam_ids,
-            steam_refresh_interval=env.util.steam_refresh_interval
-        ), 200
+# if c.util.steam_enabled:
+#     @app.route('/steam-iframe')
+#     def steam():
+#         return flask.render_template(
+#             'steam-iframe.html',
+#             c=c,
+#             steamids=c.util.steam_ids,
+#             steam_refresh_interval=c.util.steam_refresh_interval
+#         ), 200
 
 # --- End
 
 if __name__ == '__main__':
-    u.info(f'=============== hi {env.page.user}! ===============')
+    u.info(f'=============== hi {c.page.name}! ===============')
     # --- plugins - undone
     # u.info(f'Loading plugins...')
     # all_plugins = u.list_dir(u.get_path('plugin'), include_subfolder=False, ext='.py')
@@ -471,12 +470,12 @@ if __name__ == '__main__':
     # for i in all_plugins:
     #     pass
     # --- launch
-    u.info(f'Starting server: {env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
+    u.info(f'Starting server: {c.main.host}:{c.main.port}{" (debug enabled)" if c.main.debug else ""}')
     try:
         app.run(  # 启↗动↘
-            host=env.main.host,
-            port=env.main.port,
-            debug=env.main.debug
+            host=c.main.host,
+            port=c.main.port,
+            debug=c.main.debug
         )
     except Exception as e:
         u.error(f"Error running server: {e}")
