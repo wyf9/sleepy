@@ -11,34 +11,34 @@
 <details>
 <summary>点击展开示例</summary>
 
-```shell
+```json
 [02:02:44 wyf9@SRserver /sync/dev/wyf9/sleepy]$ cd "/sync/dev/wyf9/sleepy/" && python req.test.py
 I < p /device/set {"id": "device-1", "show_name": "MyDevice2", "using": true, "app_name": "VSCode"}
-O > GET http://[::]:9011/device/set 200
+O > POST http://[::]:9011/device/set 200
 {
     "success": true, 
     "code": "OK"
 }
 I < post /device/set {"id": "device-1", "show_name": "MyDevice2", "using": true, "app_name": "aaaaaaaaa"}
-O > GET http://[::]:9011/device/set 200
+O > POST http://[::]:9011/device/set 200
 {
     "success": true, 
     "code": "OK"
 }
 I < g /device/remove?name=device=2
-O > GET http://[::]:9011/device/remove?name=device=2 200
+O > GET http://[::]:9011/device/remove?id=device-not-exist 200
 {
     "success": false, 
     "code": "not found", 
     "message": "cannot find item"
 }
 I < get /device/remove?id=device-2
-O > GET http://[::]:9011/device/remove?id=device-2 200
+O > GET http://[::]:9011/device/remove?id=a-device 200
 {
     "success": true, 
     "code": "OK"
 }
-I < g /query
+I < g query
 O > GET http://[::]:9011/query 200
 {
     "time": "2025-03-30 02:26:50", 
@@ -77,4 +77,4 @@ I < ^C[02:26:59 wyf9@SRserver /sync/dev/wyf9/sleepy/tools]$
 
 </details>
 
-> *不需要自己设置 `BASE` 和 `SECRET`，会自动从 `../env.py` 获取*
+> *不需要自己设置 `BASE` 和 `SECRET`，会自动从 `../config.py` 获取*

@@ -1,7 +1,6 @@
 {
     "files.associations": {
-        ".env": "ini",
-        ".env.example": "ini"
+        ".env": "ini"
     },
     "prettier.configPath": ".prettierrc.json",
     "editor.defaultFormatter": "esbenp.prettier-vscode"

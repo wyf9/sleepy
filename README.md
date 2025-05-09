@@ -6,20 +6,20 @@
 
 ## 功能
 
-- [x] 自行设置在线状态 *(活着 / 似了 等, 也可 **[自定义](./setting/README.md#status_listjson)** 状态列表)*
-- [x] 实时更新设备使用状态 *(包括 是否正在使用 / 打开的应用名, 通过 **[client](./client/README.md)** 主动推送)*
-- [x] 美观的展示页面 [见 [Preview](#preview)]
-- [x] 开放的 Query / Metrics [接口](./doc/api.md), 方便统计
+- [x] 自行设置在线状态 *(活着 / 似了 等, 也可自定义状态)*
+- [x] 实时更新设备使用状态 *(包括 是否正在使用 / 打开的应用名, 通过 **[客户端](./client/README.md)** 主动推送)*
+- [x] 美观的展示页面 [见 **[Preview](#preview)**]
+- [x] 开放的 状态 / 统计 **[API](./doc/api.md)**, 方便统计
 
 > [!TIP]
 > **最新 开发进度 / TODOs 见: [Discord](https://discord.gg/DyBY6gwkeg)** / [Telegram](https://t.me/wyf9_sleepy) / [QQ](https://qm.qq.com/q/uItkv96Wn6)<br/>
-> 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 *[More contact](https://wyf9.top/#/contact) (注明来意)*.
+> 如有 Bug / 建议, 可发 [issue](https://github.com/wyf9/sleepy/issues/new) 或选择上面的联系方式 *(注明来意)*.
 
 ### Preview
 
-演示站 (*较*稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top)
+演示站: [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
-开发预览 (*不保证可用*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+开放预览 (暂不可用): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
 HuggingFace 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
 
@@ -45,9 +45,6 @@ Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
 ## 优化站点
 
 见 [Best Practice](./doc/best_practice.md).
-
-> [!TIP]
-> 想自定义你的状态列表 / metrics 统计白名单? **[见 `setting` 目录](./setting/README.md)**
 
 ## Star History
 

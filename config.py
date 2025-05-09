@@ -115,13 +115,13 @@ class _page:
     learn_more_link: str = get(str, _, 'learn_more_link')
     more_text: str = get(str, _, 'more_text')
 
-# to plugins
-#     hitokoto: bool = getenv('sleepy_page_hitokoto', True, bool)
-#     canvas: bool = getenv('sleepy_page_canvas', True, bool)
-#     moonlight: bool = getenv('sleepy_page_moonlight', True, bool)
-#     lantern: bool = getenv('sleepy_page_lantern', False, bool)
-#     mplayer: bool = getenv('sleepy_page_mplayer', False, bool)
-#     zhixue: bool = getenv('sleepy_page_zhixue', False, bool)
+    # to plugins
+    # hitokoto: bool = getenv('sleepy_page_hitokoto', True, bool)
+    # canvas: bool = getenv('sleepy_page_canvas', True, bool)
+    # moonlight: bool = getenv('sleepy_page_moonlight', True, bool)
+    # lantern: bool = getenv('sleepy_page_lantern', False, bool)
+    # mplayer: bool = getenv('sleepy_page_mplayer', False, bool)
+    # zhixue: bool = getenv('sleepy_page_zhixue', False, bool)
 
 
 class _status:
@@ -146,6 +146,7 @@ class _metrics:
     enabled: bool = get(bool, _, 'enabled')
     allow_list: list[str] = get(list, _, 'allow_list')
 
+    # to plugins
     # auto_switch_status: bool = getenv('sleepy_util_auto_switch_status', True, bool)
     # steam_enabled: bool = getenv('sleepy_util_steam_enabled', False, bool)
     # steam_ids: str = getenv('sleepy_util_steam_ids', '', str)

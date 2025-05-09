@@ -4,7 +4,7 @@ import json
 from flask import make_response, Response
 
 from _utils import *
-from config import main as mainenv
+from config import main as maincfg
 
 
 def info(*log):
@@ -24,7 +24,7 @@ def error(*log):
 
 
 def debug(*log):
-    if mainenv.debug:
+    if maincfg.debug:
         print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚙️  [Debug]", *log)
 
 

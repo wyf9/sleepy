@@ -111,7 +111,7 @@ class data:
             # 仅用于调试
             return {
                 'time': f'{now}',
-                'timezone': env.main.timezone,
+                'timezone': c.main.timezone,
                 'today_is': self.data['metrics']['today_is'],
                 'month_is': self.data['metrics']['month_is'],
                 'year_is': self.data['metrics']['year_is'],

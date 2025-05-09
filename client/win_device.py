@@ -44,13 +44,13 @@ ENCODING: str = 'gb18030'
 # 当窗口标题为其中任意一项时将不更新
 SKIPPED_NAMES: list = [
     '',  # 空字符串
-    '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '操作中心', '日期和时间信息', '网络连接', '电池信息', '搜索', '任务视图', '任务切换', 'Program Manager',  # 桌面组件
+    '系统托盘溢出窗口。', '新通知', '任务切换', '快速设置', '通知中心', '操作中心', '日期和时间信息', '网络连接', '电池信息', '搜索', '任务视图', '任务切换', 'Program Manager', '贴靠助手',  # 桌面组件
     'Flow.Launcher', 'Snipper - Snipaste', 'Paster - Snipaste'  # 其他程序
 ]
 # 当窗口标题为其中任意一项时视为未在使用
 NOT_USING_NAMES: list = [
     '启动', '「开始」菜单',  # 开始菜单
-    '我们喜欢这张图片，因此我们将它与你共享。', '就像你看到的图像一样？选择以下选项', '喜欢这张图片吗?'  # 锁屏界面
+    '我们喜欢这张图片，因此我们将它与你共享。', '就像你看到的图像一样？选择以下选项', '喜欢这张图片吗?', 'Windows 默认锁屏界面'  # 锁屏界面
 ]
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
 REVERSE_APP_NAME: bool = False
@@ -160,6 +160,9 @@ def get_media_info():
             if '未知唱片集' in album or '<' in album and '>' in album:
                 album = ''
 
+            if '未知唱片集' in artist or '<' in artist and '>' in artist:
+                artist = ''
+
             return is_playing, title, artist, album
 
         # 运行异步函数
@@ -237,9 +240,9 @@ def on_shutdown(hwnd, msg, wparam, lparam):
 
 # 注册窗口类
 wc = win32gui.WNDCLASS()
-wc.lpfnWndProc = on_shutdown  # 设置回调函数
-wc.lpszClassName = "ShutdownListener"
-wc.hInstance = win32api.GetModuleHandle(None)
+wc.lpfnWndProc = on_shutdown  # type: ignore / 设置回调函数
+wc.lpszClassName = "ShutdownListener" # type: ignore
+wc.hInstance = win32api.GetModuleHandle(None) # type: ignore
 
 # 创建窗口类并注册
 class_atom = win32gui.RegisterClass(wc)

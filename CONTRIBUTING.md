@@ -44,7 +44,7 @@ def function():
 -> data.py # 运行中的状态存储 (就是管 data.json 的)
 -> config.py # 读取 config.yaml, 环境变量 和 .env 中的配置
 -> utils.py # 常用函数 / 小功能
--> _utils.py # utils.py 和 env.py 都用到的函数
+-> _utils.py # utils.py 和 config.py 都用到的函数
 -> start.py # 简易启动器
 -> __init__.py # 我也不知道干嘛用的
 -> install_lib.bat # 依赖安装脚本 (Windows)
