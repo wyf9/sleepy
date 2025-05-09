@@ -55,6 +55,12 @@ Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top) ![
 
 ## 关于
 
+非常感谢 **VTEXS** 的 **「开源项目免费 VPS 计划」** 对项目提供的算力支持！
+
+> **[Link](https://console.vtexs.com/?affid=1566)** *(使用此链接获得 10% 优惠)*
+
+---
+
 本项目灵感由 Bilibili UP [@WinMEMZ](https://space.bilibili.com/417031122) 而来: **[site](https://maao.cc/sleepy/)** / **[blog](https://www.maodream.com/archives/192/)** / **[repo: `maoawa/sleepy`](https://github.com/maoawa/sleepy)**, 并~~部分借鉴~~使用了前端代码, 在此十分感谢。
 
 [`templates/steam-iframe.html`](./templates/steam-iframe.html) 来自 repo **[gamer2810/steam-miniprofile](https://github.com/gamer2810/steam-miniprofile).**
