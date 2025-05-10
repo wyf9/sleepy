@@ -13,7 +13,7 @@
     - static/ # 插件所需静态资源 (css / js / img / ...)
       - steam.css
     - __init__.py # 插件后端入口
-    - config.yaml # 插件配置模板
+    - config.plugin.yaml # 插件配置模板
   - hitokoto/
 ```
 
@@ -29,7 +29,7 @@ plugin:
 
 配置的模板存放在上文的 `config.yaml`
 
-### 启用插件
+## 启用插件
 
 在 `config.yaml` 中:
 
@@ -38,3 +38,9 @@ plugin_enabled: # 启动的插件列表，注入顺序为从上到下
   - test # 插件 id
   # - ...
 ```
+
+## 运作方式
+
+### 前端代码 (index.html)
+
+将按照插件启用的顺序注入到主 index.html 中

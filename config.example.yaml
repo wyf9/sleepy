@@ -31,7 +31,6 @@ page:
 # 页面状态显示配置
 status:
   device_slice: 30 # 设备状态从开头截取多少文字显示 (防止窗口标题过长, 设置为 0 禁用)
-  show_loading: true # 控制在刷新时是否显示 "更新中" 提示 (仅在回退到原始轮询方式后使用)
   refresh_interval: 5000 # 网页多久刷新一次状态 (毫秒, 仅在回退到原始轮询方式后使用)
   not_using: "未在使用" # 锁定设备未在使用时的提示 (如为空则使用设备提交值)
   sorted: false # 控制是否对设备进行排序
@@ -73,9 +72,9 @@ metrics:
     - "[static]" # 特殊值, 匹配 static 目录中的所有文件
     # 还可添加更多
 
-plugin_enabled:
-  - test
-  - hitokoto
+plugin_enabled: # 启用的插件列表，按从上到下的顺序加载
+  # - test
+  # - hitokoto
 
 plugin:
   test:

@@ -7,7 +7,7 @@ import os
 
 class SleepyException(Exception):
     '''
-    Custom Exception
+    Custom Exception for sleepy
     '''
 
     def __init__(self, msg: str | None = None):

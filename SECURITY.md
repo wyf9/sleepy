@@ -2,14 +2,20 @@
 
 ## Supported Version / 支持版本
 
-一般情况下，我们只维护 **最新版本** (各分支的最新 `commit`, `tag` 和 `release`)，所以请确保更新到最新版本来避免可能的漏洞和攻击.
+一般情况下，我们只维护 **最新版本** *(最新的 `commit`, `tag` 和 `release`)*，所以请确保更新到最新版本来避免可能的漏洞和攻击.
 
-## Reporting a Vulnerability / 提交漏洞
+## Reporting / 提交报告
 
-如果发现了严重影响应用安全性 / 性能的漏洞，请 ***立即*** 通过以下渠道的一种联系我们:
+如果你：
+- 发现了严重影响应用**安全性或性能**的漏洞
+- 发现了可能导致本项目**受到损害**的内容
+- 发现了可能威胁本项目**协作者的人身安全**的内容
+- 其他**危险内容**
 
-- 邮箱 (wyf9): **[sleepy-security@wyf9.top](mailto:sleepy-security@wyf9.top)** 或 [wyf9@wyf9.top](mailto:wyf9@wyf9.top)
-- 邮箱 (SiiWay): **[sleepy-security@siiway.top](mailto:sleepy-security@wyf9.top)**
+**请*立即*通过以下渠道中的*一种或多种*联系我们**:
+
+- 邮箱 (SiiWay): **[security@siiway.top](mailto:security@wyf9.top)**
+- 邮箱 (wyf9): **[security@wyf9.top](mailto:security@wyf9.top)**
 - 更多联系方式 *(Discord, Telegram, QQ)*:
-  * SiiWay Team: **https://siiway.top/about/contact**
-  * wyf9 ***(可能过时)***: **https://wyf9.top/#/contact**
+  * SiiWay: **https://siiway.top/about/contact**
+  * wyf9: https://siiway.top/members/wyf9
