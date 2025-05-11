@@ -13,7 +13,7 @@
     - static/ # 插件所需静态资源 (css / js / img / ...)
       - steam.css
     - __init__.py # 插件后端入口
-    - config.plugin.yaml # 插件配置模板
+    - plugin.yaml # 插件定义文件
   - hitokoto/
 ```
 
@@ -27,7 +27,7 @@ plugin:
     content: 'this is content' # 插件的配置项
 ```
 
-配置的模板存放在上文的 `config.yaml`
+配置的模板存放在上文的 `plugin.yaml`
 
 ## 启用插件
 
@@ -39,8 +39,31 @@ plugin_enabled: # 启动的插件列表，注入顺序为从上到下
   # - ...
 ```
 
-## 运作方式
+## 插件组成
+
+### 插件定义 (plugin.yaml)
+
+包含插件的一些必要元数据 **(必须有本文件，否则将视为插件不存在)**
+
+```yaml
+frontend: true # 是否为前端插件 (为是才会尝试加载 index.html)
+backend: true # 是否为后端插件 (为是才会尝试加载 __main__.py)
+config: # 配置项定义 (即默认值)
+  name: value
+```
 
 ### 前端代码 (index.html)
 
 将按照插件启用的顺序注入到主 index.html 中
+
+可以使用 Flask 模板语言，另有如下变量 / 方法可用:
+
+```html
+<!-- 读取键为 name 的配置项 -->
+{{ c.name }}
+
+<!-- 读取键为 desc 的配置项，且允许渲染其中的 HTML 代码 -->
+{{ c.desc | safe }}
+
+
+```

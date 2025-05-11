@@ -33,7 +33,10 @@ try:
     u = utils_init(config=c)
 
     # init data
-    d = data_init(config=c)
+    d = data_init(
+        config=c,
+        utils=u
+    )
     d.load()
     d.start_timer_check(data_check_interval=c.main.checkdata_interval)  # 启动定时保存
 
@@ -43,17 +46,18 @@ try:
         u.info('[metrics] metrics enabled, open /metrics to see the count.')
 
     # init plugin
-    p = plugin_init(config=c)
+    p = plugin_init(
+        config=c,
+        utils=u,
+        data=d
+    )
 
+except KeyboardInterrupt:
+    u.info('Interrupt init, quitting')
+    exit(0)
 except _utils.SleepyException as e:
     u.error(e)
     exit(1)
-except Exception as e:
-    u.error(f"Error initing: {e}")
-    exit(1)
-except KeyboardInterrupt:
-    u.debug('Interrupt init')
-    exit(0)
 except:
     u.error('Unexpected Error!')
     raise
@@ -160,7 +164,9 @@ def index():
                 i[0],
                 flask.render_template_string(
                     i[1],
-                    c=i[3].config
+                    c=i[3].config,
+                    d=d.data,
+                    u=u
                 )))
     # 返回 html
     return flask.render_template(
@@ -384,7 +390,7 @@ def clear_device():
 @require_secret
 def private_mode():
     '''
-    隐私模式, 即不在 /query 中显示设备状态 (仍可正常更新)
+    隐私模式, 即不在返回中显示设备状态 (仍可正常更新)
     - Method: **GET**
     '''
     private = _utils.tobool(escape(flask.request.args.get('private')))
@@ -444,18 +450,19 @@ def events():
 
                 # 获取 /query 返回数据
                 ret = query(ret_as_dict=True)
-                yield f"event: update\ndata: {json5.dumps(ret, quote_keys=True)}\n\n"
+                update_data = json5.dumps(ret, quote_keys=True, ensure_ascii=False).replace('\n', '\\n')
+                yield f'event: update\ndata: {update_data}\n\n'
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
                 timenow = datetime.now(pytz.timezone(c.main.timezone))
-                yield f"event: heartbeat\ndata: {timenow.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                yield f'event: heartbeat\ndata: {timenow.strftime("%Y-%m-%d %H:%M:%S")}\n\n'
                 last_heartbeat = current_time
 
             time.sleep(1)  # 每秒检查一次更新
 
-    response = flask.Response(event_stream(), mimetype="text/event-stream", status=200)
-    response.headers["Cache-Control"] = "no-cache"  # 禁用缓存
-    response.headers["X-Accel-Buffering"] = "no"  # 禁用 Nginx 缓冲
+    response = flask.Response(event_stream(), mimetype='text/event-stream', status=200)
+    response.headers['Cache-Control'] = 'no-cache'  # 禁用缓存
+    response.headers['X-Accel-Buffering'] = 'no'  # 禁用 Nginx 缓冲
     return response
 
 
@@ -484,15 +491,8 @@ if c.metrics.enabled:
 # --- End
 
 if __name__ == '__main__':
-    # --- plugins - undone
-    # u.info(f'Loading plugins...')
-    # all_plugins = u.list_dir(u.get_path('plugin'), include_subfolder=False, ext='.py')
-    # enabled_plugins = []
-    # for i in all_plugins:
-    #     pass
-    # --- launch
     u.info(f'=============== hi {c.page.name}! ===============')
-    u.info(f'Starting server: {c.main.host}:{c.main.port}{" (debug enabled)" if c.main.debug else ""}')
+    u.info(f'Starting server: {f"[{c.main.host}]" if ":" in c.main.host else c.main.host}:{c.main.port}{" (debug enabled)" if c.main.debug else ""}')
     try:
         app.run(  # 启↗动↘
             host=c.main.host,

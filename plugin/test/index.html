@@ -1,4 +1,5 @@
-Test content: <br />
-{{ c.content | safe }}
-
+<b><u>[Test Plugin]</u></b> <br/>
+<b>c.content</b>: {{ c.content | safe }} <br />
+<b>try print to console</b>: {{ u.debug('[test] from plugin index.html') }} <br />
+<b>read data last_updated</b>: {{ d.last_updated or None }} <br />
 <!-- <script src="{{ url_for('static', filename='testing.js') }}"></script> -->

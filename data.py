@@ -12,6 +12,7 @@ from utils import Utils
 from config import Config
 import _utils
 
+
 class Data:
     '''
     data 类，存储当前/设备状态
@@ -22,11 +23,13 @@ class Data:
     data: dict
     preload_data: dict
     data_check_interval: int = 60
+    c: Config
+    u: Utils
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, utils: Utils):
         self.c = config
-        self.u = Utils(config)
-        
+        self.u = utils
+
         with open(_utils.get_path('data.example.jsonc'), 'r', encoding='utf-8') as file:
             self.preload_data = json5.load(file)
         if os.path.exists(_utils.get_path('data.json')):
