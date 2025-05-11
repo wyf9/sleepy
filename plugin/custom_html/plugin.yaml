@@ -1,0 +1,6 @@
+frontend: true
+backend: false
+config:
+  content: |
+    <b>this is default config</b> <br/>
+    go <code>plugin/custom_html/README.md</code> to view details

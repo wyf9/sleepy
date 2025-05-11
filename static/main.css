@@ -107,27 +107,27 @@ div p {
 }
 
 
-/* 较小屏范围 */
+/* 较大屏范围 */
 @media (max-width: 1250px) {
+  .card {
+    /* 大屏宽度 */
+    width: 75%;
+  }
+}
+
+/* 较小屏范围 */
+@media (max-width: 750px) {
   body {
     touch-action: pan-y;
   }
 
   .card {
-    /* 小屏宽度 */
-    width: 75%;
-  }
-}
-
-/* 小屏范围 */
-@media (max-width: 750px) {
-  .card {
-    /* 小屏宽度 */
+    /* 较小屏宽度 */
     width: 85%;
   }
 }
 
-/* 超小屏范围 */
+/* 小屏范围 */
 @media (max-width: 500px) {
   .card {
     /* 小屏宽度 */
