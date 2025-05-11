@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ env.page.title }}</title>
-    <meta name="description" content="{{ env.page.desc }}">
+    <title>{{ c.page.title }}</title>
+    <meta name="description" content="{{ c.page.desc }}">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
-    <link rel="icon" href="{{ env.page.favicon }}">
+    <link rel="icon" href="{{ c.page.favicon }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <style>
         body {
-            background: url('{{ env.page.background }}') no-repeat center center fixed;
+            background: url('{{ c.page.background }}') no-repeat center center fixed;
         }
     </style>
 
@@ -22,70 +22,70 @@
         <div class="card light" id="user-status">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
 
-            {% if env.page.moonlight %}
+            <!-- {disabled% if c.page.moonlight %} -->
             <!-- (moonlight) 透明度 / 暗色模式 -->
-            {% include "moonlight.html" %}
-            {% endif %}
+            <!-- {disabled% include "moonlight.html" %} -->
+            <!-- {disabled% endif %} -->
 
-            <h3><i><b>{{ env.page.user }}'s</b></i> Status:<br><a id="status">{{ status['name'] }}</a></h3>
+            <h3><i><b>{{ c.page.name }}'s</b></i> Status:<br><a id="status">{{ status['name'] }}</a></h3>
             <p id="additional-info">{{ status['desc'] | safe }}</p>
             <p id="device-status">[设备状态列表]</p>
 
-            {% if env.util.steam_enabled %}
+            <!-- {disabled% if c.util.steam_enabled %} -->
             <!-- (steam) Steam 状态模块 (iframe) -->
-            {% include "steam.html" %}
-            {% endif %}
+            <!-- {disabled% include "steam.html" %} -->
+            <!-- {disabled% endif %} -->
 
             <p id="last-updated">最后更新: {{ last_updated }}</p>
         </div>
 
-        <div class="card light" id="test">
-            test content <br />
-            114514
-            1919810
+        {% for plugin in plugins %}
+        <div class="card light" id="plugin-{{ plugin[0] }}">
+            {{ plugin[1] | safe }}
         </div>
+        {% endfor %}
 
-        {% if zhixue %}
+        <!-- {disabled% if zhixue %} -->
         <!-- (zhixue) 智学网分数 -->
-        {% include "zhixue.html" %}
-        {% endif %}
+        <!-- {disabled% include "zhixue.html" %} -->
+        <!-- {disabled% endif %} -->
 
         <div class="card light" id="more-text">
-            {% if env.page.hitokoto %}
+            <!-- {disabled% if c.page.hitokoto %} -->
             <!-- (hitokoto) 一言 -->
-            {% include "hitokoto.html" %}
-            {% endif %}
+            <!-- {disabled% include "hitokoto.html" %} -->
+            <!-- {disabled% endif %} -->
             <!-- more_text START -->
             {{ more_text | safe }}
             <!-- more_text END -->
-            <p>你可以通过这个页面视奸 <b>{{ env.page.user }}</b>。<br>
-                <a href="{{ env.page.repo }}" target="_blank" style="color: rgb(0, 255, 0);">
+            <p>你可以通过这个页面视奸 <b>{{ c.page.name }}</b>。<br>
+                <!-- learn_more START -->
+                <a href="{{ c.page.learn_more_link }}" target="_blank" style="color: rgb(0, 255, 0);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:1em;">
                         <path
                             d="M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32h82.7L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32H320zM80 32C35.8 32 0 67.8 0 112V432c0 44.2 35.8 80 80 80H400c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32V432c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16H192c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z" />
                     </svg>
-                    <!-- learn_more START -->
-                    {{ env.page.learn_more | safe }}
-                    <!-- learn_more END -->
+                    {{ c.page.learn_more_text | safe }}
                 </a>
+                <!-- learn_more END -->
             </p>
         </div>
     </div>
 
-    {% if env.page.lantern %}
+    <!-- {disabled% if c.page.lantern %} -->
     <!-- (lantern) 节日灯笼 -->
-    {% include "lantern.html" %}
-    {% endif %}
+    <!-- {disabled% include "lantern.html" %} -->
+    <!-- {disabled% endif %} -->
 
-    {% if env.page.mplayer %}
+    <!-- {disabled% if c.page.mplayer %} -->
     <!-- (mplayer) 音乐播放器 -->
-    {% include "mplayer.html" %}
-    {% endif %}
+    <!-- {disabled% include "mplayer.html" %} -->
+    <!-- {disabled% endif %} -->
 
-    {% if env.page.canvas %}
+    <!-- {disabled% if c.page.canvas %} -->
     <!-- (canvas) 粒子效果 -->
-    <script src="{{ url_for('static', filename='canvas.js') }}" defer></script>
-    {% endif %}
+    <!-- <script src="{{ url_for('static', filename='canvas.js') }}" defer></script> -->
+    <!-- {disabled% endif %} -->
 
     <script>
         document.getElementById('status').classList.add("{{ status['color'] }}");

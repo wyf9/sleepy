@@ -1,0 +1,4 @@
+frontend: true
+backend: true
+config:
+  content: "default content"

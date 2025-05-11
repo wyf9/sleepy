@@ -90,7 +90,7 @@ Authorization: Bearer MySecretCannotGuess
         "device-1": { // 标识符，唯一
             "show_name": "MyDevice1", // 前台显示名称
             "using": "false", // 是否正在使用
-            "app_name": "bilibili" // 应用名 (如 using == false 则不使用)
+            "app_name": "bilibili" // 应用名 (如 using == false 且设置了 status.not_using 则会被替换)
         }
     },
     "last_updated": "2024-12-20 23:51:34", // 信息上次更新的时间

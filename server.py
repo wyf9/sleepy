@@ -10,13 +10,18 @@ import json5
 import pytz
 from markupsafe import escape
 
-import config as c
-import utils as u
-from data import data as data_init
+from config import Config as config_init
+from utils import Utils as utils_init
+from data import Data as data_init
+from plugin import Plugin as plugin_init
+import _utils
 
 try:
     # init flask app
     app = flask.Flask(__name__)
+
+    # init config
+    c = config_init()
 
     # disable flask access log (if not debug)
     if not c.main.debug:
@@ -24,16 +29,23 @@ try:
         flask_default_logger = getLogger('werkzeug')
         flask_default_logger.disabled = True
 
+    # init utils
+    u = utils_init(config=c)
+
     # init data
-    d = data_init()
+    d = data_init(config=c)
     d.load()
     d.start_timer_check(data_check_interval=c.main.checkdata_interval)  # 启动定时保存
 
     # init metrics if enabled
     if c.metrics.enabled:
-        u.info('[metrics] metrics enabled, open /metrics to see the count.')
         d.metrics_init()
-except u.SleepyException as e:
+        u.info('[metrics] metrics enabled, open /metrics to see the count.')
+
+    # init plugin
+    p = plugin_init(config=c)
+
+except _utils.SleepyException as e:
     u.error(e)
     exit(1)
 except Exception as e:
@@ -54,7 +66,6 @@ except:
 def showip():
     '''
     在日志中显示 ip, 并记录 metrics 信息
-    ~~如 Header 中 User-Agent 为 SleepyPlugin/(每次启动使用随机 uuid) 则不进行任何记录~~
 
     :param req: `flask.request` 对象, 用于取 ip
     :param msg: 信息 (一般是路径, 同时作为 metrics 的项名)
@@ -141,13 +152,24 @@ def index():
             visit_year=d.data['metrics']['year'].get('/', 0),
             visit_total=d.data['metrics']['total'].get('/', 0)
         )
+    # 处理插件注入
+    plugin_templates: list[tuple[str, str]] = []
+    for i in p.plugins:
+        if i[1]:
+            plugin_templates.append((
+                i[0],
+                flask.render_template_string(
+                    i[1],
+                    c=i[3].config
+                )))
     # 返回 html
     return flask.render_template(
         'index.html',
         c=c,
         more_text=more_text,
         status=status,
-        last_updated=d.data['last_updated']
+        last_updated=d.data['last_updated'],
+        plugins=plugin_templates
     ), 200
 
 
@@ -283,7 +305,7 @@ def device_set():
         try:
             device_id = escape(flask.request.args.get('id'))
             device_show_name = escape(flask.request.args.get('show_name'))
-            device_using = u.tobool(escape(flask.request.args.get('using')), throw=True)
+            device_using = _utils.tobool(escape(flask.request.args.get('using')), throw=True)
             app_name = escape(flask.request.args.get('app_name'))
         except:
             return u.reterr(
@@ -295,7 +317,7 @@ def device_set():
         try:
             device_id = req['id']
             device_show_name = req['show_name']
-            device_using = u.tobool(req['using'], throw=True)
+            device_using = _utils.tobool(req['using'], throw=True)
             app_name = req['app_name']
         except:
             return u.reterr(
@@ -365,7 +387,7 @@ def private_mode():
     隐私模式, 即不在 /query 中显示设备状态 (仍可正常更新)
     - Method: **GET**
     '''
-    private = u.tobool(escape(flask.request.args.get('private')))
+    private = _utils.tobool(escape(flask.request.args.get('private')))
     if private == None:
         return u.reterr(
             code='invaild request',
@@ -462,7 +484,6 @@ if c.metrics.enabled:
 # --- End
 
 if __name__ == '__main__':
-    u.info(f'=============== hi {c.page.name}! ===============')
     # --- plugins - undone
     # u.info(f'Loading plugins...')
     # all_plugins = u.list_dir(u.get_path('plugin'), include_subfolder=False, ext='.py')
@@ -470,6 +491,7 @@ if __name__ == '__main__':
     # for i in all_plugins:
     #     pass
     # --- launch
+    u.info(f'=============== hi {c.page.name}! ===============')
     u.info(f'Starting server: {c.main.host}:{c.main.port}{" (debug enabled)" if c.main.debug else ""}')
     try:
         app.run(  # 启↗动↘

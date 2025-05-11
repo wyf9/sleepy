@@ -3,10 +3,12 @@
   --dark-bg-rgb: 26, 21, 20;
   --card-alpha: 0.6;
 }
+
 html {
   height: 100%;
   width: 100%;
 }
+
 body {
   background-size: cover;
   min-height: 100vh;
@@ -16,41 +18,52 @@ body {
   align-items: center;
   background-attachment: fixed;
 }
+
 a {
   text-decoration: none;
 }
+
 button {
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
-  -webkit-appearance: none; /* 兼容 WebKit 内核浏览器 */
-  appearance: none; /* 标准属性，提升兼容性 */
+  -webkit-appearance: none;
+  /* 兼容 WebKit 内核浏览器 */
+  appearance: none;
+  /* 标准属性，提升兼容性 */
 }
+
 button:hover {
   background: var(--control-bg);
 }
+
 div p {
   opacity: 0.8;
 }
+
 #moonlight {
   position: absolute;
   right: 10px;
   top: 10px;
 }
+
 #moonlight svg {
   width: 40px;
   height: 40px;
 }
+
 #slider {
   position: absolute;
   left: 10px;
   top: 10px;
 }
+
 #slider svg {
   width: 40px;
   height: 40px;
 }
+
 #sliderRange {
   display: none;
   position: absolute;
@@ -59,12 +72,14 @@ div p {
   left: 60px;
   filter: invert(0.8);
 }
+
 .light {
   background-color: rgba(var(--light-bg-rgb), var(--card-alpha));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   color: black;
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
+
 .dark {
   background-color: rgba(var(--dark-bg-rgb), var(--card-alpha));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -72,12 +87,14 @@ div p {
   border: 1px solid rgba(60, 60, 60, 0.8);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
+
 .card {
   border-radius: 30px;
   padding: 2rem 1rem;
   margin: 1rem auto;
   font-size: 1.1em;
-  width: 40%;
+  /* 大屏宽度 */
+  width: 65%;
   text-align: center;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -86,23 +103,57 @@ div p {
   position: relative;
   box-shadow: 0 8px 32px rgb(174 137 245 / 20%),
     inset 0 0 6px 1px rgb(185 210 216 / 10%);
-  transition: all 0.25s;
+  transition: all 0.2s;
 }
+
+
+/* 较小屏范围 */
+@media (max-width: 1250px) {
+  body {
+    touch-action: pan-y;
+  }
+
+  .card {
+    /* 小屏宽度 */
+    width: 75%;
+  }
+}
+
+/* 小屏范围 */
+@media (max-width: 750px) {
+  .card {
+    /* 小屏宽度 */
+    width: 85%;
+  }
+}
+
+/* 超小屏范围 */
+@media (max-width: 500px) {
+  .card {
+    /* 小屏宽度 */
+    width: 95%;
+  }
+}
+
 .card:hover {
-  transition: all 0.15s;
+  transition: all 0.1s;
   transform: translateY(-5px);
   box-shadow: 0 12px 40px rgba(206, 140, 210, 0.2);
 }
+
 .glass {
   height: 200px;
 }
+
 #last-updated {
   font-size: 0.8em;
 }
+
 .card p {
   font-size: 1.1em;
   margin: 1rem;
 }
+
 .container {
   flex: 1;
   display: flex;
@@ -113,39 +164,39 @@ div p {
   padding: 20px;
   box-sizing: border-box;
 }
-@media (max-width: 700px) {
-  body {
-    touch-action: pan-y;
-  }
-  .card {
-    width: 90%;
-  }
-}
+
 .sleeping {
   color: gray;
 }
+
 .awake {
   color: rgb(16, 128, 0);
 }
+
 .error {
   color: red;
 }
+
 #hitokoto {
   border-radius: 0.5rem;
   padding: 0.8rem 1rem;
 }
+
 #hitokoto_text {
   color: rgba(180, 40, 200, 0.9);
 }
+
 .dark a,
 .dark .awake {
   color: rgb(100, 255, 100);
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
 }
+
 .light a,
 .light .awake {
   color: rgb(0, 100, 0);
 }
+
 .theme-controls {
   position: fixed;
   bottom: 20px;
@@ -155,12 +206,14 @@ div p {
   padding: 10px;
   z-index: 1000;
 }
+
 .opacity-controls {
   display: flex;
   align-items: center;
   gap: 10px;
   color: white;
 }
+
 .opacity-controls button {
   background: rgba(255, 255, 255, 0.3);
   border: none;
@@ -171,21 +224,26 @@ div p {
   cursor: pointer;
   font-size: 16px;
 }
+
 .opacity-controls button:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+
 .dark a.sleeping,
 .light a.sleeping {
   color: gray !important;
 }
+
 .dark a.error,
 .light a.error {
   color: red !important;
 }
+
 /* Steam Card */
 .steam_card {
   text-align: center;
 }
+
 /* 控制栏按钮 */
 button {
   background: none;
@@ -195,16 +253,22 @@ button {
   border-radius: 50%;
   transition: 0.3s;
   color: var(--text-color);
-  -webkit-appearance: none; /* 兼容 WebKit 内核浏览器 */
-  appearance: none; /* 标准属性，提升兼容性 */
+  -webkit-appearance: none;
+  /* 兼容 WebKit 内核浏览器 */
+  appearance: none;
+  /* 标准属性，提升兼容性 */
 }
+
 button:hover {
   background: var(--control-bg);
 }
+
 /* 进度条滑块 */
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; /* 兼容 WebKit 内核浏览器 */
-  appearance: none; /* 标准属性，提升兼容性 */
+  /* 兼容 WebKit 内核浏览器 */
+  -webkit-appearance: none;
+  /* 标准属性，提升兼容性 */
+  appearance: none;
   width: 12px;
   height: 12px;
   background: var(--text-color);
