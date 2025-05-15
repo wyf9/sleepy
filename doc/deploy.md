@@ -1,6 +1,9 @@
 # 部署
 
 - [部署](#部署)
+  - [一键部署](#一键部署)
+    - [Linux](#linux)
+    - [Windows](#windows)
   - [手动部署](#手动部署)
     - [安装](#安装)
     - [启动](#启动)
@@ -8,6 +11,39 @@
     - [我承认你的代码写的确实很nb，但对我来说还是太吃操作了](#我承认你的代码写的确实很nb但对我来说还是太吃操作了)
     - [卡在 Deploying?](#卡在-deploying)
   - [Vercel 部署](#vercel-部署)
+
+
+## 一键部署
+
+### Linux
+
+运行命令：
+
+```bash
+bash <(curl -s https://ghproxy.com/https://raw.githubusercontent.com/wyf9/sleepy/main/install.sh)
+```
+
+如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/wyf9/sleepy/main/install.sh)
+```
+
+### Windows
+
+运行命令：
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+irm https://ghproxy.com/https://raw.githubusercontent.com/wyf9/sleepy/main/install.ps1 | iex
+```
+
+如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+irm https://raw.githubusercontent.com/wyf9/sleepy/main/install.ps1 | iex
+```
 
 ## 手动部署
 
