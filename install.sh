@@ -220,9 +220,118 @@ initialize_data() {
     print_success "data.json file created successfully"
 }
 
+# Create systemd service
+create_systemd_service() {
+    print_step "5" "Setting up systemd service"
+
+    # Check if systemd is available
+    if ! command -v systemctl &>/dev/null; then
+        print_warning "systemd is not available on this system. Skipping service creation."
+        return
+    fi
+
+    # Ask if user wants to create a systemd service
+    read -p "Do you want to register Sleepy as a systemd service? (y/n): " choice
+    if [[ ! "$choice" =~ ^[Yy]$ ]]; then
+        print_message "Skipping systemd service creation." "$YELLOW"
+        return
+    fi
+
+    # Get current directory and user
+    CURRENT_DIR=$(pwd)
+    CURRENT_USER=$(whoami)
+
+    # Create service file
+    print_message "Creating systemd service file..." "$BLUE"
+
+    SERVICE_FILE="[Unit]
+Description=Sleepy Status Page
+After=network.target
+
+[Service]
+Type=simple
+User=${CURRENT_USER}
+WorkingDirectory=${CURRENT_DIR}
+ExecStart=$(which python3) ${CURRENT_DIR}/server.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target"
+
+    # Write service file
+    echo "$SERVICE_FILE" | sudo tee /etc/systemd/system/sleepy.service > /dev/null
+
+    if [ $? -eq 0 ]; then
+        print_success "Service file created successfully"
+
+        # Reload systemd
+        print_message "Reloading systemd..." "$BLUE"
+        sudo systemctl daemon-reload
+
+        # Enable service
+        print_message "Enabling sleepy service..." "$BLUE"
+        sudo systemctl enable sleepy.service
+
+        if [ $? -eq 0 ]; then
+            print_success "Sleepy service has been enabled and will start on boot"
+
+            # Make panel.sh executable
+            chmod +x panel.sh
+            print_success "Management panel script is now executable"
+
+            # Create alias for panel.sh
+            ALIAS_LINE="alias sleepy='${CURRENT_DIR}/panel.sh'"
+
+            # Determine shell configuration file
+            if [ -f "$HOME/.bashrc" ]; then
+                SHELL_CONFIG="$HOME/.bashrc"
+            elif [ -f "$HOME/.zshrc" ]; then
+                SHELL_CONFIG="$HOME/.zshrc"
+            else
+                SHELL_CONFIG="$HOME/.profile"
+            fi
+
+            # Check if alias already exists
+            if grep -q "alias sleepy=" "$SHELL_CONFIG"; then
+                print_warning "Sleepy alias already exists in $SHELL_CONFIG"
+            else
+                # Add alias to shell configuration
+                echo "" >> "$SHELL_CONFIG"
+                echo "# Sleepy management alias" >> "$SHELL_CONFIG"
+                echo "$ALIAS_LINE" >> "$SHELL_CONFIG"
+                print_success "Added 'sleepy' alias to $SHELL_CONFIG"
+                print_message "To use the alias in the current session, run: source $SHELL_CONFIG" "$BLUE"
+            fi
+
+            # Ask if user wants to start the service now
+            read -p "Do you want to start the Sleepy service now? (y/n): " choice
+            if [[ "$choice" =~ ^[Yy]$ ]]; then
+                print_message "Starting sleepy service..." "$BLUE"
+                sudo systemctl start sleepy.service
+
+                if [ $? -eq 0 ]; then
+                    print_success "Sleepy service started successfully"
+                else
+                    print_error "Failed to start Sleepy service"
+                    print_message "You can try starting it manually with: sudo systemctl start sleepy.service" "$YELLOW"
+                fi
+            else
+                print_message "You can start the service later with: sudo systemctl start sleepy.service" "$BLUE"
+            fi
+        else
+            print_error "Failed to enable Sleepy service"
+        fi
+    else
+        print_error "Failed to create service file"
+    fi
+}
+
 # Display completion message
 display_completion() {
-    print_step "5" "Installation complete"
+    print_step "6" "Installation complete"
 
     print_success "Sleepy has been successfully installed!"
     echo
@@ -232,6 +341,25 @@ display_completion() {
     echo -e "${BOLD}For automatic restart on crash:${NC}"
     echo "  python3 start.py"
     echo
+
+    # If systemd service was created
+    if systemctl list-unit-files | grep -q sleepy.service; then
+        echo -e "${BOLD}To manage the Sleepy service:${NC}"
+        echo "  sleepy start     # Start the service"
+        echo "  sleepy stop      # Stop the service"
+        echo "  sleepy restart   # Restart the service"
+        echo "  sleepy status    # Check service status"
+        echo "  sleepy logs      # View service logs"
+        echo "  sleepy enable    # Enable autostart"
+        echo "  sleepy disable   # Disable autostart"
+        echo "  sleepy help      # Show all commands"
+        echo
+        echo -e "${BOLD}Note:${NC} You may need to run 'source ~/.bashrc' (or your shell config file)"
+        echo "      to use the 'sleepy' command in the current terminal session."
+        echo
+    fi
+   
+    main
     echo -e "${BOLD}To update your status:${NC}"
     echo "  Use one of the client scripts in the client/ directory"
     echo
@@ -270,8 +398,9 @@ main() {
 
     # Step 4: Initialize data file
     initialize_data
-
-    # Step 5: Display completion message
+    
+    # Step 5: Create systemd service (optional)
+    create_systemd_service
     display_completion
 }
 
