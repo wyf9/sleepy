@@ -264,8 +264,13 @@ WantedBy=multi-user.target"
         if [ $? -eq 0 ]; then
             print_success "Sleepy service has been enabled and will start on boot"
 
+            # Set file permissions again
+            print_message "Setting file permissions again to ensure correct access..." "$BLUE"
+            sudo chmod -R 777 "${CURRENT_DIR}"
+            print_success "File permissions set successfully"
+
             # Make panel.sh executable
-            chmod +x panel.sh
+            sudo chmod +x panel.sh
             print_success "Management panel script is now executable"
 
             # Create alias for panel.sh
@@ -546,6 +551,16 @@ main() {
 
     # Step 5: Initialize data file
     initialize_data
+
+    # Step 5.5: Set file permissions
+    print_step "5.5" "Setting file permissions"
+    print_message "Setting file permissions for data files..." "$BLUE"
+    sudo chmod 777 "$(pwd)"
+    sudo chmod 777 "$(pwd)/data.json"
+    if [ -f "$(pwd)/.env" ]; then
+        sudo chmod 777 "$(pwd)/.env"
+    fi
+    print_success "File permissions set successfully"
 
     # Step 6: Create systemd service (optional)
     create_systemd_service

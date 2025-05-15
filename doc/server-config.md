@@ -61,9 +61,12 @@ Do you want to register Sleepy as a systemd service? (y/n):
 选择 `y` 后，脚本会：
 
 1. 创建 systemd 服务文件 `/etc/systemd/system/sleepy.service`
-2. 启用服务自动启动
-3. 创建管理面板脚本 `panel.sh`
-4. 提供 `sleepy` 命令别名设置指南
+2. 配置服务以当前用户权限运行（更安全的做法）
+3. 使用 sudo 命令设置数据文件权限为 777，确保服务可以正常读写文件
+4. 在安装过程中多次设置文件权限，确保权限设置正确
+5. 启用服务自动启动
+6. 创建管理面板脚本 `panel.sh` 并设置为可执行
+7. 提供 `sleepy` 命令别名设置指南
 
 ### 服务管理面板
 
@@ -118,5 +121,5 @@ Do you want to register Sleepy as a systemd service? (y/n):
    ```
 
 3. 交互式配置编辑：
-   
+
    在交互式菜单中选择"编辑配置"选项，可以通过菜单方式修改配置。

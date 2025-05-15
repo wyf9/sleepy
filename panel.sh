@@ -90,7 +90,7 @@ restart_service() {
 status_service() {
     echo -e "${BOLD}${BLUE}Sleepy Service Status:${NC}"
     echo
-    systemctl status sleepy.service
+    sudo systemctl status sleepy.service
 }
 
 # Enable service to start on boot
@@ -275,14 +275,33 @@ config_set() {
 
         # Check if the key exists
         if grep -q "^${key}" "$ENV_FILE"; then
+            # Create a temporary file
+            TEMP_FILE=$(mktemp)
+
             # Determine if the value should be quoted
             if grep -q "^${key}.*=\"" "$ENV_FILE"; then
                 # Update with quotes
-                sed -i "s/^${key}[[:space:]]*=[[:space:]]*\".*\"/${key} = \"${value}\"/" "$ENV_FILE"
+                while IFS= read -r line || [ -n "$line" ]; do
+                    if [[ "$line" =~ ^${key}[[:space:]]*= ]]; then
+                        echo "${key} = \"${value}\"" >> "$TEMP_FILE"
+                    else
+                        echo "$line" >> "$TEMP_FILE"
+                    fi
+                done < "$ENV_FILE"
             else
                 # Update without quotes
-                sed -i "s/^${key}[[:space:]]*=[[:space:]]*.*/${key} = ${value}/" "$ENV_FILE"
+                while IFS= read -r line || [ -n "$line" ]; do
+                    if [[ "$line" =~ ^${key}[[:space:]]*= ]]; then
+                        echo "${key} = ${value}" >> "$TEMP_FILE"
+                    else
+                        echo "$line" >> "$TEMP_FILE"
+                    fi
+                done < "$ENV_FILE"
             fi
+
+            # Replace the original file with the temporary file
+            cat "$TEMP_FILE" > "$ENV_FILE"
+            rm "$TEMP_FILE"
 
             print_success "Updated configuration: ${key} = ${value}"
         else
@@ -303,6 +322,124 @@ config_set() {
             restart_service
         else
             print_warning "Changes will take effect after service restart"
+        fi
+    else
+        print_error "Could not find .env file"
+        return 1
+    fi
+}
+
+# Save configuration file
+save_config() {
+    clear
+    echo -e "${BOLD}${BLUE}Save Configuration File:${NC}"
+    echo
+
+    ENV_FILE=$(find_env_file)
+    if [ $? -eq 0 ]; then
+        echo -e "${BOLD}Configuration file:${NC} $ENV_FILE"
+        echo
+
+        # Create backup directory if it doesn't exist
+        BACKUP_DIR="${ENV_FILE%/*}/config_backups"
+        mkdir -p "$BACKUP_DIR"
+
+        # Create backup filename with timestamp
+        TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+        BACKUP_FILE="$BACKUP_DIR/env_backup_$TIMESTAMP.env"
+
+        # Copy the file
+        cp "$ENV_FILE" "$BACKUP_FILE"
+
+        if [ $? -eq 0 ]; then
+            print_success "Configuration saved to: $BACKUP_FILE"
+
+            # List recent backups
+            echo
+            echo -e "${BOLD}Recent backups:${NC}"
+            ls -lt "$BACKUP_DIR" | head -n 6 | tail -n 5
+        else
+            print_error "Failed to save configuration"
+        fi
+    else
+        print_error "Could not find .env file"
+        return 1
+    fi
+}
+
+# Restore configuration from backup
+restore_config() {
+    clear
+    echo -e "${BOLD}${BLUE}Restore Configuration from Backup:${NC}"
+    echo
+
+    ENV_FILE=$(find_env_file)
+    if [ $? -eq 0 ]; then
+        echo -e "${BOLD}Current configuration file:${NC} $ENV_FILE"
+        echo
+
+        # Check if backup directory exists
+        BACKUP_DIR="${ENV_FILE%/*}/config_backups"
+        if [ ! -d "$BACKUP_DIR" ]; then
+            print_error "No backup directory found at: $BACKUP_DIR"
+            return 1
+        fi
+
+        # List available backups
+        echo -e "${BOLD}Available backups:${NC}"
+
+        # Create an array to store backup files
+        declare -a BACKUP_FILES
+
+        # List backup files with numbers
+        i=1
+        while IFS= read -r file; do
+            BACKUP_FILES[$i]="$file"
+            # Extract timestamp from filename
+            TIMESTAMP=$(basename "$file" | sed -E 's/env_backup_([0-9]{8}_[0-9]{6}).env/\1/')
+            # Format timestamp for display
+            DISPLAY_TIME=$(echo "$TIMESTAMP" | sed -E 's/([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})([0-9]{2})([0-9]{2})/\1-\2-\3 \4:\5:\6/')
+            echo -e "${BOLD}$i)${NC} $DISPLAY_TIME - $(basename "$file")"
+            i=$((i+1))
+        done < <(find "$BACKUP_DIR" -name "env_backup_*.env" -type f | sort -r)
+
+        if [ ${#BACKUP_FILES[@]} -eq 0 ]; then
+            print_error "No backup files found in: $BACKUP_DIR"
+            return 1
+        fi
+
+        echo
+        read -p "Enter the number of the backup to restore (or 'q' to quit): " choice
+
+        if [[ "$choice" == "q" ]]; then
+            return 0
+        elif [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le ${#BACKUP_FILES[@]} ]; then
+            SELECTED_BACKUP="${BACKUP_FILES[$choice]}"
+
+            # Create a backup of current config before restoring
+            TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+            CURRENT_BACKUP="$BACKUP_DIR/env_before_restore_$TIMESTAMP.env"
+            cp "$ENV_FILE" "$CURRENT_BACKUP"
+
+            # Restore the selected backup
+            cp "$SELECTED_BACKUP" "$ENV_FILE"
+
+            if [ $? -eq 0 ]; then
+                print_success "Configuration restored from: $(basename "$SELECTED_BACKUP")"
+                print_message "Current configuration backed up to: $(basename "$CURRENT_BACKUP")" "$BLUE"
+
+                # Ask if user wants to restart the service
+                read -p "Do you want to restart the service to apply changes? (y/n): " restart_choice
+                if [[ "$restart_choice" =~ ^[Yy]$ ]]; then
+                    restart_service
+                else
+                    print_warning "Changes will take effect after service restart"
+                fi
+            else
+                print_error "Failed to restore configuration"
+            fi
+        else
+            print_error "Invalid choice"
         fi
     else
         print_error "Could not find .env file"
@@ -399,14 +536,33 @@ interactive_config_set() {
                 new_value="$current_value"
             fi
 
+            # Create a temporary file
+            TEMP_FILE=$(mktemp)
+
             # Determine if the value should be quoted
             if grep -q "^${selected_key}.*=\"" "$ENV_FILE"; then
                 # Update with quotes
-                sed -i "s/^${selected_key}[[:space:]]*=[[:space:]]*\".*\"/${selected_key} = \"${new_value}\"/" "$ENV_FILE"
+                while IFS= read -r line || [ -n "$line" ]; do
+                    if [[ "$line" =~ ^${selected_key}[[:space:]]*= ]]; then
+                        echo "${selected_key} = \"${new_value}\"" >> "$TEMP_FILE"
+                    else
+                        echo "$line" >> "$TEMP_FILE"
+                    fi
+                done < "$ENV_FILE"
             else
                 # Update without quotes
-                sed -i "s/^${selected_key}[[:space:]]*=[[:space:]]*.*/${selected_key} = ${new_value}/" "$ENV_FILE"
+                while IFS= read -r line || [ -n "$line" ]; do
+                    if [[ "$line" =~ ^${selected_key}[[:space:]]*= ]]; then
+                        echo "${selected_key} = ${new_value}" >> "$TEMP_FILE"
+                    else
+                        echo "$line" >> "$TEMP_FILE"
+                    fi
+                done < "$ENV_FILE"
             fi
+
+            # Replace the original file with the temporary file
+            cat "$TEMP_FILE" > "$ENV_FILE"
+            rm "$TEMP_FILE"
 
             print_success "Updated configuration: ${selected_key} = ${new_value}"
         else
@@ -448,6 +604,8 @@ show_help() {
     echo "  config     View the configuration file (.env)"
     echo "  config-list List all configuration items"
     echo "  config-set  Set a configuration value (config-set KEY VALUE)"
+    echo "  config-save Save a backup of the configuration file"
+    echo "  config-restore Restore configuration from a backup"
     echo "  secret     View the secret key"
     echo "  info       View service information"
     echo "  help       Show this help message"
@@ -537,6 +695,8 @@ show_interactive_menu() {
     draw_menu_item "9" "View Config" "View the configuration file (.env)"
     draw_menu_item "c" "List Config" "List all configuration items"
     draw_menu_item "e" "Edit Config" "Edit configuration values"
+    draw_menu_item "s" "Save Config" "Save a backup of the configuration file"
+    draw_menu_item "r" "Restore Config" "Restore configuration from a backup"
     draw_menu_item "0" "View Secret" "View the secret key"
     draw_menu_item "i" "Service Info" "View service information"
 
@@ -636,6 +796,22 @@ show_interactive_menu() {
             read -p "Press Enter to continue..."
             show_interactive_menu
             ;;
+        s|S)
+            clear
+            check_service
+            save_config
+            echo
+            read -p "Press Enter to continue..."
+            show_interactive_menu
+            ;;
+        r|R)
+            clear
+            check_service
+            restore_config
+            echo
+            read -p "Press Enter to continue..."
+            show_interactive_menu
+            ;;
         0)
             clear
             check_service
@@ -728,6 +904,14 @@ main() {
                 exit 1
             fi
             config_set "$2" "$3"
+            ;;
+        config-save)
+            check_service
+            save_config
+            ;;
+        config-restore)
+            check_service
+            restore_config
             ;;
         secret)
             check_service
