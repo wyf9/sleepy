@@ -33,9 +33,6 @@ Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top) ![
 
 ## 部署 / 更新
 
-> [!IMPORTANT]
-> 从 2025-05-16 起，~~NT_AUTHORITY突发奇想于是将~~端口默认值从 9010 改为了 443。 
-
 请移步 **[部署教程](./doc/deploy.md)** 或 **[更新教程](./doc/update.md)** *(多图警告)*
 
 ## 服务器配置

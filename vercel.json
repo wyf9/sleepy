@@ -12,6 +12,5 @@
             "src": "/(.*)",
             "dest": "server.py"
         }
-    "env": {
     ]
 }
