@@ -288,11 +288,11 @@ WantedBy=multi-user.target"
             print_success "Sleepy service has been enabled and will start on boot"
 
             # Make panel.sh executable
-            chmod +x shell-scripts/panel.sh
+            chmod +x scripts/panel.sh
             print_success "Management panel script is now executable"
 
             # Create alias for panel.sh
-            ALIAS_COMMAND="alias sleepy='${CURRENT_DIR}/shell-scripts/panel.sh'"
+            ALIAS_COMMAND="alias sleepy='${CURRENT_DIR}/scripts/panel.sh'"
 
             # Display the alias command for the user to use
             print_message "To use the 'sleepy' command, run the following:" "$BLUE"
@@ -500,12 +500,12 @@ clone_repository() {
         print_success "Repository cloned successfully"
 
         # Make the install.sh script executable
-        chmod +x shell-scripts/install.sh
+        chmod +x scripts/install.sh
 
         # Check if we need to run the script from the cloned repository
-        if [ "$0" != "./shell-scripts/install.sh" ] && [ "$0" != "shell-scripts/install.sh" ]; then
+        if [ "$0" != "./scripts/install.sh" ] && [ "$0" != "scripts/install.sh" ]; then
             print_message "Running installation from the cloned repository..." "$BLUE"
-            exec ./shell-scripts/install.sh
+            exec ./scripts/install.sh
             exit 0
         fi
     else

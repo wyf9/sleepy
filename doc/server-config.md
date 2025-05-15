@@ -15,7 +15,7 @@
 在目录下新建 `.env` 文件 (参考 [`.env.example`](../.env.example) 填写), *也可以直接设置相应的环境变量*
 
 > [!TIP]
-> `shell-scripts/install.sh` 脚本会自动创建 `.env` 文件并生成随机密钥，建议使用该脚本进行安装。
+> `scripts/install.sh` 脚本会自动创建 `.env` 文件并生成随机密钥，建议使用该脚本进行安装。
 > 请勿将 `.env` 文件提交到版本控制系统中，如 Git，以保护您的敏感信息。
 
 > [!IMPORTANT]
@@ -52,7 +52,7 @@
 
 在 Linux 系统上，安装脚本现在支持将 Sleepy 自动注册为 systemd 服务，这样可以实现开机自启动和更方便的管理。
 
-在运行 `shell-scripts/install.sh` 时，脚本会询问是否要注册为系统服务：
+在运行 `scripts/install.sh` 时，脚本会询问是否要注册为系统服务：
 
 ```bash
 Do you want to register Sleepy as a systemd service? (y/n):
@@ -71,7 +71,7 @@ Do you want to register Sleepy as a systemd service? (y/n):
 
 1. 设置别名：
    ```bash
-   alias sleepy='/home/azureuser/sleepy/shell-scripts/panel.sh'
+   alias sleepy='/home/azureuser/sleepy/scripts/panel.sh'
    ```
 
    请将路径替换为您的实际安装路径。

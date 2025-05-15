@@ -21,13 +21,13 @@
 运行命令：
 
 ```bash
-bash <(curl -s https://ghproxy.com/https://raw.githubusercontent.com/wyf9/sleepy/main/shell-scripts/install.sh)
+bash <(curl -s https://ghproxy.com/https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/install.sh)
 ```
 
 如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/wyf9/sleepy/main/shell-scripts/install.sh)
+bash <(curl -s https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/install.sh)
 ```
 
 ### Windows
@@ -36,14 +36,14 @@ bash <(curl -s https://raw.githubusercontent.com/wyf9/sleepy/main/shell-scripts/
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-irm https://ghproxy.com/https://raw.githubusercontent.com/wyf9/sleepy/main/shell-scripts/install.ps1 | iex
+irm https://ghproxy.com/https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/install.ps1 | iex
 ```
 
 如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-irm https://raw.githubusercontent.com/wyf9/sleepy/main/shell-scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/install.ps1 | iex
 ```
 
 ## 手动部署

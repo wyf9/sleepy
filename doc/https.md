@@ -75,7 +75,7 @@ sleepy_main_ssl_key = "/etc/letsencrypt/live/your-domain.com/privkey.pem"
 sudo systemctl restart sleepy
 
 # 或者如果使用 panel.sh
-./shell-scripts/panel.sh restart
+./scripts/panel.sh restart
 ```
 
 ## 故障排除

@@ -38,7 +38,7 @@
 -> templates/ # Flask 模板文件夹 (HTML)
 -> static/ # Flask 静态文件 (CSS / JS, 可以用 /static/文件名 访问)
 -> tools/ # 开发用的小工具 (实际上就一个)
--> shell-scripts/ # 脚本文件 (install.sh, panel.sh, install_lib.sh, install.ps1, install_lib.bat)
+-> scripts/ # 脚本文件 (install.sh, panel.sh, install_lib.sh, install.ps1, install_lib.bat)
 ```
 
 ```ini
