@@ -34,6 +34,9 @@ class _main:
     timezone: str = getenv('sleepy_main_timezone', 'Asia/Shanghai', str)
     checkdata_interval: int = getenv('sleepy_main_checkdata_interval', 30, int)
     secret: str = getenv('SLEEPY_SECRET', '', str)
+    https_enabled: bool = getenv('sleepy_main_https_enabled', False, bool)
+    ssl_cert: str = getenv('sleepy_main_ssl_cert', 'cert.pem', str)
+    ssl_key: str = getenv('sleepy_main_ssl_key', 'key.pem', str)
 
 
 class _page:

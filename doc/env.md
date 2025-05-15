@@ -27,6 +27,9 @@
 | `sleepy_main_timezone`           | str  | `Asia/Shanghai` | 控制 **API 返回中 / 网页上**显示时间的时区，一般无需更改 *(`Asia/Shanghai` 或 `Asia/Chongqing` 均为北京时间)* |
 | `sleepy_main_checkdata_interval` | int  | 30              | 控制多久检查一次状态数据的更新 **(秒)** (*检测到更新后会写入 `data.json`，供下次启动时恢复状态*)              |
 | `SLEEPY_SECRET`                  | str  | ` `             | 密钥 (相当于密码，用于防止未授权设置状态)，**客户端须使用相同的密钥**                                         |
+| `sleepy_main_https_enabled`      | bool | false           | 是否启用 HTTPS，启用后需配置 `sleepy_main_ssl_cert` 和 `sleepy_main_ssl_key`                                  |
+| `sleepy_main_ssl_cert`           | str  | `cert.pem`      | SSL 证书路径 (相对于项目根目录或绝对路径)，详见 [HTTPS 配置指南](./https.md)                                  |
+| `sleepy_main_ssl_key`            | str  | `key.pem`       | SSL 密钥路径 (相对于项目根目录或绝对路径)，详见 [HTTPS 配置指南](./https.md)                                  |
 
 ---
 
