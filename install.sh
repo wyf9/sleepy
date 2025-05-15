@@ -63,21 +63,7 @@ install_python() {
     fi
 
     # Detect OS
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        OS=$ID
-    elif type lsb_release >/dev/null 2>&1; then
-        OS=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-    elif [ -f /etc/lsb-release ]; then
-        . /etc/lsb-release
-        OS=$DISTRIB_ID
-    elif [ -f /etc/debian_version ]; then
-        OS=debian
-    elif [ -f /etc/redhat-release ]; then
-        OS=centos
-    else
-        OS=$(uname -s)
-    fi
+    OS=$(detect_os)
 
     # Install Python based on OS
     case $OS in
@@ -358,15 +344,177 @@ display_completion() {
         echo "      to use the 'sleepy' command in the current terminal session."
         echo
     fi
-   
-    main
+
     echo -e "${BOLD}To update your status:${NC}"
     echo "  Use one of the client scripts in the client/ directory"
     echo
     echo -e "${BOLD}For more information, visit:${NC}"
     echo "  https://github.com/wyf9/sleepy"
     echo
+    # Show installation directory
+    echo -e "${BOLD}Installation directory:${NC}"
+    echo "  $(pwd)"
+    echo
     print_message "Enjoy using Sleepy!" "$GREEN"
+}
+
+# Detect OS
+detect_os() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS=$ID
+    elif type lsb_release >/dev/null 2>&1; then
+        OS=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+    elif [ -f /etc/lsb-release ]; then
+        . /etc/lsb-release
+        OS=$DISTRIB_ID
+    elif [ -f /etc/debian_version ]; then
+        OS=debian
+    elif [ -f /etc/redhat-release ]; then
+        OS=centos
+    else
+        OS=$(uname -s)
+    fi
+    echo $OS
+}
+
+# Check if git is installed and install if needed
+check_git() {
+    if ! command -v git &>/dev/null; then
+        print_warning "Git is not installed. Installing git..."
+
+        # Detect OS
+        OS=$(detect_os)
+
+        # Install git based on OS
+        case $OS in
+            ubuntu|debian|linuxmint|pop)
+                sudo apt-get update
+                sudo apt-get install -y git
+                ;;
+            fedora|centos|rhel)
+                sudo dnf install -y git
+                ;;
+            arch|manjaro)
+                sudo pacman -Sy git
+                ;;
+            darwin)
+                if command -v brew &>/dev/null; then
+                    brew install git
+                else
+                    print_error "Homebrew is not installed. Please install git manually."
+                    exit 1
+                fi
+                ;;
+            *)
+                print_error "Unsupported operating system: $OS"
+                print_message "Please install git manually and run this script again." "$YELLOW"
+                exit 1
+                ;;
+        esac
+
+        if ! command -v git &>/dev/null; then
+            print_error "Failed to install git"
+            exit 1
+        else
+            print_success "Git installed successfully"
+        fi
+    fi
+}
+
+# Clone repository
+clone_repository() {
+    print_step "1" "Cloning Sleepy repository"
+
+    # Check if git is installed
+    check_git
+
+    # Ask for installation directory
+    read -p "Enter installation directory (default: ~/sleepy): " install_dir
+    install_dir=${install_dir:-~/sleepy}
+
+    # Expand tilde to home directory
+    install_dir="${install_dir/#\~/$HOME}"
+
+    print_message "Installation directory: $install_dir" "$BLUE"
+
+    # Check if directory exists
+    if [ -d "$install_dir" ]; then
+        print_warning "Directory $install_dir already exists."
+        read -p "Do you want to use this directory anyway? (y/n): " choice
+        if [[ ! "$choice" =~ ^[Yy]$ ]]; then
+            print_message "Installation aborted." "$RED"
+            exit 1
+        fi
+    else
+        # Create directory
+        mkdir -p "$install_dir"
+        if [ $? -ne 0 ]; then
+            print_error "Failed to create directory $install_dir"
+            exit 1
+        fi
+        print_success "Created directory $install_dir"
+    fi
+
+    # Change to installation directory
+    cd "$install_dir"
+    if [ $? -ne 0 ]; then
+        print_error "Failed to change to directory $install_dir"
+        exit 1
+    fi
+
+    # Check if we're already in a git repository
+    if [ -d ".git" ]; then
+        print_warning "This directory is already a git repository."
+        read -p "Do you want to pull the latest changes instead? (y/n): " choice
+        if [[ "$choice" =~ ^[Yy]$ ]]; then
+            print_message "Pulling latest changes..." "$BLUE"
+            git pull
+            if [ $? -eq 0 ]; then
+                print_success "Repository updated successfully"
+            else
+                print_error "Failed to update repository"
+                exit 1
+            fi
+            return
+        else
+            print_message "Continuing with existing repository..." "$YELLOW"
+            return
+        fi
+    fi
+
+    # Clone the repository
+    print_message "Cloning Sleepy repository to $install_dir..." "$BLUE"
+    git clone --depth=1 -b main https://github.com/wyf9/sleepy.git .
+
+    if [ $? -eq 0 ]; then
+        print_success "Repository cloned successfully"
+
+        # Make the install.sh script executable
+        chmod +x install.sh
+
+        # Check if we need to run the script from the cloned repository
+        if [ "$0" != "./install.sh" ] && [ "$0" != "install.sh" ]; then
+            print_message "Running installation from the cloned repository..." "$BLUE"
+            exec ./install.sh
+            exit 0
+        fi
+    else
+        print_error "Failed to clone repository"
+        exit 1
+    fi
+}
+
+# Check if script is being run from curl/wget
+is_running_from_web() {
+    # Check if the script is being piped from curl or wget
+    if [ -t 0 ]; then
+        # Terminal input is available, not being piped
+        return 1
+    else
+        # No terminal input, likely being piped
+        return 0
+    fi
 }
 
 # Main installation process
@@ -377,30 +525,46 @@ main() {
     echo -e "${BOLD}${BLUE}======================================${NC}"
     echo
 
-    # Check if we're in the right directory
+    # Check if we're running the script directly from the web (curl/wget)
+    if is_running_from_web; then
+        print_message "Running installation script from web..." "$BLUE"
+        # We need to save the script to a temporary file and then execute it
+        TEMP_SCRIPT=$(mktemp)
+        cat > "$TEMP_SCRIPT"
+        chmod +x "$TEMP_SCRIPT"
+        exec "$TEMP_SCRIPT"
+        exit 0
+    fi
+
+    # Check if we're in the Sleepy directory
     if [ ! -f "server.py" ] || [ ! -f "requirements.txt" ]; then
-        print_error "This script must be run from the Sleepy project root directory."
-        exit 1
+        print_message "Not in Sleepy project directory. Will clone the repository." "$YELLOW"
+        # We're not in the Sleepy directory, need to clone the repo
+        clone_repository
+    else
+        print_success "Running from Sleepy project directory"
     fi
 
     # Check root privileges
     check_root
 
-    # Step 1: Check and install Python if needed
-    print_step "1" "Checking and installing system requirements"
+    # Step 2: Check and install Python if needed
+    print_step "2" "Checking and installing system requirements"
     install_python
 
-    # Step 2: Install dependencies
+    # Step 3: Install dependencies
     install_dependencies
 
-    # Step 3: Create .env file
+    # Step 4: Create .env file
     create_env_file
 
-    # Step 4: Initialize data file
+    # Step 5: Initialize data file
     initialize_data
-    
-    # Step 5: Create systemd service (optional)
+
+    # Step 6: Create systemd service (optional)
     create_systemd_service
+
+    # Step 7: Display completion message
     display_completion
 }
 
