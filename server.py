@@ -471,12 +471,22 @@ if __name__ == '__main__':
     # for i in all_plugins:
     #     pass
     # --- launch
-    u.info(f'Starting server: {env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
+    # 检查是否启用 HTTPS
+    if env.main.https_enabled:
+        ssl_context = (env.main.ssl_cert, env.main.ssl_key)
+        u.info(f'Starting HTTPS server: {env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
+        u.info(f'Using SSL certificate: {env.main.ssl_cert}')
+        u.info(f'Using SSL key: {env.main.ssl_key}')
+    else:
+        ssl_context = None
+        u.info(f'Starting HTTP server: {env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
+
     try:
         app.run(  # 启↗动↘
             host=env.main.host,
             port=env.main.port,
-            debug=env.main.debug
+            debug=env.main.debug,
+            ssl_context=ssl_context
         )
     except Exception as e:
         u.error(f"Error running server: {e}")
