@@ -269,28 +269,14 @@ WantedBy=multi-user.target"
             print_success "Management panel script is now executable"
 
             # Create alias for panel.sh
-            ALIAS_LINE="alias sleepy='${CURRENT_DIR}/panel.sh'"
+            ALIAS_COMMAND="alias sleepy='${CURRENT_DIR}/panel.sh'"
 
-            # Determine shell configuration file
-            if [ -f "$HOME/.bashrc" ]; then
-                SHELL_CONFIG="$HOME/.bashrc"
-            elif [ -f "$HOME/.zshrc" ]; then
-                SHELL_CONFIG="$HOME/.zshrc"
-            else
-                SHELL_CONFIG="$HOME/.profile"
-            fi
-
-            # Check if alias already exists
-            if grep -q "alias sleepy=" "$SHELL_CONFIG"; then
-                print_warning "Sleepy alias already exists in $SHELL_CONFIG"
-            else
-                # Add alias to shell configuration
-                echo "" >> "$SHELL_CONFIG"
-                echo "# Sleepy management alias" >> "$SHELL_CONFIG"
-                echo "$ALIAS_LINE" >> "$SHELL_CONFIG"
-                print_success "Added 'sleepy' alias to $SHELL_CONFIG"
-                print_message "To use the alias in the current session, run: source $SHELL_CONFIG" "$BLUE"
-            fi
+            # Display the alias command for the user to use
+            print_message "To use the 'sleepy' command, run the following:" "$BLUE"
+            print_message "$ALIAS_COMMAND" "$YELLOW"
+            echo
+            print_message "You can add this line to your shell configuration file (~/.bashrc, ~/.zshrc, or ~/.profile)" "$BLUE"
+            print_message "to make the alias permanent." "$BLUE"
 
             # Ask if user wants to start the service now
             read -p "Do you want to start the Sleepy service now? (y/n): " choice
@@ -340,8 +326,8 @@ display_completion() {
         echo "  sleepy disable   # Disable autostart"
         echo "  sleepy help      # Show all commands"
         echo
-        echo -e "${BOLD}Note:${NC} You may need to run 'source ~/.bashrc' (or your shell config file)"
-        echo "      to use the 'sleepy' command in the current terminal session."
+        echo -e "${BOLD}Note:${NC} Run the alias command shown above to use the 'sleepy' command"
+        echo "      in the current terminal session."
         echo
     fi
 

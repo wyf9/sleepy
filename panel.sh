@@ -133,6 +133,302 @@ view_realtime_logs() {
     sudo journalctl -u sleepy.service -f
 }
 
+# View configuration file
+view_config() {
+    clear
+    echo -e "${BOLD}${BLUE}Sleepy Configuration File (.env):${NC}"
+    echo
+
+    ENV_FILE=$(find_env_file)
+    if [ $? -eq 0 ]; then
+        echo -e "${BOLD}Configuration file:${NC} $ENV_FILE"
+        echo
+        cat "$ENV_FILE"
+    else
+        print_error "Could not find .env file"
+    fi
+}
+
+# View secret key
+view_secret() {
+    clear
+    echo -e "${BOLD}${BLUE}Sleepy Secret Key:${NC}"
+    echo
+
+    ENV_FILE=$(find_env_file)
+    if [ $? -eq 0 ]; then
+        SECRET=$(grep "SLEEPY_SECRET" "$ENV_FILE" | cut -d '"' -f 2)
+        if [ -n "$SECRET" ]; then
+            echo -e "${BOLD}Secret key:${NC} $SECRET"
+            echo
+            print_message "Keep this key secure! It is used for authentication." "$YELLOW"
+        else
+            print_error "Secret key not found in $ENV_FILE"
+        fi
+    else
+        print_error "Could not find .env file"
+    fi
+}
+
+# View service information
+view_service_info() {
+    clear
+    echo -e "${BOLD}${BLUE}Sleepy Service Information:${NC}"
+    echo
+
+    # Get service file path
+    SERVICE_FILE="/etc/systemd/system/sleepy.service"
+    if [ -f "$SERVICE_FILE" ]; then
+        echo -e "${BOLD}Service file:${NC} $SERVICE_FILE"
+        echo
+        cat "$SERVICE_FILE"
+    else
+        print_error "Service file not found at $SERVICE_FILE"
+    fi
+}
+
+# Find the .env file
+find_env_file() {
+    # Get the service directory from systemd
+    SERVICE_DIR=$(systemctl show -p FragmentPath sleepy.service | grep -o '/.*/' | head -1)
+
+    # If we couldn't get it from systemd, use current directory
+    if [ -z "$SERVICE_DIR" ]; then
+        SERVICE_DIR=$(pwd)
+    fi
+
+    # Check if .env file exists
+    ENV_FILE="${SERVICE_DIR}/.env"
+    if [ -f "$ENV_FILE" ]; then
+        echo "$ENV_FILE"
+        return 0
+    else
+        # Try to find .env file in common locations
+        FOUND_ENV=$(find /home -name ".env" -type f -path "*/sleepy/*" 2>/dev/null | head -1)
+
+        if [ -n "$FOUND_ENV" ]; then
+            echo "$FOUND_ENV"
+            return 0
+        else
+            return 1
+        fi
+    fi
+}
+
+# List all configuration items
+config_list() {
+    clear
+    echo -e "${BOLD}${BLUE}Sleepy Configuration Items:${NC}"
+    echo
+
+    ENV_FILE=$(find_env_file)
+    if [ $? -eq 0 ]; then
+        echo -e "${BOLD}Configuration file:${NC} $ENV_FILE"
+        echo
+
+        # Extract and format configuration items
+        echo -e "${BOLD}${CYAN}Current Configuration:${NC}"
+        echo
+
+        # Read the .env file line by line
+        while IFS= read -r line || [ -n "$line" ]; do
+            # Skip empty lines and comments
+            if [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]]; then
+                continue
+            fi
+
+            # Extract key and value
+            if [[ "$line" =~ ^([A-Za-z0-9_]+)[[:space:]]*=[[:space:]]*\"(.*)\" ]]; then
+                KEY="${BASH_REMATCH[1]}"
+                VALUE="${BASH_REMATCH[2]}"
+
+                # Format the output
+                echo -e "${BOLD}${KEY}${NC} = \"${VALUE}\""
+            elif [[ "$line" =~ ^([A-Za-z0-9_]+)[[:space:]]*=[[:space:]]*([^\"]*) ]]; then
+                KEY="${BASH_REMATCH[1]}"
+                VALUE="${BASH_REMATCH[2]}"
+
+                # Format the output
+                echo -e "${BOLD}${KEY}${NC} = ${VALUE}"
+            fi
+        done < "$ENV_FILE"
+    else
+        print_error "Could not find .env file"
+        return 1
+    fi
+}
+
+# Set a configuration item
+config_set() {
+    local key="$1"
+    local value="$2"
+
+    if [ -z "$key" ] || [ -z "$value" ]; then
+        print_error "Both key and value must be provided"
+        echo "Usage: sleepy config-set KEY VALUE"
+        return 1
+    fi
+
+    ENV_FILE=$(find_env_file)
+    if [ $? -eq 0 ]; then
+        echo -e "${BOLD}Configuration file:${NC} $ENV_FILE"
+
+        # Check if the key exists
+        if grep -q "^${key}" "$ENV_FILE"; then
+            # Determine if the value should be quoted
+            if grep -q "^${key}.*=\"" "$ENV_FILE"; then
+                # Update with quotes
+                sed -i "s/^${key}[[:space:]]*=[[:space:]]*\".*\"/${key} = \"${value}\"/" "$ENV_FILE"
+            else
+                # Update without quotes
+                sed -i "s/^${key}[[:space:]]*=[[:space:]]*.*/${key} = ${value}/" "$ENV_FILE"
+            fi
+
+            print_success "Updated configuration: ${key} = ${value}"
+        else
+            print_warning "Key '${key}' not found in configuration file"
+            read -p "Do you want to add this key-value pair? (y/n): " choice
+            if [[ "$choice" =~ ^[Yy]$ ]]; then
+                # Add new key-value pair (with quotes by default)
+                echo "${key} = \"${value}\"" >> "$ENV_FILE"
+                print_success "Added new configuration: ${key} = \"${value}\""
+            else
+                print_message "Configuration not updated." "$YELLOW"
+            fi
+        fi
+
+        # Ask if user wants to restart the service
+        read -p "Do you want to restart the service to apply changes? (y/n): " choice
+        if [[ "$choice" =~ ^[Yy]$ ]]; then
+            restart_service
+        else
+            print_warning "Changes will take effect after service restart"
+        fi
+    else
+        print_error "Could not find .env file"
+        return 1
+    fi
+}
+
+# Interactive config set
+interactive_config_set() {
+    clear
+    echo -e "${BOLD}${BLUE}Set Configuration Value:${NC}"
+    echo
+
+    # First list current configuration
+    ENV_FILE=$(find_env_file)
+    if [ $? -eq 0 ]; then
+        echo -e "${BOLD}Configuration file:${NC} $ENV_FILE"
+        echo
+
+        # Show current configuration
+        echo -e "${BOLD}${CYAN}Current Configuration:${NC}"
+        echo
+
+        # Create an array to store keys
+        declare -a CONFIG_KEYS
+
+        # Read the .env file line by line
+        local i=0
+        while IFS= read -r line || [ -n "$line" ]; do
+            # Skip empty lines and comments
+            if [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]]; then
+                continue
+            fi
+
+            # Extract key and value
+            if [[ "$line" =~ ^([A-Za-z0-9_]+)[[:space:]]*=[[:space:]]*\"(.*)\" ]]; then
+                KEY="${BASH_REMATCH[1]}"
+                VALUE="${BASH_REMATCH[2]}"
+
+                # Store key in array
+                CONFIG_KEYS[$i]="$KEY"
+                i=$((i+1))
+
+                # Format the output
+                echo -e "${BOLD}$i)${NC} ${BOLD}${KEY}${NC} = \"${VALUE}\""
+            elif [[ "$line" =~ ^([A-Za-z0-9_]+)[[:space:]]*=[[:space:]]*([^\"]*) ]]; then
+                KEY="${BASH_REMATCH[1]}"
+                VALUE="${BASH_REMATCH[2]}"
+
+                # Store key in array
+                CONFIG_KEYS[$i]="$KEY"
+                i=$((i+1))
+
+                # Format the output
+                echo -e "${BOLD}$i)${NC} ${BOLD}${KEY}${NC} = ${VALUE}"
+            fi
+        done < "$ENV_FILE"
+
+        echo
+        echo -e "${BOLD}${YELLOW}Enter 'n' to add a new configuration item${NC}"
+        echo
+
+        # Ask which key to modify
+        read -p "Enter the number of the item to modify (or 'n' for new, 'q' to quit): " choice
+
+        if [[ "$choice" == "q" ]]; then
+            return 0
+        elif [[ "$choice" == "n" ]]; then
+            # Add new configuration
+            read -p "Enter new configuration key: " new_key
+            read -p "Enter value for $new_key: " new_value
+
+            if [ -z "$new_key" ] || [ -z "$new_value" ]; then
+                print_error "Both key and value must be provided"
+                read -p "Press Enter to continue..."
+                return 1
+            fi
+
+            # Add new key-value pair (with quotes by default)
+            echo "${new_key} = \"${new_value}\"" >> "$ENV_FILE"
+            print_success "Added new configuration: ${new_key} = \"${new_value}\""
+        elif [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le ${#CONFIG_KEYS[@]} ]; then
+            # Modify existing configuration
+            key_index=$((choice-1))
+            selected_key="${CONFIG_KEYS[$key_index]}"
+
+            # Get current value
+            current_value=$(grep "^${selected_key}" "$ENV_FILE" | sed -E "s/^${selected_key}[[:space:]]*=[[:space:]]*\"?([^\"]*)\"?/\1/")
+
+            read -p "Enter new value for $selected_key [$current_value]: " new_value
+
+            # If no input, keep current value
+            if [ -z "$new_value" ]; then
+                new_value="$current_value"
+            fi
+
+            # Determine if the value should be quoted
+            if grep -q "^${selected_key}.*=\"" "$ENV_FILE"; then
+                # Update with quotes
+                sed -i "s/^${selected_key}[[:space:]]*=[[:space:]]*\".*\"/${selected_key} = \"${new_value}\"/" "$ENV_FILE"
+            else
+                # Update without quotes
+                sed -i "s/^${selected_key}[[:space:]]*=[[:space:]]*.*/${selected_key} = ${new_value}/" "$ENV_FILE"
+            fi
+
+            print_success "Updated configuration: ${selected_key} = ${new_value}"
+        else
+            print_error "Invalid choice"
+            read -p "Press Enter to continue..."
+            return 1
+        fi
+
+        # Ask if user wants to restart the service
+        read -p "Do you want to restart the service to apply changes? (y/n): " choice
+        if [[ "$choice" =~ ^[Yy]$ ]]; then
+            restart_service
+        else
+            print_warning "Changes will take effect after service restart"
+        fi
+    else
+        print_error "Could not find .env file"
+        read -p "Press Enter to continue..."
+        return 1
+    fi
+}
+
 # Show help
 show_help() {
     echo -e "${BOLD}${BLUE}Sleepy Management Panel${NC}"
@@ -149,6 +445,11 @@ show_help() {
     echo "  disable    Disable Sleepy from starting on boot"
     echo "  logs       View the service logs"
     echo "  follow     View real-time logs (follow mode)"
+    echo "  config     View the configuration file (.env)"
+    echo "  config-list List all configuration items"
+    echo "  config-set  Set a configuration value (config-set KEY VALUE)"
+    echo "  secret     View the secret key"
+    echo "  info       View service information"
     echo "  help       Show this help message"
     echo
     echo -e "${BOLD}Interactive Mode:${NC}"
@@ -232,6 +533,13 @@ show_interactive_menu() {
     draw_menu_item "7" "View Logs" "View the service logs"
     draw_menu_item "8" "Real-time Logs" "View logs in real-time (follow mode)"
 
+    echo -e "${BOLD}${MAGENTA}Configuration:${NC}"
+    draw_menu_item "9" "View Config" "View the configuration file (.env)"
+    draw_menu_item "c" "List Config" "List all configuration items"
+    draw_menu_item "e" "Edit Config" "Edit configuration values"
+    draw_menu_item "0" "View Secret" "View the secret key"
+    draw_menu_item "i" "Service Info" "View service information"
+
     echo -e "${BOLD}${MAGENTA}Other:${NC}"
     draw_menu_item "q" "Quit" "Exit the management panel"
 
@@ -304,6 +612,46 @@ show_interactive_menu() {
             read -p "Press Enter to continue..."
             show_interactive_menu
             ;;
+        9)
+            clear
+            check_service
+            view_config
+            echo
+            read -p "Press Enter to continue..."
+            show_interactive_menu
+            ;;
+        c|C)
+            clear
+            check_service
+            config_list
+            echo
+            read -p "Press Enter to continue..."
+            show_interactive_menu
+            ;;
+        e|E)
+            clear
+            check_service
+            interactive_config_set
+            echo
+            read -p "Press Enter to continue..."
+            show_interactive_menu
+            ;;
+        0)
+            clear
+            check_service
+            view_secret
+            echo
+            read -p "Press Enter to continue..."
+            show_interactive_menu
+            ;;
+        i|I)
+            clear
+            check_service
+            view_service_info
+            echo
+            read -p "Press Enter to continue..."
+            show_interactive_menu
+            ;;
         q|Q)
             clear
             echo -e "${BOLD}${GREEN}Thank you for using Sleepy Management Panel!${NC}"
@@ -363,6 +711,31 @@ main() {
         follow)
             check_service
             view_realtime_logs
+            ;;
+        config)
+            check_service
+            view_config
+            ;;
+        config-list)
+            check_service
+            config_list
+            ;;
+        config-set)
+            check_service
+            if [ -z "$2" ] || [ -z "$3" ]; then
+                print_error "Both key and value must be provided"
+                echo "Usage: sleepy config-set KEY VALUE"
+                exit 1
+            fi
+            config_set "$2" "$3"
+            ;;
+        secret)
+            check_service
+            view_secret
+            ;;
+        info)
+            check_service
+            view_service_info
             ;;
         help)
             show_help
