@@ -12,6 +12,7 @@
     - [卡在 Deploying?](#卡在-deploying)
   - [Vercel 部署](#vercel-部署)
 
+> **注意**: 关于服务器配置和 Linux 服务管理，请参考 [服务器配置](./server-config.md) 文档。
 
 ## 一键部署
 
@@ -67,14 +68,7 @@ pip install -r requirements.txt
 
 3. 编辑配置文件
 
-> *配置文件变化史: `data.json` -> `config.json` -> `config.jsonc` -> `.env`*
-
-在目录下新建 `.env` 文件 (参考 [`.env.example`](../.env.example) 填写), *也可以直接设置相应的环境变量*
-
-> [!IMPORTANT]
-> **[配置示例](../.env.example)** <br/>
-> **Windows 用户请确保 `.env` 文件以 UTF-8 编码而非 GBK 编码保存，否则读取可能出现问题!** *(如**错误读入行尾注释**)* <br/>
-> *注意: 环境变量的优先级**高于** `.env` 文件* <br/>
+请参考 [服务器配置](./server-config.md) 文档进行配置。
 
 ### 启动
 
@@ -88,7 +82,10 @@ python3 server.py
 # 简易启动器
 python3 start.py
 ```
+
 默认服务 http 端口: **`9010`**
+
+关于 Linux 服务管理和配置，请参考 [服务器配置](./server-config.md) 文档。
 
 ## Huggingface 部署
 
@@ -116,8 +113,8 @@ python3 start.py
 **有的兄弟，有的！**
 这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作
 我怕教太多了你学不会，现在只要点
-[这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)    
-然后自己去注册一个账号  
+[这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)
+然后自己去注册一个账号
 参考`.env.example`在Setting==>Variables and secrets添加环境变量配置
 然后在这里:
 ![链接](https://ghimg.siiway.top/sleepy/deploy/huggingface-1.1.png)
