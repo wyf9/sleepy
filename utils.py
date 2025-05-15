@@ -46,7 +46,7 @@ class Utils:
 
     def reterr(self, code: str, message: str) -> Response:
         '''
-        返回错误信息 json
+        返回错误信息 ~~json~~ response
 
         :param code: 代码
         :param message: 消息

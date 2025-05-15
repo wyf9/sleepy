@@ -16,6 +16,15 @@ from data import Data as data_init
 from plugin import Plugin as plugin_init
 import _utils
 
+# show welcome text
+print(f'''
+Welcome to Sleepy 2025!
+Give us a Star 🌟 please: https://github.com/wyf9/sleepy
+Bug Report: https://github.com/wyf9/sleepy/issues/new?template=1-bug-report.yml
+Feature Request: https://github.com/wyf9/sleepy/issues/new?template=2-feature-request.yml
+Security Report: https://github.com/wyf9/sleepy/security/policy
+'''[1:-1])
+
 try:
     # init flask app
     app = flask.Flask(__name__)
@@ -91,6 +100,12 @@ def showip():
 def require_secret(view_func):
     '''
     require_secret 修饰器, 用于指定函数需要 secret 鉴权
+    - ***请确保修饰器紧跟函数定义，如:***
+    ```
+    @app.route('/set')
+    @require_secret
+    def set_normal(): ...
+    ```
     '''
     @wraps(view_func)
     def wrapped_view(*args, **kwargs):

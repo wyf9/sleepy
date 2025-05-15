@@ -111,7 +111,7 @@ div p {
 @media (max-width: 1250px) {
   .card {
     /* 大屏宽度 */
-    width: 75%;
+    width: 60%;
   }
 }
 
@@ -123,7 +123,7 @@ div p {
 
   .card {
     /* 较小屏宽度 */
-    width: 85%;
+    width: 75%;
   }
 }
 
@@ -131,7 +131,7 @@ div p {
 @media (max-width: 500px) {
   .card {
     /* 小屏宽度 */
-    width: 95%;
+    width: 90%;
   }
 }
 

@@ -22,7 +22,7 @@ class PluginClass:
 
     def __init__(self, name: str, example_config: dict, user_config: Config, utils: Utils, data: Data):
         '''
-        初始化一项插件的工具 (?)
+        初始化一项插件的所需资源 (?)
 
         :param namespace: 插件 id
         :param example_config: **(插件的)** 示例配置
