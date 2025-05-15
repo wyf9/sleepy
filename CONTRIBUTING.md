@@ -28,8 +28,6 @@
 -> _utils.py # utils.py 和 env.py 都用到的函数
 -> start.py # 简易启动器
 -> __init__.py # 我也不知道干嘛用的
--> install_lib.bat # 依赖安装脚本 (Windows)
--> install_lib.sh # 依赖安装脚本 (Unix-like)
 ```
 
 ```ini
@@ -40,6 +38,7 @@
 -> templates/ # Flask 模板文件夹 (HTML)
 -> static/ # Flask 静态文件 (CSS / JS, 可以用 /static/文件名 访问)
 -> tools/ # 开发用的小工具 (实际上就一个)
+-> shell-scripts/ # 脚本文件 (install.sh, panel.sh, install_lib.sh, install.ps1, install_lib.bat)
 ```
 
 ```ini

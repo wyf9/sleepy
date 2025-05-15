@@ -75,7 +75,7 @@ sleepy_main_ssl_key = "/etc/letsencrypt/live/your-domain.com/privkey.pem"
 sudo systemctl restart sleepy
 
 # 或者如果使用 panel.sh
-./panel.sh restart
+./shell-scripts/panel.sh restart
 ```
 
 ## 故障排除
@@ -123,10 +123,10 @@ server {
 server {
     listen 443 ssl;
     server_name your-domain.com;
-    
+
     ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
-    
+
     location / {
         proxy_pass http://localhost:9010;
         proxy_set_header Host $host;

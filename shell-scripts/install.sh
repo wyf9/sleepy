@@ -253,6 +253,29 @@ WantedBy=multi-user.target"
     if [ $? -eq 0 ]; then
         print_success "Service file created successfully"
 
+        # Set Python capabilities to bind to privileged ports
+        print_message "Setting Python capabilities to bind to privileged ports..." "$BLUE"
+        python_path=$(which python3)
+        python_version=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1-2)
+        if [ -f "/usr/bin/python$python_version" ]; then
+            sudo setcap 'cap_net_bind_service=+ep' "/usr/bin/python$python_version"
+            print_success "Set capabilities for /usr/bin/python$python_version"
+        elif [ -n "$python_path" ]; then
+            sudo setcap 'cap_net_bind_service=+ep' "$python_path"
+            print_success "Set capabilities for $python_path"
+        else
+            print_warning "Could not find Python binary to set capabilities"
+        fi
+
+        # Configure firewall to allow HTTPS traffic
+        print_message "Configuring firewall to allow HTTPS traffic..." "$BLUE"
+        if command -v iptables &>/dev/null; then
+            sudo iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+            print_success "Firewall rule added for port 443"
+        else
+            print_warning "iptables not found, skipping firewall configuration"
+        fi
+
         # Reload systemd
         print_message "Reloading systemd..." "$BLUE"
         sudo systemctl daemon-reload
@@ -265,11 +288,11 @@ WantedBy=multi-user.target"
             print_success "Sleepy service has been enabled and will start on boot"
 
             # Make panel.sh executable
-            chmod +x panel.sh
+            chmod +x shell-scripts/panel.sh
             print_success "Management panel script is now executable"
 
             # Create alias for panel.sh
-            ALIAS_COMMAND="alias sleepy='${CURRENT_DIR}/panel.sh'"
+            ALIAS_COMMAND="alias sleepy='${CURRENT_DIR}/shell-scripts/panel.sh'"
 
             # Display the alias command for the user to use
             print_message "To use the 'sleepy' command, run the following:" "$BLUE"
@@ -477,12 +500,12 @@ clone_repository() {
         print_success "Repository cloned successfully"
 
         # Make the install.sh script executable
-        chmod +x install.sh
+        chmod +x shell-scripts/install.sh
 
         # Check if we need to run the script from the cloned repository
-        if [ "$0" != "./install.sh" ] && [ "$0" != "install.sh" ]; then
+        if [ "$0" != "./shell-scripts/install.sh" ] && [ "$0" != "shell-scripts/install.sh" ]; then
             print_message "Running installation from the cloned repository..." "$BLUE"
-            exec ./install.sh
+            exec ./shell-scripts/install.sh
             exit 0
         fi
     else

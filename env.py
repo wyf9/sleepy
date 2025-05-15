@@ -29,7 +29,7 @@ class _main:
     (main) 系统基本配置
     '''
     host: str = getenv('sleepy_main_host', '0.0.0.0', str)
-    port: int = getenv('sleepy_main_port', 9010, int)
+    port: int = getenv('sleepy_main_port', 443, int)
     debug: bool = getenv('sleepy_main_debug', False, bool)
     timezone: str = getenv('sleepy_main_timezone', 'Asia/Shanghai', str)
     checkdata_interval: int = getenv('sleepy_main_checkdata_interval', 30, int)

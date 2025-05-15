@@ -12,16 +12,6 @@
             "src": "/(.*)",
             "dest": "server.py"
         }
-    ],
     "env": {
-        "SLEEPY_SECRET": "your_super_secret_key",
-        "sleepy_page_user": "User",
-        "sleepy_page_title": "User Alive?",
-        "sleepy_page_desc": "User's Online Status Page",
-        "sleepy_page_background": "https://imgapi.siiway.top/image",
-        "sleepy_page_more_text": "Hello :)",
-        "sleepy_page_hitokoto": "true",
-        "sleepy_page_canvas": "true",
-        "sleepy_page_moonlight": "true"
-    }
+    ]
 }
