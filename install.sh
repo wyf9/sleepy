@@ -358,7 +358,8 @@ display_completion() {
         echo "      to use the 'sleepy' command in the current terminal session."
         echo
     fi
-
+   
+    main
     echo -e "${BOLD}To update your status:${NC}"
     echo "  Use one of the client scripts in the client/ directory"
     echo
@@ -397,11 +398,9 @@ main() {
 
     # Step 4: Initialize data file
     initialize_data
-
+    
     # Step 5: Create systemd service (optional)
     create_systemd_service
-
-    # Step 6: Display completion message
     display_completion
 }
 
