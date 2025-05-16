@@ -15,7 +15,7 @@ def getenv(key: str, default: any, typeobj: object) -> any:
     :param default: 默认值 (未读取到此项配置时使用)
     :param typeobj: 类型对象 (str / int / bool)
     '''
-    got_value = os.getenv(key)
+    got_value = os.getenv(key.upper())
     if got_value is None:
         return default
     else:
@@ -33,7 +33,7 @@ class _main:
     debug: bool = getenv('sleepy_main_debug', False, bool)
     timezone: str = getenv('sleepy_main_timezone', 'Asia/Shanghai', str)
     checkdata_interval: int = getenv('sleepy_main_checkdata_interval', 30, int)
-    secret: str = getenv('SLEEPY_SECRET', '', str)
+    secret: str = getenv('sleepy_secret', '', str)
     https_enabled: bool = getenv('sleepy_main_https_enabled', False, bool)
     ssl_cert: str = getenv('sleepy_main_ssl_cert', 'cert.pem', str)
     ssl_key: str = getenv('sleepy_main_ssl_key', 'key.pem', str)

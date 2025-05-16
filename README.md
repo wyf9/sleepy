@@ -56,17 +56,13 @@ Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top) ![
 
 ## Star History
 
-> [!NOTE]
-> Star History 的服务出现了暂时性的问题，表现为可能加载不出来。
-> 你当作这一块不存在就行了...
-
-[![Star History Chart](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
+[![如无法加载图片可点击查看](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
 
 ## 关于
 
-非常感谢 **VTEXS** 的 **「开源项目免费 VPS 计划」** 对项目提供的算力支持！
+非常感谢 **ZMTO** *(原名 VTEXS)* 的 **「开源项目免费 VPS 计划」** 对项目提供的算力支持！
 
-> **[Link](https://console.vtexs.com/?affid=1566)** *(使用此链接获得 10% 优惠)*
+> **[Link](https://console.zmto.com/?affid=1566)** *(使用此链接获得 10% 优惠)* <!-- 谁都不许改 affid -->
 
 ---
 

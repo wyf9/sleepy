@@ -8,6 +8,7 @@
 > [!IMPORTANT]
 > *(特别是)* Windows 用户请确保 `.env` 文件**使用 `UTF-8` 编码保存**，否则会导致**错误读入注释 / 中文乱码** <br/>
 > Huggingface / Vercel 等容器平台部署需将配置放在 **`Environment Variables`**，而**不是** `.env` 文件 *(见 [部署文档](./deploy.md))* <br/>
+> *请确保变量名为全大写 / [全小写 (Linux)]* <br/>
 > *修改配置后需重启服务生效*
 
 > **配置类型**: <br/>
