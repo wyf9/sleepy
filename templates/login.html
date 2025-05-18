@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ c.page.name }} - 登录</title>
+    <meta name="description" content="登录到管理面板">
+    <link rel="icon" href="{{ c.page.favicon }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+    <style>
+        body {
+            background: url('{{ c.page.background }}') no-repeat center center fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-card light">
+            <h2>管理面板登录</h2>
+            <p>请输入密钥以访问管理面板</p>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="secret">密钥</label>
+                    <input type="password" id="secret" placeholder="输入您的密钥">
+                </div>
+                <button class="login-btn" onclick="login()">登录</button>
+                <p id="error-message" class="error-message">密钥错误，请重试</p>
+            </div>
+            <a href="/" class="back-link">返回主页</a>
+        </div>
+    </div>
+
+    <script>
+        function login() {
+            const secret = document.getElementById('secret').value;
+            if (!secret) {
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('error-message').textContent = '请输入密钥';
+                return;
+            }
+
+            // 将密钥存储在 localStorage 中
+            localStorage.setItem('sleepy_secret', secret);
+
+            // 重定向到管理面板
+            window.location.href = '/webui/panel?secret=' + encodeURIComponent(secret);
+        }
+
+        // 按下回车键时触发登录按钮
+        document.getElementById('secret').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                login();
+            }
+        });
+    </script>
+</body>
+
+</html>

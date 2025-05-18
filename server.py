@@ -480,6 +480,32 @@ def events():
     response.headers['X-Accel-Buffering'] = 'no'  # 禁用 Nginx 缓冲
     return response
 
+# --- WebUI (Admin Panel)
+
+@app.route('/webui/panel')
+@require_secret
+def admin_panel():
+    '''
+    管理面板
+    - Method: **GET**
+    '''
+    return flask.render_template(
+        'panel.html',
+        c=c,
+        d=d.data
+    ), 200
+
+@app.route('/webui/login')
+def login():
+    '''
+    登录页面
+    - Method: **GET**
+    '''
+    return flask.render_template(
+        'login.html',
+        c=c
+    ), 200
+
 
 # --- Special
 
