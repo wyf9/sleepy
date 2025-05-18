@@ -27,7 +27,9 @@ Security Report: https://github.com/wyf9/sleepy/security/policy
 
 try:
     # init flask app
-    app = flask.Flask(__name__)
+    app = flask.Flask(__name__,
+                     template_folder='themes/default',
+                     static_folder='themes/default/static')
 
     # init config
     c = config_init()
@@ -73,6 +75,64 @@ except:
 
 
 # --- Functions
+
+
+def get_available_themes():
+    """
+    获取所有可用的主题列表
+
+    Returns:
+        list: 主题名称列表
+    """
+    import os
+    themes_dir = 'themes'
+    themes = []
+
+    # 检查主题目录是否存在
+    if os.path.exists(themes_dir) and os.path.isdir(themes_dir):
+        # 遍历主题目录
+        for theme in os.listdir(themes_dir):
+            theme_path = os.path.join(themes_dir, theme)
+            # 检查是否是目录且包含 index.html 文件
+            if os.path.isdir(theme_path) and os.path.exists(os.path.join(theme_path, 'index.html')):
+                themes.append(theme)
+
+    # 确保 default 主题总是存在
+    if 'default' not in themes and os.path.exists(os.path.join(themes_dir, 'default')):
+        themes.append('default')
+
+    # 按字母顺序排序主题
+    themes.sort()
+
+    return themes
+
+
+def get_theme(template_name):
+    """
+    获取主题并检查其是否存在
+
+    Args:
+        template_name: 模板文件名，如 'index.html', 'panel.html', 'login.html'
+
+    Returns:
+        str: 主题名称
+    """
+    # 获取主题 (优先使用 URL 参数，其次是配置文件)
+    theme = flask.request.args.get('theme', getattr(c.page, 'theme', 'default'))
+
+    # 检查主题是否存在，如果不存在则使用默认主题
+    import os
+    if not os.path.exists(os.path.join('themes', theme, template_name)):
+        u.warning(f"Theme {theme} not found for {template_name}, using default theme")
+        theme = getattr(c.page, 'theme', 'default')
+        if not os.path.exists(os.path.join('themes', theme, template_name)):
+            theme = 'default'
+
+    # 设置模板文件夹和静态文件夹
+    app.template_folder = f'themes/{theme}'
+    app.static_folder = f'themes/{theme}/static'
+
+    return theme
 
 
 @app.before_request
@@ -183,6 +243,13 @@ def index():
                     d=d.data,
                     u=u
                 )))
+
+    # 获取主题
+    theme = get_theme('index.html')
+
+    # 获取可用的主题列表
+    available_themes = get_available_themes()
+
     # 返回 html
     return flask.render_template(
         'index.html',
@@ -190,7 +257,9 @@ def index():
         more_text=more_text,
         status=status,
         last_updated=d.data['last_updated'],
-        plugins=plugin_templates
+        plugins=plugin_templates,
+        current_theme=theme,
+        available_themes=available_themes
     ), 200
 
 
@@ -489,10 +558,18 @@ def admin_panel():
     管理面板
     - Method: **GET**
     '''
+    # 获取主题
+    theme = get_theme('panel.html')
+
+    # 获取可用的主题列表
+    available_themes = get_available_themes()
+
     return flask.render_template(
         'panel.html',
         c=c,
-        d=d.data
+        d=d.data,
+        current_theme=theme,
+        available_themes=available_themes
     ), 200
 
 @app.route('/webui/login')
@@ -501,9 +578,13 @@ def login():
     登录页面
     - Method: **GET**
     '''
+    # 获取主题
+    theme = get_theme('login.html')
+
     return flask.render_template(
         'login.html',
-        c=c
+        c=c,
+        current_theme=theme
     ), 200
 
 

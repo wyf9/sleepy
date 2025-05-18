@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ c.page.title }}</title>
+    <meta name="description" content="{{ c.page.desc }}">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
+    <link rel="icon" href="{{ c.page.favicon }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <style>
+        body {
+            background: url('{{ c.page.background }}') no-repeat center center fixed;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="card" id="user-status">
+            <div class="ascii-art">
+  _____  _                    _____                      _
+ / ____|(_)                  / ____|                    | |
+| (___   _  _ __ ___   __ _ | |      ___   _ __   ___  | | ___
+ \___ \ | || '_ ` _ \ / _` || |     / _ \ | '_ \ / __| | |/ _ \
+ ____) || || | | | | | (_| || |____| (_) || | | |\__ \ | |  __/
+|_____/ |_||_| |_| |_|\__,_| \_____|\___/ |_| |_||___/ |_|\___|
+            </div>
+
+            <h3>{{ c.page.name }}'s System Status</h3>
+            <div id="device-status">
+                <p>$ system_status.sh</p>
+                <p>> STATUS: <span id="status">{{ status['name'] }}</span><span class="console-cursor">_</span></p>
+                <p>> INFO: {{ status['desc'] | safe }}</p>
+                <p>> DEVICES: [设备状态列表]</p>
+            </div>
+
+            <!-- {disabled% if c.util.steam_enabled %} -->
+            <!-- (steam) Steam 状态模块 (iframe) -->
+            <!-- {disabled% include "steam.html" %} -->
+            <!-- {disabled% endif %} -->
+
+            <div id="additional-info">
+                <p>> SYSTEM_LOG: {{ more_text }}</p>
+            </div>
+
+            <p id="last-updated">// 最后更新: {{ last_updated }}</p>
+        </div>
+
+        {% for plugin in plugins %}
+        <div class="card" id="plugin-{{ plugin[0] }}">
+            <p>$ plugin_{{ plugin[0] }}.sh</p>
+            <div class="plugin-content">
+                {{ plugin[1] | safe }}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- {disabled% if zhixue %} -->
+        <!-- (zhixue) 智学网分数 -->
+        <!-- {disabled% include "zhixue.html" %} -->
+        <!-- {disabled% endif %} -->
+
+        <div class="card" id="more-text">
+            <p>$ help.sh</p>
+            <!-- {disabled% if c.page.hitokoto %} -->
+            <!-- (hitokoto) 一言 -->
+            <!-- {disabled% include "hitokoto.html" %} -->
+            <!-- {disabled% endif %} -->
+
+            <div class="console-help">
+                <p>> 你可以通过这个页面视奸 <b>{{ c.page.name }}</b>。</p>
+                <p>> 可用命令:</p>
+                <p>  - <a href="{{ c.page.learn_more_link }}" target="_blank">open {{ c.page.learn_more_text | safe }}</a></p>
+                <p>  - <a href="/webui/login">admin</a></p>
+                <p>> 主题选择:</p>
+                <p>  - <a href="/?theme=default">theme default</a></p>
+                <p>  - <a href="/?theme=dark">theme dark</a></p>
+                <p>  - <a href="/?theme=blue">theme blue</a></p>
+                <p>  - <a href="/?theme=console">theme console</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- {disabled% if c.page.lantern %} -->
+    <!-- (lantern) 节日灯笼 -->
+    <!-- {disabled% include "lantern.html" %} -->
+    <!-- {disabled% endif %} -->
+
+    <!-- {disabled% if c.page.mplayer %} -->
+    <!-- (mplayer) 音乐播放器 -->
+    <!-- {disabled% include "mplayer.html" %} -->
+    <!-- {disabled% endif %} -->
+
+    <!-- {disabled% if c.page.canvas %} -->
+    <!-- (canvas) 粒子效果 -->
+    <!-- <script src="{{ url_for('static', filename='canvas.js') }}" defer></script> -->
+    <!-- {disabled% endif %} -->
+
+    <script>
+        document.getElementById('status').classList.add("{{ status['color'] }}");
+
+        // 处理主题设置
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlTheme = urlParams.get('theme');
+            const currentTheme = "{{ current_theme }}";
+
+            // 如果 URL 中有主题参数，则将其保存到 localStorage
+            if (urlTheme) {
+                localStorage.setItem('sleepy_theme', urlTheme);
+            } else {
+                // 如果 URL 中没有主题参数，检查 localStorage
+                const savedTheme = localStorage.getItem('sleepy_theme');
+
+                // 如果保存的主题是 default-light，将其更改为 default
+                if (savedTheme === 'default-light') {
+                    localStorage.setItem('sleepy_theme', 'default');
+                    return;
+                }
+
+                // 如果有保存的主题且与当前主题不同，则切换到保存的主题
+                if (savedTheme && savedTheme !== currentTheme) {
+                    // 构建带有主题参数的 URL
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('theme', savedTheme);
+                    window.location.href = url.toString();
+                }
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='get.js') }}" defer></script>
+
+</body>
+
+</html>

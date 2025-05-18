@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ c.page.name }} - 管理面板</title>
+    <meta name="description" content="管理面板">
+    <link rel="icon" href="{{ c.page.favicon }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+    <style>
+        body {
+            background: url('{{ c.page.background }}') no-repeat center center fixed;
+            background-size: cover;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body class="admin-panel">
+    <div class="panel-container">
+        <div class="panel-header">
+            <h1 class="panel-title">{{ c.page.name }} 的管理面板</h1>
+            <div class="panel-actions">
+                <button class="btn btn-primary" onclick="saveData()">保存数据</button>
+                <a href="/" class="btn btn-secondary">查看前台</a>
+                <button class="btn btn-danger" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-section">
+                <h2 class="panel-section-title">状态管理</h2>
+                <p>当前状态: <span id="current-status-name">加载中...</span></p>
+                <div class="status-selector" id="status-selector">
+                    <!-- 状态选择器将通过 JavaScript 动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-section">
+                <h2 class="panel-section-title">主题设置</h2>
+                <p>当前主题: <span id="current-theme">{{ current_theme }}</span></p>
+                <div class="status-selector" id="theme-selector">
+                    {% for theme in available_themes %}
+                    <div class="status-item {% if current_theme == theme %}active{% endif %}" onclick="switchTheme('{{ theme }}')">{{ theme }}主题</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-section">
+                <h2 class="panel-section-title">设备管理</h2>
+                <div class="panel-actions" style="margin-bottom: 15px;">
+                    <button class="btn btn-danger" onclick="clearAllDevices()">清除所有设备</button>
+                    <div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="private-mode-toggle" onchange="togglePrivateMode(this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span style="vertical-align: middle; margin-left: 5px;">隐私模式</span>
+                    </div>
+                </div>
+                <table class="device-list">
+                    <thead>
+                        <tr>
+                            <th>设备ID</th>
+                            <th>显示名称</th>
+                            <th>使用状态</th>
+                            <th>应用名称</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="device-list-body">
+                        <!-- 设备列表将通过 JavaScript 动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if c.metrics.enabled %}
+        <div class="panel-card">
+            <div class="panel-section">
+                <h2 class="panel-section-title">访问统计</h2>
+                <div class="metrics-container" id="metrics-container">
+                    <!-- 统计数据将通过 JavaScript 动态生成 -->
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // 获取密钥
+        const secret = new URLSearchParams(window.location.search).get('secret') || localStorage.getItem('sleepy_secret');
+        if (!secret) {
+            window.location.href = '/webui/login';
+        }
+
+        // 全局变量
+        let statusList = [];
+        let currentStatus = 0;
+        let deviceData = {};
+        let privateMode = false;
+
+        // 初始化页面
+        async function initPage() {
+            try {
+                // 获取状态列表
+                const statusResponse = await fetch('/status_list');
+                statusList = await statusResponse.json();
+                renderStatusSelector();
+
+                // 获取当前状态和设备信息
+                const queryResponse = await fetch('/query');
+                const queryData = await queryResponse.json();
+                currentStatus = queryData.status;
+                deviceData = queryData.device;
+                privateMode = queryData.private_mode || false;
+
+                // 更新UI
+                updateCurrentStatus();
+                renderDeviceList();
+                document.getElementById('private-mode-toggle').checked = privateMode;
+
+                // 如果启用了统计功能，获取统计数据
+                if (document.getElementById('metrics-container')) {
+                    await fetchMetrics();
+                }
+            } catch (error) {
+                console.error('初始化失败:', error);
+                alert('加载数据失败，请检查网络连接或重新登录');
+            }
+        }
+
+        // 渲染状态选择器
+        function renderStatusSelector() {
+            const container = document.getElementById('status-selector');
+            container.innerHTML = '';
+
+            statusList.forEach((status, index) => {
+                const statusItem = document.createElement('div');
+                statusItem.className = `status-item ${currentStatus === index ? 'active' : ''}`;
+                statusItem.style.backgroundColor = getStatusColor(status.color);
+                statusItem.textContent = status.name;
+                statusItem.onclick = () => setStatus(index);
+                container.appendChild(statusItem);
+            });
+        }
+
+        // 获取状态颜色
+        function getStatusColor(colorName) {
+            const colors = {
+                'awake': 'rgba(0, 200, 0, 0.2)',
+                'sleeping': 'rgba(128, 128, 128, 0.2)',
+                'error': 'rgba(255, 0, 0, 0.2)'
+            };
+            return colors[colorName] || 'rgba(200, 200, 200, 0.2)';
+        }
+
+        // 更新当前状态显示
+        function updateCurrentStatus() {
+            const statusName = document.getElementById('current-status-name');
+            if (statusList[currentStatus]) {
+                statusName.textContent = statusList[currentStatus].name;
+                statusName.style.color = statusList[currentStatus].color === 'awake' ? 'green' :
+                                        statusList[currentStatus].color === 'error' ? 'red' : 'gray';
+            } else {
+                statusName.textContent = '未知状态';
+                statusName.style.color = 'red';
+            }
+
+            // 更新状态选择器中的活动状态
+            document.querySelectorAll('.status-item').forEach((item, index) => {
+                item.classList.toggle('active', index === currentStatus);
+            });
+        }
+
+        // 设置状态
+        async function setStatus(statusIndex) {
+            try {
+                const response = await fetch(`/set?status=${statusIndex}&secret=${secret}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentStatus = statusIndex;
+                    updateCurrentStatus();
+                } else {
+                    alert('设置状态失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('设置状态失败:', error);
+                alert('设置状态失败，请检查网络连接');
+            }
+        }
+
+        // 渲染设备列表
+        function renderDeviceList() {
+            const tbody = document.getElementById('device-list-body');
+            tbody.innerHTML = '';
+
+            if (Object.keys(deviceData).length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="5" style="text-align: center;">暂无设备数据</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+
+            for (const [deviceId, device] of Object.entries(deviceData)) {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${deviceId}</td>
+                    <td>${device.show_name}</td>
+                    <td>${device.using ? '使用中' : '未使用'}</td>
+                    <td>${device.app_name}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="removeDevice('${deviceId}')">删除</button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            }
+        }
+
+        // 删除设备
+        async function removeDevice(deviceId) {
+            if (!confirm(`确定要删除设备 "${deviceId}" 吗？`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/device/remove?id=${deviceId}&secret=${secret}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    delete deviceData[deviceId];
+                    renderDeviceList();
+                } else {
+                    alert('删除设备失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('删除设备失败:', error);
+                alert('删除设备失败，请检查网络连接');
+            }
+        }
+
+        // 清除所有设备
+        async function clearAllDevices() {
+            if (!confirm('确定要清除所有设备吗？此操作不可撤销！')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/device/clear?secret=${secret}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    deviceData = {};
+                    renderDeviceList();
+                } else {
+                    alert('清除设备失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('清除设备失败:', error);
+                alert('清除设备失败，请检查网络连接');
+            }
+        }
+
+        // 切换隐私模式
+        async function togglePrivateMode(isPrivate) {
+            try {
+                const response = await fetch(`/device/private_mode?private=${isPrivate}&secret=${secret}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    privateMode = isPrivate;
+                } else {
+                    alert('切换隐私模式失败: ' + (data.message || '未知错误'));
+                    document.getElementById('private-mode-toggle').checked = privateMode;
+                }
+            } catch (error) {
+                console.error('切换隐私模式失败:', error);
+                alert('切换隐私模式失败，请检查网络连接');
+                document.getElementById('private-mode-toggle').checked = privateMode;
+            }
+        }
+
+        // 获取统计数据
+        async function fetchMetrics() {
+            try {
+                const response = await fetch('/metrics');
+                const data = await response.json();
+
+                const container = document.getElementById('metrics-container');
+                container.innerHTML = '';
+
+                // 添加总访问量卡片
+                if (data.total && data['/']) {
+                    addMetricCard(container, '首页总访问量', data.total['/'] || 0);
+                }
+
+                // 添加今日访问量卡片
+                if (data.today && data.today['/']) {
+                    addMetricCard(container, '今日首页访问', data.today['/'] || 0);
+                }
+
+                // 添加本月访问量卡片
+                if (data.month && data.month['/']) {
+                    addMetricCard(container, '本月首页访问', data.month['/'] || 0);
+                }
+
+                // 添加API调用次数卡片
+                if (data.total) {
+                    let apiCalls = 0;
+                    for (const [path, count] of Object.entries(data.total)) {
+                        if (path.startsWith('/') && path !== '/') {
+                            apiCalls += count;
+                        }
+                    }
+                    addMetricCard(container, 'API总调用次数', apiCalls);
+                }
+            } catch (error) {
+                console.error('获取统计数据失败:', error);
+                const container = document.getElementById('metrics-container');
+                container.innerHTML = '<p>获取统计数据失败，请刷新页面重试</p>';
+            }
+        }
+
+        // 添加统计卡片
+        function addMetricCard(container, label, value) {
+            const card = document.createElement('div');
+            card.className = 'metric-card';
+            card.innerHTML = `
+                <div class="metric-value">${value}</div>
+                <div class="metric-label">${label}</div>
+            `;
+            container.appendChild(card);
+        }
+
+        // 保存数据
+        async function saveData() {
+            try {
+                const response = await fetch(`/save_data?secret=${secret}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('数据保存成功！');
+                } else {
+                    alert('保存数据失败: ' + (data.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('保存数据失败:', error);
+                alert('保存数据失败，请检查网络连接');
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('sleepy_secret');
+            window.location.href = '/webui/login';
+        }
+
+        // 切换主题
+        function switchTheme(theme) {
+            // 保存主题选择到 localStorage
+            localStorage.setItem('sleepy_theme', theme);
+
+            // 保存当前的 URL 参数
+            const urlParams = new URLSearchParams(window.location.search);
+            // 设置新的主题
+            urlParams.set('theme', theme);
+            // 确保 secret 参数存在
+            if (!urlParams.has('secret') && secret) {
+                urlParams.set('secret', secret);
+            }
+            // 重定向到新的 URL
+            window.location.href = window.location.pathname + '?' + urlParams.toString();
+        }
+
+        // 初始化页面
+        window.onload = initPage;
+    </script>
+</body>
+
+</html>

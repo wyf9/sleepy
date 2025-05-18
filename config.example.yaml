@@ -21,6 +21,10 @@ page:
   learn_more_link: "https://github.com/wyf9/sleepy" # 更多信息链接的目标, 默认为本仓库链接
   more_text: "" # 内容将在状态页底部 learn_more 上方插入 (不转义)
 
+  # 主题设置
+  theme: "default" # 默认主题，可选值: default, dark, blue, console
+
+  # 功能控制
   # hitokoto: true # 控制是否显示一言
   # canvas: true # 控制是否加载背景粒子
   # moonlight: true # 控制是否启用暗色切换 / 透明度调整
