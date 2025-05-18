@@ -31,7 +31,7 @@
 
         <div class="panel-card">
             <div class="panel-section">
-                <h2 class="panel-section-title">状态管理</h2>
+                <h2 class="panel-section-title">状态设置</h2>
                 <p>当前状态: <span id="current-status-name">加载中...</span></p>
                 <div class="status-selector" id="status-selector">
                     <!-- 状态选择器将通过 JavaScript 动态生成 -->
@@ -49,15 +49,15 @@
                             <input type="checkbox" id="private-mode-toggle" onchange="togglePrivateMode(this.checked)">
                             <span class="toggle-slider"></span>
                         </label>
-                        <span style="vertical-align: middle; margin-left: 5px;">隐私模式</span>
+                        <span style="vertical-align: middle; margin-left: 5px;">隐私模式 (隐藏所有设备)</span>
                     </div>
                 </div>
                 <table class="device-list">
                     <thead>
                         <tr>
-                            <th>设备ID</th>
-                            <th>显示名称</th>
-                            <th>使用状态</th>
+                            <th>ID</th>
+                            <th>显示名</th>
+                            <th>正在使用</th>
                             <th>应用名称</th>
                             <th>操作</th>
                         </tr>
@@ -155,7 +155,7 @@
             if (statusList[currentStatus]) {
                 statusName.textContent = statusList[currentStatus].name;
                 statusName.style.color = statusList[currentStatus].color === 'awake' ? 'green' :
-                                        statusList[currentStatus].color === 'error' ? 'red' : 'gray';
+                    statusList[currentStatus].color === 'error' ? 'red' : 'gray';
             } else {
                 statusName.textContent = '未知状态';
                 statusName.style.color = 'red';
@@ -203,7 +203,7 @@
                 tr.innerHTML = `
                     <td>${deviceId}</td>
                     <td>${device.show_name}</td>
-                    <td>${device.using ? '使用中' : '未使用'}</td>
+                    <td>${device.using ? 'Yes' : 'No'}</td>
                     <td>${device.app_name}</td>
                     <td>
                         <button class="btn btn-danger" onclick="removeDevice('${deviceId}')">删除</button>
@@ -286,31 +286,62 @@
                 const container = document.getElementById('metrics-container');
                 container.innerHTML = '';
 
-                // 添加总访问量卡片
-                if (data.total && data['/']) {
-                    addMetricCard(container, '首页总访问量', data.total['/'] || 0);
+                // 今日访问
+                if (data.today) {
+                    if (data.today['/']) {
+                        addMetricCard(container, '今日首页访问量', data.today['/'] || 0);
+                    }
+                    let apiCalls = 0;
+                    for (const [path, count] of Object.entries(data.today)) {
+                        if (path.startsWith('/') && path !== '/') {
+                            apiCalls += count;
+                        }
+                    }
+                    addMetricCard(container, '今日 API 调用次数', apiCalls);
                 }
 
-                // 添加今日访问量卡片
-                if (data.today && data.today['/']) {
-                    addMetricCard(container, '今日首页访问', data.today['/'] || 0);
+                // 本月访问
+                if (data.month) {
+                    if (data.month['/']) {
+                        addMetricCard(container, '本月首页访问量', data.month['/'] || 0);
+                    }
+                    let apiCalls = 0;
+                    for (const [path, count] of Object.entries(data.month)) {
+                        if (path.startsWith('/') && path !== '/') {
+                            apiCalls += count;
+                        }
+                    }
+                    addMetricCard(container, '本月 API 调用次数', apiCalls);
                 }
 
-                // 添加本月访问量卡片
-                if (data.month && data.month['/']) {
-                    addMetricCard(container, '本月首页访问', data.month['/'] || 0);
+                // 本年访问
+                if (data.year) {
+                    if (data.year['/']) {
+                        addMetricCard(container, '本年首页访问量', data.year['/'] || 0);
+                    }
+                    let apiCalls = 0;
+                    for (const [path, count] of Object.entries(data.year)) {
+                        if (path.startsWith('/') && path !== '/') {
+                            apiCalls += count;
+                        }
+                    }
+                    addMetricCard(container, '本年 API 调用次数', apiCalls);
                 }
 
-                // 添加API调用次数卡片
+                // 总访问
                 if (data.total) {
+                    if (data.total['/']) {
+                        addMetricCard(container, '首页总访问量', data.total['/'] || 0);
+                    }
                     let apiCalls = 0;
                     for (const [path, count] of Object.entries(data.total)) {
                         if (path.startsWith('/') && path !== '/') {
                             apiCalls += count;
                         }
                     }
-                    addMetricCard(container, 'API总调用次数', apiCalls);
+                    addMetricCard(container, 'API 总调用次数', apiCalls);
                 }
+
             } catch (error) {
                 console.error('获取统计数据失败:', error);
                 const container = document.getElementById('metrics-container');

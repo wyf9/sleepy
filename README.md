@@ -2,7 +2,7 @@
 
 一个用于 ~~*视奸*~~ 查看个人在线状态 (以及正在使用软件) 的 Flask 应用，让他人能知道你不在而不是故意吊他/她
 
-[**功能**](#功能) / [**演示**](#preview) / [**部署**](#部署--更新) / [**使用**](#使用) / [**Client**](#client) / [**API**](#api) / [**关于**](#关于)
+[**功能**](#功能) / [**演示**](#preview) / [**部署**](#部署--更新) / [**Client**](#client) / [**API**](#api) / [**关于**](#关于)
 
 ## 功能
 
@@ -13,7 +13,7 @@
 
 > [!TIP]
 > **最新 开发进度 / TODOs 见: [Discord][link-dc]** / [Telegram][link-tg] / [QQ][link-qq]<br/>
-> 如有 Bug / 建议, 可发 [issue](https://github.com/wyf9/sleepy/issues/new) 或选择上面的联系方式 *(注明来意)*.
+> 如有 Bug / 建议, 可发 issue (**[Bug][link-issue-bug]** / **[Feature][link-issue-feature]**) 或选择上面的联系方式 *(注明来意)*.
 
 ### Preview
 
@@ -27,9 +27,9 @@
 
 **HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
 
-**Verce**l 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
+**Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
 
-开发服务器: [请在 Discord 服务器获取][link-dc]
+*开发服务器*: [请在 Discord 服务器获取][link-dc]
 
 > [!TIP]
 > - **演示站** 为 wyf9 个人站点 <br/>
@@ -72,6 +72,8 @@
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ **([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))**
 
 
-[link-dc]: https://discord.gg/DyBY6gwkeg
-[link-tg]: https://t.me/wyf9_sleepy
-[link-qq]: https://qm.qq.com/q/uItkv96Wn6
+[link-dc]: https://wyf9.top/t/sleepy/dc
+[link-tg]: https://wyf9.top/t/sleepy/tg
+[link-qq]: https://wyf9.top/t/sleepy/qq
+[link-issue-bug]: https://wyf9.top/t/sleepy/bug
+[link-issue-feature]: https://wyf9.top/t/sleepy/feature
