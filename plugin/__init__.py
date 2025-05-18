@@ -121,4 +121,4 @@ class Plugin:
             )
             # 保存此项
             self.plugins.append((i, plugin_frontend, plugin_backend, plugin_config))
-        self.u.info(f'plugins enabled: {", ".join(self.c.plugin_enabled)}')
+        self.u.info(f'plugins enabled: {", ".join(self.c.plugin_enabled)}' if self.c.plugin_enabled else 'no plugin enabled.')

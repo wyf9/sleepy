@@ -20,9 +20,9 @@ import _utils
 print(f'''
 Welcome to Sleepy 2025!
 Give us a Star 🌟 please: https://github.com/wyf9/sleepy
-Bug Report: https://github.com/wyf9/sleepy/issues/new?template=1-bug-report.yml
-Feature Request: https://github.com/wyf9/sleepy/issues/new?template=2-feature-request.yml
-Security Report: https://github.com/wyf9/sleepy/security/policy
+Bug Report: https://wyf9.top/t/sleepy/bug
+Feature Request: https://wyf9.top/t/sleepy/feature
+Security Report: https://wyf9.top/t/sleepy/security
 '''[1:-1])
 
 try:
@@ -534,7 +534,7 @@ def events():
 
                 # 获取 /query 返回数据
                 ret = query(ret_as_dict=True)
-                update_data = json5.dumps(ret, quote_keys=True, ensure_ascii=False) # .replace('\n', '\\n')
+                update_data = json5.dumps(ret, quote_keys=True, ensure_ascii=False)  # .replace('\n', '\\n')
                 yield f'event: update\ndata: {update_data}\n\n'
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
@@ -550,6 +550,7 @@ def events():
     return response
 
 # --- WebUI (Admin Panel)
+
 
 @app.route('/webui/panel')
 @require_secret
@@ -571,6 +572,7 @@ def admin_panel():
         current_theme=theme,
         available_themes=available_themes
     ), 200
+
 
 @app.route('/webui/login')
 def login():

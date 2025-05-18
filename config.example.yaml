@@ -15,7 +15,7 @@ page:
   name: "User" # 你的名字
   title: "User Alive?" # 页面标题
   desc: "User's Online Status Page" # 页面详情 (用于 SEO, 或许吧)
-  favicon: "./static/favicon.ico" # 页面图标 (favicon) url, 默认为 ./static/favicon.ico
+  favicon: "/static/favicon.ico" # 页面图标 (favicon) url, 默认为 /static/favicon.ico
   background: "https://imgapi.siiway.top/image" # 背景图片 url
   learn_more_text: "GitHub Repo" # 更多信息链接的提示, 默认为 "GitHub Repo"
   learn_more_link: "https://github.com/wyf9/sleepy" # 更多信息链接的目标, 默认为本仓库链接
