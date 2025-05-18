@@ -1,4 +1,5 @@
 frontend: true
+frontend-card: true
 backend: false
 config:
   content: |

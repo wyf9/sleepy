@@ -32,7 +32,7 @@ pip install -r requirements.txt
 
 3. 编辑配置文件
 
-> *配置文件变化史: `data.json` -> `config.json` -> `config.jsonc` -> `.env` -> (`config.yaml` and `.env`)*
+> *配置文件变化史: ~~`data.json`~~ -> ~~`config.json`~~ -> ~~`config.jsonc`~~ -> `.env` -> `config.yaml`*
 
 在目录下新建 `config.yaml`，并**按照 [此处](./config.md) 的说明编辑配置**
 
@@ -40,6 +40,7 @@ pip install -r requirements.txt
 
 ### 启动
 
+> [!WARNING]
 > **使用宝塔面板 (uwsgi) 等部署时，请确定只为本程序分配了 1 个进程, 如设置多个服务进程可能导致数据不同步!!!**
 
 有两种启动方式:
@@ -89,10 +90,6 @@ python3 start.py
 
 ### 卡在 Deploying?
 
-<details>
-
-<summary>解决方法</summary>
-
 > [!TIP]
 > *对所有的 Hugging Face Space 都有效*
 
@@ -100,17 +97,44 @@ python3 start.py
 2. 在 `Settings` 页面底部 `Delete this Space` 处**删除**旧 Space
 3. 在 `Settings` -> `Rename or transfer this space` 将新 Space **重命名**为旧 Space 的名称
 
-</details>
-
 ### 如何使用自定义域名
 
-<details>
+1. 到 [Zero Trust Dashboard](https://one.dash.cloudflare.com/?to=/:account/networks/tunnels/add/cfd_tunnel) 创建一个 Tunnel
 
-<summary>点击展开</summary>
+随便填一个名字后进入 `安装并运行连接器`，复制 Token:
 
-TODO
+![huggingface-2](https://ghimg.siiway.top/sleepy/deploy/huggingface-2.1.png)
 
-</details>
+进入 `路由隧道`，按如下图片配置并保存:
+
+![huggingface-3](https://ghimg.siiway.top/sleepy/deploy/huggingface-3.1.png)
+
+2. 编辑 Space 的 `Dockerfile`，将底部的 `CMD python3 server.py` 删除，并添加:
+
+```dockerfile
+# Install wget
+RUN apt install wget -y
+
+# Download Cloudflared script
+RUN wget -O cfd.sh https://gist.github.com/wyf9/71ff358636154ab00d90602c3c818763/raw/cfd.sh
+
+# Start
+CMD bash cfd.sh
+```
+
+3. 新建两个环境变量 (`Settings` -> `Variables and secrets`):
+
+- `CFD_COMMAND` *(`Variable`)*: `python3 server.py`
+- `CFD_TOKEN`: 你的 Cloudflare Tunnel 密钥
+
+设置完成后如图:
+
+![huggingface-4](https://ghimg.siiway.top/sleepy/deploy/huggingface-4.1.png)
+
+4. 重新构建 Space (`Factory rebuild`) 即可
+
+> 定时请求仍然需要使用 Huggingface 提供的子域 <br/>
+> *详见: [Gist](https://gist.github.com/wyf9/71ff358636154ab00d90602c3c818763)*
 
 ## Vercel 部署
 
@@ -137,4 +161,4 @@ TODO
 
 ![vercel-4](https://ghimg.siiway.top/sleepy/deploy/vercel-4.1.png)
 
-> 修改环境变量后需重新部署
+> 修改环境变量后需重启 Space

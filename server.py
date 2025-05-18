@@ -465,7 +465,7 @@ def events():
 
                 # 获取 /query 返回数据
                 ret = query(ret_as_dict=True)
-                update_data = json5.dumps(ret, quote_keys=True, ensure_ascii=False).replace('\n', '\\n')
+                update_data = json5.dumps(ret, quote_keys=True, ensure_ascii=False) # .replace('\n', '\\n')
                 yield f'event: update\ndata: {update_data}\n\n'
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:

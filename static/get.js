@@ -29,10 +29,10 @@ function escapeHtml(str) {
 
 function escapeJs(str) {
     return String(str)
-        .replace(/\\/g, '\\\\')
         .replace(/'/g, "\\'")
-        .replace(/\n/g, '\\n')
-        .replace(/\r/g, '\\r');
+    // .replace(/\\/g, '\\\\')
+    // .replace(/\n/g, '\\n')
+    // .replace(/\r/g, '\\r');
 }
 
 function getFormattedDate(date) {
@@ -95,15 +95,18 @@ function updateElement(data) {
             const escapedJsCode = escapeHtml(jsCode);
 
             device_app = `
-<a class="awake" 
-    title="${escapedAppName}" 
+<a
+    class="awake"
+    title="${escapedAppName}"
     href="javascript:${escapedJsCode}">
-${sliceText(escapedAppName, data.device_status_slice)}
+${sliceText(escapedAppName, data.device_status_slice).replaceAll('.\n', ' <br/>\n')}
 </a>`;
         } else {
             device_app = `
-<a class="sleeping">
-${sliceText(escapedAppName, data.device_status_slice)}
+<a
+    class="sleeping"
+    title="${escapedAppName}">
+${sliceText(escapedAppName, data.device_status_slice).replaceAll('\n', ' <br/>\n')}
 </a>`
         }
         deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;

@@ -9,26 +9,35 @@
 - [x] 自行设置在线状态 *(活着 / 似了 等, 也可自定义状态)*
 - [x] 实时更新设备使用状态 *(包括 是否正在使用 / 打开的应用名, 通过 **[客户端](./client/README.md)** 主动推送)*
 - [x] 美观的展示页面 [见 **[Preview](#preview)**]
-- [x] 开放的 状态 / 统计 **[API](./doc/api.md)**, 方便统计
+- [x] 开放的 状态 / 统计 **[API](./doc/api.md)**
 
 > [!TIP]
-> **最新 开发进度 / TODOs 见: [Discord](https://discord.gg/DyBY6gwkeg)** / [Telegram](https://t.me/wyf9_sleepy) / [QQ](https://qm.qq.com/q/uItkv96Wn6)<br/>
+> **最新 开发进度 / TODOs 见: [Discord][link-dc]** / [Telegram][link-tg] / [QQ][link-qq]<br/>
 > 如有 Bug / 建议, 可发 [issue](https://github.com/wyf9/sleepy/issues/new) 或选择上面的联系方式 *(注明来意)*.
 
 ### Preview
 
 演示站: [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
-开放预览 (暂不可用): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+<details>
 
-HuggingFace 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
+<summary>展开更多</summary>
 
-Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
+开放预览站: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
-> 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本 (**密钥均为 `wyf9test`**)
+**HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
 
-> [!WARNING]
-> *不要拿演示站做坏事 (比如 js 注入，已由 DeepSeek 强力修复) ~~，没准哪天我会加访问日志~~*
+**Verce**l 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
+
+开发服务器: [请在 Discord 服务器获取][link-dc]
+
+> [!TIP]
+> - **演示站** 为 wyf9 个人站点 <br/>
+> - **预览站** 允许测试 API，运行最新的稳定版本 <br/>
+> - **开发服务器** 运行最新甚至未提交的*不稳定*版本, **不保证可正常访问** <br/>
+> *除演示站外, 密钥均为 `wyf9test`*
+
+</details>
 
 ## 部署 / 更新
 
@@ -61,3 +70,8 @@ Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
 对智能家居 / Home Assistant 感兴趣的朋友，一定要看看 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): **[maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!**
 
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ **([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))**
+
+
+[link-dc]: https://discord.gg/DyBY6gwkeg
+[link-tg]: https://t.me/wyf9_sleepy
+[link-qq]: https://qm.qq.com/q/uItkv96Wn6

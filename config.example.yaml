@@ -72,7 +72,7 @@ metrics:
     - "[static]" # 特殊值, 匹配 static 目录中的所有文件
     # 还可添加更多
 
-plugin_enabled: # 启用的插件列表，按从上到下的顺序加载
+plugin_enabled: [] # 启用的插件列表，按从上到下的顺序加载
   # - test
   # - hitokoto
 

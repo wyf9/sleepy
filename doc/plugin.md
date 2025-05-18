@@ -47,6 +47,7 @@ plugin_enabled: # 启动的插件列表，注入顺序为从上到下
 
 ```yaml
 frontend: true # 是否为前端插件 (为是才会尝试加载 index.html)
+frontend-card: true # 是否创建卡片 (为是则将 index.html 内容插入到卡片中，为否则插入到网页底部) / TODO
 backend: true # 是否为后端插件 (为是才会尝试加载 __main__.py)
 config: # 配置项定义 (即默认值)
   name: value
