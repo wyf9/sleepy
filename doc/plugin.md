@@ -2,7 +2,7 @@
 
 本文档介绍如何使用 sleepy 的插件功能，适合普通用户阅读。
 
-> 注意：如果您是插件开发者，请参阅 [plugin-dev/frontend.md](plugin-dev/frontend.md) 和 [plugin-dev/backend.md](plugin-dev/backend.md) 获取开发相关信息。
+> 注意：如果您是插件开发者，请参阅 [plugin-dev/index.md](plugin-dev/index.md) 获取开发相关信息。
 
 ## 什么是插件？
 
@@ -84,8 +84,8 @@ plugin:
 
 ### Example Backend 插件
 
-这是一个示例后端插件，展示系统事件日志。  
-默认情况下，它是禁用的，只用于演示插件的开发。  
+这是一个示例后端插件，展示系统事件日志。
+默认情况下，它是禁用的，只用于演示插件的开发。
 如果您想启用它，请在 `config.yaml` 中添加以下内容：
 
 ```yaml

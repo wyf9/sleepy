@@ -11,4 +11,5 @@
 
 - **[API 文档](./api.md)**
 - *[插件规范](./plugin.md)*
+- *[插件开发文档](./plugin-dev/README.md)*
 - *[xhc861 的 components api 参考](./20.49api.md)*
