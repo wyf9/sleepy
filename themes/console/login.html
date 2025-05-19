@@ -43,65 +43,10 @@
     </div>
 
     <script>
-        // 处理主题设置
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlTheme = urlParams.get('theme');
-            const currentTheme = "{{ current_theme }}";
-
-            // 如果 URL 中有主题参数，则将其保存到 localStorage
-            if (urlTheme) {
-                localStorage.setItem('sleepy_theme', urlTheme);
-            } else {
-                // 如果 URL 中没有主题参数，检查 localStorage
-                const savedTheme = localStorage.getItem('sleepy_theme');
-
-                // 如果保存的主题是 default-light，将其更改为 default
-                if (savedTheme === 'default-light') {
-                    localStorage.setItem('sleepy_theme', 'default');
-                    return;
-                }
-
-                // 如果有保存的主题且与当前主题不同，则切换到保存的主题
-                if (savedTheme && savedTheme !== currentTheme) {
-                    // 构建带有主题参数的 URL
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('theme', savedTheme);
-                    window.location.href = url.toString();
-                }
-            }
-        });
-
-        function login() {
-            const secret = document.getElementById('secret').value;
-            if (!secret) {
-                document.getElementById('error-message').style.display = 'block';
-                document.getElementById('error-message').textContent = '请输入密钥';
-                return;
-            }
-
-            // 将密钥存储在 localStorage 中
-            localStorage.setItem('sleepy_secret', secret);
-
-            // 获取当前保存的主题
-            const savedTheme = localStorage.getItem('sleepy_theme');
-
-            // 重定向到管理面板，如果有主题则带上主题参数
-            let redirectUrl = '/webui/panel?secret=' + encodeURIComponent(secret);
-            if (savedTheme) {
-                redirectUrl += '&theme=' + encodeURIComponent(savedTheme);
-            }
-
-            window.location.href = redirectUrl;
-        }
-
-        // 按下回车键时触发登录按钮
-        document.getElementById('secret').addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                login();
-            }
-        });
+        // 设置当前主题，供 login.js 使用
+        document.body.setAttribute('data-theme', "{{ current_theme }}");
     </script>
+    <script src="{{ url_for('static', filename='login.js') }}"></script>
 </body>
 
 </html>
