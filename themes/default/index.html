@@ -103,34 +103,10 @@
     <script>
         document.getElementById('status').classList.add("{{ status['color'] }}");
 
-        // 处理主题设置
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlTheme = urlParams.get('theme');
-            const currentTheme = "{{ current_theme }}";
-
-            // 如果 URL 中有主题参数，则将其保存到 localStorage 并使用该主题
-            if (urlTheme) {
-                localStorage.setItem('sleepy_theme', urlTheme);
-            } else {
-                // 如果 URL 中没有主题参数，检查 localStorage
-                const savedTheme = localStorage.getItem('sleepy_theme');
-
-                // 如果保存的主题是 default-light，将其更改为 default
-                if (savedTheme === 'default-light') {
-                    localStorage.setItem('sleepy_theme', 'default');
-                }
-
-                // 如果有保存的主题且与当前主题不同，则切换到保存的主题
-                if (savedTheme && savedTheme !== currentTheme) {
-                    // 构建带有主题参数的 URL
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('theme', savedTheme);
-                    window.location.href = url.toString();
-                }
-            }
-        });
+        // 设置当前主题，供 theme.js 使用
+        document.body.setAttribute('data-theme', "{{ current_theme }}");
     </script>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
 
 </body>

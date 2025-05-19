@@ -45,6 +45,11 @@
             font-weight: bold;
         }
     </style>
+    <script>
+        // 设置当前主题，供 theme.js 使用
+        document.body.setAttribute('data-theme', "{{ current_theme }}");
+    </script>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
 </head>
 <body>
     <div class="container">
@@ -364,18 +369,7 @@
             window.location.href = '/webui/logout';
         }
 
-        // 切换主题
-        function switchTheme(theme) {
-            // 保存主题选择到 localStorage
-            localStorage.setItem('sleepy_theme', theme);
-
-            // 保存当前的 URL 参数
-            const urlParams = new URLSearchParams(window.location.search);
-            // 设置新的主题
-            urlParams.set('theme', theme);
-            // 重定向到新的 URL
-            window.location.href = window.location.pathname + '?' + urlParams.toString();
-        }
+        // switchTheme 函数现在在 theme.js 中定义
 
         // 初始化页面
         window.onload = initPage;
