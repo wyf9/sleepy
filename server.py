@@ -115,8 +115,8 @@ def get_available_themes():
         # 遍历主题目录
         for theme in os.listdir(themes_dir):
             theme_path = os.path.join(themes_dir, theme)
-            # 检查是否是目录且包含 index.html 文件
-            if os.path.isdir(theme_path) and os.path.exists(os.path.join(theme_path, 'index.html')):
+            # 检查是否是目录
+            if os.path.isdir(theme_path):
                 themes.append(theme)
 
     # 确保 default 主题总是存在
