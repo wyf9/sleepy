@@ -34,6 +34,30 @@ def init_plugin(config):
     try:
         _init_database()
         config.u.info(f'[app-chart] 插件初始化成功，数据库路径: {_db_path}')
+
+        # 在服务器启动时输出模式列表
+        try:
+            conn = _get_db()
+            cursor = conn.cursor()
+
+            try:
+                # 获取所有模式
+                cursor.execute('SELECT id, pattern, replacement, description, enabled FROM app_name_patterns ORDER BY id')
+                patterns = [dict(row) for row in cursor.fetchall()]
+
+                # 输出模式列表
+                config.u.debug("===== 应用名称模式列表 =====")
+                if patterns:
+                    for pattern in patterns:
+                        config.u.debug(f"ID: {pattern['id']}, 模式: {pattern['pattern']}, 替换为: {pattern['replacement']}, 描述: {pattern.get('description', '')}")
+                else:
+                    config.u.debug("暂无模式")
+                config.u.debug("========================================")
+            finally:
+                conn.close()
+        except Exception as e:
+            config.u.error(f"[app-chart] 获取模式列表失败: {str(e)}")
+
         return True
     except Exception as e:
         config.u.error(f'[app-chart] 插件初始化失败: {str(e)}')
@@ -982,15 +1006,17 @@ def app_name_patterns_card(_):
     :param _: 插件配置对象（未使用）
     :return: 卡片内容
     """
-    # 构建卡片内容
-    content = """
+    # 直接返回内联的 HTML、CSS 和 JavaScript，不需要导入模块
+    return """
     <div class="app-name-patterns">
         <div class="patterns-description">
-            <p>应用名称模式允许您将多个相似的应用名称合并为一个。支持以下通配符格式：</p>
+            <h4>应用名称模式</h4>
+            <p>您可以创建应用名称模式来合并相似的应用名称。例如，将所有包含"Chrome"的应用名称显示为"Chrome浏览器"。</p>
+            <p>支持的模式类型：</p>
             <ul>
-                <li><code>*Discord</code> - 匹配以 "Discord" 结尾的应用名称</li>
-                <li><code>Chrome*</code> - 匹配以 "Chrome" 开头的应用名称</li>
-                <li><code>*Office*</code> - 匹配包含 "Office" 的应用名称</li>
+                <li><code>*Chrome</code> - 匹配所有以"Chrome"结尾的名称</li>
+                <li><code>Chrome*</code> - 匹配所有以"Chrome"开头的名称</li>
+                <li><code>*Chrome*</code> - 匹配所有包含"Chrome"的名称</li>
                 <li><code>Exact Name</code> - 精确匹配 "Exact Name"</li>
             </ul>
         </div>
@@ -1117,16 +1143,40 @@ def app_name_patterns_card(_):
         border: 1px solid rgba(249, 197, 19, 0.2);
         color: #e36209;
     }
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+    .empty-message {
+        color: #888;
+        text-align: center;
+        padding: 20px;
+    }
+    .error-message {
+        color: #e15759;
+        text-align: center;
+        padding: 20px;
+    }
     </style>
 
     <script>
     // 加载模式列表
     async function loadPatterns() {
         const container = document.getElementById('patterns-container');
+        if (!container) {
+            console.error('Error: patterns-container element not found');
+            return;
+        }
+
         container.innerHTML = '<div class="loading">加载中...</div>';
 
         try {
-            const response = await fetch('/plugin/app-chart/patterns');
+            const response = await fetch('/plugin/app-chart/patterns/list');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
 
             if (!data.success) {
@@ -1135,12 +1185,18 @@ def app_name_patterns_card(_):
 
             if (data.patterns.length === 0) {
                 container.innerHTML = '<div class="empty-message">暂无模式，请添加一个新模式</div>';
-                document.getElementById('delete-all-patterns').style.display = 'none';
+                const deleteAllBtn = document.getElementById('delete-all-patterns');
+                if (deleteAllBtn) {
+                    deleteAllBtn.style.display = 'none';
+                }
                 return;
             }
 
             // 显示删除所有按钮
-            document.getElementById('delete-all-patterns').style.display = 'block';
+            const deleteAllBtn = document.getElementById('delete-all-patterns');
+            if (deleteAllBtn) {
+                deleteAllBtn.style.display = 'block';
+            }
 
             container.innerHTML = '';
 
@@ -1257,11 +1313,19 @@ def app_name_patterns_card(_):
         }
 
         const messageEl = document.getElementById('patterns-message');
+        if (!messageEl) {
+            console.error('Error: patterns-message element not found');
+            return;
+        }
 
         try {
             const response = await fetch(`/plugin/app-chart/patterns/${id}`, {
                 method: 'DELETE'
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
             const data = await response.json();
 
@@ -1283,6 +1347,7 @@ def app_name_patterns_card(_):
                 messageEl.style.display = 'none';
             }, 3000);
         } catch (error) {
+            console.error('Error deleting pattern:', error);
             messageEl.textContent = '删除模式失败: ' + error.message;
             messageEl.className = 'patterns-message error';
             messageEl.style.display = 'block';
@@ -1296,16 +1361,24 @@ def app_name_patterns_card(_):
         }
 
         const messageEl = document.getElementById('patterns-message');
+        if (!messageEl) {
+            console.error('Error: patterns-message element not found');
+            return;
+        }
 
         try {
-            const response = await fetch('/plugin/app-chart/patterns');
+            const response = await fetch('/plugin/app-chart/patterns/list');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
 
             if (!data.success) {
                 throw new Error(data.message || '获取模式列表失败');
             }
 
-            if (data.patterns.length === 0) {
+            if (!data.patterns || data.patterns.length === 0) {
                 messageEl.textContent = '没有模式可删除';
                 messageEl.className = 'patterns-message info';
                 messageEl.style.display = 'block';
@@ -1327,6 +1400,11 @@ def app_name_patterns_card(_):
                         method: 'DELETE'
                     });
 
+                    if (!deleteResponse.ok) {
+                        failCount++;
+                        continue;
+                    }
+
                     const deleteData = await deleteResponse.json();
 
                     if (deleteData.success) {
@@ -1335,6 +1413,7 @@ def app_name_patterns_card(_):
                         failCount++;
                     }
                 } catch (error) {
+                    console.error('Error deleting pattern:', error);
                     failCount++;
                 }
             }
@@ -1356,6 +1435,7 @@ def app_name_patterns_card(_):
                 messageEl.style.display = 'none';
             }, 3000);
         } catch (error) {
+            console.error('Error deleting all patterns:', error);
             messageEl.textContent = '删除所有模式失败: ' + error.message;
             messageEl.className = 'patterns-message error';
             messageEl.style.display = 'block';
@@ -1364,17 +1444,24 @@ def app_name_patterns_card(_):
 
     // 初始化
     document.addEventListener('DOMContentLoaded', function() {
+        // 确保所有元素都存在
+        const addPatternBtn = document.getElementById('add-pattern');
+        const deleteAllPatternsBtn = document.getElementById('delete-all-patterns');
+
         // 加载初始数据
         loadPatterns();
 
-        // 绑定事件
-        document.getElementById('add-pattern').addEventListener('click', addPattern);
-        document.getElementById('delete-all-patterns').addEventListener('click', deleteAllPatterns);
+        // 绑定事件（确保元素存在）
+        if (addPatternBtn) {
+            addPatternBtn.addEventListener('click', addPattern);
+        }
+
+        if (deleteAllPatternsBtn) {
+            deleteAllPatternsBtn.addEventListener('click', deleteAllPatterns);
+        }
     });
     </script>
     """
-
-    return content
 
 @route('/export-data')
 def export_data():
@@ -1419,7 +1506,7 @@ def export_data():
             'message': str(e)
         }
 
-@route('/patterns')
+@route('/patterns/list', methods=['GET'])
 def get_patterns():
     """
     获取应用名称模式列表
@@ -1434,6 +1521,15 @@ def get_patterns():
             # 获取所有模式
             cursor.execute('SELECT id, pattern, replacement, description, enabled FROM app_name_patterns ORDER BY id')
             patterns = [dict(row) for row in cursor.fetchall()]
+
+            # 在后台输出模式列表
+            print("\n===== 应用名称模式列表 =====")
+            if patterns:
+                for pattern in patterns:
+                    print(f"ID: {pattern['id']}, 模式: {pattern['pattern']}, 替换为: {pattern['replacement']}, 描述: {pattern.get('description', '')}")
+            else:
+                print("暂无模式")
+            print("===========================\n")
 
             return {
                 'success': True,
@@ -1485,7 +1581,13 @@ def add_pattern():
 
             conn.commit()
 
-            return {'success': True, 'id': cursor.lastrowid}
+            # 在后台输出添加的模式
+            new_id = cursor.lastrowid
+            print("\n===== 添加新模式 =====")
+            print(f"ID: {new_id}, 模式: {pattern}, 替换为: {replacement}, 描述: {description}")
+            print("======================\n")
+
+            return {'success': True, 'id': new_id}
         except sqlite3.IntegrityError:
             return {'success': False, 'message': '模式已存在'}
         finally:
@@ -1558,9 +1660,21 @@ def delete_pattern(pattern_id):
             if not pattern:
                 return {'success': False, 'message': '模式不存在'}
 
+            # 获取模式信息（用于日志）
+            cursor.execute('SELECT pattern, replacement FROM app_name_patterns WHERE id = ?', (pattern_id,))
+            pattern_info = cursor.fetchone()
+
             # 删除模式
             cursor.execute('DELETE FROM app_name_patterns WHERE id = ?', (pattern_id,))
             conn.commit()
+
+            # 在后台输出删除的模式
+            print("\n===== 删除模式 =====")
+            if pattern_info:
+                print(f"ID: {pattern_id}, 模式: {pattern_info['pattern']}, 替换为: {pattern_info['replacement']}")
+            else:
+                print(f"ID: {pattern_id}")
+            print("===================\n")
 
             return {'success': True}
         finally:

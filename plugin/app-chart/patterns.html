@@ -1,0 +1,49 @@
+<div class="app-name-patterns">
+    <div class="patterns-description">
+        <h4>应用名称模式</h4>
+        <p>您可以创建应用名称模式来合并相似的应用名称。例如，将所有包含"Chrome"的应用名称显示为"Chrome浏览器"。</p>
+        <p>支持的模式类型：</p>
+        <ul>
+            <li><code>*Chrome</code> - 匹配所有以"Chrome"结尾的名称</li>
+            <li><code>Chrome*</code> - 匹配所有以"Chrome"开头的名称</li>
+            <li><code>*Chrome*</code> - 匹配所有包含"Chrome"的名称</li>
+            <li><code>Exact Name</code> - 精确匹配 "Exact Name"</li>
+        </ul>
+    </div>
+
+    <div class="patterns-list">
+        <div class="patterns-header">
+            <h4>当前模式</h4>
+            <button id="delete-all-patterns" class="btn btn-danger btn-sm" style="display: none;">
+                <i class="fas fa-trash-alt"></i> 删除所有模式
+            </button>
+        </div>
+        <div id="patterns-container">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <div class="patterns-form">
+        <h4>添加新模式</h4>
+        <div class="form-group">
+            <label for="pattern">模式:</label>
+            <input type="text" id="pattern" placeholder="例如: *Discord" />
+            <small>使用 * 作为通配符</small>
+        </div>
+        <div class="form-group">
+            <label for="replacement">替换为:</label>
+            <input type="text" id="replacement" placeholder="例如: Discord" />
+            <small>所有匹配的应用将显示为这个名称</small>
+        </div>
+        <div class="form-group">
+            <label for="description">描述:</label>
+            <input type="text" id="description" placeholder="可选描述" />
+            <small>帮助您记住这个模式的用途</small>
+        </div>
+        <div class="form-actions">
+            <button id="add-pattern" class="btn btn-primary">添加模式</button>
+        </div>
+    </div>
+
+    <div id="patterns-message" class="patterns-message" style="display: none;"></div>
+</div>

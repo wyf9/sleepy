@@ -1,0 +1,99 @@
+.app-name-patterns {
+    max-width: 600px;
+}
+.patterns-description {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+.patterns-description code {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+.patterns-list {
+    margin-bottom: 20px;
+}
+.patterns-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.pattern-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+}
+.pattern-info {
+    flex-grow: 1;
+}
+.pattern-actions {
+    display: flex;
+    gap: 5px;
+}
+.pattern-pattern {
+    font-weight: bold;
+    font-family: monospace;
+}
+.pattern-replacement {
+    color: #2ea043;
+    font-weight: bold;
+}
+.pattern-description {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 3px;
+}
+.patterns-form {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+.patterns-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+}
+.patterns-message.success {
+    background-color: rgba(46, 160, 67, 0.1);
+    border: 1px solid rgba(46, 160, 67, 0.2);
+    color: #2ea043;
+}
+.patterns-message.error {
+    background-color: rgba(248, 81, 73, 0.1);
+    border: 1px solid rgba(248, 81, 73, 0.2);
+    color: #f85149;
+}
+.patterns-message.info {
+    background-color: rgba(3, 102, 214, 0.1);
+    border: 1px solid rgba(3, 102, 214, 0.2);
+    color: #0366d6;
+}
+.patterns-message.warning {
+    background-color: rgba(249, 197, 19, 0.1);
+    border: 1px solid rgba(249, 197, 19, 0.2);
+    color: #e36209;
+}
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+.empty-message {
+    color: #888;
+    text-align: center;
+    padding: 20px;
+}
+.error-message {
+    color: #e15759;
+    text-align: center;
+    padding: 20px;
+}
