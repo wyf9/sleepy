@@ -1,0 +1,21 @@
+frontend: true
+backend: true
+frontend-card: true
+config:
+  title: "应用使用时间统计"
+  description: "统计并展示应用使用时间"
+  db_path: "app_chart.db"
+  max_apps: 10
+  default_days: 7
+  chart_height: 300
+  colors:
+    - "#4e79a7"
+    - "#f28e2c"
+    - "#e15759"
+    - "#76b7b2"
+    - "#59a14f"
+    - "#edc949"
+    - "#af7aa1"
+    - "#ff9da7"
+    - "#9c755f"
+    - "#bab0ab"

@@ -96,6 +96,20 @@
             </div>
         </div>
         {% endif %}
+
+        <!-- 插件管理后台卡片 -->
+        {% if plugin_admin_cards %}
+            {% for card in plugin_admin_cards %}
+            <div class="panel-card plugin-card" id="{{ card.id }}">
+                <div class="panel-section">
+                    <h2 class="panel-section-title">{{ card.title }} <span class="plugin-badge">{{ card.plugin_name }}</span></h2>
+                    <div class="plugin-card-content">
+                        {{ card.content|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
     </div>
 
     <script>

@@ -666,12 +666,40 @@ def admin_panel():
     # 获取可用的主题列表
     available_themes = get_available_themes()
 
+    # 获取插件注册的管理后台卡片
+    plugin_admin_cards = p.get_admin_cards()
+
+    # 渲染插件卡片内容
+    rendered_cards = []
+    for card in plugin_admin_cards:
+        try:
+            # 渲染卡片内容（如果是模板字符串）
+            if isinstance(card['content'], str) and '{{' in card['content']:
+                card_content = flask.render_template_string(
+                    card['content'],
+                    c=c,
+                    d=d.data,
+                    u=u
+                )
+            else:
+                card_content = card['content']
+
+            rendered_cards.append({
+                'id': card['id'],
+                'plugin_name': card['plugin_name'],
+                'title': card['title'],
+                'content': card_content
+            })
+        except Exception as e:
+            u.error(f"Error rendering admin card '{card['title']}' for plugin '{card['plugin_name']}': {str(e)}")
+
     return flask.render_template(
         'panel.html',
         c=c,
         d=d.data,
         current_theme=theme,
-        available_themes=available_themes
+        available_themes=available_themes,
+        plugin_admin_cards=rendered_cards
     ), 200
 
 

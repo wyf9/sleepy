@@ -1,0 +1,9 @@
+frontend: true
+backend: true
+config:
+  title: "管理后台卡片示例"
+  description: "演示如何在管理后台添加卡片"
+  settings:
+    message: "这是一个示例消息"
+    count: 5
+    enabled: true

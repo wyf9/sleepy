@@ -16,6 +16,7 @@ from _utils import get_path, SleepyException
 _plugin_routes: Dict[str, Dict[str, Callable]] = {}  # 插件命名空间下的路由
 _plugin_global_routes: Dict[str, Dict[str, Callable]] = {}  # 全局路由
 _plugin_event_handlers: Dict[str, List[Tuple[str, Callable]]] = {}
+_plugin_admin_cards: Dict[str, Dict[str, Any]] = {}  # 插件注册的管理后台卡片
 
 # 插件装饰器
 def route(rule: str, methods: List[str] = None):
@@ -74,6 +75,41 @@ def global_route(rule: str, methods: List[str] = None):
         _plugin_global_routes[plugin_name][rule] = {
             'func': func,
             'methods': methods
+        }
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def admin_card(title: str, order: int = 100):
+    """
+    装饰器：注册管理后台卡片
+
+    :param title: 卡片标题
+    :param order: 卡片排序顺序（数字越小越靠前）
+    """
+    def decorator(func):
+        # 获取插件名称（从函数模块名称中提取）
+        module_name = func.__module__
+        plugin_name = module_name.split('.')[-1]
+
+        # 初始化插件管理后台卡片字典
+        if plugin_name not in _plugin_admin_cards:
+            _plugin_admin_cards[plugin_name] = {}
+
+        # 生成卡片ID
+        card_id = f"{plugin_name}_{len(_plugin_admin_cards[plugin_name])}"
+
+        # 注册管理后台卡片
+        _plugin_admin_cards[plugin_name][card_id] = {
+            'title': title,
+            'order': order,
+            'func': func
         }
 
         @functools.wraps(func)
@@ -195,6 +231,8 @@ class Plugin:
     plugins: list[tuple[str, str, object, PluginClass]] = []
     # 存储已注册的插件路由
     registered_routes = {}
+    # 存储已注册的管理后台卡片
+    admin_cards = []
 
     def __init__(self, config: Config, utils: Utils, data: Data, app=None):
         '''
@@ -280,6 +318,9 @@ class Plugin:
             # 保存此项
             self.plugins.append((i, plugin_frontend, plugin_backend, plugin_config))
 
+        # 注册管理后台卡片
+        self._register_admin_cards()
+
         # 触发应用启动事件
         if self.c.plugin_enabled:
             trigger_event('app_started', self)
@@ -333,6 +374,54 @@ class Plugin:
                 })
 
                 self.u.info(f"Registered global route '{full_rule}' for plugin '{plugin_name}'")
+
+    def _register_admin_cards(self):
+        """
+        注册插件的管理后台卡片
+        """
+        # 清空已注册的卡片
+        self.admin_cards = []
+
+        # 遍历所有启用的插件
+        for plugin_name in self.c.plugin_enabled:
+            # 检查插件是否注册了管理后台卡片
+            if plugin_name in _plugin_admin_cards:
+                for card_id, card_info in _plugin_admin_cards[plugin_name].items():
+                    # 获取插件配置
+                    plugin_config = None
+                    for p in self.plugins:
+                        if p[0] == plugin_name:
+                            plugin_config = p[3]
+                            break
+
+                    if plugin_config:
+                        try:
+                            # 调用卡片函数获取内容
+                            content = card_info['func'](plugin_config)
+
+                            # 添加到已注册的卡片列表
+                            self.admin_cards.append({
+                                'id': card_id,
+                                'plugin_name': plugin_name,
+                                'title': card_info['title'],
+                                'order': card_info['order'],
+                                'content': content
+                            })
+
+                            self.u.info(f"Registered admin card '{card_info['title']}' for plugin '{plugin_name}'")
+                        except Exception as e:
+                            self.u.error(f"Error registering admin card for plugin '{plugin_name}': {str(e)}")
+
+        # 按顺序排序卡片
+        self.admin_cards.sort(key=lambda x: x['order'])
+
+    def get_admin_cards(self):
+        """
+        获取所有注册的管理后台卡片
+
+        :return: 卡片列表
+        """
+        return self.admin_cards
 
     def trigger_event(self, event_name, *args, **kwargs):
         """
