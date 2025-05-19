@@ -23,14 +23,11 @@
 
 <summary>展开更多</summary>
 
-<spam title="密钥：wyf9test">
-**开放预览站**: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
-</spam><br>
-**HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)  
-**Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)  
-<spam title="不稳定！">
-**开发服务器**: [请在 Discord 服务器获取](link-dc)
-</spam>
+    **开放预览站**: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)  
+    **HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)  
+    **Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)  
+    **开发服务器**: [请在 Discord 服务器获取](link-dc)
+
 </details>
 
 ## 部署 / 更新
