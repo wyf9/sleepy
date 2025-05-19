@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ c.page.title }}</title>
+    <meta name="description" content="{{ c.page.desc }}">
+    <link rel="icon" href="{{ c.page.favicon }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="card" id="user-status">
+            <h1>似了吗?</h1>
+            <h3>{{ c.page.name }}'s Status: <span id="status">{{ status['name'] }}</span></h3>
+            <p id="additional-info">{{ status['desc'] | safe }}</p>
+            <p id="device-status">[设备状态列表]</p>
+            <p id="last-updated">最后更新: {{ last_updated }}</p>
+        </div>
+
+        {% for plugin in plugins %}
+        <div class="card" id="plugin-{{ plugin[0] }}">
+            {{ plugin[1] | safe }}
+        </div>
+        {% endfor %}
+
+        <div class="card" id="more-text">
+            {{ more_text | safe }}
+            <p>
+                你可以通过这个页面视奸 <b>{{ c.page.name }}</b>。<br>
+                <a href="{{ c.page.learn_more_link }}" target="_blank">{{ c.page.learn_more_text | safe }}</a>
+                |
+                <a href="/webui/login">管理面板</a>
+                <div style="margin-top: 10px;">
+                    主题:
+                    {% for theme in available_themes %}
+                    <a href="/?theme={{ theme }}">{{ theme }}</a>{% if not loop.last %} | {% endif %}
+                    {% endfor %}
+                </div>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('status').classList.add("{{ status['color'] }}");
+
+        // 处理主题设置
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlTheme = urlParams.get('theme');
+            const currentTheme = "{{ current_theme }}";
+
+            // 如果 URL 中有主题参数，则将其保存到 localStorage
+            if (urlTheme) {
+                localStorage.setItem('sleepy_theme', urlTheme);
+            } else {
+                // 如果 URL 中没有主题参数，检查 localStorage
+                const savedTheme = localStorage.getItem('sleepy_theme');
+
+                // 如果有保存的主题且与当前主题不同，则切换到保存的主题
+                if (savedTheme && savedTheme !== currentTheme) {
+                    // 构建带有主题参数的 URL
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('theme', savedTheme);
+                    window.location.href = url.toString();
+                }
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='get.js') }}" defer></script>
+</body>
+</html>
