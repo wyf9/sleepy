@@ -255,6 +255,12 @@ def require_secret(view_func):
             u.debug('[Auth] Verify secret Success from Header (Authorization)')
             return view_func(*args, **kwargs)
 
+        # 5. cookie (sleepy-token)
+        # -> Cookie: sleepy-token=my-secret
+        elif flask.request.cookies.get('sleepy-token') == c.main.secret:
+            u.debug('[Auth] Verify secret Success from Cookie (sleepy-token)')
+            return view_func(*args, **kwargs)
+
         # -1. no any secret
         else:
             u.debug('[Auth] Verify secret Failed')
@@ -649,6 +655,55 @@ def login():
         c=c,
         current_theme=theme
     ), 200
+
+
+@app.route('/webui/auth', methods=['POST'])
+def auth():
+    '''
+    处理登录请求，验证密钥并设置 cookie
+    - Method: **POST**
+    '''
+    # 获取请求中的密钥
+    body = flask.request.get_json(silent=True) or {}
+    secret = body.get('secret')
+
+    # 验证密钥
+    if secret == c.main.secret:
+        # 创建响应
+        response = flask.make_response(u.format_dict({
+            'success': True,
+            'code': 'OK',
+            'message': 'Login successful'
+        }))
+
+        # 设置 cookie，有效期为 30 天
+        max_age = 30 * 24 * 60 * 60  # 30 days in seconds
+        response.set_cookie('sleepy-token', secret, max_age=max_age, httponly=True, samesite='Lax')
+
+        u.debug('[Auth] Login successful, cookie set')
+        return response, 200
+    else:
+        u.debug('[Auth] Login failed, wrong secret')
+        return u.reterr(
+            code='not authorized',
+            message='wrong secret'
+        ), 401
+
+
+@app.route('/webui/logout')
+def logout():
+    '''
+    处理退出登录请求，清除 cookie
+    - Method: **GET**
+    '''
+    # 创建响应
+    response = flask.make_response(flask.redirect('/webui/login'))
+
+    # 清除 cookie
+    response.delete_cookie('sleepy-token')
+
+    u.debug('[Auth] Logout successful, cookie cleared')
+    return response
 
 
 # --- Special

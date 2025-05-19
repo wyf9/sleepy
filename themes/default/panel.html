@@ -94,11 +94,8 @@
     </div>
 
     <script>
-        // 获取密钥
-        const secret = new URLSearchParams(window.location.search).get('secret') || localStorage.getItem('sleepy_secret');
-        if (!secret) {
-            window.location.href = '/webui/login';
-        }
+        // 获取密钥（仅作为备份，主要使用 cookie 进行身份验证）
+        const secret = localStorage.getItem('sleepy_secret');
 
         // 全局变量
         let statusList = [];
@@ -182,7 +179,7 @@
         // 设置状态
         async function setStatus(statusIndex) {
             try {
-                const response = await fetch(`/set?status=${statusIndex}&secret=${secret}`);
+                const response = await fetch(`/set?status=${statusIndex}`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -233,7 +230,7 @@
             }
 
             try {
-                const response = await fetch(`/device/remove?id=${deviceId}&secret=${secret}`);
+                const response = await fetch(`/device/remove?id=${deviceId}`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -255,7 +252,7 @@
             }
 
             try {
-                const response = await fetch(`/device/clear?secret=${secret}`);
+                const response = await fetch(`/device/clear`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -273,7 +270,7 @@
         // 切换隐私模式
         async function togglePrivateMode(isPrivate) {
             try {
-                const response = await fetch(`/device/private_mode?private=${isPrivate}&secret=${secret}`);
+                const response = await fetch(`/device/private_mode?private=${isPrivate}`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -344,7 +341,7 @@
         // 保存数据
         async function saveData() {
             try {
-                const response = await fetch(`/save_data?secret=${secret}`);
+                const response = await fetch('/save_data');
                 const data = await response.json();
 
                 if (data.success) {
@@ -360,8 +357,10 @@
 
         // 退出登录
         function logout() {
+            // 清除本地存储的密钥
             localStorage.removeItem('sleepy_secret');
-            window.location.href = '/webui/login';
+            // 重定向到退出登录路由，该路由会清除 cookie
+            window.location.href = '/webui/logout';
         }
 
         // 切换主题
@@ -373,10 +372,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             // 设置新的主题
             urlParams.set('theme', theme);
-            // 确保 secret 参数存在
-            if (!urlParams.has('secret') && secret) {
-                urlParams.set('secret', secret);
-            }
             // 重定向到新的 URL
             window.location.href = window.location.pathname + '?' + urlParams.toString();
         }

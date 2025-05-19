@@ -10,14 +10,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
     <style>
-        :root {
-            {% for key, value in theme_variables.items() %}
-            --{{ key }}: {{ value }};
-            {% endfor %}
-        }
-
         body {
-            background: url('{{ theme_background }}') no-repeat center center fixed;
+            background: url('{{ c.page.background }}') no-repeat center center fixed;
             background-size: cover;
         }
     </style>
@@ -69,7 +63,7 @@
             }
         });
 
-        function login() {
+        async function login() {
             const secret = document.getElementById('secret').value;
             if (!secret) {
                 document.getElementById('error-message').style.display = 'block';
@@ -77,19 +71,41 @@
                 return;
             }
 
-            // 将密钥存储在 localStorage 中
-            localStorage.setItem('sleepy_secret', secret);
+            try {
+                // 发送登录请求到新的 API 端点
+                const response = await fetch('/webui/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ secret: secret })
+                });
 
-            // 获取当前保存的主题
-            const savedTheme = localStorage.getItem('sleepy_theme');
+                if (response.ok) {
+                    // 登录成功，将密钥存储在 localStorage 中作为备份
+                    localStorage.setItem('sleepy_secret', secret);
 
-            // 重定向到管理面板，如果有主题则带上主题参数
-            let redirectUrl = '/webui/panel?secret=' + encodeURIComponent(secret);
-            if (savedTheme) {
-                redirectUrl += '&theme=' + encodeURIComponent(savedTheme);
+                    // 获取当前保存的主题
+                    const savedTheme = localStorage.getItem('sleepy_theme');
+
+                    // 重定向到管理面板，如果有主题则带上主题参数
+                    let redirectUrl = '/webui/panel';
+                    if (savedTheme) {
+                        redirectUrl += '?theme=' + encodeURIComponent(savedTheme);
+                    }
+
+                    window.location.href = redirectUrl;
+                } else {
+                    // 登录失败
+                    const data = await response.json();
+                    document.getElementById('error-message').style.display = 'block';
+                    document.getElementById('error-message').textContent = data.message || '密钥错误，请重试';
+                }
+            } catch (error) {
+                console.error('登录请求失败:', error);
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('error-message').textContent = '登录请求失败，请检查网络连接';
             }
-
-            window.location.href = redirectUrl;
         }
 
         // 按下回车键时触发登录按钮
