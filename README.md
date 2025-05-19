@@ -23,6 +23,7 @@
 
 <summary>展开更多</summary>
 
+
 开放预览站: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
 **HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
@@ -32,9 +33,11 @@
 *开发服务器*: [请在 Discord 服务器获取][link-dc]
 
 > [!TIP]
-> - **演示站** 为 wyf9 个人站点 <br/>
-> - **预览站** 允许测试 API，运行最新的稳定版本 <br/>
-> - **开发服务器** 运行最新甚至未提交的*不稳定*版本, **不保证可正常访问** <br/>
+> 
+> - **演示站** 为 wyf9 个人站点  
+> - **预览站** 允许测试 API，运行最新的稳定版本  
+> - **开发服务器** 运行最新甚至未提交的*不稳定*版本, **不保证可正常访问**  
+> 
 > *除演示站外, 密钥均为 `wyf9test`*
 
 </details>
@@ -70,7 +73,6 @@
 对智能家居 / Home Assistant 感兴趣的朋友，一定要看看 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): **[maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!**
 
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ **([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))**
-
 
 [link-dc]: https://wyf9.top/t/sleepy/dc
 [link-tg]: https://wyf9.top/t/sleepy/tg
