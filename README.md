@@ -23,38 +23,14 @@
 
 <summary>展开更多</summary>
 
-
-开放预览站: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
-
-**HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
-
-**Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
-
-*开发服务器*: [请在 Discord 服务器获取][link-dc]
-
-> [!TIP]
-> 
-> - **演示站** 为 wyf9 个人站点  
-> - **预览站** 允许测试 API，运行最新的稳定版本  
-> - **开发服务器** 运行最新甚至未提交的*不稳定*版本, **不保证可正常访问**  
-> 
-> *除演示站外, 密钥均为 `wyf9test`*
-
-<div class="markdown-alert markdown-alert-tip" dir="auto">
-  <p class="markdown-alert-title" dir="auto">
-    <svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75Z M5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5Z M6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>
-    Tip
-  </p>
-  <p dir="auto">
-    <strong>演示站</strong> 为 wyf9 个人站点<br>
-    <strong>预览站</strong> 允许测试 API，运行最新的稳定版本<br>
-    <strong>开发服务器</strong> 运行最新甚至未提交的 <em>不稳定</em> 版本, <strong>不保证可正常访问</strong><br>
-    <br>
-    *除演示站外, 密钥均为 <code>wyf9test</code>*
-  </p>
-</div>
-
-
+<spam title="密钥：wyf9test">
+**开放预览站**: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+</spam><br>
+**HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)  
+**Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)  
+<spam title="不稳定！">
+**开发服务器**: [请在 Discord 服务器获取](link-dc)
+</spam>
 </details>
 
 ## 部署 / 更新
