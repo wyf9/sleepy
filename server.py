@@ -81,7 +81,8 @@ try:
     p = plugin_init(
         config=c,
         utils=u,
-        data=d
+        data=d,
+        app=app
     )
 
 except KeyboardInterrupt:
@@ -441,7 +442,12 @@ def set_normal():
             code='bad request',
             message="argument 'status' must be int"
         ), 400
+    old_status = d.data['status']
     d.data['status'] = status
+
+    # 触发状态更新事件
+    p.trigger_event('status_updated', old_status, status)
+
     return u.format_dict({
         'success': True,
         'code': 'OK',
@@ -492,6 +498,10 @@ def device_set():
     }
     d.data['last_updated'] = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     d.check_device_status()
+
+    # 触发设备更新事件
+    p.trigger_event('device_updated', device_id, d.data['device_status'][device_id])
+
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -507,9 +517,17 @@ def remove_device():
     '''
     device_id = escape(flask.request.args.get('id'))
     try:
+        # 保存设备信息用于事件触发
+        device_info = d.data['device_status'][device_id].copy() if device_id in d.data['device_status'] else None
+
         del d.data['device_status'][device_id]
         d.data['last_updated'] = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
         d.check_device_status()
+
+        # 触发设备删除事件
+        if device_info:
+            p.trigger_event('device_removed', device_id, device_info)
+
     except KeyError:
         return u.reterr(
             code='not found',
@@ -528,9 +546,16 @@ def clear_device():
     清除所有设备状态
     - Method: **GET**
     '''
+    # 保存设备信息用于事件触发
+    old_devices = d.data['device_status'].copy()
+
     d.data['device_status'] = {}
     d.data['last_updated'] = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
     d.check_device_status()
+
+    # 触发设备清除事件
+    p.trigger_event('devices_cleared', old_devices)
+
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -550,8 +575,13 @@ def private_mode():
             code='invaild request',
             message='"private" arg only supports boolean type'
         ), 400
+    old_private_mode = d.data.get('private_mode', False)
     d.data['private_mode'] = private
     d.data['last_updated'] = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+
+    # 触发隐私模式切换事件
+    p.trigger_event('private_mode_changed', old_private_mode, private)
+
     return u.format_dict({
         'success': True,
         'code': 'OK'
@@ -567,6 +597,10 @@ def save_data():
     '''
     try:
         d.save()
+
+        # 触发数据保存事件
+        p.trigger_event('data_saved', d.data)
+
     except Exception as e:
         return u.reterr(
             code='exception',

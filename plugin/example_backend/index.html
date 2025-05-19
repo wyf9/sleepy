@@ -1,0 +1,46 @@
+<h3>示例后端插件</h3>
+<p>{{ c.message }}</p>
+<p>插件状态: <span id="plugin-status">加载中...</span></p>
+<p>事件日志:</p>
+<div id="event-log" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+    <em>等待事件...</em>
+</div>
+
+<script>
+    // 获取插件状态
+    async function getPluginStatus() {
+        try {
+            const response = await fetch('/plugin/example_backend/status');
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('plugin-status').textContent = '正常运行中';
+                
+                // 更新事件日志
+                if (data.events && data.events.length > 0) {
+                    const eventLog = document.getElementById('event-log');
+                    eventLog.innerHTML = '';
+                    
+                    data.events.forEach(event => {
+                        const eventItem = document.createElement('div');
+                        eventItem.innerHTML = `<strong>${event.time}</strong>: ${event.type} - ${event.message}`;
+                        eventLog.appendChild(eventItem);
+                    });
+                }
+            } else {
+                document.getElementById('plugin-status').textContent = '出错: ' + data.message;
+            }
+        } catch (error) {
+            document.getElementById('plugin-status').textContent = '无法连接到插件API';
+            console.error('获取插件状态失败:', error);
+        }
+    }
+    
+    // 页面加载完成后获取插件状态
+    document.addEventListener('DOMContentLoaded', function() {
+        getPluginStatus();
+        
+        // 每10秒更新一次
+        setInterval(getPluginStatus, 10000);
+    });
+</script>

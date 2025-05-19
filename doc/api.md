@@ -39,7 +39,9 @@ Authorization: Bearer MySecretCannotGuess
 
 5. Cookie *(`Cookie`)* 的 `sleepy-token`
 
-```http
+对于 `webui/panel` 特别有用
+
+```
 sleepy-token=MySecretCannotGuess
 ```
 

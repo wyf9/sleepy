@@ -1,0 +1,6 @@
+frontend: true
+backend: true
+config:
+  message: "这是一个示例后端插件"
+  log_events: true
+  api_enabled: true
