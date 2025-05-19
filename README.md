@@ -44,10 +44,6 @@
 
 详细的 API 文档见 [doc/api.md](./doc/api.md).
 
-## 优化站点
-
-见 [Best Practice](./doc/best_practice.md).
-
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
