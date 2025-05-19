@@ -59,7 +59,7 @@ sleepy_main_debug = false
 > - `list`: 列表 ***(只能在配置文件里配置)***
 > - `dict`: 字典 ***(只能在配置文件里配置)***
 
-> 配置的默认值见 [`config/config.example.yaml`](../config/config.example.yaml) 或 [`config/config.example.toml`](../config/config.example.toml)
+> 配置的默认值见 [`config/config.default.yaml`](../config/config.default.yaml) 或 [`config/config.default.toml`](../config/config.default.toml)
 
 ## (main) 系统基本配置
 

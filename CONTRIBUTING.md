@@ -63,7 +63,7 @@ def function():
 
 ```ini
 ### 用户可修改配置 / 数据模板 ###
--> config.example.yaml # 配置文件模板
+-> config.default.yaml # 配置文件模板
 -> data.example.jsonc # 状态文件模板
 ```
 

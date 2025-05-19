@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import os
 import time
 import os
 from datetime import datetime
-from functools import wraps  # 用于修饰器
+from functools import wraps
 
 import flask
 import json5
@@ -70,7 +71,7 @@ try:
         utils=u
     )
     d.load()
-    d.start_timer_check(data_check_interval=c.main.checkdata_interval)  # 启动定时保存
+    d.start_timer_check(data_check_interval=c.main.checkdata_interval)  # 启动定时保存 data
 
     # init metrics if enabled
     if c.metrics.enabled:

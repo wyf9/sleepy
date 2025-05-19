@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 在 `config` 目录下新建 `config.yaml` 或 `config.toml`，并**按照 [此处](./config.md) 的说明编辑配置**
 
-*配置文件示例: [`config/config.example.yaml`](../config/config.example.yaml) 或 [`config/config.example.toml`](../config/config.example.toml)*
+*配置文件示例: [`config/config.default.yaml`](../config/config.default.yaml) 或 [`config/config.default.toml`](../config/config.default.toml)*
 
 ### 启动
 

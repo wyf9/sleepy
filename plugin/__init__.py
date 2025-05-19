@@ -18,6 +18,8 @@ _plugin_global_routes: Dict[str, Dict[str, Callable]] = {}  # 全局路由
 _plugin_event_handlers: Dict[str, List[Tuple[str, Callable]]] = {}
 
 # 插件装饰器
+
+
 def route(rule: str, methods: List[str] = None):
     """
     装饰器：注册插件路由
@@ -50,6 +52,7 @@ def route(rule: str, methods: List[str] = None):
         return wrapper
 
     return decorator
+
 
 def global_route(rule: str, methods: List[str] = None):
     """
@@ -84,6 +87,7 @@ def global_route(rule: str, methods: List[str] = None):
 
     return decorator
 
+
 def on_event(event_name: str):
     """
     装饰器：注册事件处理器
@@ -109,6 +113,7 @@ def on_event(event_name: str):
         return wrapper
 
     return decorator
+
 
 def trigger_event(event_name: str, *args, **kwargs):
     """

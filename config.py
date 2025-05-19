@@ -26,6 +26,8 @@ def getenv(key: str, typeobj) -> ...:
     else:
         if typeobj == bool:
             return tobool(got_value, throw=True)
+        elif typeobj == object:
+            return got_value
         else:
             return typeobj(got_value)
 
@@ -55,17 +57,12 @@ except Exception as e:
 # 加载示例配置
 try:
     # 首先尝试加载 YAML 示例配置
-    if os.path.exists(get_path('config/config.example.yaml')):
-        with open(get_path('config/config.example.yaml'), 'r', encoding='utf-8') as f:
+    if os.path.exists(get_path('config/config.default.yaml')):
+        with open(get_path('config/config.default.yaml'), 'r', encoding='utf-8') as f:
             example_config = yaml.safe_load(f)
             f.close()
-    # 如果 YAML 失败或不存在，尝试加载 TOML 示例配置
-    elif os.path.exists(get_path('config/config.example.toml')):
-        with open(get_path('config/config.example.toml'), 'r', encoding='utf-8') as f:
-            example_config = toml.load(f)
-            f.close()
     else:
-        raise SleepyException('No example config file found! Please make sure either config/config.example.yaml or config/config.example.toml exists.')
+        raise SleepyException('No example config file found! Please make sure config/config.default.yaml exists.')
 except Exception as e:
     raise SleepyException(f'Error loading example config: {str(e)}')
 
@@ -73,9 +70,9 @@ except Exception as e:
 def get(_type, *key: str) -> ...:
     '''
     获取配置项
-    - 顺序: `config/config.yaml` 或 `config/config.toml` -> 环境变量 -> `.env` -> `config/config.example.yaml` 或 `config/config.example.toml`
+    - 顺序: `config/config.yaml` 或 `config/config.toml` -> 环境变量 -> `.env` -> `config/config.default.yaml` 或 `config/config.default.toml`
 
-    :param _type: 配置项的类型
+    :param _type: 配置项的类型 (如不指定则禁用类型检查)
     :param *key: 配置项名
     :param load_env: 是否允许从 .env 加载 (列表 / 字典需设置为否)
     '''
@@ -98,7 +95,7 @@ def get(_type, *key: str) -> ...:
     except KeyError:
         pass
     except ValueError:
-        raise SleepyException(f'Invaild config {envname} from environment or .env, it should be a(n) {_type.__name__} object.')
+        raise SleepyException(f'Invaild config {envname} from environment or .env!{"" if _type == object else f" it should be a(n) {_type.__name__} object."}')
 
     # 3. from example config
     try:
