@@ -32,11 +32,11 @@ pip install -r requirements.txt
 
 3. 编辑配置文件
 
-> *配置文件变化史: ~~`data.json`~~ -> ~~`config.json`~~ -> ~~`config.jsonc`~~ -> `.env` -> `config.yaml`*
+> *配置文件变化史: ~~`data.json`~~ -> ~~`config.json`~~ -> ~~`config.jsonc`~~ -> `.env` -> `config.yaml` -> `config/config.yaml`*
 
-在目录下新建 `config.yaml`，并**按照 [此处](./config.md) 的说明编辑配置**
+在 `config` 目录下新建 `config.yaml`，并**按照 [此处](./config.md) 的说明编辑配置**
 
-*配置文件示例: [`config.example.yaml`](../config.example.yaml)*
+*配置文件示例: [`config/config.example.yaml`](../config/config.example.yaml)*
 
 ### 启动
 
@@ -79,8 +79,8 @@ python3 start.py
 **有的兄弟，有的！**
 这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作
 我怕教太多了你学不会，现在只要点
-[这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)    
-然后自己去注册一个账号  
+[这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)
+然后自己去注册一个账号
 参考[配置文档](./config.md)在Setting==>Variables and secrets添加环境变量配置
 然后在这里:
 ![链接](https://ghimg.siiway.top/sleepy/deploy/huggingface-1.1.png)

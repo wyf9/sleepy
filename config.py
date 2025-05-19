@@ -31,22 +31,22 @@ def getenv(key: str, typeobj) -> ...:
 
 # ===== prepare yaml =====
 
-if os.path.exists(get_path('config.yaml')):
+if os.path.exists(get_path('config/config.yaml')):
     # load user config
-    with open(get_path('config.yaml'), 'r', encoding='utf-8') as f:
+    with open(get_path('config/config.yaml'), 'r', encoding='utf-8') as f:
         user_config = yaml.safe_load(f)
         f.close()
 else:
     user_config = {}
 # load example config
-with open(get_path('config.example.yaml'), 'r', encoding='utf-8') as f:
+with open(get_path('config/config.example.yaml'), 'r', encoding='utf-8') as f:
     example_config = yaml.safe_load(f)
     f.close()
 
 
 def get(_type, *key: str) -> ...:
     '''
-    获取配置项 
+    获取配置项
     - 顺序: `config.yaml` -> 环境变量 -> `.env` -> `config.example.yaml`
 
     :param _type: 配置项的类型

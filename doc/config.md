@@ -2,8 +2,8 @@
 
 有两种方式修改配置:
 
-1. `config.yaml` 文件 **(优先级最高)**
-2. 环境变量 
+1. `config/config.yaml` 文件 **(优先级最高)**
+2. 环境变量
 3.  `.env` 文件 *(不建议使用)*
 
 > [!IMPORTANT]
@@ -14,7 +14,7 @@
 <details>
 <summary>config.yaml 与 .env 的转换</summary>
 
-在 `config.yaml` 中，`main.host` *(str)*, `main.port` *(int)*, `main.debug` *(bool)* 可以这样配置:
+在 `config/config.yaml` 中，`main.host` *(str)*, `main.port` *(int)*, `main.debug` *(bool)* 可以这样配置:
 
 ```yaml
 main:
@@ -50,7 +50,7 @@ sleepy_main_debug = false
 > - `list`: 列表 ***(只能在 `config.yaml` 里配置)***
 > - `dict`: 字典 ***(只能在 `config.yaml` 里配置)***
 
-> 配置的默认值见 [`config.example.yaml`](../config.example.yaml)
+> 配置的默认值见 [`config/config.example.yaml`](../config/config.example.yaml)
 
 ## (main) 系统基本配置
 

@@ -89,6 +89,7 @@ def function():
 > [!IMPORTANT]
 > **千万不要** 将以下文件包含在提交中:
 > - `config.yaml`
+> - `config/config.yaml`
 > - `.env`
 > - `data.json`
 
