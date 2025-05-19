@@ -8,7 +8,7 @@
     <meta name="description" content="{{ c.page.desc }}">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
     <link rel="icon" href="{{ c.page.favicon }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}?theme={{ current_theme }}">
     <style>
         body {
             background: url('{{ c.page.background }}') no-repeat center center fixed;
@@ -63,8 +63,7 @@
         <!-- {disabled% include "zhixue.html" %} -->
         <!-- {disabled% endif %} -->
 
-        <div class="card" id="more-text">
-            <p>$ help.sh</p>
+        <div class="more-card" id="more-text">
             <!-- {disabled% if c.page.hitokoto %} -->
             <!-- (hitokoto) 一言 -->
             <!-- {disabled% include "hitokoto.html" %} -->
@@ -108,7 +107,7 @@
             const urlTheme = urlParams.get('theme');
             const currentTheme = "{{ current_theme }}";
 
-            // 如果 URL 中有主题参数，则将其保存到 localStorage
+            // 如果 URL 中有主题参数，则将其保存到 localStorage 并使用该主题
             if (urlTheme) {
                 localStorage.setItem('sleepy_theme', urlTheme);
             } else {
@@ -118,7 +117,6 @@
                 // 如果保存的主题是 default-light，将其更改为 default
                 if (savedTheme === 'default-light') {
                     localStorage.setItem('sleepy_theme', 'default');
-                    return;
                 }
 
                 // 如果有保存的主题且与当前主题不同，则切换到保存的主题
@@ -131,7 +129,7 @@
             }
         });
     </script>
-    <script src="{{ url_for('static', filename='get.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='get.js') }}?theme={{ current_theme }}" defer></script>
 
 </body>
 

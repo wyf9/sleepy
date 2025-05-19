@@ -1,14 +1,7 @@
 :root {
   --light-bg-rgb: 240, 248, 255;
-  --dark-bg-rgb: 0, 0, 0;
-  --card-alpha: 0.9;
-  --console-green: #00ff00;
-  --console-text: #cccccc;
-  --console-bg: #000000;
-  --console-border: #333333;
-  --console-shadow: rgba(0, 255, 0, 0.3);
-  --console-font: 'Courier New', monospace;
-  --console-cursor: '_';
+  --dark-bg-rgb: 26, 21, 20;
+  --card-alpha: 0.6;
 }
 
 html {
@@ -24,16 +17,10 @@ body {
   justify-content: center;
   align-items: center;
   background-attachment: fixed;
-  background-color: var(--console-bg);
-  color: var(--console-text);
-  font-family: var(--console-font);
-  position: relative;
-  overflow-x: hidden;
 }
 
 a {
   text-decoration: none;
-  color: var(--console-green);
 }
 
 button {
@@ -102,60 +89,23 @@ div p {
 }
 
 .card {
-  border-radius: 5px;
+  border-radius: 30px;
   padding: 2rem 1rem;
   margin: 1rem auto;
   font-size: 1.1em;
   /* 大屏宽度 */
   width: 65%;
-  text-align: left;
-  background-color: var(--console-bg);
-  border: 1px solid var(--console-border);
+  text-align: center;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
-  box-shadow: 0 0 10px var(--console-shadow);
+  box-shadow: 0 8px 32px rgb(174 137 245 / 20%),
+    inset 0 0 6px 1px rgb(185 210 216 / 10%);
   transition: all 0.2s;
-  color: var(--console-text);
-  font-family: var(--console-font);
-  overflow: hidden;
 }
 
-.card::before {
-  content: "$ status.sh";
-  display: block;
-  color: var(--console-green);
-  margin-bottom: 10px;
-  font-weight: bold;
-  border-bottom: 1px solid var(--console-border);
-  padding-bottom: 5px;
-}
-
-.more-card {
-  border-radius: 5px;
-  padding: 2rem 1rem;
-  margin: 1rem auto;
-  font-size: 1.1em;
-  /* 大屏宽度 */
-  width: 65%;
-  text-align: left;
-  background-color: var(--console-bg);
-  border: 1px solid var(--console-border);
-  position: relative;
-  box-shadow: 0 0 10px var(--console-shadow);
-  transition: all 0.2s;
-  color: var(--console-text);
-  font-family: var(--console-font);
-  overflow: hidden;
-}
-
-.more-card::before {
-  content: "$ more.sh";
-  display: block;
-  color: var(--console-green);
-  margin-bottom: 10px;
-  font-weight: bold;
-  border-bottom: 1px solid var(--console-border);
-  padding-bottom: 5px;
-}
 
 /* 较大屏范围 */
 @media (max-width: 1250px) {
@@ -216,21 +166,15 @@ div p {
 }
 
 .sleeping {
-  color: #888888;
+  color: gray;
 }
 
 .awake {
-  color: var(--console-green);
-  animation: blink 1s step-end infinite;
+  color: rgb(16, 128, 0);
 }
 
 .error {
-  color: #ff0000;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  color: red;
 }
 
 #hitokoto {
@@ -329,55 +273,4 @@ input[type="range"]::-webkit-slider-thumb {
   height: 12px;
   background: var(--text-color);
   border-radius: 50%;
-}
-
-/* Console Theme Specific Styles */
-.console-cursor {
-  display: inline-block;
-  animation: cursor-blink 1s step-end infinite;
-}
-
-@keyframes cursor-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-/* Console style for device status */
-#device-status {
-  font-family: var(--console-font);
-  text-align: left;
-  white-space: pre-wrap;
-  line-height: 1.5;
-}
-
-/* Console style for user status */
-#user-status h1, #user-status h3 {
-  font-family: var(--console-font);
-  text-shadow: 0 0 5px var(--console-shadow);
-}
-
-/* Console style for additional info */
-#additional-info {
-  border-left: 2px solid var(--console-green);
-  padding-left: 10px;
-  margin-left: 10px;
-  text-align: left;
-}
-
-/* Console style for last updated */
-#last-updated {
-  font-size: 0.8em;
-  color: #666;
-  text-align: right;
-  font-style: italic;
-}
-
-/* ASCII art style */
-.ascii-art {
-  font-family: monospace;
-  white-space: pre;
-  line-height: 1.2;
-  color: var(--console-green);
-  margin: 10px 0;
-  text-align: left;
 }

@@ -47,7 +47,7 @@
             const urlTheme = urlParams.get('theme');
             const currentTheme = "{{ current_theme }}";
 
-            // 如果 URL 中有主题参数，则将其保存到 localStorage
+            // 如果 URL 中有主题参数，则将其保存到 localStorage 并使用该主题
             if (urlTheme) {
                 localStorage.setItem('sleepy_theme', urlTheme);
             } else {
@@ -57,7 +57,6 @@
                 // 如果保存的主题是 default-light，将其更改为 default
                 if (savedTheme === 'default-light') {
                     localStorage.setItem('sleepy_theme', 'default');
-                    return;
                 }
 
                 // 如果有保存的主题且与当前主题不同，则切换到保存的主题

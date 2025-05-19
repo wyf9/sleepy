@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import time
+import os
 from datetime import datetime
 from functools import wraps  # 用于修饰器
 
@@ -9,6 +10,7 @@ import flask
 import json5
 import pytz
 from markupsafe import escape
+from jinja2 import FileSystemLoader, ChoiceLoader
 
 from config import Config as config_init
 from utils import Utils as utils_init
@@ -25,11 +27,30 @@ Feature Request: https://wyf9.top/t/sleepy/feature
 Security Report: https://wyf9.top/t/sleepy/security
 '''[1:-1])
 
+class ThemeLoader(ChoiceLoader):
+    """
+    自定义主题加载器，支持主题 fallback 机制
+    当主题中的文件缺失时，自动 fallback 到 default 主题
+    """
+    def __init__(self, theme_name):
+        self.theme_name = theme_name
+        self.default_theme = 'default'
+        loaders = []
+
+        # 添加当前主题的加载器
+        if theme_name != self.default_theme:
+            loaders.append(FileSystemLoader(f'themes/{theme_name}'))
+
+        # 添加默认主题的加载器作为 fallback
+        loaders.append(FileSystemLoader(f'themes/{self.default_theme}'))
+
+        super().__init__(loaders)
+
 try:
     # init flask app
     app = flask.Flask(__name__,
                      template_folder='themes/default',
-                     static_folder='themes/default/static')
+                     static_folder=None)
 
     # init config
     c = config_init()
@@ -107,12 +128,12 @@ def get_available_themes():
     return themes
 
 
-def get_theme(template_name):
+def get_theme(template_name=None):
     """
     获取主题并检查其是否存在
 
     Args:
-        template_name: 模板文件名，如 'index.html', 'panel.html', 'login.html'
+        template_name: 模板文件名，如 'index.html', 'panel.html', 'login.html'（可选，用于日志记录）
 
     Returns:
         str: 主题名称
@@ -120,20 +141,60 @@ def get_theme(template_name):
     # 获取主题 (优先使用 URL 参数，其次是配置文件)
     theme = flask.request.args.get('theme', getattr(c.page, 'theme', 'default'))
 
-    # 检查主题是否存在，如果不存在则使用默认主题
-    import os
-    if not os.path.exists(os.path.join('themes', theme, template_name)):
-        u.warning(f"Theme {theme} not found for {template_name}, using default theme")
+    # 检查主题目录是否存在，如果不存在则使用默认主题
+    if not os.path.exists(os.path.join('themes', theme)):
+        if template_name:
+            u.warning(f"Theme directory {theme} not found for {template_name}, using default theme")
+        else:
+            u.warning(f"Theme directory {theme} not found, using default theme")
         theme = getattr(c.page, 'theme', 'default')
-        if not os.path.exists(os.path.join('themes', theme, template_name)):
+        if not os.path.exists(os.path.join('themes', theme)):
             theme = 'default'
 
-    # 设置模板文件夹和静态文件夹
-    app.template_folder = f'themes/{theme}'
+    # 设置自定义的主题加载器，支持 fallback 机制
+    app.jinja_loader = ThemeLoader(theme)
+
+    # 设置静态文件夹
     app.static_folder = f'themes/{theme}/static'
 
     return theme
 
+
+# 全局静态文件处理函数，支持 fallback 机制
+@app.route('/static/<path:filename>', endpoint='static')
+def static_proxy(filename):
+    # 获取当前主题 (从 URL 参数或 Referer 中获取)
+    theme = flask.request.args.get('theme')
+
+    # 如果 URL 中没有主题参数，尝试从 Referer 中获取
+    if not theme and flask.request.referrer:
+        try:
+            from urllib.parse import urlparse, parse_qs
+            referer_url = urlparse(flask.request.referrer)
+            referer_query = parse_qs(referer_url.query)
+            if 'theme' in referer_query:
+                theme = referer_query['theme'][0]
+        except:
+            pass
+
+    # 如果仍然没有主题参数，使用配置文件中的主题
+    if not theme:
+        theme = getattr(c.page, 'theme', 'default')
+
+    # 首先尝试从当前主题加载
+    theme_path = os.path.join('themes', theme, 'static', filename)
+    if os.path.exists(theme_path):
+        return flask.send_from_directory(f'themes/{theme}/static', filename)
+
+    # 如果当前主题中不存在，fallback 到默认主题
+    default_path = os.path.join('themes', 'default', 'static', filename)
+    if os.path.exists(default_path):
+        u.info(f"Static file {filename} not found in theme {theme}, using default theme's file")
+        return flask.send_from_directory('themes/default/static', filename)
+
+    # 如果默认主题中也不存在，返回 404
+    u.warning(f"Static file {filename} not found in any theme")
+    return flask.abort(404)
 
 @app.before_request
 def showip():
