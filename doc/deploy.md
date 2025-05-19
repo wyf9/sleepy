@@ -32,11 +32,11 @@ pip install -r requirements.txt
 
 3. 编辑配置文件
 
-> *配置文件变化史: ~~`data.json`~~ -> ~~`config.json`~~ -> ~~`config.jsonc`~~ -> `.env` -> `config.yaml` -> `config/config.yaml`*
+> *配置文件变化史: ~~`data.json`~~ -> ~~`config.json`~~ -> ~~`config.jsonc`~~ -> `.env` -> `config.yaml` -> `config/config.yaml` 或 `config/config.toml`*
 
-在 `config` 目录下新建 `config.yaml`，并**按照 [此处](./config.md) 的说明编辑配置**
+在 `config` 目录下新建 `config.yaml` 或 `config.toml`，并**按照 [此处](./config.md) 的说明编辑配置**
 
-*配置文件示例: [`config/config.example.yaml`](../config/config.example.yaml)*
+*配置文件示例: [`config/config.example.yaml`](../config/config.example.yaml) 或 [`config/config.example.toml`](../config/config.example.toml)*
 
 ### 启动
 

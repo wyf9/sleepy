@@ -1,8 +1,8 @@
 # 配置项说明
 
-有两种方式修改配置:
+有三种方式修改配置:
 
-1. `config/config.yaml` 文件 **(优先级最高)**
+1. `config/config.yaml` 或 `config/config.toml` 文件 **(优先级最高)**
 2. 环境变量
 3.  `.env` 文件 *(不建议使用)*
 
@@ -12,7 +12,7 @@
 > *修改配置后需重启服务生效*
 
 <details>
-<summary>config.yaml 与 .env 的转换</summary>
+<summary>配置文件格式与环境变量的转换</summary>
 
 在 `config/config.yaml` 中，`main.host` *(str)*, `main.port` *(int)*, `main.debug` *(bool)* 可以这样配置:
 
@@ -31,6 +31,15 @@ main.port: 9010
 main.debug: false
 ```
 
+在 `config/config.toml` 中，相同的配置是这样的:
+
+```toml
+[main]
+host = "0.0.0.0"
+port = 9010
+debug = false
+```
+
 转换到环境变量和 `.env` 就是这样配置:
 
 ```ini
@@ -47,10 +56,10 @@ sleepy_main_debug = false
 > - `str`: 字符串
 > - `int`: 整数
 > - `bool`: 布尔值，可选 `true` **(是)** / `false` **(否)**
-> - `list`: 列表 ***(只能在 `config.yaml` 里配置)***
-> - `dict`: 字典 ***(只能在 `config.yaml` 里配置)***
+> - `list`: 列表 ***(只能在配置文件里配置)***
+> - `dict`: 字典 ***(只能在配置文件里配置)***
 
-> 配置的默认值见 [`config/config.example.yaml`](../config/config.example.yaml)
+> 配置的默认值见 [`config/config.example.yaml`](../config/config.example.yaml) 或 [`config/config.example.toml`](../config/config.example.toml)
 
 ## (main) 系统基本配置
 

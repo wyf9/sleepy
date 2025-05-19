@@ -3,6 +3,7 @@ import os
 
 from dotenv import load_dotenv
 import yaml
+import toml
 
 from _utils import tobool, get_path, SleepyException, list_dir
 
@@ -29,25 +30,50 @@ def getenv(key: str, typeobj) -> ...:
             return typeobj(got_value)
 
 
-# ===== prepare yaml =====
+# ===== prepare config =====
 
-if os.path.exists(get_path('config/config.yaml')):
-    # load user config
-    with open(get_path('config/config.yaml'), 'r', encoding='utf-8') as f:
-        user_config = yaml.safe_load(f)
-        f.close()
-else:
+# 初始化配置变量
+user_config = {}
+example_config = {}
+
+# 检查用户配置文件
+try:
+    if os.path.exists(get_path('config/config.yaml')):
+        # 尝试加载 YAML 用户配置
+        with open(get_path('config/config.yaml'), 'r', encoding='utf-8') as f:
+            user_config = yaml.safe_load(f)
+            f.close()
+    elif os.path.exists(get_path('config/config.toml')):
+        # 如果 YAML 不存在，尝试加载 TOML 用户配置
+        with open(get_path('config/config.toml'), 'r', encoding='utf-8') as f:
+            user_config = toml.load(f)
+            f.close()
+except Exception as e:
+    print(f"Error loading user config: {str(e)}")
     user_config = {}
-# load example config
-with open(get_path('config/config.example.yaml'), 'r', encoding='utf-8') as f:
-    example_config = yaml.safe_load(f)
-    f.close()
+
+# 加载示例配置
+try:
+    # 首先尝试加载 YAML 示例配置
+    if os.path.exists(get_path('config/config.example.yaml')):
+        with open(get_path('config/config.example.yaml'), 'r', encoding='utf-8') as f:
+            example_config = yaml.safe_load(f)
+            f.close()
+    # 如果 YAML 失败或不存在，尝试加载 TOML 示例配置
+    elif os.path.exists(get_path('config/config.example.toml')):
+        with open(get_path('config/config.example.toml'), 'r', encoding='utf-8') as f:
+            example_config = toml.load(f)
+            f.close()
+    else:
+        raise SleepyException('No example config file found! Please make sure either config/config.example.yaml or config/config.example.toml exists.')
+except Exception as e:
+    raise SleepyException(f'Error loading example config: {str(e)}')
 
 
 def get(_type, *key: str) -> ...:
     '''
     获取配置项
-    - 顺序: `config.yaml` -> 环境变量 -> `.env` -> `config.example.yaml`
+    - 顺序: `config/config.yaml` 或 `config/config.toml` -> 环境变量 -> `.env` -> `config/config.example.yaml` 或 `config/config.example.toml`
 
     :param _type: 配置项的类型
     :param *key: 配置项名
@@ -58,7 +84,7 @@ def get(_type, *key: str) -> ...:
         value = user_config
         for k in key:
             value = value[k]
-        assert isinstance(value, _type), SleepyException(f'Invaild config {".".join(key)} from config.yaml, it should be a(n) {_type.__name__} object.')  # verify config type
+        assert isinstance(value, _type), SleepyException(f'Invaild config {".".join(key)} from config file, it should be a(n) {_type.__name__} object.')  # verify config type
         return value
     except KeyError:
         pass
@@ -81,7 +107,7 @@ def get(_type, *key: str) -> ...:
             value = value[k]
         return value
     except KeyError:
-        raise SleepyException(f'Config {envname} (should be a(n) {_type.__name__}) not found in config.example.yaml!')
+        raise SleepyException(f'Config {envname} (should be a(n) {_type.__name__}) not found in example config file!')
 
 # ===== system config =====
 
