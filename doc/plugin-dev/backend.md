@@ -14,16 +14,16 @@
 def init_plugin(config):
     """
     插件初始化函数
-    
+
     :param config: 插件配置对象，包含用户配置和系统工具
     :return: 布尔值，表示初始化是否成功
     """
     # 获取插件配置
     message = config.getconf('message')
-    
+
     # 访问系统工具
     config.u.info(f'[my_plugin] 插件初始化成功，消息: {message}')
-    
+
     return True
 ```
 
@@ -41,11 +41,16 @@ def init_plugin(config):
 
 ## 自定义路由
 
-插件可以添加自定义路由，这些路由会自动注册到 Flask 应用中，路径前缀为 `/plugin/{plugin_name}`。
+插件可以添加自定义路由，这些路由会自动注册到 Flask 应用中。有两种类型的路由：
 
-### 定义路由
+1. **命名空间路由**：路径前缀为 `/plugin/{plugin_name}`，适用于插件特定的功能
+2. **全局路由**：无前缀，直接使用定义的路径，适用于需要简洁 URL 的功能
 
-使用 `@route` 装饰器定义路由：
+> 注意：关于全局路由的详细信息，请参阅 [global-routes.md](global-routes.md) 文档。
+
+### 定义命名空间路由
+
+使用 `@route` 装饰器定义命名空间路由：
 
 ```python
 from plugin import route
@@ -67,7 +72,7 @@ def handle_data():
     访问路径: /plugin/my_plugin/data
     """
     from flask import request
-    
+
     if request.method == 'POST':
         data = request.get_json()
         # 处理数据...
@@ -132,7 +137,7 @@ from plugin import on_event
 def on_app_started(plugin_manager):
     """
     应用启动事件处理器
-    
+
     :param plugin_manager: 插件管理器实例
     """
     print('应用已启动')
@@ -142,7 +147,7 @@ def on_app_started(plugin_manager):
 def on_status_updated(old_status, new_status):
     """
     状态更新事件处理器
-    
+
     :param old_status: 旧状态
     :param new_status: 新状态
     """
@@ -162,13 +167,31 @@ def on_status_updated(old_status, new_status):
 6. `data_saved`: 数据保存时触发
 7. `private_mode_changed`: 隐私模式变更时触发
 
+### 定义全局路由
+
+使用 `@global_route` 装饰器定义全局路由：
+
+```python
+from plugin import global_route
+
+@global_route('/hello')
+def global_hello():
+    """
+    全局路由
+    访问路径: /hello
+    """
+    return {
+        'message': 'Hello from global route!'
+    }
+```
+
 ## 完整示例
 
 以下是一个完整的后端插件示例：
 
 ```python
 # plugin/my_plugin/__init__.py
-from plugin import route, on_event
+from plugin import route, global_route, on_event
 
 # 存储计数器
 counter = 0
@@ -191,6 +214,11 @@ def increment_count():
     global counter
     counter += 1
     return {'count': counter}
+
+@global_route('/api/counter')
+def global_counter():
+    """全局路由示例"""
+    return {'count': counter, 'type': 'global'}
 
 @on_event('status_updated')
 def on_status_updated(old_status, new_status):
@@ -224,7 +252,7 @@ config:
         const data = await response.json();
         document.getElementById('counter').textContent = data.count;
     }
-    
+
     // 增加计数
     async function incrementCount() {
         const response = await fetch('/plugin/my_plugin/increment', {
@@ -233,11 +261,11 @@ config:
         const data = await response.json();
         document.getElementById('counter').textContent = data.count;
     }
-    
+
     // 页面加载完成后获取计数
     document.addEventListener('DOMContentLoaded', function() {
         getCount();
-        
+
         // 绑定按钮点击事件
         document.getElementById('increment-btn').addEventListener('click', incrementCount);
     });

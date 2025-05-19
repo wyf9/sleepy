@@ -13,7 +13,8 @@ from data import Data
 from _utils import get_path, SleepyException
 
 # 全局变量，用于存储插件注册的路由和事件处理器
-_plugin_routes: Dict[str, Dict[str, Callable]] = {}
+_plugin_routes: Dict[str, Dict[str, Callable]] = {}  # 插件命名空间下的路由
+_plugin_global_routes: Dict[str, Dict[str, Callable]] = {}  # 全局路由
 _plugin_event_handlers: Dict[str, List[Tuple[str, Callable]]] = {}
 
 # 插件装饰器
@@ -38,6 +39,39 @@ def route(rule: str, methods: List[str] = None):
 
         # 注册路由
         _plugin_routes[plugin_name][rule] = {
+            'func': func,
+            'methods': methods
+        }
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+def global_route(rule: str, methods: List[str] = None):
+    """
+    装饰器：注册全局路由（不带插件前缀）
+
+    :param rule: 路由规则，例如 '/hello'
+    :param methods: HTTP方法列表，例如 ['GET', 'POST']
+    """
+    if methods is None:
+        methods = ['GET']
+
+    def decorator(func):
+        # 获取插件名称（从函数模块名称中提取）
+        module_name = func.__module__
+        plugin_name = module_name.split('.')[-1]
+
+        # 初始化插件全局路由字典
+        if plugin_name not in _plugin_global_routes:
+            _plugin_global_routes[plugin_name] = {}
+
+        # 注册全局路由
+        _plugin_global_routes[plugin_name][rule] = {
             'func': func,
             'methods': methods
         }
@@ -258,26 +292,47 @@ class Plugin:
 
         :param plugin_name: 插件名称
         """
-        if plugin_name not in _plugin_routes:
-            return
+        # 注册插件命名空间下的路由
+        if plugin_name in _plugin_routes:
+            for rule, route_info in _plugin_routes[plugin_name].items():
+                # 构建完整的路由规则
+                full_rule = f'/plugin/{plugin_name}{rule}'
 
-        for rule, route_info in _plugin_routes[plugin_name].items():
-            # 构建完整的路由规则
-            full_rule = f'/plugin/{plugin_name}{rule}'
+                # 注册路由
+                self.app.route(full_rule, methods=route_info['methods'])(route_info['func'])
 
-            # 注册路由
-            self.app.route(full_rule, methods=route_info['methods'])(route_info['func'])
+                # 记录已注册的路由
+                if plugin_name not in self.registered_routes:
+                    self.registered_routes[plugin_name] = []
 
-            # 记录已注册的路由
-            if plugin_name not in self.registered_routes:
-                self.registered_routes[plugin_name] = []
+                self.registered_routes[plugin_name].append({
+                    'rule': full_rule,
+                    'methods': route_info['methods'],
+                    'type': 'namespace'
+                })
 
-            self.registered_routes[plugin_name].append({
-                'rule': full_rule,
-                'methods': route_info['methods']
-            })
+                self.u.info(f"Registered route '{full_rule}' for plugin '{plugin_name}'")
 
-            self.u.info(f"Registered route '{full_rule}' for plugin '{plugin_name}'")
+        # 注册全局路由
+        if plugin_name in _plugin_global_routes:
+            for rule, route_info in _plugin_global_routes[plugin_name].items():
+                # 全局路由直接使用规则，不添加前缀
+                full_rule = rule
+
+                # 注册路由
+                self.app.route(full_rule, methods=route_info['methods'])(route_info['func'])
+
+                # 记录已注册的路由
+                if plugin_name not in self.registered_routes:
+                    self.registered_routes[plugin_name] = []
+
+                self.registered_routes[plugin_name].append({
+                    'rule': full_rule,
+                    'methods': route_info['methods'],
+                    'type': 'global'
+                })
+
+                self.u.info(f"Registered global route '{full_rule}' for plugin '{plugin_name}'")
 
     def trigger_event(self, event_name, *args, **kwargs):
         """
