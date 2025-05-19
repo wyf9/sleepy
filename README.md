@@ -23,10 +23,12 @@
 
 <summary>展开更多</summary>
 
-    **开放预览站**: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)  
-    **HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)  
-    **Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)  
-    **开发服务器**: [请在 Discord 服务器获取](link-dc)
+**开放预览站**: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)  
+**HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)  
+**Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)  
+**开发服务器**: [请在 Discord 服务器获取](link-dc)
+
+你可以在开发预览站测试最新功能和API, 但不保证稳定性 / 安全性.
 
 </details>
 
