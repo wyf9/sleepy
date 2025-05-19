@@ -37,6 +37,12 @@ Sleepy-Secret: MySecretCannotGuess
 Authorization: Bearer MySecretCannotGuess
 ```
 
+5. Cookie *(`Cookie`)* 的 `sleepy-token`
+
+```http
+sleepy-token=MySecretCannotGuess
+```
+
 > 服务端的 `secret` 即为在环境变量中配置的 `SLEEPY_SECRET`
 
 如 `secret` 错误，则会返回:
@@ -147,7 +153,7 @@ Authorization: Bearer MySecretCannotGuess
 * 无需鉴权
 
 > [!TIP]
-> 本接口较特殊: 如服务器关闭了统计, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果 <br/>
+> 本接口较特殊: 如服务器关闭了统计, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果  
 > ~~*我也不知道自己怎么想的*~~
 
 #### Response
