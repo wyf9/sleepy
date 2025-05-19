@@ -63,6 +63,10 @@ def get_status():
         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
+@route('/hello')
+def hello():
+    return {'message': 'Hello from my plugin!'}
+
 # 事件处理函数
 @on_event('app_started')
 def on_app_started(plugin_manager):
