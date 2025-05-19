@@ -54,6 +54,6 @@ if __name__ == '__main__':
                 out = eval(inp)
             print(f'O > {out}'.replace(SECRET, "[SECRET]"))
         except Exception as e:
-            print(f'E - {str(e)}'.replace(SECRET, "[SECRET]"))
+            print(f'E - {e}'.replace(SECRET, "[SECRET]"))
         except KeyboardInterrupt:
             exit(0)

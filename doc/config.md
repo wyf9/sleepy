@@ -2,25 +2,23 @@
 
 有三种方式修改配置:
 
-1. `config/config.yaml` 或 `config/config.toml` 文件 **(优先级最高)**
+1. `data/config.yaml` 或 `data/config.toml` 文件 **(优先级最高)**
 2. 环境变量
-3.  `.env` 文件 *(不建议使用)*
+3. `.env` 文件 _(不建议使用)_
 
-> [!IMPORTANT]
-> *(特别是 Windows 用户)* 请确保所有配置文件 **使用 `UTF-8` 编码保存**，否则会导致 **错误读入注释 / 中文乱码** 等异常情况 <br/>
-> Huggingface / Vercel 等容器平台部署需将环境变量放在 **`Environment Variables`** *(见 [部署文档](./deploy.md))* <br/>
-> *修改配置后需重启服务生效*
+> [!IMPORTANT] > _(特别是 Windows 用户)_ 请确保所有配置文件 **使用 `UTF-8` 编码保存**，否则会导致 **错误读入注释 / 中文乱码** 等异常情况 <br/>
+> Huggingface / Vercel 等容器平台部署需将环境变量放在 **`Environment Variables`** _(见 [部署文档](./deploy.md))_ <br/> > _修改配置后需重启服务生效_
 
 <details>
 <summary>配置文件格式与环境变量的转换</summary>
 
-在 `config/config.yaml` 中，`main.host` *(str)*, `main.port` *(int)*, `main.debug` *(bool)* 可以这样配置:
+在 `data/config.yaml` 中，`main.host` _(str)_, `main.port` _(int)_, `main.debug` _(bool)_ 可以这样配置:
 
 ```yaml
 main:
-  host: '0.0.0.0'
-  port: 9010
-  debug: false
+    host: '0.0.0.0'
+    port: 9010
+    debug: false
 ```
 
 也可以这样配置:
@@ -31,7 +29,7 @@ main.port: 9010
 main.debug: false
 ```
 
-在 `config/config.toml` 中，相同的配置是这样的:
+在 `data/config.toml` 中，相同的配置是这样的:
 
 ```toml
 [main]
@@ -53,23 +51,24 @@ sleepy_main_debug = false
 ---
 
 > **配置类型** <br/>
-> - `str`: 字符串
-> - `int`: 整数
-> - `bool`: 布尔值，可选 `true` **(是)** / `false` **(否)**
-> - `list`: 列表 ***(只能在配置文件里配置)***
-> - `dict`: 字典 ***(只能在配置文件里配置)***
+>
+> -   `str`: 字符串
+> -   `int`: 整数
+> -   `bool`: 布尔值，可选 `true` **(是)** / `false` **(否)**
+> -   `list`: 列表 **_(只能在配置文件里配置)_**
+> -   `dict`: 字典 **_(只能在配置文件里配置)_**
 
-> 配置的默认值见 [`config/config.default.yaml`](../config/config.default.yaml) 或 [`config/config.default.toml`](../config/config.default.toml)
+> 配置的默认值见 [`config.default.yaml`](../config.default.yaml)
 
 ## (main) 系统基本配置
 
 | 名称                      | 类型 | 说明                                                                                                          |
 | ------------------------- | ---- | ------------------------------------------------------------------------------------------------------------- |
 | `main.host`               | str  | 服务的监听地址，如需同时监听 IPv6 地址需改为 `::`                                                             |
-| `main.port`               | int  | 服务的监听端口 *(0-65535)*                                                                                    |
-| `main.debug`              | bool | 控制是否开启 Flask 的调试模式 (一般无需开启) *(开启后可自动重载代码)*                                         |
-| `main.timezone`           | str  | 控制 **API 返回中 / 网页上**显示时间的时区，一般无需更改 *(`Asia/Shanghai` 或 `Asia/Chongqing` 均为北京时间)* |
-| `main.checkdata_interval` | int  | 控制多久检查一次状态数据的更新 **(秒)** (*检测到更新后会写入 `data.json`，供下次启动时恢复状态*)              |
+| `main.port`               | int  | 服务的监听端口 _(0-65535)_                                                                                    |
+| `main.debug`              | bool | 控制是否开启 Flask 的调试模式 (一般无需开启) _(开启后可自动重载代码)_                                         |
+| `main.timezone`           | str  | 控制 **API 返回中 / 网页上**显示时间的时区，一般无需更改 _(`Asia/Shanghai` 或 `Asia/Chongqing` 均为北京时间)_ |
+| `main.checkdata_interval` | int  | 控制多久检查一次状态数据的更新 **(秒)** (_检测到更新后会写入 `data.json`，供下次启动时恢复状态_)              |
 | `main.secret`             | str  | 密钥 (相当于密码，用于防止未授权设置状态)，**客户端须使用相同的密钥**                                         |
 
 ---
@@ -80,11 +79,11 @@ sleepy_main_debug = false
 | ---------------------- | ---- | ------------------------------------------------------------------------------------------------------------ |
 | `page.name`            | str  | 网页顶部 `(名字)'s Status` 中的名字                                                                          |
 | `page.title`           | str  | 标题栏中显示的网页标题                                                                                       |
-| `page.desc`            | str  | 网页描述 *(主要用于 SEO)*                                                                                    |
+| `page.desc`            | str  | 网页描述 _(主要用于 SEO)_                                                                                    |
 | `page.favicon`         | str  | 网页的图标 (`.png` 或 `.ico` 图片) 路径，可以为绝对路径或相对路径                                            |
-| `page.background`      | str  | 背景图片地址，可以使用网上的图片 API 或单张图片 *(默认为 [siiway/imgapi](https://github.com/siiway/imgapi))* |
+| `page.background`      | str  | 背景图片地址，可以使用网上的图片 API 或单张图片 _(默认为 [siiway/imgapi](https://github.com/siiway/imgapi))_ |
 | `page.learn_more_text` | str  | 网页底部链接的**显示文字**                                                                                   |
-| `page.learn_more_link` | str  | 网页底部链接的**目标** *(默认为本 repo 地址)*                                                                |
+| `page.learn_more_link` | str  | 网页底部链接的**目标** _(默认为本 repo 地址)_                                                                |
 | `page.more_text`       | str  | 网页底部链接上方插入的文字 (**支持 HTML**，可以插入 统计代码 / 备案号 等)                                    |
 
 <!-- | `page.hitokoto`        | bool | 在插入文字上方显示随机 [一言](https://hitokoto.cn)                                                           |
@@ -98,11 +97,11 @@ sleepy_main_debug = false
 
 | 名称                  | 类型 | 说明                                                                 |
 | --------------------- | ---- | -------------------------------------------------------------------- |
-| `status.device_slice` | int  | 网页中设备状态文本的最大长度，超过此长度会被截断 *(设置为 `0` 禁用)* |
-| `status.not_using`    | str  | 设备未在使用时显示的状态文本 *(如为空则使用设备上报值)*              |
+| `status.device_slice` | int  | 网页中设备状态文本的最大长度，超过此长度会被截断 _(设置为 `0` 禁用)_ |
+| `status.not_using`    | str  | 设备未在使用时显示的状态文本 _(如为空则使用设备上报值)_              |
 | `status.sorted`       | bool | 是否按字母顺序排序设备列表                                           |
 | `status.using_first`  | bool | 是否设置使用中设备优先显示                                           |
-| `status.status_list`  | list | 手动设置状态的预设列表 *(`status` 即为索引)*                         |
+| `status.status_list`  | list | 手动设置状态的预设列表 _(`status` 即为索引)_                         |
 
 <!-- ## (util) 可选功能
 

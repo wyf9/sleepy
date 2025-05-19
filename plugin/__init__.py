@@ -167,7 +167,7 @@ def trigger_event(event_name: str, *args, **kwargs):
                 result = handler(*args, **kwargs)
                 results.append((plugin_name, result))
             except Exception as e:
-                print(f"Error in plugin {plugin_name} event handler for {event_name}: {str(e)}")
+                print(f"Error in plugin {plugin_name} event handler for {event_name}: {e}")
 
     return results
 
@@ -300,14 +300,14 @@ class Plugin:
                             plugin_backend.init_plugin(plugin_config)
                             self.u.info(f"Plugin '{i}' initialized successfully")
                         except Exception as e:
-                            self.u.error(f"Error initializing plugin '{i}': {str(e)}")
+                            self.u.error(f"Error initializing plugin '{i}': {e}")
 
                     # 注册插件路由
                     if self.app and i in _plugin_routes:
                         self._register_plugin_routes(i)
 
                 except Exception as e:
-                    self.u.error(f"Error loading plugin '{i}': {str(e)}")
+                    self.u.error(f"Error loading plugin '{i}': {e}")
                     plugin_backend = None
 
             # 加载配置
@@ -414,7 +414,7 @@ class Plugin:
 
                             self.u.info(f"Registered admin card '{card_info['title']}' for plugin '{plugin_name}'")
                         except Exception as e:
-                            self.u.error(f"Error registering admin card for plugin '{plugin_name}': {str(e)}")
+                            self.u.error(f"Error registering admin card for plugin '{plugin_name}': {e}")
 
         # 按顺序排序卡片
         self.admin_cards.sort(key=lambda x: x['order'])

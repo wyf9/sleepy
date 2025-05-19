@@ -185,7 +185,7 @@ def save_settings():
             return {'success': False, 'message': '计数必须在1-100之间'}
         
         # 更新配置文件
-        config_path = _utils.get_path('config/config.yaml')
+        config_path = _utils.get_path('data/config.yaml')
         
         try:
             import yaml
@@ -215,6 +215,6 @@ def save_settings():
             
             return {'success': True}
         except Exception as e:
-            return {'success': False, 'message': f'保存配置失败: {str(e)}'}
+            return {'success': False, 'message': f'保存配置失败: {e}'}
     except Exception as e:
         return {'success': False, 'message': str(e)}

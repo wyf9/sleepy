@@ -402,7 +402,7 @@ sleepy-token=MySecretCannotGuess
 
 > `/save_data`
 
-保存内存中的状态信息到 `data.json`
+保存内存中的状态信息到 `data/data.json`
 
 * Method: GET
 * **需要鉴权**
@@ -414,7 +414,7 @@ sleepy-token=MySecretCannotGuess
 {
     "success": true,
     "code": "OK",
-    "data": { // data.json 内容
+    "data": { // data/data.json 内容
         "status": 0,
         "device_status": {},
         "last_updated": "2024-12-21 13:58:38"

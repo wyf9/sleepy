@@ -56,11 +56,11 @@ def init_plugin(config):
             finally:
                 conn.close()
         except Exception as e:
-            config.u.error(f"[app-chart] 获取模式列表失败: {str(e)}")
+            config.u.error(f"[app-chart] 获取模式列表失败: {e}")
 
         return True
     except Exception as e:
-        config.u.error(f'[app-chart] 插件初始化失败: {str(e)}')
+        config.u.error(f'[app-chart] 插件初始化失败: {e}')
         return False
 
 def _get_db():
@@ -868,7 +868,7 @@ def save_settings():
             return {'success': False, 'message': '至少需要一种颜色'}
 
         # 更新配置文件
-        config_path = _utils.get_path('config/config.yaml')
+        config_path = _utils.get_path('data/config.yaml')
 
         try:
             import yaml
@@ -897,7 +897,7 @@ def save_settings():
 
             return {'success': True}
         except Exception as e:
-            return {'success': False, 'message': f'保存配置失败: {str(e)}'}
+            return {'success': False, 'message': f'保存配置失败: {e}'}
     except Exception as e:
         return {'success': False, 'message': str(e)}
 

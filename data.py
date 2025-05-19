@@ -32,22 +32,22 @@ class Data:
 
         with open(_utils.get_path('data.example.jsonc'), 'r', encoding='utf-8') as file:
             self.preload_data = json5.load(file)
-        if os.path.exists(_utils.get_path('data.json')):
+        if os.path.exists(_utils.get_path('data/data.json')):
             try:
                 self.load()
             except Exception as e:
                 self.u.warning(f'Error when loading data: {e}, try re-create')
-                os.remove(_utils.get_path('data.json'))
+                os.remove(_utils.get_path('data/data.json'))
                 self.data = self.preload_data
                 self.save()
                 self.load()
         else:
-            self.u.info('Could not find data.json, creating.')
+            self.u.info('Could not find data/data.json, creating.')
             try:
                 self.data = self.preload_data
                 self.save()
             except Exception as e:
-                self.u.exception(f'Create data.json failed: {e}')
+                self.u.exception(f'Create data/data.json failed: {e}')
 
     # --- Storage functions
 
@@ -56,7 +56,7 @@ class Data:
         加载状态
 
         :param ret: 是否返回加载后的 dict (为否则设置 self.data)
-        :param preload: 将会将 data.json 的内容追加到此后
+        :param preload: 将会将 data/data.json 的内容追加到此后
         '''
         if not preload:
             preload = self.preload_data
@@ -64,11 +64,11 @@ class Data:
 
         while attempts > 0:
             try:
-                if not os.path.exists(_utils.get_path('data.json')):
-                    self.u.warning('data.json not exist, try re-create')
+                if not os.path.exists(_utils.get_path('data/data.json')):
+                    self.u.warning('data/data.json not exist, try re-create')
                     self.data = self.preload_data
                     self.save()
-                with open(_utils.get_path('data.json'), 'r', encoding='utf-8') as file:
+                with open(_utils.get_path('data/data.json'), 'r', encoding='utf-8') as file:
                     Data = json.load(file)
                     DATA: dict = {**preload, **Data}
                     if ret:
@@ -89,10 +89,10 @@ class Data:
         保存配置
         '''
         try:
-            with open(_utils.get_path('data.json'), 'w', encoding='utf-8') as file:
+            with open(_utils.get_path('data/data.json'), 'w', encoding='utf-8') as file:
                 json.dump(self.data, file, indent=4, ensure_ascii=False)
         except Exception as e:
-            self.u.error(f'Failed to save data.json: {e}')
+            self.u.error(f'Failed to save data/data.json: {e}')
 
     # --- Metrics
 

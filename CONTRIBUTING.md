@@ -35,7 +35,8 @@ def function():
 </details>
 
 > [!IMPORTANT]
-> **千万不要** 将以下文件包含在提交中:
+> **千万不要** 将以下文件 (夹) 包含在提交中:
+> - `data/`
 > - `config.yaml`
 > - `config.toml`
 > - `.env`

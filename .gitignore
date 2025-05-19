@@ -2,10 +2,9 @@
 __pycache__/
 
 # Config and Data
+data/
 config.yaml
 config.toml
-config/config.yaml
-config/config.toml
 .env
 data.json
 

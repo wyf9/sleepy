@@ -229,7 +229,7 @@ https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/cli
 - [`device_remove(id: str)`](../doc/api.md#device-remove): 移除设备状态
 - [`device_clear()`](../doc/api.md#device-clear): 清除设备状态
 - [`private_mode(private: bool)`](../doc/api.md#device-private-mode): 开关隐私模式
-- [`save_data()`](../doc/api.md#storage-save-data): 保存数据到 `data.json`
+- [`save_data()`](../doc/api.md#storage-save-data): 保存数据到 `data/data.json`
 
 </details>
 

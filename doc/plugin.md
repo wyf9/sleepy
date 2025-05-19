@@ -10,7 +10,7 @@
 
 ## 可用的插件
 
-sleepy 默认包含以下插件。默认情况下，所有插件都是禁用的，您需要在 `config.yaml` 中启用它们。
+sleepy 默认包含以下插件。默认情况下，所有插件都是禁用的，您需要在 `data/config.yaml` 中启用它们。
 
 1. **test** - 一个简单的测试插件，显示自定义内容
 2. **custom_html** - 允许您在页面上显示自定义 HTML 内容
@@ -20,7 +20,7 @@ sleepy 默认包含以下插件。默认情况下，所有插件都是禁用的�
 
 ## 启用插件
 
-要启用插件，您需要编辑 `config.yaml` 文件，将插件名称添加到 `plugin_enabled` 列表中：
+要启用插件，您需要编辑 `data/config.yaml` 文件，将插件名称添加到 `plugin_enabled` 列表中：
 
 ```yaml
 plugin_enabled:
@@ -33,7 +33,7 @@ plugin_enabled:
 
 ## 配置插件
 
-每个插件可能有自己的配置选项，您可以在 `config.yaml` 文件的 `plugin` 部分进行设置：
+每个插件可能有自己的配置选项，您可以在 `data/config.yaml` 文件的 `plugin` 部分进行设置：
 
 ```yaml
 plugin:
@@ -86,7 +86,7 @@ plugin:
 
 这是一个示例后端插件，展示系统事件日志。
 默认情况下，它是禁用的，只用于演示插件的开发。
-如果您想启用它，请在 `config.yaml` 中添加以下内容：
+如果您想启用它，请在 `data/config.yaml` 中添加以下内容：
 
 ```yaml
 plugin:
