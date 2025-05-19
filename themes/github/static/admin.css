@@ -1,0 +1,337 @@
+/* Admin Panel Styles for GitHub Theme */
+
+/* Login Page Styles */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 340px;
+  padding: 24px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.login-form {
+  margin-top: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 5px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.light .form-group input {
+  background-color: var(--gh-bg-light);
+  border: 1px solid var(--gh-border-light);
+  color: var(--gh-text-light);
+}
+
+.dark .form-group input {
+  background-color: var(--gh-bg-dark);
+  border: 1px solid var(--gh-border-dark);
+  color: var(--gh-text-dark);
+}
+
+.form-group input:focus {
+  outline: none;
+}
+
+.light .form-group input:focus {
+  border-color: var(--gh-link-light);
+  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.3);
+}
+
+.dark .form-group input:focus {
+  border-color: var(--gh-link-dark);
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+}
+
+.login-btn {
+  display: inline-block;
+  padding: 5px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid;
+  border-radius: 6px;
+  transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+}
+
+.light .login-btn {
+  background-color: var(--gh-button-light);
+  color: #ffffff;
+  border-color: rgba(27, 31, 35, 0.15);
+}
+
+.light .login-btn:hover {
+  background-color: var(--gh-button-hover-light);
+  text-decoration: none;
+}
+
+.dark .login-btn {
+  background-color: var(--gh-button-dark);
+  color: #ffffff;
+  border-color: rgba(240, 246, 252, 0.1);
+}
+
+.dark .login-btn:hover {
+  background-color: var(--gh-button-hover-dark);
+  text-decoration: none;
+}
+
+.error-message {
+  margin-top: 16px;
+  display: none;
+}
+
+.light .error-message {
+  color: var(--error-color);
+}
+
+.dark .error-message {
+  color: var(--error-color);
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 24px;
+}
+
+/* Admin Panel Styles */
+.admin-panel {
+  padding: 20px;
+}
+
+.panel-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.panel-card {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.light .panel-card {
+  background-color: rgba(255, 255, 255, var(--card-alpha));
+  border: 1px solid var(--gh-border-light);
+}
+
+.dark .panel-card {
+  background-color: rgba(13, 17, 23, var(--card-alpha));
+  border: 1px solid var(--gh-border-dark);
+}
+
+.panel-section {
+  margin-bottom: 16px;
+}
+
+.panel-section-title {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Status Selector */
+.status-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.status-item {
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.light .status-item {
+  border: 1px solid var(--gh-border-light);
+}
+
+.dark .status-item {
+  border: 1px solid var(--gh-border-dark);
+}
+
+.status-item.active {
+  font-weight: 600;
+}
+
+.light .status-item.active {
+  border-color: var(--gh-link-light);
+}
+
+.dark .status-item.active {
+  border-color: var(--gh-link-dark);
+}
+
+/* Device List */
+.device-list {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.device-list th,
+.device-list td {
+  padding: 8px 16px;
+  text-align: left;
+}
+
+.light .device-list th,
+.light .device-list td {
+  border-bottom: 1px solid var(--gh-border-light);
+}
+
+.dark .device-list th,
+.dark .device-list td {
+  border-bottom: 1px solid var(--gh-border-dark);
+}
+
+.device-list th {
+  font-weight: 600;
+}
+
+.light .device-list th {
+  background-color: var(--gh-header-light);
+}
+
+.dark .device-list th {
+  background-color: var(--gh-header-dark);
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 5px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid;
+  border-radius: 6px;
+  transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+}
+
+.light .btn-primary {
+  background-color: var(--gh-button-light);
+  color: #ffffff;
+  border-color: rgba(27, 31, 35, 0.15);
+}
+
+.light .btn-primary:hover {
+  background-color: var(--gh-button-hover-light);
+  text-decoration: none;
+}
+
+.dark .btn-primary {
+  background-color: var(--gh-button-dark);
+  color: #ffffff;
+  border-color: rgba(240, 246, 252, 0.1);
+}
+
+.dark .btn-primary:hover {
+  background-color: var(--gh-button-hover-dark);
+  text-decoration: none;
+}
+
+.light .btn-secondary {
+  background-color: #fafbfc;
+  color: var(--gh-text-light);
+  border-color: rgba(27, 31, 35, 0.15);
+}
+
+.light .btn-secondary:hover {
+  background-color: #f3f4f6;
+  text-decoration: none;
+}
+
+.dark .btn-secondary {
+  background-color: #21262d;
+  color: var(--gh-text-dark);
+  border-color: rgba(240, 246, 252, 0.1);
+}
+
+.dark .btn-secondary:hover {
+  background-color: #30363d;
+  text-decoration: none;
+}
+
+.light .btn-danger {
+  background-color: #fafbfc;
+  color: #cb2431;
+  border-color: rgba(27, 31, 35, 0.15);
+}
+
+.light .btn-danger:hover {
+  background-color: #f3f4f6;
+  color: #cb2431;
+  text-decoration: none;
+}
+
+.dark .btn-danger {
+  background-color: #21262d;
+  color: #f85149;
+  border-color: rgba(240, 246, 252, 0.1);
+}
+
+.dark .btn-danger:hover {
+  background-color: #30363d;
+  color: #f85149;
+  text-decoration: none;
+}
