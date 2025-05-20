@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" style="font-family: 'Courier New', monospace;">
 
 <head>
     <meta charset="UTF-8">
@@ -10,6 +10,9 @@
     <link rel="icon" href="{{ c.page.favicon }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}?theme={{ current_theme }}">
     <style>
+        html, body {
+            font-family: var(--console-font);
+        }
         body {
             background: url('{{ c.page.background }}') no-repeat center center fixed;
         }

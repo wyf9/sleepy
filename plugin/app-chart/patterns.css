@@ -11,7 +11,6 @@
     background-color: rgba(0, 0, 0, 0.05);
     padding: 2px 4px;
     border-radius: 3px;
-    font-family: monospace;
 }
 .patterns-list {
     margin-bottom: 20px;
@@ -40,7 +39,6 @@
 }
 .pattern-pattern {
     font-weight: bold;
-    font-family: monospace;
 }
 .pattern-replacement {
     color: #2ea043;

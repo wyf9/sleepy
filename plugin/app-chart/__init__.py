@@ -427,6 +427,8 @@ def app_chart_settings_card(config):
     :param config: 插件配置对象
     :return: 卡片内容
     """
+    import os
+
     # 获取当前设置
     db_path = config.getconf('db_path')
     max_apps = config.getconf('max_apps')
@@ -437,134 +439,34 @@ def app_chart_settings_card(config):
     # 颜色列表转为字符串
     colors_str = '\n'.join(colors) if colors else ''
 
+    # 读取外部文件
+    plugin_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # 读取HTML模板
+    html_path = os.path.join(plugin_dir, 'settings.html')
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+
+    # 读取CSS
+    css_path = os.path.join(plugin_dir, 'settings.css')
+    with open(css_path, 'r', encoding='utf-8') as f:
+        css_content = f.read()
+
+    # 读取JavaScript
+    js_path = os.path.join(plugin_dir, 'settings.js')
+    with open(js_path, 'r', encoding='utf-8') as f:
+        js_content = f.read()
+
     # 构建卡片内容
-    content = """
-    <div class="app-chart-settings">
-        <div class="form-group">
-            <label for="db_path">数据库路径:</label>
-            <input type="text" id="db_path" value="{{ db_path }}" />
-            <small>数据库文件的路径，相对于应用根目录</small>
-        </div>
-        <div class="form-group">
-            <label for="max_apps">最大应用数量:</label>
-            <input type="number" id="max_apps" value="{{ max_apps }}" min="1" max="50" />
-            <small>图表中显示的最大应用数量</small>
-        </div>
-        <div class="form-group">
-            <label for="default_days">默认显示天数:</label>
-            <select id="default_days">
-                <option value="7" {% if default_days == 7 %}selected{% endif %}>7天</option>
-                <option value="14" {% if default_days == 14 %}selected{% endif %}>14天</option>
-                <option value="30" {% if default_days == 30 %}selected{% endif %}>30天</option>
-            </select>
-            <small>默认显示的时间范围</small>
-        </div>
-        <div class="form-group">
-            <label for="chart_height">图表高度:</label>
-            <input type="number" id="chart_height" value="{{ chart_height }}" min="100" max="800" step="10" />
-            <small>图表的高度（像素）</small>
-        </div>
-        <div class="form-group">
-            <label for="colors">图表颜色:</label>
-            <textarea id="colors" rows="5">{{ colors_str }}</textarea>
-            <small>每行一个颜色代码，例如 #4e79a7</small>
-        </div>
-        <div class="form-actions">
-            <button id="save-settings" class="btn btn-primary">保存设置</button>
-            <button id="reset-settings" class="btn btn-secondary">重置</button>
-        </div>
-        <div id="settings-message" class="settings-message" style="display: none;"></div>
-    </div>
+    content = f"""
+    {html_content}
 
     <style>
-    .app-chart-settings {
-        max-width: 600px;
-    }
-    .app-chart-settings small {
-        display: block;
-        color: #666;
-        margin-top: 2px;
-        font-size: 12px;
-    }
-    .settings-message {
-        margin-top: 15px;
-        padding: 10px;
-        border-radius: 4px;
-    }
-    .settings-message.success {
-        background-color: rgba(46, 160, 67, 0.1);
-        border: 1px solid rgba(46, 160, 67, 0.2);
-        color: #2ea043;
-    }
-    .settings-message.error {
-        background-color: rgba(248, 81, 73, 0.1);
-        border: 1px solid rgba(248, 81, 73, 0.2);
-        color: #f85149;
-    }
+    {css_content}
     </style>
 
     <script>
-    // 保存设置
-    document.getElementById('save-settings').addEventListener('click', async function() {
-        const db_path = document.getElementById('db_path').value;
-        const max_apps = parseInt(document.getElementById('max_apps').value);
-        const default_days = parseInt(document.getElementById('default_days').value);
-        const chart_height = parseInt(document.getElementById('chart_height').value);
-        const colors_str = document.getElementById('colors').value;
-
-        // 解析颜色列表
-        const colors = colors_str.split('\\n')
-            .map(color => color.trim())
-            .filter(color => color.length > 0);
-
-        try {
-            const response = await fetch('/plugin/app-chart/settings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    db_path,
-                    max_apps,
-                    default_days,
-                    chart_height,
-                    colors
-                })
-            });
-
-            const data = await response.json();
-            const messageEl = document.getElementById('settings-message');
-
-            if (data.success) {
-                messageEl.textContent = '设置已保存，重启服务后生效';
-                messageEl.className = 'settings-message success';
-                messageEl.style.display = 'block';
-            } else {
-                messageEl.textContent = '保存失败: ' + data.message;
-                messageEl.className = 'settings-message error';
-                messageEl.style.display = 'block';
-            }
-
-            // 3秒后隐藏消息
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 3000);
-        } catch (error) {
-            const messageEl = document.getElementById('settings-message');
-            messageEl.textContent = '保存失败: ' + error.message;
-            messageEl.className = 'settings-message error';
-            messageEl.style.display = 'block';
-        }
-    });
-
-    // 重置设置
-    document.getElementById('reset-settings').addEventListener('click', function() {
-        document.getElementById('db_path').value = '{{ db_path }}';
-        document.getElementById('max_apps').value = '{{ max_apps }}';
-        document.getElementById('default_days').value = '{{ default_days }}';
-        document.getElementById('chart_height').value = '{{ chart_height }}';
-        document.getElementById('colors').value = '{{ colors_str }}';
-    });
+    {js_content}
     </script>
     """
 
@@ -598,233 +500,39 @@ def app_chart_data_card(_):
     """
     应用使用数据管理卡片
 
-    :param config: 插件配置对象
+    :param _: 插件配置对象（未使用）
     :return: 卡片内容
     """
+    import os
+
+    # 读取外部文件
+    plugin_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # 读取HTML模板
+    html_path = os.path.join(plugin_dir, 'data-management.html')
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+
+    # 读取CSS
+    css_path = os.path.join(plugin_dir, 'data-management.css')
+    with open(css_path, 'r', encoding='utf-8') as f:
+        css_content = f.read()
+
+    # 读取JavaScript
+    js_path = os.path.join(plugin_dir, 'data-management.js')
+    with open(js_path, 'r', encoding='utf-8') as f:
+        js_content = f.read()
+
     # 构建卡片内容
-    content = """
-    <div class="app-chart-data-management">
-        <div class="data-stats">
-            <div class="loading">加载数据统计中...</div>
-        </div>
-
-        <div class="data-actions">
-            <button id="refresh-stats" class="btn btn-secondary">刷新统计</button>
-            <button id="clear-data" class="btn btn-danger">清除所有数据</button>
-            <button id="export-data" class="btn btn-primary">导出数据</button>
-            <button id="download-db" class="btn btn-primary">下载数据库</button>
-        </div>
-
-        <div id="data-message" class="data-message" style="display: none;"></div>
-    </div>
+    content = f"""
+    {html_content}
 
     <style>
-    .app-chart-data-management {
-        max-width: 600px;
-    }
-    .data-stats {
-        margin-bottom: 20px;
-        background-color: rgba(255, 255, 255, 0.5);
-        border-radius: 8px;
-        padding: 15px;
-    }
-    .data-actions {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-    .data-message {
-        margin-top: 15px;
-        padding: 10px;
-        border-radius: 4px;
-    }
-    .data-message.success {
-        background-color: rgba(46, 160, 67, 0.1);
-        border: 1px solid rgba(46, 160, 67, 0.2);
-        color: #2ea043;
-    }
-    .data-message.error {
-        background-color: rgba(248, 81, 73, 0.1);
-        border: 1px solid rgba(248, 81, 73, 0.2);
-        color: #f85149;
-    }
-    .data-stat-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-    }
-    .data-stat-item:last-child {
-        border-bottom: none;
-    }
-    .data-stat-label {
-        font-weight: bold;
-    }
+    {css_content}
     </style>
 
     <script>
-    // 加载数据统计
-    async function loadDataStats() {
-        const statsEl = document.querySelector('.data-stats');
-        statsEl.innerHTML = '<div class="loading">加载数据统计中...</div>';
-
-        try {
-            const response = await fetch('/plugin/app-chart/data-stats');
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message || '加载数据失败');
-            }
-
-            statsEl.innerHTML = `
-                <h4>数据统计</h4>
-                <div class="data-stat-item">
-                    <span class="data-stat-label">应用使用记录数:</span>
-                    <span>${data.stats.usage_count}</span>
-                </div>
-                <div class="data-stat-item">
-                    <span class="data-stat-label">每日统计记录数:</span>
-                    <span>${data.stats.daily_count}</span>
-                </div>
-                <div class="data-stat-item">
-                    <span class="data-stat-label">追踪的应用数:</span>
-                    <span>${data.stats.app_count}</span>
-                </div>
-                <div class="data-stat-item">
-                    <span class="data-stat-label">数据库大小:</span>
-                    <span>${data.stats.db_size}</span>
-                </div>
-                <div class="data-stat-item">
-                    <span class="data-stat-label">最早记录日期:</span>
-                    <span>${data.stats.first_date || '无数据'}</span>
-                </div>
-                <div class="data-stat-item">
-                    <span class="data-stat-label">最新记录日期:</span>
-                    <span>${data.stats.last_date || '无数据'}</span>
-                </div>
-            `;
-        } catch (error) {
-            console.error('Error loading data stats:', error);
-            statsEl.innerHTML = `<div class="error-message">加载数据统计失败: ${error.message}</div>`;
-        }
-    }
-
-    // 清除所有数据
-    async function clearAllData() {
-        if (!confirm('确定要清除所有应用使用时间数据吗？此操作不可恢复！')) {
-            return;
-        }
-
-        const messageEl = document.getElementById('data-message');
-
-        try {
-            const response = await fetch('/plugin/app-chart/clear-data', {
-                method: 'POST'
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                messageEl.textContent = '所有数据已清除';
-                messageEl.className = 'data-message success';
-                messageEl.style.display = 'block';
-
-                // 重新加载统计
-                loadDataStats();
-            } else {
-                messageEl.textContent = '清除数据失败: ' + data.message;
-                messageEl.className = 'data-message error';
-                messageEl.style.display = 'block';
-            }
-
-            // 3秒后隐藏消息
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 3000);
-        } catch (error) {
-            messageEl.textContent = '清除数据失败: ' + error.message;
-            messageEl.className = 'data-message error';
-            messageEl.style.display = 'block';
-        }
-    }
-
-    // 导出数据
-    async function exportData() {
-        try {
-            const response = await fetch('/plugin/app-chart/export-data');
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message || '导出数据失败');
-            }
-
-            // 创建下载链接
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data.data, null, 2));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "app_usage_data.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-
-            const messageEl = document.getElementById('data-message');
-            messageEl.textContent = '数据导出成功';
-            messageEl.className = 'data-message success';
-            messageEl.style.display = 'block';
-
-            // 3秒后隐藏消息
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 3000);
-        } catch (error) {
-            const messageEl = document.getElementById('data-message');
-            messageEl.textContent = '导出数据失败: ' + error.message;
-            messageEl.className = 'data-message error';
-            messageEl.style.display = 'block';
-        }
-    }
-
-    // 下载数据库
-    async function downloadDatabase() {
-        try {
-            const messageEl = document.getElementById('data-message');
-            messageEl.textContent = '准备下载数据库...';
-            messageEl.className = 'data-message success';
-            messageEl.style.display = 'block';
-
-            // 创建下载链接
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", '/plugin/app-chart/download-db');
-            downloadAnchorNode.setAttribute("download", "app_chart.db");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-
-            messageEl.textContent = '数据库下载已开始';
-
-            // 3秒后隐藏消息
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 3000);
-        } catch (error) {
-            const messageEl = document.getElementById('data-message');
-            messageEl.textContent = '下载数据库失败: ' + error.message;
-            messageEl.className = 'data-message error';
-            messageEl.style.display = 'block';
-        }
-    }
-
-    // 初始化
-    document.addEventListener('DOMContentLoaded', function() {
-        // 加载初始数据
-        loadDataStats();
-
-        // 绑定事件
-        document.getElementById('refresh-stats').addEventListener('click', loadDataStats);
-        document.getElementById('clear-data').addEventListener('click', clearAllData);
-        document.getElementById('export-data').addEventListener('click', exportData);
-        document.getElementById('download-db').addEventListener('click', downloadDatabase);
-    });
+    {js_content}
     </script>
     """
 
@@ -1006,462 +714,40 @@ def app_name_patterns_card(_):
     :param _: 插件配置对象（未使用）
     :return: 卡片内容
     """
-    # 直接返回内联的 HTML、CSS 和 JavaScript，不需要导入模块
-    return """
-    <div class="app-name-patterns">
-        <div class="patterns-description">
-            <h4>应用名称模式</h4>
-            <p>您可以创建应用名称模式来合并相似的应用名称。例如，将所有包含"Chrome"的应用名称显示为"Chrome浏览器"。</p>
-            <p>支持的模式类型：</p>
-            <ul>
-                <li><code>*Chrome</code> - 匹配所有以"Chrome"结尾的名称</li>
-                <li><code>Chrome*</code> - 匹配所有以"Chrome"开头的名称</li>
-                <li><code>*Chrome*</code> - 匹配所有包含"Chrome"的名称</li>
-                <li><code>Exact Name</code> - 精确匹配 "Exact Name"</li>
-            </ul>
-        </div>
+    import os
 
-        <div class="patterns-list">
-            <div class="patterns-header">
-                <h4>当前模式</h4>
-                <button id="delete-all-patterns" class="btn btn-danger btn-sm" style="display: none;">
-                    <i class="fas fa-trash-alt"></i> 删除所有模式
-                </button>
-            </div>
-            <div id="patterns-container">
-                <div class="loading">加载中...</div>
-            </div>
-        </div>
+    # 读取外部文件
+    plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
-        <div class="patterns-form">
-            <h4>添加新模式</h4>
-            <div class="form-group">
-                <label for="pattern">模式:</label>
-                <input type="text" id="pattern" placeholder="例如: *Discord" />
-                <small>使用 * 作为通配符</small>
-            </div>
-            <div class="form-group">
-                <label for="replacement">替换为:</label>
-                <input type="text" id="replacement" placeholder="例如: Discord" />
-                <small>所有匹配的应用将显示为这个名称</small>
-            </div>
-            <div class="form-group">
-                <label for="description">描述:</label>
-                <input type="text" id="description" placeholder="可选描述" />
-                <small>帮助您记住这个模式的用途</small>
-            </div>
-            <div class="form-actions">
-                <button id="add-pattern" class="btn btn-primary">添加模式</button>
-            </div>
-        </div>
+    # 读取HTML模板
+    html_path = os.path.join(plugin_dir, 'patterns.html')
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
 
-        <div id="patterns-message" class="patterns-message" style="display: none;"></div>
-    </div>
+    # 读取CSS
+    css_path = os.path.join(plugin_dir, 'patterns.css')
+    with open(css_path, 'r', encoding='utf-8') as f:
+        css_content = f.read()
+
+    # 读取JavaScript
+    js_path = os.path.join(plugin_dir, 'patterns.js')
+    with open(js_path, 'r', encoding='utf-8') as f:
+        js_content = f.read()
+
+    # 构建卡片内容
+    content = f"""
+    {html_content}
 
     <style>
-    .app-name-patterns {
-        max-width: 600px;
-    }
-    .patterns-description {
-        background-color: rgba(255, 255, 255, 0.5);
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    .patterns-description code {
-        background-color: rgba(0, 0, 0, 0.05);
-        padding: 2px 4px;
-        border-radius: 3px;
-        font-family: monospace;
-    }
-    .patterns-list {
-        margin-bottom: 20px;
-    }
-    .patterns-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-    .pattern-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-        margin-bottom: 8px;
-        background-color: rgba(255, 255, 255, 0.5);
-        border-radius: 4px;
-    }
-    .pattern-info {
-        flex-grow: 1;
-    }
-    .pattern-actions {
-        display: flex;
-        gap: 5px;
-    }
-    .pattern-pattern {
-        font-weight: bold;
-        font-family: monospace;
-    }
-    .pattern-replacement {
-        color: #2ea043;
-        font-weight: bold;
-    }
-    .pattern-description {
-        color: #666;
-        font-size: 0.9em;
-        margin-top: 3px;
-    }
-    .patterns-form {
-        background-color: rgba(255, 255, 255, 0.5);
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    .patterns-message {
-        margin-top: 15px;
-        padding: 10px;
-        border-radius: 4px;
-    }
-    .patterns-message.success {
-        background-color: rgba(46, 160, 67, 0.1);
-        border: 1px solid rgba(46, 160, 67, 0.2);
-        color: #2ea043;
-    }
-    .patterns-message.error {
-        background-color: rgba(248, 81, 73, 0.1);
-        border: 1px solid rgba(248, 81, 73, 0.2);
-        color: #f85149;
-    }
-    .patterns-message.info {
-        background-color: rgba(3, 102, 214, 0.1);
-        border: 1px solid rgba(3, 102, 214, 0.2);
-        color: #0366d6;
-    }
-    .patterns-message.warning {
-        background-color: rgba(249, 197, 19, 0.1);
-        border: 1px solid rgba(249, 197, 19, 0.2);
-        color: #e36209;
-    }
-    .loading {
-        text-align: center;
-        padding: 20px;
-        color: #666;
-    }
-    .empty-message {
-        color: #888;
-        text-align: center;
-        padding: 20px;
-    }
-    .error-message {
-        color: #e15759;
-        text-align: center;
-        padding: 20px;
-    }
+    {css_content}
     </style>
 
     <script>
-    // 加载模式列表
-    async function loadPatterns() {
-        const container = document.getElementById('patterns-container');
-        if (!container) {
-            console.error('Error: patterns-container element not found');
-            return;
-        }
-
-        container.innerHTML = '<div class="loading">加载中...</div>';
-
-        try {
-            const response = await fetch('/plugin/app-chart/patterns/list');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message || '加载模式失败');
-            }
-
-            if (data.patterns.length === 0) {
-                container.innerHTML = '<div class="empty-message">暂无模式，请添加一个新模式</div>';
-                const deleteAllBtn = document.getElementById('delete-all-patterns');
-                if (deleteAllBtn) {
-                    deleteAllBtn.style.display = 'none';
-                }
-                return;
-            }
-
-            // 显示删除所有按钮
-            const deleteAllBtn = document.getElementById('delete-all-patterns');
-            if (deleteAllBtn) {
-                deleteAllBtn.style.display = 'block';
-            }
-
-            container.innerHTML = '';
-
-            data.patterns.forEach(pattern => {
-                const patternItem = document.createElement('div');
-                patternItem.className = 'pattern-item';
-
-                const patternInfo = document.createElement('div');
-                patternInfo.className = 'pattern-info';
-
-                const patternText = document.createElement('div');
-                patternText.innerHTML = `<span class="pattern-pattern">${pattern.pattern}</span> → <span class="pattern-replacement">${pattern.replacement}</span>`;
-
-                const patternDescription = document.createElement('div');
-                patternDescription.className = 'pattern-description';
-                patternDescription.textContent = pattern.description || '';
-
-                patternInfo.appendChild(patternText);
-                if (pattern.description) {
-                    patternInfo.appendChild(patternDescription);
-                }
-
-                const patternActions = document.createElement('div');
-                patternActions.className = 'pattern-actions';
-
-                const deleteButton = document.createElement('button');
-                deleteButton.className = 'btn btn-danger btn-sm';
-                deleteButton.innerHTML = '<i class="fas fa-trash"></i> 删除';
-                deleteButton.title = '删除此模式';
-                deleteButton.onclick = () => deletePattern(pattern.id);
-
-                patternActions.appendChild(deleteButton);
-
-                patternItem.appendChild(patternInfo);
-                patternItem.appendChild(patternActions);
-
-                container.appendChild(patternItem);
-            });
-        } catch (error) {
-            console.error('Error loading patterns:', error);
-            container.innerHTML = `<div class="error-message">加载模式失败: ${error.message}</div>`;
-        }
-    }
-
-    // 添加新模式
-    async function addPattern() {
-        const pattern = document.getElementById('pattern').value.trim();
-        const replacement = document.getElementById('replacement').value.trim();
-        const description = document.getElementById('description').value.trim();
-        const messageEl = document.getElementById('patterns-message');
-
-        if (!pattern) {
-            messageEl.textContent = '请输入模式';
-            messageEl.className = 'patterns-message error';
-            messageEl.style.display = 'block';
-            return;
-        }
-
-        if (!replacement) {
-            messageEl.textContent = '请输入替换名称';
-            messageEl.className = 'patterns-message error';
-            messageEl.style.display = 'block';
-            return;
-        }
-
-        try {
-            const response = await fetch('/plugin/app-chart/patterns', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    pattern,
-                    replacement,
-                    description
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                messageEl.textContent = '模式添加成功';
-                messageEl.className = 'patterns-message success';
-                messageEl.style.display = 'block';
-
-                // 清空表单
-                document.getElementById('pattern').value = '';
-                document.getElementById('replacement').value = '';
-                document.getElementById('description').value = '';
-
-                // 重新加载模式列表
-                loadPatterns();
-            } else {
-                messageEl.textContent = '添加模式失败: ' + data.message;
-                messageEl.className = 'patterns-message error';
-                messageEl.style.display = 'block';
-            }
-
-            // 3秒后隐藏消息
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 3000);
-        } catch (error) {
-            messageEl.textContent = '添加模式失败: ' + error.message;
-            messageEl.className = 'patterns-message error';
-            messageEl.style.display = 'block';
-        }
-    }
-
-    // 删除模式
-    async function deletePattern(id) {
-        if (!confirm('确定要删除这个模式吗？')) {
-            return;
-        }
-
-        const messageEl = document.getElementById('patterns-message');
-        if (!messageEl) {
-            console.error('Error: patterns-message element not found');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/plugin/app-chart/patterns/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                messageEl.textContent = '模式删除成功';
-                messageEl.className = 'patterns-message success';
-                messageEl.style.display = 'block';
-
-                // 重新加载模式列表
-                loadPatterns();
-            } else {
-                messageEl.textContent = '删除模式失败: ' + data.message;
-                messageEl.className = 'patterns-message error';
-                messageEl.style.display = 'block';
-            }
-
-            // 3秒后隐藏消息
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 3000);
-        } catch (error) {
-            console.error('Error deleting pattern:', error);
-            messageEl.textContent = '删除模式失败: ' + error.message;
-            messageEl.className = 'patterns-message error';
-            messageEl.style.display = 'block';
-        }
-    }
-
-    // 删除所有模式
-    async function deleteAllPatterns() {
-        if (!confirm('确定要删除所有模式吗？此操作不可恢复！')) {
-            return;
-        }
-
-        const messageEl = document.getElementById('patterns-message');
-        if (!messageEl) {
-            console.error('Error: patterns-message element not found');
-            return;
-        }
-
-        try {
-            const response = await fetch('/plugin/app-chart/patterns/list');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message || '获取模式列表失败');
-            }
-
-            if (!data.patterns || data.patterns.length === 0) {
-                messageEl.textContent = '没有模式可删除';
-                messageEl.className = 'patterns-message info';
-                messageEl.style.display = 'block';
-                return;
-            }
-
-            // 显示删除进度
-            messageEl.textContent = '正在删除模式...';
-            messageEl.className = 'patterns-message info';
-            messageEl.style.display = 'block';
-
-            // 逐个删除模式
-            let successCount = 0;
-            let failCount = 0;
-
-            for (const pattern of data.patterns) {
-                try {
-                    const deleteResponse = await fetch(`/plugin/app-chart/patterns/${pattern.id}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (!deleteResponse.ok) {
-                        failCount++;
-                        continue;
-                    }
-
-                    const deleteData = await deleteResponse.json();
-
-                    if (deleteData.success) {
-                        successCount++;
-                    } else {
-                        failCount++;
-                    }
-                } catch (error) {
-                    console.error('Error deleting pattern:', error);
-                    failCount++;
-                }
-            }
-
-            // 显示结果
-            if (failCount === 0) {
-                messageEl.textContent = `成功删除了 ${successCount} 个模式`;
-                messageEl.className = 'patterns-message success';
-            } else {
-                messageEl.textContent = `删除了 ${successCount} 个模式，${failCount} 个模式删除失败`;
-                messageEl.className = 'patterns-message warning';
-            }
-
-            // 重新加载模式列表
-            loadPatterns();
-
-            // 3秒后隐藏消息
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 3000);
-        } catch (error) {
-            console.error('Error deleting all patterns:', error);
-            messageEl.textContent = '删除所有模式失败: ' + error.message;
-            messageEl.className = 'patterns-message error';
-            messageEl.style.display = 'block';
-        }
-    }
-
-    // 初始化
-    document.addEventListener('DOMContentLoaded', function() {
-        // 确保所有元素都存在
-        const addPatternBtn = document.getElementById('add-pattern');
-        const deleteAllPatternsBtn = document.getElementById('delete-all-patterns');
-
-        // 加载初始数据
-        loadPatterns();
-
-        // 绑定事件（确保元素存在）
-        if (addPatternBtn) {
-            addPatternBtn.addEventListener('click', addPattern);
-        }
-
-        if (deleteAllPatternsBtn) {
-            deleteAllPatternsBtn.addEventListener('click', deleteAllPatterns);
-        }
-    });
+    {js_content}
     </script>
     """
+
+    return content
 
 @route('/export-data')
 def export_data():
