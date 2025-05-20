@@ -4,7 +4,6 @@
 
 - **[部署教程](./deploy.md)**
 - [更新教程](./update.md)
-- [最佳实践](./best_practice.md)
 - [配置文档](./config.md)
 - [使用插件](./plugin.md)
 

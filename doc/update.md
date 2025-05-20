@@ -16,8 +16,6 @@ pip install -r requirements.txt # 安装依赖 (如果有新的)
 
 更新完成，重新启动即可.
 
-> 可以 [在这](https://github.com/wyf9/sleepy/commits/main/config/config.default.yaml) 查看配置示例更新记录，并相应修改 `config/config.yaml` 或 `config/config.toml` 文件
-
 ## Huggingface 部署
 
 1. `Settings` ==> `Variables and secrets` ==> **更改对应的新增配置项**

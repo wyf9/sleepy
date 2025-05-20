@@ -159,7 +159,7 @@ class SleepyManager:
     # ------ Storage APIs ------
 
     def save_data(self) -> Dict:
-        """保存内存中的状态信息到 data.json"""
+        """保存内存中的状态信息到 data/data.json"""
         return self._request('GET', 'save_data')
 
 
@@ -516,7 +516,7 @@ class SleepyManagerCLI:
         """保存数据"""
         if args and args[0] in ['-h', '--help']:
             print("用法: save_data")
-            print("功能: 保存当前状态到 data.json")
+            print("功能: 保存当前状态到 data/data.json")
             return
 
         try:

@@ -65,9 +65,9 @@ def get_path(path: str) -> str:
     '''
     相对路径 (基于主程序目录) -> 绝对路径
     '''
-    if current_dir().startswith('/var/task') and path == 'data.json':
-        # 适配 Vercel 部署 (调整 data.json 路径为可写的 /tmp/)
-        return '/tmp/sleepy_data.json'
+    if current_dir().startswith('/var/task') and path == '/data/data.json':
+        # 适配 Vercel 部署 (调整 data/data.json 路径为可写的 /tmp/)
+        return '/tmp/sleepy/data/data.json'
     else:
         return str(Path(__file__).parent.joinpath(path))
 

@@ -36,41 +36,40 @@ def getenv(key: str, typeobj) -> ...:
 
 # 初始化配置变量
 user_config = {}
-example_config = {}
+default_config = {}
 
 # 检查用户配置文件
 try:
-    if os.path.exists(get_path('config/config.yaml')):
-        # 尝试加载 YAML 用户配置
-        with open(get_path('config/config.yaml'), 'r', encoding='utf-8') as f:
+    if os.path.exists(get_path('data/config.yaml')):
+        # 首先尝试加载 YAML 用户配置
+        with open(get_path('data/config.yaml'), 'r', encoding='utf-8') as f:
             user_config = yaml.safe_load(f)
             f.close()
-    elif os.path.exists(get_path('config/config.toml')):
+    elif os.path.exists(get_path('data/config.toml')):
         # 如果 YAML 不存在，尝试加载 TOML 用户配置
-        with open(get_path('config/config.toml'), 'r', encoding='utf-8') as f:
+        with open(get_path('data/config.toml'), 'r', encoding='utf-8') as f:
             user_config = toml.load(f)
             f.close()
 except Exception as e:
-    print(f"Error loading user config: {str(e)}")
+    u.warning(f"Error loading user config: {e}")
     user_config = {}
 
-# 加载示例配置
+# 加载默认配置
 try:
-    # 首先尝试加载 YAML 示例配置
-    if os.path.exists(get_path('config/config.default.yaml')):
-        with open(get_path('config/config.default.yaml'), 'r', encoding='utf-8') as f:
-            example_config = yaml.safe_load(f)
+    if os.path.exists(get_path('config.default.yaml')):
+        with open(get_path('config.default.yaml'), 'r', encoding='utf-8') as f:
+            default_config = yaml.safe_load(f)
             f.close()
     else:
-        raise SleepyException('No example config file found! Please make sure config/config.default.yaml exists.')
+        raise SleepyException('No default config file found! Please make sure config.default.yaml exists.')
 except Exception as e:
-    raise SleepyException(f'Error loading example config: {str(e)}')
+    raise SleepyException(f'Error loading default config: {e}')
 
 
 def get(_type, *key: str) -> ...:
     '''
     获取配置项
-    - 顺序: `config/config.yaml` 或 `config/config.toml` -> 环境变量 -> `.env` -> `config/config.default.yaml` 或 `config/config.default.toml`
+    - 顺序: `data/config.yaml` 或 `data/config.toml` -> 环境变量 -> `.env` -> `config.default.yaml`
 
     :param _type: 配置项的类型 (如不指定则禁用类型检查)
     :param *key: 配置项名
@@ -97,14 +96,14 @@ def get(_type, *key: str) -> ...:
     except ValueError:
         raise SleepyException(f'Invaild config {envname} from environment or .env!{"" if _type == object else f" it should be a(n) {_type.__name__} object."}')
 
-    # 3. from example config
+    # 3. from default config
     try:
-        value = example_config
+        value = default_config
         for k in key:
             value = value[k]
         return value
     except KeyError:
-        raise SleepyException(f'Config {envname} (should be a(n) {_type.__name__}) not found in example config file!')
+        raise SleepyException(f'Config {envname} (should be a(n) {_type.__name__}) not found in default config file!')
 
 # ===== system config =====
 

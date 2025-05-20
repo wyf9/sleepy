@@ -90,7 +90,7 @@ BLACKLIST = ExampleApp|Privacy Information
             self.blacklist = self._parse_list('BLACKLIST', fallback=['User1', 'User2'])
         
         except Exception as e:
-            logging.error(f'配置文件打不开惹: {str(e)}')
+            logging.error(f'配置文件打不开惹: {e}')
             sys.exit(1)
     
     def _parse_list(self, key: str, fallback="") -> list:
@@ -272,7 +272,7 @@ def message_loop(monitor):
                 if resp.status_code != 200:
                     logging.warning(f'阿巴阿巴，{resp.status_code} - {resp.json()}')
             except Exception as e:
-                logging.warning(f'玛卡巴卡，{str(e)}')
+                logging.warning(f'玛卡巴卡，{e}')
             return True  # 允许关机或注销
            
         return 0
@@ -307,7 +307,7 @@ def main():
             logging.info("主人要抛弃人家了吗~呜")
             sys.exit(0)
         except Exception as e:
-            logging.error(f'梦梦不知道哦: {str(e)}')
+            logging.error(f'梦梦不知道哦: {e}')
             monitor.send_state(False, [str(e)])
             sleep(10)
 

@@ -63,7 +63,7 @@ config:
 
 在插件的模板中，可以访问以下变量：
 
-- `c`: 插件配置对象，包含 `plugin.yaml` 中定义的配置项和用户在 `config.yaml` 中设置的值
+- `c`: 插件配置对象，包含 `plugin.yaml` 中定义的配置项和用户在 `data/config.yaml` 中设置的值
   - 例如：`{{ c.title }}`, `{{ c.description }}`
 - `status`: 系统状态信息
   - `status.name`: 当前状态名称

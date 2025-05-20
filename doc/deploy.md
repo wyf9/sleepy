@@ -14,7 +14,7 @@
 
 本方式理论上全平台通用, 安装了 Python >= **3.6** 即可 (建议: **3.10+**)
 
-> 优点: 数据文件 (`data.json`) 可持久化，不会因为重启而被删除
+> 优点: 数据文件 (`data/data.json`) 可持久化，不会因为重启而被删除
 
 ### 安装
 
@@ -32,11 +32,11 @@ pip install -r requirements.txt
 
 3. 编辑配置文件
 
-> *配置文件变化史: ~~`data.json`~~ -> ~~`config.json`~~ -> ~~`config.jsonc`~~ -> `.env` -> `config.yaml` -> `config/config.yaml` 或 `config/config.toml`*
+> *配置文件变化史: ~~`data.json`~~ -> ~~`config.json`~~ -> ~~`config.jsonc`~~ -> `.env` -> `config.yaml` -> `data/config.yaml` 或 `data/config.toml`*
 
-在 `config` 目录下新建 `config.yaml` 或 `config.toml`，并**按照 [此处](./config.md) 的说明编辑配置**
+在 `data` 目录下新建 `config.yaml` 或 `config.toml`，并**按照 [此处](./config.md) 的说明编辑配置**
 
-*配置文件示例: [`config/config.default.yaml`](../config/config.default.yaml) 或 [`config/config.default.toml`](../config/config.default.toml)*
+*默认配置文件: [`config.default.yaml`](../config.default.yaml)*
 
 ### 启动
 

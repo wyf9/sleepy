@@ -34,72 +34,10 @@ def function():
 
 </details>
 
-## 项目结构
-
-> *以 `/` 结尾的为目录*，否则就是文件
-
-```ini
-### 根目录程序 ###
--> server.py # 服务主程序 (入口文件)
--> data.py # 运行中的状态存储 (就是管 data.json 的)
--> config.py # 读取 config.yaml, 环境变量 和 .env 中的配置
--> utils.py # 常用函数 / 小功能
--> _utils.py # utils.py 和 config.py 都用到的函数
--> start.py # 简易启动器
--> __init__.py # 我也不知道干嘛用的
--> install_lib.bat # 依赖安装脚本 (Windows)
--> install_lib.sh # 依赖安装脚本 (Unix-like)
-```
-
-```ini
-### 子目录 ###
--> client/ # 客户端
--> doc/ # 文档 (部署 / 使用 / 配置 / API 等等)
--> templates/ # Flask 模板文件夹 (HTML)
--> static/ # Flask 静态文件 (CSS / JS, 可以用 /static/文件名 访问)
--> tools/ # 开发用的小工具 (实际上就一个)
--> plugin/ # 插件目录
-```
-
-```ini
-### 用户可修改配置 / 数据模板 ###
--> config.default.yaml # 配置文件模板
--> data.example.jsonc # 状态文件模板
-```
-
-```ini
-### 社区基础 (Community Standards) ###
--> README.md # 自述文件
--> LICENSE # 版权声明
--> CONTRIBUTING.md # 贡献指南 (本文件)
--> SECURITY.md # 安全准则
-```
-
-```ini
-### 特定平台配置 ###
--> .github/ # GitHub 配置文件夹
-  |-> ISSUE_TEMPLATE/ # Issue 模板
-  |-> PULL_REQUEST_TEMPLATE # PR 模板
--> .vscode/ # VSCode 配置文件夹
--> .prettierrc # Prettier 配置文件
--> .gitignore # Git 忽略文件
--> requirements.txt # Python 依赖列表
-```
-
 > [!IMPORTANT]
-> **千万不要** 将以下文件包含在提交中:
+> **千万不要** 将以下文件 (夹) 包含在提交中:
+> - `data/`
 > - `config.yaml`
 > - `config.toml`
-> - `config/config.yaml`
-> - `config/config.toml`
 > - `.env`
 > - `data.json`
-
-## 代码风格
-
-- 缩进: **4** 或 2 个空格 *(非强制)*
-- 编码: **UTF-8**
-- python 类型检查: **basic**
-- *是的，没了~*
-
-> *[查看 Prettier 配置](./.prettierrc.json)*

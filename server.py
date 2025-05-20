@@ -40,17 +40,17 @@ class ThemeLoader(ChoiceLoader):
 
         # 添加当前主题的加载器
         if theme_name != self.default_theme:
-            loaders.append(FileSystemLoader(f'themes/{theme_name}'))
+            loaders.append(FileSystemLoader(f'theme/{theme_name}'))
 
         # 添加默认主题的加载器作为 fallback
-        loaders.append(FileSystemLoader(f'themes/{self.default_theme}'))
+        loaders.append(FileSystemLoader(f'theme/{self.default_theme}'))
 
         super().__init__(loaders)
 
 try:
     # init flask app
     app = flask.Flask(__name__,
-                     template_folder='themes/default',
+                     template_folder='theme/default',
                      static_folder=None)
 
     # init config
@@ -108,20 +108,20 @@ def get_available_themes():
         list: 主题名称列表
     """
     import os
-    themes_dir = 'themes'
+    theme_dir = 'theme'
     themes = []
 
     # 检查主题目录是否存在
-    if os.path.exists(themes_dir) and os.path.isdir(themes_dir):
+    if os.path.exists(theme_dir) and os.path.isdir(theme_dir):
         # 遍历主题目录
-        for theme in os.listdir(themes_dir):
-            theme_path = os.path.join(themes_dir, theme)
+        for theme in os.listdir(theme_dir):
+            theme_path = os.path.join(theme_dir, theme)
             # 检查是否是目录
             if os.path.isdir(theme_path):
                 themes.append(theme)
 
     # 确保 default 主题总是存在
-    if 'default' not in themes and os.path.exists(os.path.join(themes_dir, 'default')):
+    if 'default' not in themes and os.path.exists(os.path.join(theme_dir, 'default')):
         themes.append('default')
 
     # 按字母顺序排序主题
@@ -144,20 +144,20 @@ def get_theme(template_name=None):
     theme = flask.request.args.get('theme', getattr(c.page, 'theme', 'default'))
 
     # 检查主题目录是否存在，如果不存在则使用默认主题
-    if not os.path.exists(os.path.join('themes', theme)):
+    if not os.path.exists(os.path.join('theme', theme)):
         if template_name:
             u.warning(f"Theme directory {theme} not found for {template_name}, using default theme")
         else:
             u.warning(f"Theme directory {theme} not found, using default theme")
         theme = getattr(c.page, 'theme', 'default')
-        if not os.path.exists(os.path.join('themes', theme)):
+        if not os.path.exists(os.path.join('theme', theme)):
             theme = 'default'
 
     # 设置自定义的主题加载器，支持 fallback 机制
     app.jinja_loader = ThemeLoader(theme)
 
     # 设置静态文件夹
-    app.static_folder = f'themes/{theme}/static'
+    app.static_folder = f'theme/{theme}/static'
 
     return theme
 
@@ -184,15 +184,15 @@ def static_proxy(filename):
         theme = getattr(c.page, 'theme', 'default')
 
     # 首先尝试从当前主题加载
-    theme_path = os.path.join('themes', theme, 'static', filename)
+    theme_path = os.path.join('theme', theme, 'static', filename)
     if os.path.exists(theme_path):
-        return flask.send_from_directory(f'themes/{theme}/static', filename)
+        return flask.send_from_directory(f'theme/{theme}/static', filename)
 
     # 如果当前主题中不存在，fallback 到默认主题
-    default_path = os.path.join('themes', 'default', 'static', filename)
+    default_path = os.path.join('theme', 'default', 'static', filename)
     if os.path.exists(default_path):
         u.info(f"Static file {filename} not found in theme {theme}, using default theme's file")
-        return flask.send_from_directory('themes/default/static', filename)
+        return flask.send_from_directory('theme/default/static', filename)
 
     # 如果默认主题中也不存在，返回 404
     u.warning(f"Static file {filename} not found in any theme")
@@ -593,7 +593,7 @@ def private_mode():
 @require_secret
 def save_data():
     '''
-    保存内存中的状态信息到 `data.json`
+    保存内存中的状态信息到 `data/data.json`
     - Method: **GET**
     '''
     try:
@@ -692,7 +692,7 @@ def admin_panel():
                 'content': card_content
             })
         except Exception as e:
-            u.error(f"Error rendering admin card '{card['title']}' for plugin '{card['plugin_name']}': {str(e)}")
+            u.error(f"Error rendering admin card '{card['title']}' for plugin '{card['plugin_name']}': {e}")
 
     return flask.render_template(
         'panel.html',
