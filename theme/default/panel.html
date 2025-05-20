@@ -50,7 +50,8 @@
                 <p>当前主题: <span id="current-theme">{{ current_theme }}</span></p>
                 <div class="status-selector" id="theme-selector">
                     {% for theme in available_themes %}
-                    <div class="status-item {% if current_theme == theme %}active{% endif %}" onclick="switchTheme('{{ theme }}')">{{ theme }}主题</div>
+                    <div class="status-item {% if current_theme == theme %}active{% endif %}"
+                        onclick="switchTheme('{{ theme }}')">{{ theme }}主题</div>
                     {% endfor %}
                 </div>
             </div>
@@ -99,16 +100,17 @@
 
         <!-- 插件管理后台卡片 -->
         {% if plugin_admin_cards %}
-            {% for card in plugin_admin_cards %}
-            <div class="panel-card plugin-card" id="{{ card.id }}">
-                <div class="panel-section">
-                    <h2 class="panel-section-title">{{ card.title }} <span class="plugin-badge">{{ card.plugin_name }}</span></h2>
-                    <div class="plugin-card-content">
-                        {{ card.content|safe }}
-                    </div>
+        {% for card in plugin_admin_cards %}
+        <div class="panel-card plugin-card" id="{{ card.id }}">
+            <div class="panel-section">
+                <h2 class="panel-section-title">{{ card.title }} <span
+                        class="plugin-badge">{{ card.plugin_name }}</span></h2>
+                <div class="plugin-card-content">
+                    {{ card.content|safe }}
                 </div>
             </div>
-            {% endfor %}
+        </div>
+        {% endfor %}
         {% endif %}
     </div>
 
@@ -183,7 +185,7 @@
             if (statusList[currentStatus]) {
                 statusName.textContent = statusList[currentStatus].name;
                 statusName.style.color = statusList[currentStatus].color === 'awake' ? 'green' :
-                                        statusList[currentStatus].color === 'error' ? 'red' : 'gray';
+                    statusList[currentStatus].color === 'error' ? 'red' : 'gray';
             } else {
                 statusName.textContent = '未知状态';
                 statusName.style.color = 'red';
@@ -314,31 +316,62 @@
                 const container = document.getElementById('metrics-container');
                 container.innerHTML = '';
 
-                // 添加总访问量卡片
-                if (data.total && data['/']) {
-                    addMetricCard(container, '首页总访问量', data.total['/'] || 0);
+                // 今日访问
+                if (data.today) {
+                    if (data.today['/']) {
+                        addMetricCard(container, '今日首页访问量', data.today['/'] || 0);
+                    }
+                    let apiCalls = 0;
+                    for (const [path, count] of Object.entries(data.today)) {
+                        if (path.startsWith('/') && path !== '/') {
+                            apiCalls += count;
+                        }
+                    }
+                    addMetricCard(container, '今日 API 调用次数', apiCalls);
                 }
 
-                // 添加今日访问量卡片
-                if (data.today && data.today['/']) {
-                    addMetricCard(container, '今日首页访问', data.today['/'] || 0);
+                // 本月访问
+                if (data.month) {
+                    if (data.month['/']) {
+                        addMetricCard(container, '本月首页访问量', data.month['/'] || 0);
+                    }
+                    let apiCalls = 0;
+                    for (const [path, count] of Object.entries(data.month)) {
+                        if (path.startsWith('/') && path !== '/') {
+                            apiCalls += count;
+                        }
+                    }
+                    addMetricCard(container, '本月 API 调用次数', apiCalls);
                 }
 
-                // 添加本月访问量卡片
-                if (data.month && data.month['/']) {
-                    addMetricCard(container, '本月首页访问', data.month['/'] || 0);
+                // 本年访问
+                if (data.year) {
+                    if (data.year['/']) {
+                        addMetricCard(container, '本年首页访问量', data.year['/'] || 0);
+                    }
+                    let apiCalls = 0;
+                    for (const [path, count] of Object.entries(data.year)) {
+                        if (path.startsWith('/') && path !== '/') {
+                            apiCalls += count;
+                        }
+                    }
+                    addMetricCard(container, '本年 API 调用次数', apiCalls);
                 }
 
-                // 添加API调用次数卡片
+                // 总访问
                 if (data.total) {
+                    if (data.total['/']) {
+                        addMetricCard(container, '首页总访问量', data.total['/'] || 0);
+                    }
                     let apiCalls = 0;
                     for (const [path, count] of Object.entries(data.total)) {
                         if (path.startsWith('/') && path !== '/') {
                             apiCalls += count;
                         }
                     }
-                    addMetricCard(container, 'API总调用次数', apiCalls);
+                    addMetricCard(container, 'API 总调用次数', apiCalls);
                 }
+
             } catch (error) {
                 console.error('获取统计数据失败:', error);
                 const container = document.getElementById('metrics-container');

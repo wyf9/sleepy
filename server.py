@@ -28,11 +28,13 @@ Feature Request: https://wyf9.top/t/sleepy/feature
 Security Report: https://wyf9.top/t/sleepy/security
 '''[1:-1])
 
+
 class ThemeLoader(ChoiceLoader):
     """
     自定义主题加载器，支持主题 fallback 机制
     当主题中的文件缺失时，自动 fallback 到 default 主题
     """
+
     def __init__(self, theme_name):
         self.theme_name = theme_name
         self.default_theme = 'default'
@@ -47,11 +49,12 @@ class ThemeLoader(ChoiceLoader):
 
         super().__init__(loaders)
 
+
 try:
     # init flask app
     app = flask.Flask(__name__,
-                     template_folder='theme/default',
-                     static_folder=None)
+                      template_folder='theme/default',
+                      static_folder=None)
 
     # init config
     c = config_init()
@@ -197,6 +200,7 @@ def static_proxy(filename):
     # 如果默认主题中也不存在，返回 404
     u.warning(f"Static file {filename} not found in any theme")
     return flask.abort(404)
+
 
 @app.before_request
 def showip():
@@ -621,9 +625,12 @@ def events():
     SSE 事件流，用于推送状态更新
     - Method: **GET**
     '''
-    def event_stream():
+    last_event_id = flask.request.headers.get('Last-Event-ID', 0)
+
+    def event_stream(event_id: int = last_event_id):
         last_update = None
         last_heartbeat = time.time()
+
         while True:
             current_time = time.time()
             # 检查数据是否已更新
@@ -636,18 +643,19 @@ def events():
                 last_heartbeat = current_time
 
                 # 获取 /query 返回数据
-                ret = query(ret_as_dict=True)
-                update_data = json5.dumps(ret, quote_keys=True, ensure_ascii=False)  # .replace('\n', '\\n')
-                yield f'event: update\ndata: {update_data}\n\n'
+                update_data = json5.dumps(query(ret_as_dict=True), quote_keys=True, ensure_ascii=False)
+                event_id += 1
+                yield f'id: {event_id}\nevent: update\ndata: {update_data}\n\n'
+
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
-                timenow = datetime.now(pytz.timezone(c.main.timezone))
-                yield f'event: heartbeat\ndata: {timenow.strftime("%Y-%m-%d %H:%M:%S")}\n\n'
+                event_id += 1
+                yield f'id: {event_id}\nevent: heartbeat\ndata:\n\n'
                 last_heartbeat = current_time
 
             time.sleep(1)  # 每秒检查一次更新
 
-    response = flask.Response(event_stream(), mimetype='text/event-stream', status=200)
+    response = flask.Response(event_stream(last_event_id), mimetype='text/event-stream', status=200)
     response.headers['Cache-Control'] = 'no-cache'  # 禁用缓存
     response.headers['X-Accel-Buffering'] = 'no'  # 禁用 Nginx 缓冲
     return response
@@ -802,7 +810,8 @@ if __name__ == '__main__':
         app.run(  # 启↗动↘
             host=c.main.host,
             port=c.main.port,
-            debug=c.main.debug
+            debug=c.main.debug,
+            threaded=True
         )
     except Exception as e:
         u.error(f"Error running server: {e}")

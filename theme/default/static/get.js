@@ -251,7 +251,7 @@ function setupEventSource() {
         lastEventTime = Date.now(); // 更新最后收到消息的时间
 
         const data = JSON.parse(event.data);
-        console.log(`[SSE] 收到数据更新:`, data);
+        console.log(`[SSE] [#${event.lastEventId}] 收到数据更新:`, data);
 
         // 处理更新数据
         if (data.success) {
@@ -269,7 +269,7 @@ function setupEventSource() {
 
     // 监听心跳事件
     evtSource.addEventListener('heartbeat', function (event) {
-        console.log(`[SSE] 收到心跳: ${event.data}`);
+        console.log(`[SSE] [#${event.lastEventId}] 收到心跳包`);
         lastEventTime = Date.now(); // 更新最后收到消息的时间
     });
 
