@@ -61,15 +61,28 @@ def current_dir() -> str:
     return str(Path(__file__).parent)
 
 
-def get_path(path: str) -> str:
+def get_path(path: str, create_dirs: bool = True) -> str:
     '''
     相对路径 (基于主程序目录) -> 绝对路径
+
+    :param path: 相对路径
+    :param create_dirs: 是否自动创建目录（如果不存在）
+    :return: 绝对路径
     '''
     if current_dir().startswith('/var/task') and path == '/data/data.json':
         # 适配 Vercel 部署 (调整 data/data.json 路径为可写的 /tmp/)
-        return '/tmp/sleepy/data/data.json'
+        full_path = '/tmp/sleepy/data/data.json'
+        if create_dirs:
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        return full_path
     else:
-        return str(Path(__file__).parent.joinpath(path))
+        full_path = str(Path(__file__).parent.joinpath(path))
+        if create_dirs and not os.path.isfile(full_path):
+            # 如果是目录路径或文件不存在，确保目录存在
+            dir_path = full_path if os.path.isdir(full_path) else os.path.dirname(full_path)
+            if dir_path and not os.path.exists(dir_path):
+                os.makedirs(dir_path, exist_ok=True)
+        return full_path
 
 
 def list_dir(path: str | Path, include_subfolder: bool = True, strict_exist: bool = False, ext: str = '') -> list:

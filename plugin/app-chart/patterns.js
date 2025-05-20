@@ -45,7 +45,16 @@ async function loadPatterns() {
             patternInfo.className = 'pattern-info';
 
             const patternText = document.createElement('div');
-            patternText.innerHTML = `<span class="pattern-pattern">${pattern.pattern}</span> → <span class="pattern-replacement">${pattern.replacement}</span>`;
+
+            // 检查是否是忽略模式
+            const isIgnoreMode = pattern.replacement.toUpperCase() === 'IGNORE';
+
+            // 根据是否是忽略模式设置不同的样式
+            if (isIgnoreMode) {
+                patternText.innerHTML = `<span class="pattern-pattern">${pattern.pattern}</span> → <span class="pattern-replacement ignore-pattern">IGNORE</span>`;
+            } else {
+                patternText.innerHTML = `<span class="pattern-pattern">${pattern.pattern}</span> → <span class="pattern-replacement">${pattern.replacement}</span>`;
+            }
 
             const patternDescription = document.createElement('div');
             patternDescription.className = 'pattern-description';

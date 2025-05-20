@@ -9,6 +9,11 @@
             <li><code>*Chrome*</code> - 匹配所有包含"Chrome"的名称</li>
             <li><code>Exact Name</code> - 精确匹配 "Exact Name"</li>
         </ul>
+        <div class="ignore-mode-info">
+            <h5>忽略模式</h5>
+            <p>如果您想完全忽略某些应用程序，请将替换名称设置为 <code>IGNORE</code>。</p>
+            <p>例如：将模式设置为 <code>*Overlay</code>，替换名称设置为 <code>IGNORE</code>，这样所有以"Overlay"结尾的应用将被忽略，不会出现在统计中。</p>
+        </div>
     </div>
 
     <div class="patterns-list">
@@ -32,8 +37,8 @@
         </div>
         <div class="form-group">
             <label for="replacement">替换为:</label>
-            <input type="text" id="replacement" placeholder="例如: Discord" />
-            <small>所有匹配的应用将显示为这个名称</small>
+            <input type="text" id="replacement" placeholder="例如: Discord 或 IGNORE" />
+            <small>所有匹配的应用将显示为这个名称，或使用 IGNORE 忽略该应用</small>
         </div>
         <div class="form-group">
             <label for="description">描述:</label>

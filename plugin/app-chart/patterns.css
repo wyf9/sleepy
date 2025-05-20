@@ -12,6 +12,18 @@
     padding: 2px 4px;
     border-radius: 3px;
 }
+.ignore-mode-info {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: rgba(255, 240, 200, 0.5);
+    border-left: 3px solid #f0ad4e;
+    border-radius: 4px;
+}
+.ignore-mode-info h5 {
+    margin-top: 0;
+    color: #8a6d3b;
+    font-weight: bold;
+}
 .patterns-list {
     margin-bottom: 20px;
 }
@@ -43,6 +55,13 @@
 .pattern-replacement {
     color: #2ea043;
     font-weight: bold;
+}
+.pattern-replacement.ignore-pattern {
+    color: #d73a49;
+    font-weight: bold;
+    background-color: rgba(215, 58, 73, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
 }
 .pattern-description {
     color: #666;

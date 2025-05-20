@@ -20,12 +20,30 @@ def init_plugin(config):
     """
     global _db_path, _db_lock
     import threading
+    import os
 
     # 获取插件配置
     db_path = config.getconf('db_path')
 
+    # 确保使用 /data/ 目录存储数据
+    if not db_path.startswith('/data/'):
+        # 如果配置的路径不是以 /data/ 开头，则修改为使用 /data/ 目录
+        db_filename = os.path.basename(db_path)
+        db_path = f'/data/{db_filename}'
+        config.u.info(f'[app-chart] 数据库路径已调整为使用 /data/ 目录: {db_path}')
+
     # 确保数据库路径是绝对路径
     _db_path = _utils.get_path(db_path)
+
+    # 确保 /data/ 目录存在
+    data_dir = os.path.dirname(_db_path)
+    if not os.path.exists(data_dir):
+        try:
+            os.makedirs(data_dir)
+            config.u.info(f'[app-chart] 创建数据目录: {data_dir}')
+        except Exception as e:
+            config.u.error(f'[app-chart] 创建数据目录失败: {e}')
+            return False
 
     # 初始化线程锁
     _db_lock = threading.Lock()
@@ -151,14 +169,14 @@ def _apply_app_name_patterns(app_name):
     应用应用名称模式匹配
 
     :param app_name: 原始应用名称
-    :return: 匹配后的应用名称
+    :return: 匹配后的应用名称，如果应该忽略则返回 None
     """
     conn = _get_db()
     cursor = conn.cursor()
 
     try:
         # 获取应用名称模式
-        cursor.execute('SELECT pattern, replacement FROM app_name_patterns')
+        cursor.execute('SELECT pattern, replacement FROM app_name_patterns WHERE enabled = 1')
         patterns = cursor.fetchall()
 
         # 应用模式匹配
@@ -166,30 +184,41 @@ def _apply_app_name_patterns(app_name):
             pattern_str = pattern['pattern']
             replacement = pattern['replacement']
 
+            # 检查是否匹配
+            is_match = False
+
             # 处理前缀通配符 (*xxx)
             if pattern_str.startswith('*') and len(pattern_str) > 1:
                 suffix = pattern_str[1:]
                 if app_name.endswith(suffix):
-                    return replacement
+                    is_match = True
 
             # 处理后缀通配符 (xxx*)
             elif pattern_str.endswith('*') and len(pattern_str) > 1:
                 prefix = pattern_str[:-1]
                 if app_name.startswith(prefix):
-                    return replacement
+                    is_match = True
 
             # 处理包含通配符 (*xxx*)
             elif pattern_str.startswith('*') and pattern_str.endswith('*') and len(pattern_str) > 2:
                 substring = pattern_str[1:-1]
                 if substring in app_name:
-                    return replacement
+                    is_match = True
 
             # 精确匹配
             elif pattern_str == app_name:
-                return replacement
-    except:
-        # 如果出错，返回原始应用名称
-        pass
+                is_match = True
+
+            # 如果匹配成功
+            if is_match:
+                # 特殊处理：如果替换值为 "IGNORE"，返回 None 表示忽略此应用
+                if replacement.upper() == "IGNORE":
+                    return None
+                else:
+                    return replacement
+    except Exception as e:
+        # 如果出错，记录错误并返回原始应用名称
+        print(f"Error in _apply_app_name_patterns: {e}")
     finally:
         conn.close()
 
@@ -209,6 +238,10 @@ def _update_daily_stats(date, app_name, duration):
     try:
         # 应用名称模式匹配
         mapped_app_name = _apply_app_name_patterns(app_name)
+
+        # 如果应用名称被标记为忽略（返回None），则不记录统计
+        if mapped_app_name is None:
+            return
 
         # 尝试更新现有记录
         cursor.execute('''
@@ -378,25 +411,30 @@ def on_device_updated(device_id, device_info):
                 # 计算时间差（秒）
                 time_diff = (current_time - last_time).total_seconds()
 
-                # 如果应用变更或状态变更为未使用，记录上一个应用的使用时间
-                if not is_using or last_app != app_name:
-                    _record_app_usage(
-                        device_id=device_id,
-                        device_name=device_name,
-                        app_name=last_app,
-                        start_time=last_time,
-                        end_time=current_time,
-                        duration=time_diff
-                    )
+                # 检查应用是否应该被忽略
+                mapped_last_app = _apply_app_name_patterns(last_app)
 
-                    # 更新每日统计
-                    today = last_time.strftime('%Y-%m-%d')
-                    _update_daily_stats(today, last_app, time_diff)
-                # 如果应用没变但仍在使用，也更新统计（每次更新增加时间差）
-                elif is_using and last_app == app_name:
-                    # 更新每日统计
-                    today = last_time.strftime('%Y-%m-%d')
-                    _update_daily_stats(today, app_name, time_diff)
+                # 如果上一个应用不应该被忽略
+                if mapped_last_app is not None:
+                    # 如果应用变更或状态变更为未使用，记录上一个应用的使用时间
+                    if not is_using or last_app != app_name:
+                        _record_app_usage(
+                            device_id=device_id,
+                            device_name=device_name,
+                            app_name=last_app,
+                            start_time=last_time,
+                            end_time=current_time,
+                            duration=time_diff
+                        )
+
+                        # 更新每日统计
+                        today = last_time.strftime('%Y-%m-%d')
+                        _update_daily_stats(today, last_app, time_diff)
+                    # 如果应用没变但仍在使用，也更新统计（每次更新增加时间差）
+                    elif is_using and last_app == app_name:
+                        # 更新每日统计
+                        today = last_time.strftime('%Y-%m-%d')
+                        _update_daily_stats(today, app_name, time_diff)
 
         # 更新设备状态
         _last_device_status[device_id] = {
@@ -562,6 +600,12 @@ def save_settings():
         # 验证设置值
         if not db_path:
             return {'success': False, 'message': '数据库路径不能为空'}
+
+        # 确保使用 /data/ 目录
+        import os
+        if not db_path.startswith('/data/'):
+            db_filename = os.path.basename(db_path)
+            db_path = f'/data/{db_filename}'
 
         if max_apps < 1 or max_apps > 50:
             return {'success': False, 'message': '最大应用数量必须在1-50之间'}
@@ -925,6 +969,196 @@ def download_database():
             'success': False,
             'message': str(e)
         }, 500
+
+@route('/import-db', methods=['POST'])
+def import_database():
+    """
+    导入数据库文件
+
+    :return: 操作结果
+    """
+    try:
+        from flask import request
+        import os
+        import shutil
+        import tempfile
+
+        # 检查是否有文件上传
+        if 'db_file' not in request.files:
+            return {
+                'success': False,
+                'message': '没有上传文件'
+            }
+
+        file = request.files['db_file']
+        if file.filename == '':
+            return {
+                'success': False,
+                'message': '没有选择文件'
+            }
+
+        # 检查文件扩展名
+        if not file.filename.endswith('.db'):
+            return {
+                'success': False,
+                'message': '请上传有效的 SQLite 数据库文件 (.db)'
+            }
+
+        # 创建临时文件
+        temp_dir = tempfile.mkdtemp()
+        temp_db_path = os.path.join(temp_dir, 'temp_import.db')
+
+        # 保存上传的文件到临时位置
+        file.save(temp_db_path)
+
+        # 验证文件是否为有效的 SQLite 数据库
+        try:
+            import sqlite3
+            conn = sqlite3.connect(temp_db_path)
+            cursor = conn.cursor()
+
+            # 检查必要的表是否存在
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND (name='app_usage' OR name='daily_stats' OR name='app_name_patterns')")
+            tables = cursor.fetchall()
+
+            if len(tables) < 2:  # 至少应该有 app_usage 和 daily_stats 表
+                conn.close()
+                return {
+                    'success': False,
+                    'message': '无效的数据库文件，缺少必要的表'
+                }
+
+            conn.close()
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'无效的 SQLite 数据库文件: {str(e)}'
+            }
+
+        # 使用线程锁确保在替换过程中没有其他线程访问数据库
+        with _db_lock:
+            # 备份当前数据库
+            backup_dir = tempfile.mkdtemp()
+            backup_db_path = os.path.join(backup_dir, 'app_chart_backup.db')
+
+            if os.path.exists(_db_path):
+                shutil.copy2(_db_path, backup_db_path)
+
+            try:
+                # 替换数据库文件
+                shutil.copy2(temp_db_path, _db_path)
+            except Exception as e:
+                # 如果替换失败，恢复备份
+                if os.path.exists(backup_db_path):
+                    shutil.copy2(backup_db_path, _db_path)
+                raise e
+
+        return {
+            'success': True,
+            'message': '数据库导入成功'
+        }
+    except Exception as e:
+        return {
+            'success': False,
+            'message': str(e)
+        }
+
+@route('/import-json', methods=['POST'])
+def import_json_data():
+    """
+    导入 JSON 数据
+
+    :return: 操作结果
+    """
+    try:
+        from flask import request
+
+        # 获取请求数据
+        data = request.get_json()
+
+        if not data or 'data' not in data:
+            return {
+                'success': False,
+                'message': '无效的请求数据'
+            }
+
+        json_data = data['data']
+        clear_before_import = data.get('clear_before_import', False)
+
+        # 验证 JSON 数据结构
+        if 'daily_stats' not in json_data or 'app_usage' not in json_data:
+            return {
+                'success': False,
+                'message': '无效的数据格式，缺少必要的数据字段'
+            }
+
+        daily_stats = json_data['daily_stats']
+        app_usage = json_data['app_usage']
+
+        if not isinstance(daily_stats, list) or not isinstance(app_usage, list):
+            return {
+                'success': False,
+                'message': '无效的数据格式，数据字段必须是数组'
+            }
+
+        # 使用线程锁确保在导入过程中没有其他线程访问数据库
+        with _db_lock:
+            conn = _get_db()
+            cursor = conn.cursor()
+
+            try:
+                # 如果需要，清除现有数据
+                if clear_before_import:
+                    cursor.execute('DELETE FROM app_usage')
+                    cursor.execute('DELETE FROM daily_stats')
+                    cursor.execute('DELETE FROM sqlite_sequence WHERE name="app_usage" OR name="daily_stats"')
+
+                # 导入每日统计数据
+                daily_count = 0
+                for record in daily_stats:
+                    if 'date' in record and 'app_name' in record and 'total_duration' in record:
+                        cursor.execute('''
+                        INSERT INTO daily_stats (date, app_name, total_duration)
+                        VALUES (?, ?, ?)
+                        ON CONFLICT(date, app_name) DO UPDATE SET
+                        total_duration = total_duration + ?
+                        ''', (record['date'], record['app_name'], record['total_duration'], record['total_duration']))
+                        daily_count += 1
+
+                # 导入应用使用记录
+                usage_count = 0
+                for record in app_usage:
+                    if 'device_id' in record and 'device_name' in record and 'app_name' in record:
+                        start_time = record.get('start_time')
+                        end_time = record.get('end_time')
+                        duration = record.get('duration', 0)
+
+                        cursor.execute('''
+                        INSERT INTO app_usage (device_id, device_name, app_name, start_time, end_time, duration)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        ''', (record['device_id'], record['device_name'], record['app_name'], start_time, end_time, duration))
+                        usage_count += 1
+
+                conn.commit()
+
+                return {
+                    'success': True,
+                    'message': '数据导入成功',
+                    'stats': {
+                        'daily_count': daily_count,
+                        'usage_count': usage_count
+                    }
+                }
+            except Exception as e:
+                conn.rollback()
+                raise e
+            finally:
+                conn.close()
+    except Exception as e:
+        return {
+            'success': False,
+            'message': str(e)
+        }
 
 @route('/patterns/<int:pattern_id>', methods=['DELETE'])
 def delete_pattern(pattern_id):

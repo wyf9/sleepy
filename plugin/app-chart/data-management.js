@@ -149,6 +149,158 @@ async function downloadDatabase() {
     }
 }
 
+// 导入数据库文件
+async function importDatabase() {
+    const fileInput = document.getElementById('db-file');
+    const messageEl = document.getElementById('data-message');
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+        messageEl.textContent = '请选择数据库文件';
+        messageEl.className = 'data-message error';
+        messageEl.style.display = 'block';
+        return;
+    }
+
+    const file = fileInput.files[0];
+    if (!file.name.endsWith('.db')) {
+        messageEl.textContent = '请选择有效的 SQLite 数据库文件 (.db)';
+        messageEl.className = 'data-message error';
+        messageEl.style.display = 'block';
+        return;
+    }
+
+    if (!confirm('导入数据库将替换当前所有数据，确定要继续吗？')) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('db_file', file);
+
+    try {
+        messageEl.textContent = '正在导入数据库...';
+        messageEl.className = 'data-message info';
+        messageEl.style.display = 'block';
+
+        const response = await fetch('/plugin/app-chart/import-db', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            messageEl.textContent = '数据库导入成功';
+            messageEl.className = 'data-message success';
+
+            // 清空文件输入
+            fileInput.value = '';
+
+            // 重新加载统计
+            loadDataStats();
+        } else {
+            messageEl.textContent = '导入失败: ' + data.message;
+            messageEl.className = 'data-message error';
+        }
+    } catch (error) {
+        messageEl.textContent = '导入失败: ' + error.message;
+        messageEl.className = 'data-message error';
+    }
+
+    // 3秒后隐藏消息
+    setTimeout(() => {
+        messageEl.style.display = 'none';
+    }, 3000);
+}
+
+// 导入 JSON 数据
+async function importJsonData() {
+    const fileInput = document.getElementById('json-file');
+    const clearBeforeImport = document.getElementById('clear-before-import').checked;
+    const messageEl = document.getElementById('data-message');
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+        messageEl.textContent = '请选择 JSON 数据文件';
+        messageEl.className = 'data-message error';
+        messageEl.style.display = 'block';
+        return;
+    }
+
+    const file = fileInput.files[0];
+    if (!file.name.endsWith('.json')) {
+        messageEl.textContent = '请选择有效的 JSON 文件 (.json)';
+        messageEl.className = 'data-message error';
+        messageEl.style.display = 'block';
+        return;
+    }
+
+    if (clearBeforeImport && !confirm('导入前将清除所有现有数据，确定要继续吗？')) {
+        return;
+    }
+
+    try {
+        // 读取文件内容
+        const fileContent = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsText(file);
+        });
+
+        // 解析 JSON
+        let jsonData;
+        try {
+            jsonData = JSON.parse(fileContent);
+        } catch (e) {
+            throw new Error('无效的 JSON 格式');
+        }
+
+        // 验证 JSON 结构
+        if (!jsonData.daily_stats || !jsonData.app_usage) {
+            throw new Error('无效的数据格式，缺少必要的数据字段');
+        }
+
+        messageEl.textContent = '正在导入数据...';
+        messageEl.className = 'data-message info';
+        messageEl.style.display = 'block';
+
+        // 发送数据到服务器
+        const response = await fetch('/plugin/app-chart/import-json', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                data: jsonData,
+                clear_before_import: clearBeforeImport
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            messageEl.textContent = `数据导入成功: ${data.stats.daily_count} 条每日记录, ${data.stats.usage_count} 条使用记录`;
+            messageEl.className = 'data-message success';
+
+            // 清空文件输入
+            fileInput.value = '';
+
+            // 重新加载统计
+            loadDataStats();
+        } else {
+            messageEl.textContent = '导入失败: ' + data.message;
+            messageEl.className = 'data-message error';
+        }
+    } catch (error) {
+        messageEl.textContent = '导入失败: ' + error.message;
+        messageEl.className = 'data-message error';
+    }
+
+    // 3秒后隐藏消息
+    setTimeout(() => {
+        messageEl.style.display = 'none';
+    }, 3000);
+}
+
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
     // 加载初始数据
@@ -159,4 +311,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('clear-data').addEventListener('click', clearAllData);
     document.getElementById('export-data').addEventListener('click', exportData);
     document.getElementById('download-db').addEventListener('click', downloadDatabase);
+
+    // 绑定导入功能事件
+    document.getElementById('import-db-btn').addEventListener('click', importDatabase);
+    document.getElementById('import-json-btn').addEventListener('click', importJsonData);
 });

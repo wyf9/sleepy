@@ -300,6 +300,9 @@ def index():
             visit_year=d.data['metrics']['year'].get('/', 0),
             visit_total=d.data['metrics']['total'].get('/', 0)
         )
+    # 获取主题
+    theme = get_theme('index.html')
+
     # 处理插件注入
     plugin_templates: list[tuple[str, str]] = []
     for i in p.plugins:
@@ -310,11 +313,9 @@ def index():
                     i[1],
                     c=i[3].config,
                     d=d.data,
-                    u=u
+                    u=u,
+                    current_theme=theme
                 )))
-
-    # 获取主题
-    theme = get_theme('index.html')
 
     # 获取可用的主题列表
     available_themes = get_available_themes()
@@ -680,7 +681,8 @@ def admin_panel():
                     card['content'],
                     c=c,
                     d=d.data,
-                    u=u
+                    u=u,
+                    current_theme=theme
                 )
             else:
                 card_content = card['content']
