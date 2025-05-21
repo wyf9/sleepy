@@ -1,3 +1,28 @@
+## 贡献准则
+
+这些是与原版 Code of Conduct 同等地位的贡献准则 **(基于实际问题制定)**:
+
+1. **禁止** 使用全自动 AI 工具 (如 Manus, Cursor) 进行开发 (不限制非自动化的 AI 使用)
+2. **禁止** 直接提交未经 **100%** 人工检查的 AI 生成代码
+3. **禁止** 使用 AI 代替人工编写文档 **(特别是部署文档)**
+
+<details>
+<summary>为什么要限制 AI 使用 (点击展开)</summary>
+
+> *图 1 为聊天记录, 图 2 - 5 为聊天记录中顺序出现的图片*
+
+![why-no-auto-ai-1](https://ghimg.siiway.top/sleepy/code-of-conduct/why-no-auto-ai-1.png)
+
+![why-no-auto-ai-2](https://ghimg.siiway.top/sleepy/code-of-conduct/why-no-auto-ai-2.png)
+
+![why-no-auto-ai-3](https://ghimg.siiway.top/sleepy/code-of-conduct/why-no-auto-ai-3.png)
+
+![why-no-auto-ai-4](https://ghimg.siiway.top/sleepy/code-of-conduct/why-no-auto-ai-4.png)
+
+![why-no-auto-ai-5](https://ghimg.siiway.top/sleepy/code-of-conduct/why-no-auto-ai-5.png)
+
+</details>
+
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge

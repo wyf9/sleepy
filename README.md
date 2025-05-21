@@ -50,6 +50,9 @@
 
 ## 贡献者
 
+> [!WARNING]
+> 在提交贡献前, 请先查阅 **[贡献准则](./CODE_OF_CONDUCT.md#贡献准则)**
+
 现有贡献者列表：
 
 <!-- readme: contributors -start -->
