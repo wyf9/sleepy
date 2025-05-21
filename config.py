@@ -190,5 +190,16 @@ class Config:
 
     # ===== plugin config =====
 
-    plugin_enabled: list[str] = get(list, 'plugin_enabled')
-    plugin: dict[str, dict] = get(dict, 'plugin')
+    # 获取插件配置，如果为空则使用空列表
+    try:
+        plugin_enabled: list[str] = get(list, 'plugin_enabled')
+    except Exception as e:
+        print(f"Warning: Error loading plugin_enabled config: {e}")
+        plugin_enabled: list[str] = []
+
+    # 获取插件详细配置，如果为空则使用空字典
+    try:
+        plugin: dict[str, dict] = get(dict, 'plugin')
+    except Exception as e:
+        print(f"Warning: Error loading plugin config: {e}")
+        plugin: dict[str, dict] = {}

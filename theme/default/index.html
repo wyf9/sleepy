@@ -19,11 +19,11 @@
 
 <body>
     <div class="container">
-        <div class="card light" id="user-status">
+        <div class="card" id="user-status">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
 
-            <!-- {disabled% if c.page.moonlight %} -->
-            <!-- (moonlight) 透明度 / 暗色模式 -->
+            <!-- {disabled% if c.page.slider %} -->
+            <!-- (slider) 透明度调整 -->
             <!-- {disabled% include "moonlight.html" %} -->
             <!-- {disabled% endif %} -->
 
@@ -40,7 +40,7 @@
         </div>
 
         {% for plugin in plugins %}
-        <div class="card light" id="plugin-{{ plugin[0] }}">
+        <div class="card" id="plugin-{{ plugin[0] }}">
             {{ plugin[1] | safe }}
         </div>
         {% endfor %}
@@ -50,7 +50,7 @@
         <!-- {disabled% include "zhixue.html" %} -->
         <!-- {disabled% endif %} -->
 
-        <div class="card light" id="more-text">
+        <div class="card" id="more-text">
             <!-- {disabled% if c.page.hitokoto %} -->
             <!-- (hitokoto) 一言 -->
             <!-- {disabled% include "hitokoto.html" %} -->

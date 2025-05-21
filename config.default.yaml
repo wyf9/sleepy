@@ -27,7 +27,7 @@ page:
   # 功能控制
   # hitokoto: true # 控制是否显示一言
   # canvas: true # 控制是否加载背景粒子
-  # moonlight: true # 控制是否启用暗色切换 / 透明度调整
+  # slider: true # 控制是否启用透明度调整
   # lantern: false # 控制是否加载节日灯笼
   # mplayer: false # 控制是否加载音乐播放器
   # zhixue: false # 控制是否加载智学网分数

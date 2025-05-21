@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 # coding: utf-8
-
-import os
 import time
 import os
 from datetime import datetime
@@ -58,6 +56,12 @@ try:
 
     # init config
     c = config_init()
+
+    # 在开发环境中禁用模板缓存
+    if c.main.debug:
+        app.config['TEMPLATES_AUTO_RELOAD'] = True
+        app.jinja_env.auto_reload = True
+        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # 禁用静态文件缓存
 
     # disable flask access log (if not debug)
     if not c.main.debug:
@@ -143,8 +147,19 @@ def get_theme(template_name=None):
     Returns:
         str: 主题名称
     """
-    # 获取主题 (优先使用 URL 参数，其次是配置文件)
-    theme = flask.request.args.get('theme', getattr(c.page, 'theme', 'default'))
+    # 获取主题 (优先使用 URL 参数，其次是 cookie，最后是配置文件)
+    theme = flask.request.args.get('theme')
+
+    # 如果 URL 中有主题参数，将其保存到 cookie 中
+    if theme:
+        # 记录主题参数，以便在响应中设置 cookie
+        flask.g.theme_from_url = theme
+    # 如果 URL 中没有主题参数，尝试从 cookie 中获取
+    elif flask.request.cookies.get('sleepy-theme'):
+        theme = flask.request.cookies.get('sleepy-theme')
+    # 如果 cookie 中也没有，使用配置文件中的主题
+    else:
+        theme = getattr(c.page, 'theme', 'default')
 
     # 检查主题目录是否存在，如果不存在则使用默认主题
     if not os.path.exists(os.path.join('theme', theme)):
@@ -168,10 +183,14 @@ def get_theme(template_name=None):
 # 全局静态文件处理函数，支持 fallback 机制
 @app.route('/static/<path:filename>', endpoint='static')
 def static_proxy(filename):
-    # 获取当前主题 (从 URL 参数或 Referer 中获取)
+    # 获取当前主题 (从 URL 参数、cookie 或 Referer 中获取)
     theme = flask.request.args.get('theme')
 
-    # 如果 URL 中没有主题参数，尝试从 Referer 中获取
+    # 如果 URL 中没有主题参数，尝试从 cookie 中获取
+    if not theme:
+        theme = flask.request.cookies.get('sleepy-theme')
+
+    # 如果 cookie 中没有主题参数，尝试从 Referer 中获取
     if not theme and flask.request.referrer:
         try:
             from urllib.parse import urlparse, parse_qs
@@ -189,13 +208,23 @@ def static_proxy(filename):
     # 首先尝试从当前主题加载
     theme_path = os.path.join('theme', theme, 'static', filename)
     if os.path.exists(theme_path):
-        return flask.send_from_directory(f'theme/{theme}/static', filename)
+        response = flask.send_from_directory(f'theme/{theme}/static', filename)
+        # 设置缓存控制头，防止浏览器缓存
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
 
     # 如果当前主题中不存在，fallback 到默认主题
     default_path = os.path.join('theme', 'default', 'static', filename)
     if os.path.exists(default_path):
         u.info(f"Static file {filename} not found in theme {theme}, using default theme's file")
-        return flask.send_from_directory('theme/default/static', filename)
+        response = flask.send_from_directory('theme/default/static', filename)
+        # 设置缓存控制头，防止浏览器缓存
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
 
     # 如果默认主题中也不存在，返回 404
     u.warning(f"Static file {filename} not found in any theme")
@@ -222,6 +251,19 @@ def showip():
     # --- count
     if c.metrics.enabled:
         d.record_metrics(path)
+
+
+@app.after_request
+def set_theme_cookie(response):
+    '''
+    在响应中设置主题 cookie
+    '''
+    # 如果 URL 中有主题参数，将其保存到 cookie 中
+    if hasattr(flask.g, 'theme_from_url'):
+        theme = flask.g.theme_from_url
+        # 设置 cookie，有效期 30 天
+        response.set_cookie('sleepy-theme', theme, max_age=30*24*60*60, path='/', samesite='Lax')
+    return response
 
 
 def require_secret(view_func):
@@ -723,6 +765,12 @@ def login():
     # 获取主题
     theme = get_theme('login.html')
 
+    # 检查是否已经登录（cookie 中是否有有效的 sleepy-token）
+    cookie_token = flask.request.cookies.get('sleepy-token')
+    if cookie_token == c.main.secret:
+        # 如果 cookie 有效，直接重定向到管理面板
+        return flask.redirect('/webui/panel')
+
     return flask.render_template(
         'login.html',
         c=c,
@@ -772,11 +820,29 @@ def logout():
     # 创建响应
     response = flask.make_response(flask.redirect('/webui/login'))
 
-    # 清除 cookie
+    # 清除认证 cookie
     response.delete_cookie('sleepy-token')
+
+    # 不清除主题 cookie，保留用户的主题偏好
+    # response.delete_cookie('sleepy-theme')
 
     u.debug('[Auth] Logout successful, cookie cleared')
     return response
+
+
+@app.route('/api/login', methods=['GET', 'POST'])
+@require_secret
+def api_login():
+    '''
+    API登录接口，验证密钥并返回成功
+    - Method: **GET / POST**
+    '''
+    u.debug('[API] Secret verified')
+    return u.format_dict({
+        'success': True,
+        'code': 'OK',
+        'message': 'Secret verified'
+    }), 200
 
 
 # --- Special

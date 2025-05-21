@@ -253,81 +253,82 @@ class Plugin:
         self.app = app
 
         # 检查目录是否存在 (以及是否有插件定义 (plugin.yaml))
-        for i in self.c.plugin_enabled:
-            plugin_path = get_path(f'plugin/{i}/plugin.yaml')
-            if os.path.exists(plugin_path) and os.path.isfile(plugin_path):
-                pass
-            else:
-                self.u.exception(f'Plugin not exist: {i}')
+        if self.c.plugin_enabled:
+            for i in self.c.plugin_enabled:
+                plugin_path = get_path(f'plugin/{i}/plugin.yaml')
+                if os.path.exists(plugin_path) and os.path.isfile(plugin_path):
+                    pass
+                else:
+                    self.u.exception(f'Plugin not exist: {i}')
 
         # 加载插件配置
-        for i in self.c.plugin_enabled:
-            # 加载单个插件配置
-            with open(get_path(f'plugin/{i}/plugin.yaml'), 'r', encoding='utf-8') as f:
-                plugin: dict = yaml.safe_load(f)
-                f.close()
+        if self.c.plugin_enabled:
+            for i in self.c.plugin_enabled:
+                # 加载单个插件配置
+                with open(get_path(f'plugin/{i}/plugin.yaml'), 'r', encoding='utf-8') as f:
+                    plugin: dict = yaml.safe_load(f)
+                    f.close()
 
-            is_frontend = plugin.get('frontend', False)
-            is_backend = plugin.get('backend', False)
-            self.u.debug(f'initing plugin, name: {i}, frontend: {is_frontend}, backend: {is_backend}')
+                is_frontend = plugin.get('frontend', False)
+                is_backend = plugin.get('backend', False)
+                self.u.debug(f'initing plugin, name: {i}, frontend: {is_frontend}, backend: {is_backend}')
 
-            # 加载前端代码 (index.html)
-            if is_frontend:
-                with open(get_path(f'plugin/{i}/index.html'), 'r', encoding='utf-8') as ff:
-                    plugin_frontend = ff.read()
-                    ff.close()
-            else:
-                plugin_frontend = ''
+                # 加载前端代码 (index.html)
+                if is_frontend:
+                    with open(get_path(f'plugin/{i}/index.html'), 'r', encoding='utf-8') as ff:
+                        plugin_frontend = ff.read()
+                        ff.close()
+                else:
+                    plugin_frontend = ''
 
-            # 加载后端代码 (__init__.py)
-            plugin_backend = None
-            if is_backend:
-                try:
-                    plugin_backend = importlib.import_module(f'plugin.{i}')
+                # 加载后端代码 (__init__.py)
+                plugin_backend = None
+                if is_backend:
+                    try:
+                        plugin_backend = importlib.import_module(f'plugin.{i}')
 
-                    # 检查并调用插件的初始化函数
-                    if hasattr(plugin_backend, 'init_plugin'):
-                        plugin_config = PluginClass(
-                            name=i,
-                            example_config=plugin.get('config', {}),
-                            user_config=self.c,
-                            utils=self.u,
-                            data=self.d
-                        )
+                        # 检查并调用插件的初始化函数
+                        if hasattr(plugin_backend, 'init_plugin'):
+                            plugin_config = PluginClass(
+                                name=i,
+                                example_config=plugin.get('config', {}),
+                                user_config=self.c,
+                                utils=self.u,
+                                data=self.d
+                            )
 
-                        # 调用插件的初始化函数
-                        try:
-                            plugin_backend.init_plugin(plugin_config)
-                            self.u.info(f"Plugin '{i}' initialized successfully")
-                        except Exception as e:
-                            self.u.error(f"Error initializing plugin '{i}': {e}")
+                            # 调用插件的初始化函数
+                            try:
+                                plugin_backend.init_plugin(plugin_config)
+                                self.u.info(f"Plugin '{i}' initialized successfully")
+                            except Exception as e:
+                                self.u.error(f"Error initializing plugin '{i}': {e}")
 
-                    # 注册插件路由
-                    if self.app and i in _plugin_routes:
-                        self._register_plugin_routes(i)
+                        # 注册插件路由
+                        if self.app and i in _plugin_routes:
+                            self._register_plugin_routes(i)
 
-                except Exception as e:
-                    self.u.error(f"Error loading plugin '{i}': {e}")
-                    plugin_backend = None
+                    except Exception as e:
+                        self.u.error(f"Error loading plugin '{i}': {e}")
+                        plugin_backend = None
 
-            # 加载配置
-            plugin_config = PluginClass(
-                name=i,
-                example_config=plugin.get('config', {}),
-                user_config=self.c,
-                utils=self.u,
-                data=self.d
-            )
+                # 加载配置
+                plugin_config = PluginClass(
+                    name=i,
+                    example_config=plugin.get('config', {}),
+                    user_config=self.c,
+                    utils=self.u,
+                    data=self.d
+                )
 
-            # 保存此项
-            self.plugins.append((i, plugin_frontend, plugin_backend, plugin_config))
+                # 保存此项
+                self.plugins.append((i, plugin_frontend, plugin_backend, plugin_config))
 
         # 注册管理后台卡片
         self._register_admin_cards()
 
         # 触发应用启动事件
-        if self.c.plugin_enabled:
-            trigger_event('app_started', self)
+        trigger_event('app_started', self)
 
         self.u.info(f'plugins enabled: {", ".join(self.c.plugin_enabled)}' if self.c.plugin_enabled else 'no plugin enabled.')
 
@@ -386,6 +387,10 @@ class Plugin:
         # 清空已注册的卡片
         self.admin_cards = []
 
+        # 如果没有启用的插件，直接返回
+        if not self.c.plugin_enabled:
+            return
+
         # 遍历所有启用的插件
         for plugin_name in self.c.plugin_enabled:
             # 检查插件是否注册了管理后台卡片
@@ -417,7 +422,8 @@ class Plugin:
                             self.u.error(f"Error registering admin card for plugin '{plugin_name}': {e}")
 
         # 按顺序排序卡片
-        self.admin_cards.sort(key=lambda x: x['order'])
+        if self.admin_cards:
+            self.admin_cards.sort(key=lambda x: x['order'])
 
     def get_admin_cards(self):
         """

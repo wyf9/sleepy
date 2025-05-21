@@ -9,9 +9,6 @@ async function login() {
         return;
     }
 
-    // 将密钥存储在 localStorage 中作为备份
-    localStorage.setItem('sleepy_secret', secret);
-
     // 获取当前保存的主题
     const savedTheme = localStorage.getItem('sleepy_theme');
 
@@ -31,10 +28,15 @@ async function login() {
 
             if (response.ok) {
                 // 登录成功，重定向到管理面板
+                // 构建重定向URL，保留主题参数
+                const currentUrl = new URL(window.location.href);
+                const theme = currentUrl.searchParams.get('theme');
+
                 let redirectUrl = '/webui/panel';
-                if (savedTheme) {
-                    redirectUrl += '?theme=' + encodeURIComponent(savedTheme);
+                if (theme) {
+                    redirectUrl += `?theme=${theme}`;
                 }
+
                 window.location.href = redirectUrl;
             } else {
                 // 登录失败
@@ -48,27 +50,89 @@ async function login() {
             document.getElementById('error-message').textContent = '登录请求失败，请检查网络连接';
         }
     } else {
-        // 传统方式：直接通过URL参数传递密钥
-        let redirectUrl = '/webui/panel?secret=' + encodeURIComponent(secret);
-        if (savedTheme) {
-            redirectUrl += '&theme=' + encodeURIComponent(savedTheme);
+        // 传统方式：使用 cookie 进行身份验证，不再在 URL 中传递密钥
+        // 由于没有 /webui/auth 接口，我们需要手动设置 cookie
+        document.cookie = `sleepy-token=${encodeURIComponent(secret)}; max-age=${30*24*60*60}; path=/; samesite=Lax`;
+
+        // 构建重定向URL，保留主题参数
+        const currentUrl = new URL(window.location.href);
+        const theme = currentUrl.searchParams.get('theme');
+
+        let redirectUrl = '/webui/panel';
+        if (theme) {
+            redirectUrl += `?theme=${theme}`;
         }
+
         window.location.href = redirectUrl;
+    }
+}
+
+// 验证 cookie 是否有效
+async function validateCookie() {
+    try {
+        // 使用 /api/login 验证 cookie 是否有效
+        const response = await fetch('/api/login', {
+            method: 'GET',
+            credentials: 'include', // 包含 cookie
+            cache: 'no-cache' // 禁用缓存
+        });
+
+        if (response.ok) {
+            // cookie 有效，重定向到管理面板
+            console.log('Cookie 验证成功，正在重定向到管理面板...');
+
+            // 构建重定向URL，保留主题参数
+            const currentUrl = new URL(window.location.href);
+            const theme = currentUrl.searchParams.get('theme');
+
+            let redirectUrl = '/webui/panel';
+            if (theme) {
+                redirectUrl += `?theme=${theme}`;
+            }
+
+            window.location.href = redirectUrl;
+            return true;
+        } else {
+            // cookie 无效，显示登录表单
+            console.log('Cookie 验证失败，需要登录');
+            return false;
+        }
+    } catch (error) {
+        console.error('验证 cookie 时出错:', error);
+        return false;
     }
 }
 
 // 初始化事件监听器
 document.addEventListener('DOMContentLoaded', function() {
-    // 按下回车键时触发登录按钮
-    document.getElementById('secret').addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-            login();
+    // 自动清除 localStorage 中存储的 secret
+    if (localStorage.getItem('sleepy_secret')) {
+        localStorage.removeItem('sleepy_secret');
+        console.log('已清除 localStorage 中存储的 secret');
+    }
+
+    // 验证 cookie 是否有效
+    validateCookie().then(isValid => {
+        if (!isValid) {
+            // 如果 cookie 无效，设置登录表单事件监听器
+
+            // 按下回车键时触发登录按钮
+            document.getElementById('secret').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    login();
+                }
+            });
+
+            // 如果存在登录按钮，添加点击事件
+            const loginBtn = document.querySelector('.login-btn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', login);
+            }
+
+            // 隐藏加载消息
+            document.getElementById('loading-message').style.display = 'none';
+            // 显示登录表单
+            document.querySelector('.login-form').style.display = 'block';
         }
     });
-
-    // 如果存在登录按钮，添加点击事件
-    const loginBtn = document.querySelector('.login-btn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', login);
-    }
 });

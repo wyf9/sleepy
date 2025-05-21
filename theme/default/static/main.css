@@ -42,16 +42,7 @@ div p {
   opacity: 0.8;
 }
 
-#moonlight {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-}
 
-#moonlight svg {
-  width: 40px;
-  height: 40px;
-}
 
 #slider {
   position: absolute;
@@ -73,20 +64,14 @@ div p {
   filter: invert(0.8);
 }
 
-.light {
+.light, .card {
   background-color: rgba(var(--light-bg-rgb), var(--card-alpha));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   color: black;
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
-.dark {
-  background-color: rgba(var(--dark-bg-rgb), var(--card-alpha));
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  color: white;
-  border: 1px solid rgba(60, 60, 60, 0.8);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
+
 
 .card {
   border-radius: 30px;
@@ -99,10 +84,7 @@ div p {
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
-  box-shadow: 0 8px 32px rgb(174 137 245 / 20%),
-    inset 0 0 6px 1px rgb(185 210 216 / 10%);
   transition: all 0.2s;
 }
 
@@ -186,12 +168,6 @@ div p {
   color: rgba(180, 40, 200, 0.9);
 }
 
-.dark a,
-.dark .awake {
-  color: rgb(100, 255, 100);
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-}
-
 .light a,
 .light .awake {
   color: rgb(0, 100, 0);
@@ -229,12 +205,10 @@ div p {
   background: rgba(255, 255, 255, 0.5);
 }
 
-.dark a.sleeping,
 .light a.sleeping {
   color: gray !important;
 }
 
-.dark a.error,
 .light a.error {
   color: red !important;
 }
