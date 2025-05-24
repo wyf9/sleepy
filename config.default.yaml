@@ -20,9 +20,7 @@ page:
   learn_more_text: "GitHub Repo" # 更多信息链接的提示, 默认为 "GitHub Repo"
   learn_more_link: "https://github.com/wyf9/sleepy" # 更多信息链接的目标, 默认为本仓库链接
   more_text: "" # 内容将在状态页底部 learn_more 上方插入 (不转义)
-
-  # 主题设置
-  theme: "default" # 默认主题，可选值: default, dark, blue, console
+  theme: "default" # 设置主题 (theme 下的文件夹名)
 
   # 功能控制
   # hitokoto: true # 控制是否显示一言

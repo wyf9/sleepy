@@ -1,8 +1,11 @@
 # sleepy
 
+> [!WARNING]
+> **请勿使用本分支，功能不稳定!**
+
 一个用于 ~~*视奸*~~ 查看个人在线状态 (以及正在使用软件) 的 Flask 应用，让他人能知道你不在而不是故意吊他/她
 
-[**功能**](#功能) / [**演示**](#preview) / [**部署**](#部署--更新) / [**Client**](#client) / [**API**](#api) / [**关于**](#关于)
+[**功能**](#功能) / [**演示**](#preview) / [**部署**](#部署--更新) / [**客户端**](#客户端) / [**API**](#api) / [**关于**](#关于)
 
 ## 功能
 
@@ -28,21 +31,25 @@
 **Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)  
 **开发服务器**: [请在 Discord 服务器获取](link-dc)
 
-你可以在开发预览站测试最新功能和API, 但不保证稳定性 / 安全性.
-
 </details>
 
 ## 部署 / 更新
 
 请移步 **[部署教程](./doc/deploy.md)** 或 **[更新教程](./doc/update.md)** *(多图警告)*
 
-## Client
+## 客户端
 
 如果你想直接开始使用，可在 **[`/client`](./client/README.md)** 找到客户端 (用于**手动更新状态**/**自动更新设备打开应用**)
 
 ## API
 
 详细的 API 文档见 [doc/api.md](./doc/api.md).
+
+## 插件系统
+
+(普通用户看这个) **[doc/plugin.md](./doc/plugin.md)**
+
+(插件开发看这个) **[doc/plugin-dev/README.md](./doc/plugin-dev/README.md)**
 
 ## Star History
 
@@ -52,8 +59,6 @@
 
 > [!WARNING]
 > 在提交贡献前, 请先查阅 **[贡献准则](./CODE_OF_CONDUCT.md#贡献准则)**
-
-现有贡献者列表：
 
 <!-- readme: contributors -start -->
 <!-- readme: contributors -end -->
@@ -69,6 +74,8 @@
 对智能家居 / Home Assistant 感兴趣的朋友，一定要看看 WinMEMZ 的 [sleepy 重生版](https://maao.cc/project-sleepy/): **[maoawa/project-sleepy](https://github.com/maoawa/project-sleepy)!**
 
 感谢 [@1812z](https://github.com/1812z) 的 B 站视频推广~ **([BV1LjB9YjEi3](https://www.bilibili.com/video/BV1LjB9YjEi3))**
+
+---
 
 [link-dc]: https://wyf9.top/t/sleepy/dc
 [link-tg]: https://wyf9.top/t/sleepy/tg

@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import yaml
 import toml
 
-from _utils import tobool, get_path, SleepyException, list_dir
+from _utils import tobool, get_path, SleepyException, list_dirs
 
 # ===== prepare env =====
 
@@ -50,8 +50,11 @@ try:
         with open(get_path('data/config.toml'), 'r', encoding='utf-8') as f:
             user_config = toml.load(f)
             f.close()
+    else:
+        # 如还是没有则使用默认配置
+        user_config = {}
 except Exception as e:
-    u.warning(f"Error loading user config: {e}")
+    u.warning(f'Error loading user config: {e}')
     user_config = {}
 
 # 加载默认配置
@@ -138,6 +141,7 @@ class Config:
         learn_more_text: str = get(str, _, 'learn_more_text')
         learn_more_link: str = get(str, _, 'learn_more_link')
         more_text: str = get(str, _, 'more_text')
+        theme: str = get(str, _, 'theme')
 
         # to plugins
         # hitokoto: bool = getenv('sleepy_page_hitokoto', True, bool)
@@ -185,21 +189,9 @@ class Config:
     # metrics_list 中 [static] 处理
     if '[static]' in metrics.allow_list:
         metrics.allow_list.remove('[static]')
-        static_list = list_dir(get_path('static/'))
+        static_list = list_dirs(get_path('static/'))
         metrics.allow_list.extend(['/static/' + i for i in static_list])
 
     # ===== plugin config =====
-
-    # 获取插件配置，如果为空则使用空列表
-    try:
-        plugin_enabled: list[str] = get(list, 'plugin_enabled')
-    except Exception as e:
-        print(f"Warning: Error loading plugin_enabled config: {e}")
-        plugin_enabled: list[str] = []
-
-    # 获取插件详细配置，如果为空则使用空字典
-    try:
-        plugin: dict[str, dict] = get(dict, 'plugin')
-    except Exception as e:
-        print(f"Warning: Error loading plugin config: {e}")
-        plugin: dict[str, dict] = {}
+    plugin_enabled: list[str] = get(list, 'plugin_enabled')
+    plugin: dict[str, dict] = get(dict, 'plugin')

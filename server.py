@@ -1,21 +1,5 @@
 #!/usr/bin/python3
 # coding: utf-8
-import time
-import os
-from datetime import datetime
-from functools import wraps
-
-import flask
-import json5
-import pytz
-from markupsafe import escape
-from jinja2 import FileSystemLoader, ChoiceLoader
-
-from config import Config as config_init
-from utils import Utils as utils_init
-from data import Data as data_init
-from plugin import Plugin as plugin_init
-import _utils
 
 # show welcome text
 print(f'''
@@ -24,14 +8,41 @@ Give us a Star 🌟 please: https://github.com/wyf9/sleepy
 Bug Report: https://wyf9.top/t/sleepy/bug
 Feature Request: https://wyf9.top/t/sleepy/feature
 Security Report: https://wyf9.top/t/sleepy/security
+'''[1:])
+
+# import modules
+try:
+    import time
+    import os
+    from datetime import datetime
+    from functools import wraps
+
+    import flask
+    import json5
+    import pytz
+    from markupsafe import escape
+    from jinja2 import FileSystemLoader, ChoiceLoader
+
+    from config import Config as config_init
+    from utils import Utils as utils_init
+    from data import Data as data_init
+    from plugin import Plugin as plugin_init
+    import _utils
+except:
+    print(f'''
+Import module Failed!
+ * Please make sure you installed all dependencies in requirements.txt
+ * If you believe that's our fault, report the bug to us: https://wyf9.top/t/sleepy/bug
+ * And provide the logs (below) to us:
 '''[1:-1])
+    raise
 
 
 class ThemeLoader(ChoiceLoader):
-    """
+    '''
     自定义主题加载器，支持主题 fallback 机制
     当主题中的文件缺失时，自动 fallback 到 default 主题
-    """
+    '''
 
     def __init__(self, theme_name):
         self.theme_name = theme_name
@@ -57,14 +68,13 @@ try:
     # init config
     c = config_init()
 
-    # 在开发环境中禁用模板缓存
     if c.main.debug:
+        # debug: disable template cache
         app.config['TEMPLATES_AUTO_RELOAD'] = True
         app.jinja_env.auto_reload = True
-        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # 禁用静态文件缓存
-
-    # disable flask access log (if not debug)
-    if not c.main.debug:
+        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+    else:
+        # not debug: disable flask access log
         from logging import getLogger
         flask_default_logger = getLogger('werkzeug')
         flask_default_logger.disabled = True
@@ -107,59 +117,15 @@ except:
 # --- Functions
 
 
-def get_available_themes():
-    """
-    获取所有可用的主题列表
-
-    Returns:
-        list: 主题名称列表
-    """
-    import os
-    theme_dir = 'theme'
-    themes = []
-
-    # 检查主题目录是否存在
-    if os.path.exists(theme_dir) and os.path.isdir(theme_dir):
-        # 遍历主题目录
-        for theme in os.listdir(theme_dir):
-            theme_path = os.path.join(theme_dir, theme)
-            # 检查是否是目录
-            if os.path.isdir(theme_path):
-                themes.append(theme)
-
-    # 确保 default 主题总是存在
-    if 'default' not in themes and os.path.exists(os.path.join(theme_dir, 'default')):
-        themes.append('default')
-
-    # 按字母顺序排序主题
-    themes.sort()
-
-    return themes
-
-
 def get_theme(template_name=None):
     """
     获取主题并检查其是否存在
 
-    Args:
-        template_name: 模板文件名，如 'index.html', 'panel.html', 'login.html'（可选，用于日志记录）
-
-    Returns:
-        str: 主题名称
+    :param template_name: 模板文件名，如 'index.html', 'panel.html', 'login.html'（可选，用于日志记录）
+    :return str: 主题名称
     """
     # 获取主题 (优先使用 URL 参数，其次是 cookie，最后是配置文件)
-    theme = flask.request.args.get('theme')
-
-    # 如果 URL 中有主题参数，将其保存到 cookie 中
-    if theme:
-        # 记录主题参数，以便在响应中设置 cookie
-        flask.g.theme_from_url = theme
-    # 如果 URL 中没有主题参数，尝试从 cookie 中获取
-    elif flask.request.cookies.get('sleepy-theme'):
-        theme = flask.request.cookies.get('sleepy-theme')
-    # 如果 cookie 中也没有，使用配置文件中的主题
-    else:
-        theme = getattr(c.page, 'theme', 'default')
+    theme = flask.request.args.get('theme') or flask.request.cookies.get('sleepy-theme') or c.page.theme
 
     # 检查主题目录是否存在，如果不存在则使用默认主题
     if not os.path.exists(os.path.join('theme', theme)):
@@ -183,27 +149,8 @@ def get_theme(template_name=None):
 # 全局静态文件处理函数，支持 fallback 机制
 @app.route('/static/<path:filename>', endpoint='static')
 def static_proxy(filename):
-    # 获取当前主题 (从 URL 参数、cookie 或 Referer 中获取)
-    theme = flask.request.args.get('theme')
-
-    # 如果 URL 中没有主题参数，尝试从 cookie 中获取
-    if not theme:
-        theme = flask.request.cookies.get('sleepy-theme')
-
-    # 如果 cookie 中没有主题参数，尝试从 Referer 中获取
-    if not theme and flask.request.referrer:
-        try:
-            from urllib.parse import urlparse, parse_qs
-            referer_url = urlparse(flask.request.referrer)
-            referer_query = parse_qs(referer_url.query)
-            if 'theme' in referer_query:
-                theme = referer_query['theme'][0]
-        except:
-            pass
-
-    # 如果仍然没有主题参数，使用配置文件中的主题
-    if not theme:
-        theme = getattr(c.page, 'theme', 'default')
+    # 获取当前主题
+    theme = flask.request.args.get('theme') or flask.request.cookies.get('sleepy-theme') or c.page.theme
 
     # 首先尝试从当前主题加载
     theme_path = os.path.join('theme', theme, 'static', filename)
@@ -218,7 +165,7 @@ def static_proxy(filename):
     # 如果当前主题中不存在，fallback 到默认主题
     default_path = os.path.join('theme', 'default', 'static', filename)
     if os.path.exists(default_path):
-        u.info(f"Static file {filename} not found in theme {theme}, using default theme's file")
+        u.debug(f'Static file {filename} not found in theme {theme}, using default theme\'s file')
         response = flask.send_from_directory('theme/default/static', filename)
         # 设置缓存控制头，防止浏览器缓存
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -227,12 +174,12 @@ def static_proxy(filename):
         return response
 
     # 如果默认主题中也不存在，返回 404
-    u.warning(f"Static file {filename} not found in any theme")
+    u.warning(f'Static file {filename} not found in any theme')
     return flask.abort(404)
 
 
 @app.before_request
-def showip():
+def before_request():
     '''
     在日志中显示 ip, 并记录 metrics 信息
 
@@ -254,7 +201,7 @@ def showip():
 
 
 @app.after_request
-def set_theme_cookie(response):
+def after_request(response: flask.Response):
     '''
     在响应中设置主题 cookie
     '''
@@ -363,9 +310,6 @@ def index():
                     current_theme=theme
                 )))
 
-    # 获取可用的主题列表
-    available_themes = get_available_themes()
-
     # 返回 html
     return flask.render_template(
         'index.html',
@@ -375,7 +319,7 @@ def index():
         last_updated=d.data['last_updated'],
         plugins=plugin_templates,
         current_theme=theme,
-        available_themes=available_themes
+        available_themes=u.themes_available
     ), 200
 
 
@@ -715,9 +659,6 @@ def admin_panel():
     # 获取主题
     theme = get_theme('panel.html')
 
-    # 获取可用的主题列表
-    available_themes = get_available_themes()
-
     # 获取插件注册的管理后台卡片
     plugin_admin_cards = p.get_admin_cards()
 
@@ -751,7 +692,7 @@ def admin_panel():
         c=c,
         d=d.data,
         current_theme=theme,
-        available_themes=available_themes,
+        available_themes=u.themes_available,
         plugin_admin_cards=rendered_cards
     ), 200
 
@@ -823,10 +764,7 @@ def logout():
     # 清除认证 cookie
     response.delete_cookie('sleepy-token')
 
-    # 不清除主题 cookie，保留用户的主题偏好
-    # response.delete_cookie('sleepy-theme')
-
-    u.debug('[Auth] Logout successful, cookie cleared')
+    u.debug('[Auth] Logout successful')
     return response
 
 
@@ -870,15 +808,16 @@ if c.metrics.enabled:
 # --- End
 
 if __name__ == '__main__':
-    u.info(f'=============== hi {c.page.name}! ===============')
+    u.info(f'=============== Hi {c.page.name}! ===============')
     u.info(f'Starting server: {f"[{c.main.host}]" if ":" in c.main.host else c.main.host}:{c.main.port}{" (debug enabled)" if c.main.debug else ""}')
     try:
         app.run(  # 启↗动↘
             host=c.main.host,
             port=c.main.port,
-            debug=c.main.debug,
+            debug=False,  # 此处禁用 Flask 提供的 debug 功能, 会导致代码执行两次
             threaded=True
         )
+
     except Exception as e:
         u.error(f"Error running server: {e}")
     print()

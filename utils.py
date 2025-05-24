@@ -1,21 +1,27 @@
 # coding: utf-8
+import os
 from datetime import datetime
 import json
+
 from flask import make_response, Response
 
 from config import Config
 import _utils
+
 
 class Utils:
     '''
     实用工具
     '''
 
+    c: Config
+
     def __init__(self, config: Config):
         '''
         :param config: 用户配置对象
         '''
         self.c = config
+        self._themes_available = sorted(_utils.list_dirs('theme', name_only=True))
 
     def info(self, *log):
         print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ℹ️  [Info]", *log)
@@ -59,9 +65,6 @@ class Utils:
         self.error(f'Response: {code} - {message}')
         return self.format_dict(ret)
 
-    def show_404(self) -> tuple[str, int]:
-        return '<!DOCTYPE HTML>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>', 404
-
     def exception(self, msg: str) -> _utils.SleepyException:
         '''
         抛出 SleepyException
@@ -69,3 +72,10 @@ class Utils:
         :param msg: 错误描述
         '''
         raise _utils.SleepyException(msg)
+
+    @property
+    def themes_available(self) -> list[str]:
+        if self.c.main.debug:
+            return sorted(_utils.list_dirs('theme', name_only=True))
+        else:
+            return self._themes_available
