@@ -1,16 +1,19 @@
 # coding: utf-8
 
 import os
-import pytz
-import json
-import json5
 import threading
 from time import sleep
 from datetime import datetime
+from logging import getLogger
 
-from utils import Utils
+import pytz
+import json
+import json5
+
+import utils as u
 from config import Config
-import _utils
+
+l = getLogger(__name__)
 
 
 class Data:
@@ -24,30 +27,28 @@ class Data:
     preload_data: dict
     data_check_interval: int = 60
     c: Config
-    u: Utils
 
-    def __init__(self, config: Config, utils: Utils):
+    def __init__(self, config: Config):
         self.c = config
-        self.u = utils
 
-        with open(_utils.get_path('data.example.jsonc'), 'r', encoding='utf-8') as file:
+        with open(u.get_path('data.example.jsonc'), 'r', encoding='utf-8') as file:
             self.preload_data = json5.load(file)
-        if os.path.exists(_utils.get_path('data/data.json')):
+        if os.path.exists(u.get_path('data/data.json')):
             try:
                 self.load()
             except Exception as e:
-                self.u.warning(f'Error when loading data: {e}, try re-create')
-                os.remove(_utils.get_path('data/data.json'))
+                l.warning(f'Error when loading data: {e}, try re-create')
+                os.remove(u.get_path('data/data.json'))
                 self.data = self.preload_data
                 self.save()
                 self.load()
         else:
-            self.u.info('Could not find data/data.json, creating.')
+            l.info('Could not find data/data.json, creating.')
             try:
                 self.data = self.preload_data
                 self.save()
             except Exception as e:
-                self.u.exception(f'Create data/data.json failed: {e}')
+                u.exception(f'Create data/data.json failed: {e}')
 
     # --- Storage functions
 
@@ -64,11 +65,11 @@ class Data:
 
         while attempts > 0:
             try:
-                if not os.path.exists(_utils.get_path('data/data.json')):
-                    self.u.warning('data/data.json not exist, try re-create')
+                if not os.path.exists(u.get_path('data/data.json')):
+                    l.warning('data/data.json not exist, try re-create')
                     self.data = self.preload_data
                     self.save()
-                with open(_utils.get_path('data/data.json'), 'r', encoding='utf-8') as file:
+                with open(u.get_path('data/data.json'), 'r', encoding='utf-8') as file:
                     Data = json.load(file)
                     DATA: dict = {**preload, **Data}
                     if ret:
@@ -79,9 +80,9 @@ class Data:
             except Exception as e:
                 attempts -= 1
                 if attempts > 0:
-                    self.u.warning(f'Load data error: {e}, retrying ({attempts} attempts left)')
+                    l.warning(f'Load data error: {e}, retrying ({attempts} attempts left)')
                 else:
-                    self.u.error(f'Load data error: {e}, reached max retry count!')
+                    l.error(f'Load data error: {e}, reached max retry count!')
                     raise
 
     def save(self):
@@ -89,10 +90,10 @@ class Data:
         保存配置
         '''
         try:
-            with open(_utils.get_path('data/data.json'), 'w', encoding='utf-8') as file:
+            with open(u.get_path('data/data.json'), 'w', encoding='utf-8') as file:
                 json.dump(self.data, file, indent=4, ensure_ascii=False)
         except Exception as e:
-            self.u.error(f'Failed to save data/data.json: {e}')
+            l.error(f'Failed to save data/data.json: {e}')
 
     # --- Metrics
 
@@ -100,7 +101,7 @@ class Data:
         try:
             self.data['metrics']
         except KeyError:
-            self.u.debug('[metrics] Metrics data init')
+            l.debug('[metrics] Metrics data init')
             self.data['metrics'] = {
                 'today_is': '',
                 'month_is': '',
@@ -130,7 +131,7 @@ class Data:
             }
         else:
         '''
-        return self.u.format_dict({
+        return u.format_dict({
             'time': f'{now}',
             'timezone': self.c.main.timezone,
             'today_is': self.data['metrics']['today_is'],
@@ -157,17 +158,17 @@ class Data:
 
         # - check time
         if self.data['metrics']['today_is'] != today_is:
-            self.u.debug(f'[metrics] today_is changed: {self.data["metrics"]["today_is"]} -> {today_is}')
+            l.debug(f'[metrics] today_is changed: {self.data["metrics"]["today_is"]} -> {today_is}')
             self.data['metrics']['today_is'] = today_is
             self.data['metrics']['today'] = {}
         # this month
         if self.data['metrics']['month_is'] != month_is:
-            self.u.debug(f'[metrics] month_is changed: {self.data["metrics"]["month_is"]} -> {month_is}')
+            l.debug(f'[metrics] month_is changed: {self.data["metrics"]["month_is"]} -> {month_is}')
             self.data['metrics']['month_is'] = month_is
             self.data['metrics']['month'] = {}
         # this year
         if self.data['metrics']['year_is'] != year_is:
-            self.u.debug(f'[metrics] year_is changed: {self.data["metrics"]["year_is"]} -> {year_is}')
+            l.debug(f'[metrics] year_is changed: {self.data["metrics"]["year_is"]} -> {year_is}')
             self.data['metrics']['year_is'] = year_is
             self.data['metrics']['year'] = {}
 
@@ -207,11 +208,9 @@ class Data:
         self.timer_thread = threading.Thread(target=self.timer_check, daemon=True)
         self.timer_thread.start()
 
-    def check_device_status(self, trigged_by_timer: bool = False):
+    def check_device_status(self):
         '''
         按情况自动切换状态
-
-        :param trigged_by_timer: 是否由计时器触发 (为 True 将不记录日志)
         '''
         device_status: dict = self.data.get('device_status', {})
         current_status: int = self.data.get('status', 0)  # 获取当前 status，默认为 0
@@ -227,11 +226,11 @@ class Data:
                 else:
                     self.data['status'] = 1
                 if last_status != self.data['status']:
-                    self.u.debug(f'[check_device_status] 已自动切换状态 ({last_status} -> {self.data["status"]}).')
-                elif not trigged_by_timer:
-                    self.u.debug(f'[check_device_status] 当前状态已为 {current_status}, 无需切换.')
-            elif not trigged_by_timer:
-                self.u.debug(f'[check_device_status] 当前状态为 {current_status}, 不适用自动切换.')
+                    l.debug(f'[check_device_status] 已自动切换状态 ({last_status} -> {self.data["status"]}).')
+                else:
+                    l.debug(f'[check_device_status] 当前状态已为 {current_status}, 无需切换.')
+            else:
+                l.debug(f'[check_device_status] 当前状态为 {current_status}, 不适用自动切换.')
 
     def timer_check(self):
         '''
@@ -239,17 +238,20 @@ class Data:
         * 根据 `data_check_interval` 参数调整 sleep() 的秒数
         * 需要使用 threading 启动新线程运行
         '''
-        self.u.info(f'[timer_check] started, interval: {self.data_check_interval} seconds.')
+        l.info(f'[timer_check] started, interval: {self.data_check_interval} seconds.')
         while True:
             sleep(self.data_check_interval)
             try:
                 self.check_metrics_time()  # 检测是否跨日
-                self.check_device_status(trigged_by_timer=True)  # 检测设备状态并更新 status
+                self.check_device_status()  # 检测设备状态并更新 status
                 file_data = self.load(ret=True)
-                if file_data != self.data:
+                if file_data == self.data:
+                    l.debug('[timer_check] data not changed, skip saving.')
+                else:
                     self.save()
+                    l.debug('[timer_check] data changed, saved to disk.')
             except Exception as e:
-                self.u.warning(f'[timer_check] Error: {e}, retrying.')
+                l.warning(f'[timer_check] saving error: {e}, retrying.')
 
     # --- check device heartbeat
     # TODO

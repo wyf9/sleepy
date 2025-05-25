@@ -2,17 +2,19 @@
 
 import os
 import importlib
-import inspect
-import yaml
 import functools
-from typing import Dict, List, Callable, Any, Optional, Union, Tuple
+from typing import Dict, List, Callable, Any, Tuple
+from logging import getLogger
+from flask import Flask
+
+import yaml
 
 from config import Config
-from utils import Utils
+import utils as u
 from data import Data
-from _utils import get_path, SleepyException
 
 # 全局变量，用于存储插件注册的路由和事件处理器
+l = getLogger(__name__)
 _plugin_routes: Dict[str, Dict[str, Callable]] = {}  # 插件命名空间下的路由
 _plugin_global_routes: Dict[str, Dict[str, Callable]] = {}  # 全局路由
 _plugin_event_handlers: Dict[str, List[Tuple[str, Callable]]] = {}
@@ -123,6 +125,7 @@ def admin_card(title: str, order: int = 100):
 
     return decorator
 
+
 def on_event(event_name: str):
     """
     装饰器：注册事件处理器
@@ -179,23 +182,20 @@ class PluginClass:
     name: str
     example_config: dict
     user_config: Config
-    u: Utils
     d: Data
 
-    def __init__(self, name: str, example_config: dict, user_config: Config, utils: Utils, data: Data):
+    def __init__(self, name: str, example_config: dict, user_config: Config, data: Data):
         '''
         初始化一项插件的所需资源 (?)
 
         :param namespace: 插件 id
         :param example_config: **(插件的)** 示例配置
         :param user_config: **(全局的)** 用户配置
-        :param utils: 实用功能 (`utils.Utils`)
         :param data: 用户数据 (`data.Data`)
         '''
         self.name = name
         self.example_config = example_config
         self.user_config = user_config
-        self.u = utils
         self.d = data
 
     def getconf(self, *key: str):
@@ -219,7 +219,7 @@ class PluginClass:
                 value = value[k]
             return value
         except KeyError:
-            raise SleepyException(f'Plugin config not found in plugin/{self.name}/plugin.yaml!')
+            raise u.SleepyException(f'Plugin config not found in plugin/{self.name}/plugin.yaml!')
 
     @property
     def config(self):
@@ -238,7 +238,11 @@ class Plugin:
     # 存储已注册的管理后台卡片
     admin_cards = []
 
-    def __init__(self, config: Config, utils: Utils, data: Data, app=None):
+    c: Config
+    d: Data
+    app: Flask
+
+    def __init__(self, config: Config, data: Data, app=None):
         '''
         初始化插件功能，包括验证插件可用性
 
@@ -248,34 +252,33 @@ class Plugin:
         :param app: Flask应用实例，用于注册路由
         '''
         self.c = config
-        self.u = utils
         self.d = data
         self.app = app
 
         # 检查目录是否存在 (以及是否有插件定义 (plugin.yaml))
         if self.c.plugin_enabled:
             for i in self.c.plugin_enabled:
-                plugin_path = get_path(f'plugin/{i}/plugin.yaml')
+                plugin_path = u.get_path(f'plugin/{i}/plugin.yaml')
                 if os.path.exists(plugin_path) and os.path.isfile(plugin_path):
                     pass
                 else:
-                    self.u.exception(f'Plugin not exist: {i}')
+                    u.exception(f'Plugin not exist: {i}')
 
         # 加载插件配置
         if self.c.plugin_enabled:
             for i in self.c.plugin_enabled:
                 # 加载单个插件配置
-                with open(get_path(f'plugin/{i}/plugin.yaml'), 'r', encoding='utf-8') as f:
+                with open(u.get_path(f'plugin/{i}/plugin.yaml'), 'r', encoding='utf-8') as f:
                     plugin: dict = yaml.safe_load(f)
                     f.close()
 
                 is_frontend = plugin.get('frontend', False)
                 is_backend = plugin.get('backend', False)
-                self.u.debug(f'initing plugin, name: {i}, frontend: {is_frontend}, backend: {is_backend}')
+                l.debug(f'initing plugin, name: {i}, frontend: {is_frontend}, backend: {is_backend}')
 
                 # 加载前端代码 (index.html)
                 if is_frontend:
-                    with open(get_path(f'plugin/{i}/index.html'), 'r', encoding='utf-8') as ff:
+                    with open(u.get_path(f'plugin/{i}/index.html'), 'r', encoding='utf-8') as ff:
                         plugin_frontend = ff.read()
                         ff.close()
                 else:
@@ -293,23 +296,22 @@ class Plugin:
                                 name=i,
                                 example_config=plugin.get('config', {}),
                                 user_config=self.c,
-                                utils=self.u,
                                 data=self.d
                             )
 
                             # 调用插件的初始化函数
                             try:
                                 plugin_backend.init_plugin(plugin_config)
-                                self.u.info(f"Plugin '{i}' initialized successfully")
+                                l.info(f"Plugin '{i}' initialized successfully")
                             except Exception as e:
-                                self.u.error(f"Error initializing plugin '{i}': {e}")
+                                l.error(f"Error initializing plugin '{i}': {e}")
 
                         # 注册插件路由
                         if self.app and i in _plugin_routes:
                             self._register_plugin_routes(i)
 
                     except Exception as e:
-                        self.u.error(f"Error loading plugin '{i}': {e}")
+                        l.error(f"Error loading plugin '{i}': {e}")
                         plugin_backend = None
 
                 # 加载配置
@@ -317,7 +319,6 @@ class Plugin:
                     name=i,
                     example_config=plugin.get('config', {}),
                     user_config=self.c,
-                    utils=self.u,
                     data=self.d
                 )
 
@@ -330,7 +331,7 @@ class Plugin:
         # 触发应用启动事件
         trigger_event('app_started', self)
 
-        self.u.info(f'plugins enabled: {", ".join(self.c.plugin_enabled)}' if self.c.plugin_enabled else 'no plugin enabled.')
+        l.info(f'plugins enabled: {", ".join(self.c.plugin_enabled)}' if self.c.plugin_enabled else 'no plugin enabled.')
 
     def _register_plugin_routes(self, plugin_name):
         """
@@ -357,7 +358,7 @@ class Plugin:
                     'type': 'namespace'
                 })
 
-                self.u.info(f"Registered route '{full_rule}' for plugin '{plugin_name}'")
+                l.info(f"Registered route '{full_rule}' for plugin '{plugin_name}'")
 
         # 注册全局路由
         if plugin_name in _plugin_global_routes:
@@ -378,7 +379,7 @@ class Plugin:
                     'type': 'global'
                 })
 
-                self.u.info(f"Registered global route '{full_rule}' for plugin '{plugin_name}'")
+                l.info(f"Registered global route '{full_rule}' for plugin '{plugin_name}'")
 
     def _register_admin_cards(self):
         """
@@ -417,9 +418,9 @@ class Plugin:
                                 'content': content
                             })
 
-                            self.u.info(f"Registered admin card '{card_info['title']}' for plugin '{plugin_name}'")
+                            l.info(f"Registered admin card '{card_info['title']}' for plugin '{plugin_name}'")
                         except Exception as e:
-                            self.u.error(f"Error registering admin card for plugin '{plugin_name}': {e}")
+                            l.error(f"Error registering admin card for plugin '{plugin_name}': {e}")
 
         # 按顺序排序卡片
         if self.admin_cards:

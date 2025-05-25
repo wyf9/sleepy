@@ -1,6 +1,12 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import logging
+from functools import wraps
+from datetime import datetime
+import os
+import time
+
 # show welcome text
 print(f'''
 Welcome to Sleepy 2025!
@@ -10,13 +16,8 @@ Feature Request: https://wyf9.top/t/sleepy/feature
 Security Report: https://wyf9.top/t/sleepy/security
 '''[1:])
 
-# import modules
+# import not built-in moduls
 try:
-    import time
-    import os
-    from datetime import datetime
-    from functools import wraps
-
     import flask
     import json5
     import pytz
@@ -24,10 +25,9 @@ try:
     from jinja2 import FileSystemLoader, ChoiceLoader
 
     from config import Config as config_init
-    from utils import Utils as utils_init
+    import utils as u
     from data import Data as data_init
     from plugin import Plugin as plugin_init
-    import _utils
 except:
     print(f'''
 Import module Failed!
@@ -61,31 +61,49 @@ class ThemeLoader(ChoiceLoader):
 
 try:
     # init flask app
-    app = flask.Flask(__name__,
-                      template_folder='theme/default',
-                      static_folder=None)
+    app = flask.Flask(
+        __name__,
+        template_folder='theme/default',
+        static_folder=None
+    )
 
     # init config
     c = config_init()
+
+    # init logger
+    l = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
+    root_logger = logging.getLogger()
+    root_logger.level = logging.DEBUG if c.main.debug else logging.INFO  # set log level
+    root_logger.handlers.clear()  # clear default handler
+    # set stream handler
+    shandler = logging.StreamHandler()
+    shandler.setFormatter(u.CustomFormatter(show_symbol=True))
+    root_logger.addHandler(shandler)
+    # set file handler
+    if c.main.log_file:
+        log_file_path = u.get_path(c.main.log_file)
+        l.info(f'Saving logs to {log_file_path}')
+        fhandler = logging.FileHandler(log_file_path, encoding='utf-8', errors='ignore')
+        fhandler.setFormatter(u.CustomFormatter(show_symbol=False))
+        root_logger.addHandler(fhandler)
+
+    l.info(f'{"="*15} Application Starting Up {"="*15}')
 
     if c.main.debug:
         # debug: disable template cache
         app.config['TEMPLATES_AUTO_RELOAD'] = True
         app.jinja_env.auto_reload = True
         app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-    else:
-        # not debug: disable flask access log
-        from logging import getLogger
-        flask_default_logger = getLogger('werkzeug')
-        flask_default_logger.disabled = True
 
-    # init utils
-    u = utils_init(config=c)
+    # disable flask access log
+    logging.getLogger('werkzeug').disabled = True
+    from flask import cli
+    cli.show_server_banner = lambda *_: None
 
     # init data
     d = data_init(
-        config=c,
-        utils=u
+        config=c
     )
     d.load()
     d.start_timer_check(data_check_interval=c.main.checkdata_interval)  # 启动定时保存 data
@@ -93,26 +111,24 @@ try:
     # init metrics if enabled
     if c.metrics.enabled:
         d.metrics_init()
-        u.info('[metrics] metrics enabled, open /metrics to see the count.')
+        l.info('[metrics] metrics enabled, open /metrics to see the count.')
 
     # init plugin
     p = plugin_init(
         config=c,
-        utils=u,
         data=d,
         app=app
     )
 
 except KeyboardInterrupt:
-    u.info('Interrupt init, quitting')
+    l.info('Interrupt init, quitting')
     exit(0)
-except _utils.SleepyException as e:
-    u.error(e)
+except u.SleepyException as e:
+    l.error(e)
     exit(1)
 except:
-    u.error('Unexpected Error!')
+    l.error('Unexpected Error!')
     raise
-
 
 # --- Functions
 
@@ -130,9 +146,9 @@ def get_theme(template_name=None):
     # 检查主题目录是否存在，如果不存在则使用默认主题
     if not os.path.exists(os.path.join('theme', theme)):
         if template_name:
-            u.warning(f"Theme directory {theme} not found for {template_name}, using default theme")
+            l.warning(f"Theme directory {theme} not found for {template_name}, using default theme")
         else:
-            u.warning(f"Theme directory {theme} not found, using default theme")
+            l.warning(f"Theme directory {theme} not found, using default theme")
         theme = getattr(c.page, 'theme', 'default')
         if not os.path.exists(os.path.join('theme', theme)):
             theme = 'default'
@@ -165,7 +181,7 @@ def static_proxy(filename):
     # 如果当前主题中不存在，fallback 到默认主题
     default_path = os.path.join('theme', 'default', 'static', filename)
     if os.path.exists(default_path):
-        u.debug(f'Static file {filename} not found in theme {theme}, using default theme\'s file')
+        l.debug(f'Static file {filename} not found in theme {theme}, using default theme\'s file')
         response = flask.send_from_directory('theme/default/static', filename)
         # 设置缓存控制头，防止浏览器缓存
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -174,7 +190,7 @@ def static_proxy(filename):
         return response
 
     # 如果默认主题中也不存在，返回 404
-    u.warning(f'Static file {filename} not found in any theme')
+    l.warning(f'Static file {filename} not found in any theme')
     return flask.abort(404)
 
 
@@ -192,9 +208,9 @@ def before_request():
     ip1 = flask.request.remote_addr
     ip2 = flask.request.headers.get('X-Forwarded-For')
     if ip2:
-        u.info(f'- Request: {ip1} / {ip2} : {path}')
+        l.info(f'- Request: {ip1} / {ip2} : {path}')
     else:
-        u.info(f'- Request: {ip1} : {path}')
+        l.info(f'- Request: {ip1} : {path}')
     # --- count
     if c.metrics.enabled:
         d.record_metrics(path)
@@ -229,36 +245,36 @@ def require_secret(view_func):
         # -> {"secret": "my-secret"}
         body: dict = flask.request.get_json(silent=True) or {}
         if body and body.get('secret') == c.main.secret:
-            u.debug('[Auth] Verify secret Success from Body')
+            l.debug('[Auth] Verify secret Success from Body')
             return view_func(*args, **kwargs)
 
         # 2. param
         # -> ?secret=my-secret
         elif flask.request.args.get('secret') == c.main.secret:
-            u.debug('[Auth] Verify secret Success from Param')
+            l.debug('[Auth] Verify secret Success from Param')
             return view_func(*args, **kwargs)
 
         # 3. header (Sleepy-Secret)
         # -> Sleepy-Secret: my-secret
         elif flask.request.headers.get('Sleepy-Secret') == c.main.secret:
-            u.debug('[Auth] Verify secret Success from Header (Sleepy-Secret)')
+            l.debug('[Auth] Verify secret Success from Header (Sleepy-Secret)')
             return view_func(*args, **kwargs)
 
         # 4. header (Authorization)
         # -> Authorization: Bearer my-secret
         elif flask.request.headers.get('Authorization', '')[7:] == c.main.secret:
-            u.debug('[Auth] Verify secret Success from Header (Authorization)')
+            l.debug('[Auth] Verify secret Success from Header (Authorization)')
             return view_func(*args, **kwargs)
 
         # 5. cookie (sleepy-token)
         # -> Cookie: sleepy-token=my-secret
         elif flask.request.cookies.get('sleepy-token') == c.main.secret:
-            u.debug('[Auth] Verify secret Success from Cookie (sleepy-token)')
+            l.debug('[Auth] Verify secret Success from Cookie (sleepy-token)')
             return view_func(*args, **kwargs)
 
         # -1. no any secret
         else:
-            u.debug('[Auth] Verify secret Failed')
+            l.debug('[Auth] Verify secret Failed')
             return u.reterr(
                 code='not authorized',
                 message='wrong secret'
@@ -278,7 +294,7 @@ def index():
     try:
         status: dict = c.status.status_list[d.data['status']]
     except:
-        u.warning(f"Index {d.data['status']} out of range!")
+        l.warning(f"Index {d.data['status']} out of range!")
         status = {
             'name': 'Unknown',
             'desc': '未知的标识符，可能是配置问题。',
@@ -319,7 +335,7 @@ def index():
         last_updated=d.data['last_updated'],
         plugins=plugin_templates,
         current_theme=theme,
-        available_themes=u.themes_available
+        available_themes=u.themes_available()
     ), 200
 
 
@@ -460,7 +476,7 @@ def device_set():
         try:
             device_id = escape(flask.request.args.get('id'))
             device_show_name = escape(flask.request.args.get('show_name'))
-            device_using = _utils.tobool(escape(flask.request.args.get('using')), throw=True)
+            device_using = u.tobool(escape(flask.request.args.get('using')), throw=True)
             app_name = escape(flask.request.args.get('app_name'))
         except:
             return u.reterr(
@@ -472,7 +488,7 @@ def device_set():
         try:
             device_id = req['id']
             device_show_name = req['show_name']
-            device_using = _utils.tobool(req['using'], throw=True)
+            device_using = u.tobool(req['using'], throw=True)
             app_name = req['app_name']
         except:
             return u.reterr(
@@ -561,7 +577,7 @@ def private_mode():
     隐私模式, 即不在返回中显示设备状态 (仍可正常更新)
     - Method: **GET**
     '''
-    private = _utils.tobool(escape(flask.request.args.get('private')))
+    private = u.tobool(escape(flask.request.args.get('private')))
     if private == None:
         return u.reterr(
             code='invaild request',
@@ -685,14 +701,14 @@ def admin_panel():
                 'content': card_content
             })
         except Exception as e:
-            u.error(f"Error rendering admin card '{card['title']}' for plugin '{card['plugin_name']}': {e}")
+            l.error(f"Error rendering admin card '{card['title']}' for plugin '{card['plugin_name']}': {e}")
 
     return flask.render_template(
         'panel.html',
         c=c,
         d=d.data,
         current_theme=theme,
-        available_themes=u.themes_available,
+        available_themes=u.themes_available(),
         plugin_admin_cards=rendered_cards
     ), 200
 
@@ -742,10 +758,10 @@ def auth():
         max_age = 30 * 24 * 60 * 60  # 30 days in seconds
         response.set_cookie('sleepy-token', secret, max_age=max_age, httponly=True, samesite='Lax')
 
-        u.debug('[Auth] Login successful, cookie set')
+        l.debug('[Auth] Login successful, cookie set')
         return response, 200
     else:
-        u.debug('[Auth] Login failed, wrong secret')
+        l.debug('[Auth] Login failed, wrong secret')
         return u.reterr(
             code='not authorized',
             message='wrong secret'
@@ -764,7 +780,7 @@ def logout():
     # 清除认证 cookie
     response.delete_cookie('sleepy-token')
 
-    u.debug('[Auth] Logout successful')
+    l.debug('[Auth] Logout successful')
     return response
 
 
@@ -775,7 +791,7 @@ def api_login():
     API登录接口，验证密钥并返回成功
     - Method: **GET / POST**
     '''
-    u.debug('[API] Secret verified')
+    l.debug('[API] Secret verified')
     return u.format_dict({
         'success': True,
         'code': 'OK',
@@ -808,19 +824,25 @@ if c.metrics.enabled:
 # --- End
 
 if __name__ == '__main__':
-    u.info(f'=============== Hi {c.page.name}! ===============')
-    u.info(f'Starting server: {f"[{c.main.host}]" if ":" in c.main.host else c.main.host}:{c.main.port}{" (debug enabled)" if c.main.debug else ""}')
+    l.info(f'{"-"*15} Hi {c.page.name}! {"-"*15}')
+    l.info(f'Listening service on: {f"[{c.main.host}]" if ":" in c.main.host else c.main.host}:{c.main.port}{" (debug enabled)" if c.main.debug else ""}')
     try:
         app.run(  # 启↗动↘
             host=c.main.host,
             port=c.main.port,
-            debug=False,  # 此处禁用 Flask 提供的 debug 功能, 会导致代码执行两次
+            debug=c.main.debug,
+            use_reloader=False,
             threaded=True
         )
 
     except Exception as e:
-        u.error(f"Error running server: {e}")
-    print()
-    u.info('Server exited, saving data...')
-    d.save()
-    u.info('Bye.')
+        l.error(f"Error running server: {e}")
+        l.info('Saving data before raise...')
+        d.save()
+        l.info('(data saved) Error Stack below:')
+        raise
+    else:
+        print()
+        l.info('Server exited, saving data...')
+        d.save()
+        l.info('Bye.')

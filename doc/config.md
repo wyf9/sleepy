@@ -67,6 +67,7 @@ sleepy_main_debug = false
 | `main.host`               | str  | 服务的监听地址，如需同时监听 IPv6 地址需改为 `::`                                                             |
 | `main.port`               | int  | 服务的监听端口 _(0-65535)_                                                                                    |
 | `main.debug`              | bool | 控制是否开启 Flask 的调试模式 (一般无需开启) _(开启后可自动重载代码)_                                         |
+| `main.log_file`           | str  | 日志文件路径 (建议: `./data/running.log`), 留空禁用保存日志 **(注意: 不会切割日志, 请注意日志文件大小!)**                                  |
 | `main.timezone`           | str  | 控制 **API 返回中 / 网页上**显示时间的时区，一般无需更改 _(`Asia/Shanghai` 或 `Asia/Chongqing` 均为北京时间)_ |
 | `main.checkdata_interval` | int  | 控制多久检查一次状态数据的更新 **(秒)** (_检测到更新后会写入 `data.json`，供下次启动时恢复状态_)              |
 | `main.secret`             | str  | 密钥 (相当于密码，用于防止未授权设置状态)，**客户端须使用相同的密钥**                                         |

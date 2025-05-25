@@ -1,15 +1,18 @@
 # coding: utf-8
 import os
+from logging import getLogger
 
 from dotenv import load_dotenv
 import yaml
 import toml
 
-from _utils import tobool, get_path, SleepyException, list_dirs
+import utils as u
+
+l = getLogger(__name__)
 
 # ===== prepare env =====
 
-load_dotenv(dotenv_path=get_path('.env'))
+load_dotenv(dotenv_path=u.get_path('.env'))
 
 
 def getenv(key: str, typeobj) -> ...:
@@ -25,7 +28,7 @@ def getenv(key: str, typeobj) -> ...:
         raise KeyError
     else:
         if typeobj == bool:
-            return tobool(got_value, throw=True)
+            return u.tobool(got_value, throw=True)
         elif typeobj == object:
             return got_value
         else:
@@ -40,33 +43,33 @@ default_config = {}
 
 # 检查用户配置文件
 try:
-    if os.path.exists(get_path('data/config.yaml')):
+    if os.path.exists(u.get_path('data/config.yaml')):
         # 首先尝试加载 YAML 用户配置
-        with open(get_path('data/config.yaml'), 'r', encoding='utf-8') as f:
+        with open(u.get_path('data/config.yaml'), 'r', encoding='utf-8') as f:
             user_config = yaml.safe_load(f)
             f.close()
-    elif os.path.exists(get_path('data/config.toml')):
+    elif os.path.exists(u.get_path('data/config.toml')):
         # 如果 YAML 不存在，尝试加载 TOML 用户配置
-        with open(get_path('data/config.toml'), 'r', encoding='utf-8') as f:
+        with open(u.get_path('data/config.toml'), 'r', encoding='utf-8') as f:
             user_config = toml.load(f)
             f.close()
     else:
         # 如还是没有则使用默认配置
         user_config = {}
 except Exception as e:
-    u.warning(f'Error loading user config: {e}')
+    l.warning(f'Error loading user config: {e}')
     user_config = {}
 
 # 加载默认配置
 try:
-    if os.path.exists(get_path('config.default.yaml')):
-        with open(get_path('config.default.yaml'), 'r', encoding='utf-8') as f:
+    if os.path.exists(u.get_path('config.default.yaml')):
+        with open(u.get_path('config.default.yaml'), 'r', encoding='utf-8') as f:
             default_config = yaml.safe_load(f)
             f.close()
     else:
-        raise SleepyException('No default config file found! Please make sure config.default.yaml exists.')
+        raise u.SleepyException('No default config file found! Please make sure config.default.yaml exists.')
 except Exception as e:
-    raise SleepyException(f'Error loading default config: {e}')
+    raise u.SleepyException(f'Error loading default config: {e}')
 
 
 def get(_type, *key: str) -> ...:
@@ -83,7 +86,8 @@ def get(_type, *key: str) -> ...:
         value = user_config
         for k in key:
             value = value[k]
-        assert isinstance(value, _type), SleepyException(f'Invaild config {".".join(key)} from config file, it should be a(n) {_type.__name__} object.')  # verify config type
+        assert isinstance(value, _type), u.SleepyException(
+            f'Invaild config {".".join(key)} from config file!{"" if _type == object else f" it should be a(n) {_type.__name__} object."}')  # verify config type
         return value
     except KeyError:
         pass
@@ -97,7 +101,7 @@ def get(_type, *key: str) -> ...:
     except KeyError:
         pass
     except ValueError:
-        raise SleepyException(f'Invaild config {envname} from environment or .env!{"" if _type == object else f" it should be a(n) {_type.__name__} object."}')
+        raise u.SleepyException(f'Invaild config {envname} from environment or .env!{"" if _type == object else f" it should be a(n) {_type.__name__} object."}')
 
     # 3. from default config
     try:
@@ -106,7 +110,7 @@ def get(_type, *key: str) -> ...:
             value = value[k]
         return value
     except KeyError:
-        raise SleepyException(f'Config {envname} (should be a(n) {_type.__name__}) not found in default config file!')
+        raise u.SleepyException(f'Config {envname}{"" if _type == object else f" (should be a(n) {_type.__name__})"} not found in default config file!')
 
 # ===== system config =====
 
@@ -124,6 +128,7 @@ class Config:
         host: str = get(str, _, 'host')
         port: int = get(int, _, 'port')
         debug: bool = get(bool, _, 'debug')
+        log_file: str = get(str, _, 'log_file')
         timezone: str = get(str, _, 'timezone')
         checkdata_interval: int = get(int, _, 'checkdata_interval')
         secret: str = get(str, _, 'secret')
@@ -189,9 +194,9 @@ class Config:
     # metrics_list 中 [static] 处理
     if '[static]' in metrics.allow_list:
         metrics.allow_list.remove('[static]')
-        static_list = list_dirs(get_path('static/'))
+        static_list = u.list_dirs(u.get_path('static/'))
         metrics.allow_list.extend(['/static/' + i for i in static_list])
 
     # ===== plugin config =====
-    plugin_enabled: list[str] = get(list, 'plugin_enabled')
-    plugin: dict[str, dict] = get(dict, 'plugin')
+    plugin_enabled: list[str] = get(list, 'plugin_enabled') or []
+    plugin: dict[str, dict] = get(dict, 'plugin') or {}
