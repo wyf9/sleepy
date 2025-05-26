@@ -41,7 +41,9 @@ Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top) ![
 
 ## Client
 
-如果你想直接开始使用，可在 **[`/client`](./client/README.md)** 找到客户端 (用于**手动更新状态**/**自动更新设备打开应用**)
+搭建完服务端后，你可在 **[`/client`](./client/README.md)** 找到客户端 (用于**手动更新状态**/**自动更新设备打开应用**)
+
+分类:[Windows](./client/README.md#Windows) [Android](./client/README.md#Android) [Linux](./client/README.md#Linux) [命令行](./client/README.md#CLI) [其它](./client/README.md#Others)
 
 ## API
 
