@@ -3,84 +3,33 @@
 此目录存储客户端 (用于更新状态/设备状态)
 
 - [/client](#client)
-  - [CMDConsole](#cmdconsole)
-    - [配置](#配置)
-    - [使用](#使用)
-  - [CmdConsoleMulti](#cmdconsolemulti)
-    - [配置](#配置-1)
-    - [使用](#使用-1)
+- [Windows](#Windows)
   - [WinDevice](#windevice)
-    - [配置](#配置-2)
-    - [自启动](#自启动)
-      - [1. PM2](#1-pm2)
-      - [2. 自启脚本](#2-自启脚本)
-    - [无法获取网易云媒体信息](#无法获取网易云媒体信息)
+  - [Win_Simple](#win_simple)
+- [Android](#Android)
   - [AutoxjsScript](#autoxjsscript)
-    - [配置](#配置-3)
-    - [使用](#使用-2)
-    - [安卓低版本运行](#安卓低版本运行)
-  - [BrowserScript](#browserscript)
-    - [配置](#配置-4)
-  - [HomeworkDevice](#homeworkdevice)
-    - [配置](#配置-5)
-    - [使用](#使用-3)
-  - [MinecraftScript](#minecraftscript)
-    - [Minescript](#minescript)
-    - [配置](#配置-6)
-    - [使用](#使用-4)
-    - [自启](#自启)
-  - [LinuxScriptKDE](#linuxscriptkde)
-    - [配置](#配置-7)
-    - [使用](#使用-5)
-  - [LinuxScriptHyprland](#linuxscripthyprland)
-    - [配置](#配置-8)
-    - [使用](#使用-6)
   - [MagiskService](#magiskservice)
-    - [配置](#配置-9)
-    - [使用](#使用-7)
-  - [Win\_Simple](#win_simple)
-    - [配置](#配置-10)
-    - [使用](#使用-8)
+- [Linux](#Linux)
+  - [LinuxScriptKDE](#linuxscriptkde)
+  - [LinuxScriptHyprland](#linuxscripthyprland)
+- [MacOS](#MacOS)
   - [AppleShortcuts](#appleshortcuts)
-    - [FullVer](#fullver)
-    - [FastVer](#fastver)
+- [命令行](#CLI)
+  - [CMDConsole](#cmdconsole)
+  - [CmdConsoleMulti](#cmdconsolemulti)
+- [其他](#Others)
+  - [MinecraftScript](#minecraftscript)
+  - [BrowserScript](#browserscript)
+  - [HomeworkDevice](#homeworkdevice)
   - [Zhixuewang](#zhixuewang)
-    - [配置](#配置-11)
-    - [使用](#使用-9)
   - [Other repos](#other-repos)
 
 > [!TIP]
 > 欢迎提交 Issue / PR 贡献自己的脚本！
 
-## [CMDConsole](./cmd_console.py)
 
-> by: [@wyf9](https://github.com/wyf9)
 
-一个简单的命令行客户端，用于手动更新状态
-
-依赖: `requests`
-
-### 配置
-
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console.py#L14-L21
-
-### 使用
-
-启动脚本, 按照提示操作即可
-
-## [CmdConsoleMulti](./cmd_console_multi.py)
-
-> by: [@wyf9](https://github.com/wyf9)
-
-[CMDConsole](#cmdconsole) 的旧版本 (可选择多个服务)
-
-### 配置
-
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console_multi.py#L14-L23
-
-### 使用
-
-同上, 多了一步选择服务
+# Windows
 
 ## [WinDevice](./win_device.py)
 
@@ -91,11 +40,23 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 在 Windows 上自动更新设备状态
 
-依赖: `requests`, `pywin32`
-
 ### 配置
 
 https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/client/win_device.py#L28-L70
+
+### 依赖安装
+
+```基础安装
+pip install pywin32 requests
+```
+
+```媒体监听-Python≤3.9
+pip install pywin32 requests winrt
+```
+
+```媒体监听-Python≤3.9
+pip install pywin32 requests winrt.windows.media.control winrt.windows.foundation
+```
 
 ### 自启动
 
@@ -128,6 +89,28 @@ https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/cli
 
 **解决方法**: 安装 [BetterNCM](https://github.com/std-microblock/BetterNCM)，并安装 `InfLink` 插件，启用其中的 `SMTC` 功能即可正常获取
 
+## [Win_Simple](./Win_Simple/dist/Win_Simple.exe)
+
+> by: [@kmizmal](https://github.com/kmizmal) <br/>
+> Source: [`./Win_Simple/script.py`](./Win_Simple/script.py)
+
+### 配置
+
+配置文件 (首次打开自动在同级目录下创建): `config.ini`
+> `config.ini`里面注释写的很详细了，不再提供示例
+
+### 使用
+
+下载后双击 `Win_Simple.exe` 初始化配置文件，然后在同级目录下的 `config.ini` 中填写配置
+
+> [!TIP]
+> 如何开机自启? <br/>
+> 创建一个 `Win_Simple.exe` 的快捷方式，然后扔到 `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup` 下即可
+
+
+
+# Android
+
 ## [AutoxjsScript](./autoxjs_device.js)
 
 > by: [@wyf9](https://github.com/wyf9) <br/>
@@ -141,6 +124,10 @@ https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/cli
 > 可自行寻找 [Auto.js](https://github.com/hyb1996/Auto.js) 的其他分支 **(可能需要作一些修改以兼容)**
 
 在使用前，请确保**已安装** Autox.js *且*授予**无障碍权限**
+
+### 软件下载
+
+[aiselp/AutoX Release](https://github.com/aiselp/AutoX/releases)
 
 ### 配置
 
@@ -180,6 +167,183 @@ console.log('[sleepyc] ' + msg);
 ```
 
 </details>
+
+## [MagiskService](./magisk/service.sh)
+
+> by: [@kmizmal](https://github.com/kmizmal)
+
+适用于 Magisk Root 环境的服务脚本
+
+### 配置
+
+[./magisk/config.cfg](./magisk/config.cfg)
+
+https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/client/magisk/config.cfg#L1-L6
+
+> [!TIP]
+> 详见 [说明](./magisk/README.md)
+
+### 使用
+
+刷入 [magisk.zip](./magisk/magisk.zip) 并重启即可
+
+
+
+# Linux
+
+## [LinuxScriptKDE](./linux_device_kde.py)
+
+> by: [@RikkaNaa](https://github.com/RikkaNaa)
+
+适用于 Linux KDE 桌面环境，且需要系统安装 [kdotool](https://github.com/jinliu/kdotool)
+
+如获取失败则视为未在使用，[变量计时参考](https://github.com/RikkaNaa/sleepy/commit/9d5b4fc2014b725df24304beaa9439a5eb07099b)
+
+### 配置
+
+https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_kde.py#L18-L28
+
+### 使用
+
+可自行配置本脚本的自启动
+
+> 当进程接收到 `SIGTERM` 信号时将会发送未在使用请求
+
+## [LinuxScriptHyprland](./linux_device_hyprland.sh)
+
+> by: [@inoryxin](https://github.com/inoryxin)
+
+适用于 Linux Hyprland 桌面环境，无需任何依赖，开箱即用
+
+### 配置
+
+https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_hyprland.sh#L7-L12
+
+### 使用
+
+直接启动即可
+
+> [!TIP]
+> 开机自启可自行在 `hyprland.conf` 中配置 <br/>
+> **注意: 需要给脚本加上可执行权限 *(`chmod +x`)*, 否则无法运行!**
+
+
+
+# MacOS
+
+## [AppleShortcuts](https://github.com/Detritalw/Sleepy-Client-Shortcuts)
+
+> by: [@Detritalw](https://github.com/Detritalw) <br/>
+> ***指向外部资源***
+
+### FullVer
+
+[点击链接安装完整版, 支持 Apple Watch, iPhone, iPad, mac...](https://www.icloud.com/shortcuts/aa31f2a5295842939be354285d4e9d14)
+
+### FastVer
+
+[点击链接安装极速版](https://www.icloud.com/shortcuts/eec863215bfb4d7ea7228b6032d1fc6c)
+
+**建议设置自动化 → 打开App → 选择全部App → 设置为不确认，立即执行 → 选择快捷指令为Sleepy Client Shortcuts Fast，即可获得超级好的体验。**
+
+> [!WARNING]
+> 这里的链接可能不是最新，[建议到项目内查看](https://www.icloud.com/shortcuts/92fbddbf922343f5b076c828f788371f)
+
+> [!TIP]
+> 手动更新 <br/>
+> 您可以将该快捷指令设置为操作按钮、控制中心按钮、锁定屏幕按钮、敲击 2 / 3 下背板指令来快捷使用
+
+
+
+# CLI
+
+## [CMDConsole](./cmd_console.py)
+
+> by: [@wyf9](https://github.com/wyf9)
+
+一个简单的命令行客户端，用于手动更新状态
+
+依赖: `requests`
+
+### 配置
+
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console.py#L14-L21
+
+### 使用
+
+启动脚本, 按照提示操作即可
+
+## [CmdConsoleMulti](./cmd_console_multi.py)
+
+> by: [@wyf9](https://github.com/wyf9)
+
+[CMDConsole](#cmdconsole) 的旧版本 (可选择多个服务)
+
+### 配置
+
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console_multi.py#L14-L23
+
+### 使用
+
+同上, 多了一步选择服务
+
+
+
+# Others
+
+## [MinecraftScript](./mc_script.py)
+
+> by: [@wyf9](https://github.com/wyf9)
+
+依赖: `requests`
+
+一个使用 Minescript mod 在 Minecraft Java 版中上报游戏内信息的脚本
+
+### Minescript
+
+在使用前, 你需要下载 Minescript mod:
+
+Links: [MCMod.cn](https://www.mcmod.cn/class/7594.html) / [Modrinth](https://modrinth.com/mod/minescript) / [Repo](https://github.com/maxuser0/minescript)
+
+> 也可在各大启动器的 Modrinth 源中直接下载
+
+在下载并启动一次后, 打开 `.minecraft/versions/你的版本/minescript/` 目录, 并进行两个操作:
+
+1. 新建 `config.txt`, 内容:
+
+```txt
+# Lines starting with "#" are ignored.
+# 替换为你的 Python 可执行程序路径
+python="C:\Program Files\Python312\python.exe"
+```
+
+2. 将 [`mc_script.py`](./mc_script.py) 复制到此目录, 并改名为 `sleepy.py` (也可为其他名字)
+
+### 配置
+
+需要配置两处:
+
+1. 基本服务
+
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L16-L24
+
+2. `app_name` 格式
+
+https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L116
+
+### 使用
+
+配置完成后重启 Minecraft 进入游戏, 按 `T` *(默认键位, 可能不同)* 打开聊天栏, 并输入: `\sleepy` **(即上面重命名后的文件名去掉 `.py` 后缀)* 回车启动
+
+停止: `\sleepy stop`
+
+### 自启
+
+也可以配置自启, 只需在 `config.txt` 中新增一行:
+
+```txt
+autorun[*]=eval 'execute("\\sleepy")'
+```
 
 ## [BrowserScript](./browser-script-2025.2.10.user.js)
 
@@ -254,155 +418,6 @@ for i in range(114514, 1, -1):
     writing(f'My Homework #{i}')
     sleep(11.45)
 ```
-
-## [MinecraftScript](./mc_script.py)
-
-> by: [@wyf9](https://github.com/wyf9)
-
-依赖: `requests`
-
-一个使用 Minescript mod 在 Minecraft Java 版中上报游戏内信息的脚本
-
-### Minescript
-
-在使用前, 你需要下载 Minescript mod:
-
-Links: [MCMod.cn](https://www.mcmod.cn/class/7594.html) / [Modrinth](https://modrinth.com/mod/minescript) / [Repo](https://github.com/maxuser0/minescript)
-
-> 也可在各大启动器的 Modrinth 源中直接下载
-
-在下载并启动一次后, 打开 `.minecraft/versions/你的版本/minescript/` 目录, 并进行两个操作:
-
-1. 新建 `config.txt`, 内容:
-
-```txt
-# Lines starting with "#" are ignored.
-# 替换为你的 Python 可执行程序路径
-python="C:\Program Files\Python312\python.exe"
-```
-
-2. 将 [`mc_script.py`](./mc_script.py) 复制到此目录, 并改名为 `sleepy.py` (也可为其他名字)
-
-### 配置
-
-需要配置两处:
-
-1. 基本服务
-
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L16-L24
-
-2. `app_name` 格式
-
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L116
-
-### 使用
-
-配置完成后重启 Minecraft 进入游戏, 按 `T` *(默认键位, 可能不同)* 打开聊天栏, 并输入: `\sleepy` **(即上面重命名后的文件名去掉 `.py` 后缀)* 回车启动
-
-停止: `\sleepy stop`
-
-### 自启
-
-也可以配置自启, 只需在 `config.txt` 中新增一行:
-
-```txt
-autorun[*]=eval 'execute("\\sleepy")'
-```
-
-## [LinuxScriptKDE](./linux_device_kde.py)
-
-> by: [@RikkaNaa](https://github.com/RikkaNaa)
-
-适用于 Linux KDE 桌面环境，且需要系统安装 [kdotool](https://github.com/jinliu/kdotool)
-
-如获取失败则视为未在使用，[变量计时参考](https://github.com/RikkaNaa/sleepy/commit/9d5b4fc2014b725df24304beaa9439a5eb07099b)
-
-### 配置
-
-https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_kde.py#L18-L28
-
-### 使用
-
-可自行配置本脚本的自启动
-
-> 当进程接收到 `SIGTERM` 信号时将会发送未在使用请求
-
-## [LinuxScriptHyprland](./linux_device_hyprland.sh)
-
-> by: [@inoryxin](https://github.com/inoryxin)
-
-适用于 Linux Hyprland 桌面环境，无需任何依赖，开箱即用
-
-### 配置
-
-https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_hyprland.sh#L7-L12
-
-### 使用
-
-直接启动即可
-
-> [!TIP]
-> 开机自启可自行在 `hyprland.conf` 中配置 <br/>
-> **注意: 需要给脚本加上可执行权限 *(`chmod +x`)*, 否则无法运行!**
-
-## [MagiskService](./magisk/service.sh)
-
-> by: [@kmizmal](https://github.com/kmizmal)
-
-适用于 Magisk Root 环境的服务脚本
-
-### 配置
-
-[./magisk/config.cfg](./magisk/config.cfg)
-
-https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/client/magisk/config.cfg#L1-L6
-
-> [!TIP]
-> 详见 [说明](./magisk/README.md)
-
-### 使用
-
-刷入 [magisk.zip](./magisk/magisk.zip) 并重启即可
-
-## [Win_Simple](./Win_Simple/dist/Win_Simple.exe)
-
-> by: [@kmizmal](https://github.com/kmizmal) <br/>
-> Source: [`./Win_Simple/script.py`](./Win_Simple/script.py)
-
-### 配置
-
-配置文件 (首次打开自动在同级目录下创建): `config.ini`
-> `config.ini`里面注释写的很详细了，不再提供示例
-
-### 使用
-
-下载后双击 `Win_Simple.exe` 初始化配置文件，然后在同级目录下的 `config.ini` 中填写配置
-
-> [!TIP]
-> 如何开机自启? <br/>
-> 创建一个 `Win_Simple.exe` 的快捷方式，然后扔到 `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup` 下即可
-
-## [AppleShortcuts](https://github.com/Detritalw/Sleepy-Client-Shortcuts)
-
-> by: [@Detritalw](https://github.com/Detritalw) <br/>
-> ***指向外部资源***
-
-### FullVer
-
-[点击链接安装完整版, 支持 Apple Watch, iPhone, iPad, mac...](https://www.icloud.com/shortcuts/aa31f2a5295842939be354285d4e9d14)
-
-### FastVer
-
-[点击链接安装极速版](https://www.icloud.com/shortcuts/eec863215bfb4d7ea7228b6032d1fc6c)
-
-**建议设置自动化 → 打开App → 选择全部App → 设置为不确认，立即执行 → 选择快捷指令为Sleepy Client Shortcuts Fast，即可获得超级好的体验。**
-
-> [!WARNING]
-> 这里的链接可能不是最新，[建议到项目内查看](https://www.icloud.com/shortcuts/92fbddbf922343f5b076c828f788371f)
-
-> [!TIP]
-> 手动更新 <br/>
-> 您可以将该快捷指令设置为操作按钮、控制中心按钮、锁定屏幕按钮、敲击 2 / 3 下背板指令来快捷使用
 
 ## [Zhixuewang](./zhixue.py)
 
