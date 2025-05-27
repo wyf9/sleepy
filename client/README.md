@@ -26,15 +26,13 @@
 > [!TIP]
 > 欢迎提交 Issue / PR 贡献自己的脚本！
 
-
-
 # Windows
 
 ## [WinDevice](./win_device.py)
 
-> by: [@wyf9](https://github.com/wyf9)
-> Co-authored-by: [@kmizmal](https://github.com/kmizmal)
-> Co-authored-by: [@pwnInt](https://github.com/pwnInt) - ^C / 鼠标空闲检测
+> by: [@wyf9](https://github.com/wyf9) <br/>
+> Co-authored-by: [@kmizmal](https://github.com/kmizmal) <br/>
+> Co-authored-by: [@pwnInt](https://github.com/pwnInt) - ^C / 鼠标空闲检测 <br/>
 > Co-authored-by: [@gongfuture](https://github.com/gongfuture) - 媒体信息获取
 
 在 Windows 上自动更新设备状态
@@ -45,15 +43,18 @@ https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/cli
 
 ### 依赖安装
 
-```基础安装
+```shell
+# 安装依赖 (不含媒体状态)
 pip install pywin32 requests
 ```
 
-```媒体监听-Python≤3.9
+```shell
+# 媒体状态依赖 (Python <= 3.9)
 pip install pywin32 requests winrt
 ```
 
-```媒体监听-Python≤3.9
+```shell
+# 媒体状态依赖 (Python >= 3.10)
 pip install pywin32 requests winrt.windows.media.control winrt.windows.foundation
 ```
 
@@ -91,12 +92,12 @@ pip install pywin32 requests winrt.windows.media.control winrt.windows.foundatio
 ## [Win_Simple](./Win_Simple/dist/Win_Simple.exe)
 
 > by: [@kmizmal](https://github.com/kmizmal) <br/>
-> Source: [`./Win_Simple/script.py`](./Win_Simple/script.py)
+> 源代码: [`./Win_Simple/script.py`](./Win_Simple/script.py)
 
 ### 配置
 
 配置文件 (首次打开自动在同级目录下创建): `config.ini`
-> `config.ini`里面注释写的很详细了，不再提供示例
+> `config.ini` 里面的注释写的很详细了，不再提供示例
 
 ### 使用
 
@@ -105,8 +106,6 @@ pip install pywin32 requests winrt.windows.media.control winrt.windows.foundatio
 > [!TIP]
 > 如何开机自启? <br/>
 > 创建一个 `Win_Simple.exe` 的快捷方式，然后扔到 `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup` 下即可
-
-
 
 # Android
 
@@ -143,8 +142,6 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### 安卓低版本运行
 
-<!-- > 方法提供: [@][https://github.com/] - waiting for reply -->
-
 如果需要在较低的安卓版本运行，无法安装上面 repo 中的安装包，可以从下载站下载旧版本:
 
 http://www.autoxjs.com/topic/116/autox-js
@@ -154,9 +151,9 @@ http://www.autoxjs.com/topic/116/autox-js
 <details>
 <summary>点击展开</summary>
 
-之所以报错是因为 **AutoX.js 旧版本不支持 Javascript 中的模板字符串**
+*之所以报错是因为 **AutoX.js 旧版本不支持 Javascript 中的模板字符串***
 
-解决方案就是手动将脚本中的模板字符串替换为 `+` 连接的形式，如:
+解决方案: **手动将脚本中的模板字符串替换为 `+` 连接的形式**，如:
 
 ```js
 // Before
@@ -185,8 +182,6 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 ### 使用
 
 刷入 [magisk.zip](./magisk/magisk.zip) 并重启即可
-
-
 
 # Linux
 
@@ -226,8 +221,6 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 > 开机自启可自行在 `hyprland.conf` 中配置 <br/>
 > **注意: 需要给脚本加上可执行权限 *(`chmod +x`)*, 否则无法运行!**
 
-
-
 # MacOS
 
 ## [AppleShortcuts](https://github.com/Detritalw/Sleepy-Client-Shortcuts)
@@ -249,16 +242,14 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 > 这里的链接可能不是最新，[建议到项目内查看](https://www.icloud.com/shortcuts/92fbddbf922343f5b076c828f788371f)
 
 > [!TIP]
-> 手动更新 <br/>
-> 您可以将该快捷指令设置为操作按钮、控制中心按钮、锁定屏幕按钮、敲击 2 / 3 下背板指令来快捷使用
-
-
+> 你可以将该快捷指令设置为操作按钮、控制中心按钮、锁定屏幕按钮、敲击 2 / 3 下背板指令来快捷使用
 
 # CLI
 
 ## [CMDConsole](./cmd_console.py)
 
-> by: [@wyf9](https://github.com/wyf9)
+> by: [@wyf9](https://github.com/wyf9) <br/>
+> *留档，不建议使用*
 
 一个简单的命令行客户端，用于手动更新状态
 
@@ -274,7 +265,8 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ## [CmdConsoleMulti](./cmd_console_multi.py)
 
-> by: [@wyf9](https://github.com/wyf9)
+> by: [@wyf9](https://github.com/wyf9) <br/>
+> *留档，不建议使用*
 
 [CMDConsole](#cmdconsole) 的旧版本 (可选择多个服务)
 
@@ -285,8 +277,6 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 ### 使用
 
 同上, 多了一步选择服务
-
-
 
 # Others
 
