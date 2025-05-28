@@ -228,6 +228,42 @@ class PluginClass:
         '''
         return {**self.example_config, **self.user_config.plugin.get(self.name, {})}
 
+    def register_route(self, rule: str, func: Callable, methods: List[str] = None):
+        """
+        注册插件的路由
+
+        :param rule: 路由规则，例如 '/api/endpoint'
+        :param func: 处理函数
+        :param methods: HTTP方法列表，例如 ['GET', 'POST']
+        """
+        if methods is None:
+            methods = ['GET']
+
+        # 获取插件名称
+        if self.name not in _plugin_routes:
+            _plugin_routes[self.name] = {}
+
+        # 注册路由
+        _plugin_routes[self.name][rule] = {
+            'func': func,
+            'methods': methods
+        }
+
+        l.debug(f"Route '{rule}' registered for plugin '{self.name}'")
+
+    def register_event(self, event_name: str, handler: Callable):
+        """
+        注册事件处理器
+
+        :param event_name: 事件名称
+        :param handler: 处理函数
+        """
+        if event_name not in _plugin_event_handlers:
+            _plugin_event_handlers[event_name] = []
+            
+        _plugin_event_handlers[event_name].append((self.name, handler))
+        l.debug(f"Event handler registered for '{event_name}' in plugin '{self.name}'")
+
 
 class Plugin:
     # [id, frontend, backend, ConfigClass]
@@ -283,10 +319,17 @@ class Plugin:
                 l.debug(f'initing plugin, name: {i}, frontend: {is_frontend}, backend: {is_backend}')
 
                 # 加载前端代码 (index.html)
+                plugin_frontend = ''
                 if is_frontend:
-                    with open(u.get_path(f'plugin/{i}/index.html'), 'r', encoding='utf-8') as ff:
-                        plugin_frontend = ff.read()
-                        ff.close()
+                    html_path = u.get_path(f'plugin/{i}/index.html')
+                    if not os.path.exists(html_path):
+                        l.warning(f'Plugin {i} does not have index.html, skipping frontend loading.')
+                    else:
+                        try:
+                            with open(html_path, 'r', encoding='utf-8') as ff:
+                                plugin_frontend = ff.read()
+                        except Exception as e:
+                            l.error(f'Failed to load index.html for plugin {i}: {e}')
                 else:
                     plugin_frontend = ''
 
