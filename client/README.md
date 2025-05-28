@@ -2,29 +2,91 @@
 
 此目录存储客户端 (用于更新状态/设备状态)
 
-- [Windows](#Windows)
-  - [WinDevice](#WinDevice)
-  - [Win_Simple](#Win_Simple)
-- [Android](#Android)
-  - [AutoxjsScript](#AutoxjsScript)
-  - [MagiskService](#MagiskService)
-- [Linux](#Linux)
-  - [LinuxScriptKDE](#LinuxScriptKDE)
-  - [LinuxScriptHyprland](#LinuxScriptHyprland)
-- [MacOS](#MacOS)
+**Windows**:
+  - [WinDevice](#WinDevice) *(已安装 Python 推荐)*
+  - [Win_Simple](#Win_Simple) *(未安装 Python 推荐)*
+
+**Android**:
+  - [AutoxjsScript](#AutoxjsScript) *(无需 Root, 需安装额外软件)*
+  - [MagiskService](#MagiskService) *(需 Root)*
+
+**Linux**:
+  - [LinuxScriptKDE](#LinuxScriptKDE) *(KDE Python 脚本)*
+  - [LinuxScriptHyprland](#LinuxScriptHyprland) *(Hyprland 原生脚本)*
+
+**MacOS**:
   - [AppleShortcuts](#AppleShortcuts)
-- [命令行](#CLI)
-  - [CMDConsole](#CMDConsole)
-  - [CmdConsoleMulti](#CmdConsoleMulti)
-- [其他](#Others)
+
+**CLI** (命令行):
+  - [HomeworkDevice](#HomeworkDevice)
+  - [CMDConsole](#CMDConsole) *(不建议使用)*
+  - [CmdConsoleMulti](#CmdConsoleMulti) *(不建议使用)*
+
+**Others** (其他):
   - [MinecraftScript](#MinecraftScript)
   - [BrowserScript](#BrowserScript)
-  - [HomeworkDevice](#HomeworkDevice)
   - [Zhixuewang](#Zhixuewang)
-  - [Other repos](#Other repos)
 
 > [!TIP]
 > 欢迎提交 Issue / PR 贡献自己的脚本！
+
+## 快速跳转
+
+- [/client](#client)
+  - [快速跳转](#快速跳转)
+- [Windows](#windows)
+  - [WinDevice](#windevice)
+    - [配置](#配置)
+    - [依赖安装](#依赖安装)
+    - [自启动](#自启动)
+      - [1. PM2](#1-pm2)
+      - [2. 自启脚本](#2-自启脚本)
+    - [无法获取网易云媒体信息](#无法获取网易云媒体信息)
+  - [Win\_Simple](#win_simple)
+    - [配置](#配置-1)
+    - [使用](#使用)
+- [Android](#android)
+  - [AutoxjsScript](#autoxjsscript)
+    - [软件下载](#软件下载)
+    - [配置](#配置-2)
+    - [使用](#使用-1)
+    - [安卓低版本运行](#安卓低版本运行)
+  - [MagiskService](#magiskservice)
+    - [配置](#配置-3)
+    - [使用](#使用-2)
+- [Linux](#linux)
+  - [LinuxScriptKDE](#linuxscriptkde)
+    - [配置](#配置-4)
+    - [使用](#使用-3)
+  - [LinuxScriptHyprland](#linuxscripthyprland)
+    - [配置](#配置-5)
+    - [使用](#使用-4)
+- [MacOS](#macos)
+  - [AppleShortcuts](#appleshortcuts)
+    - [FullVer](#fullver)
+    - [FastVer](#fastver)
+- [CLI](#cli)
+  - [HomeworkDevice](#homeworkdevice)
+    - [配置](#配置-6)
+    - [使用](#使用-5)
+  - [CMDConsole](#cmdconsole)
+    - [配置](#配置-7)
+    - [使用](#使用-6)
+  - [CmdConsoleMulti](#cmdconsolemulti)
+    - [配置](#配置-8)
+    - [使用](#使用-7)
+- [Others](#others)
+  - [MinecraftScript](#minecraftscript)
+    - [Minescript](#minescript)
+    - [配置](#配置-9)
+    - [使用](#使用-8)
+    - [自启](#自启)
+  - [BrowserScript](#browserscript)
+    - [配置](#配置-10)
+  - [Zhixuewang](#zhixuewang)
+    - [配置](#配置-11)
+    - [使用](#使用-9)
+  - [Other repos](#other-repos)
 
 # Windows
 
@@ -43,19 +105,24 @@ https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/cli
 
 ### 依赖安装
 
-```shell
-# 安装依赖 (不含媒体状态)
+```bat
+:: 必装依赖，其他为可选 (对应功能需要)
 pip install pywin32 requests
 ```
 
-```shell
-# 媒体状态依赖 (Python <= 3.9)
-pip install pywin32 requests winrt
+```bat
+:: 媒体状态依赖 (Python <= 3.9)
+pip install winrt
 ```
 
-```shell
-# 媒体状态依赖 (Python >= 3.10)
-pip install pywin32 requests winrt.windows.media.control winrt.windows.foundation
+```bat
+:: 媒体状态依赖 (Python >= 3.10)
+pip install winrt.windows.media.control winrt.windows.foundation
+```
+
+```bat
+:: 电池状态依赖
+pip install psutil
 ```
 
 ### 自启动
@@ -101,7 +168,7 @@ pip install pywin32 requests winrt.windows.media.control winrt.windows.foundatio
 
 ### 使用
 
-下载后双击 `Win_Simple.exe` 初始化配置文件，然后在同级目录下的 `config.ini` 中填写配置
+下载后双击 `Win_Simple.exe` 初始化配置文件，然后在同级目录下的 `config.ini` 中填写配置，重新打开即可
 
 > [!TIP]
 > 如何开机自启? <br/>
@@ -246,6 +313,66 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 
 # CLI
 
+## [HomeworkDevice](./homework_device.py)
+
+> by: [@wyf9](https://github.com/wyf9)
+
+一个手动设置设备状态的示例 ***(不止!)*** *用来展示你的作业进度*
+
+依赖: `requests`
+
+### 配置
+
+https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/homework_device.py#L5-L9
+
+### 使用
+
+脚本提供了一些函数:
+
+- `left(num: int)`: 设置剩余作业的数量 (为 `0` 则移除) *[device id: `homework-left`]*
+- `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除) *[device id: `homework-writing`]*
+
+还有一些扩展函数, 可以调用 ~~全部 *(存疑)*~~ 大部分 API:
+
+<details>
+<summary>点击展开列表</summary>
+
+> 点击链接跳转 api 文档
+
+- [`query()`](../doc/api.md#query): 查看当前状态 *(未格式化输出)*
+- [`status_list()`](../doc/api.md#status-list): 查看可用状态列表 *(未格式化输出)*
+- [`metrics()`](../doc/api.md#metrics): 查看统计数据 *(未格式化输出)*
+- [`status(stat: int)`](../doc/api.md#status-set): 设置状态
+- [`device_set(id: str, show_name: str, msg: str, using: bool = True)`](../doc/api.md#device-set): 设备状态设置
+- [`device_remove(id: str)`](../doc/api.md#device-remove): 移除设备状态
+- [`device_clear()`](../doc/api.md#device-clear): 清除设备状态
+- [`private_mode(private: bool)`](../doc/api.md#device-private-mode): 开关隐私模式
+- [`save_data()`](../doc/api.md#storage-save-data): 保存数据到 `data.json`
+
+</details>
+
+那么，如何使用这两个函数呢？
+
+1. 直接使用
+
+使用 `python homework_device.py` 直接打开, 并用执行函数 *(`eval()`)* 的方式发送请求，
+
+如：`left(114514)`
+
+> 如何将多个调用写在一行？可用逗号分隔：`left(114513), writing('五 年 中 考 三 年 模 拟')`
+
+2. 其他程序调用
+
+```py
+from time import sleep
+from homework_device import left, writing # import
+
+for i in range(114514, 1, -1):
+    left(i)
+    writing(f'My Homework #{i}')
+    sleep(11.45)
+```
+
 ## [CMDConsole](./cmd_console.py)
 
 > by: [@wyf9](https://github.com/wyf9) <br/>
@@ -347,66 +474,6 @@ autorun[*]=eval 'execute("\\sleepy")'
 ### 配置
 
 https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/browser-script.user.js#L18-L25
-
-## [HomeworkDevice](./homework_device.py)
-
-> by: [@wyf9](https://github.com/wyf9)
-
-一个手动设置设备状态的示例 ***(不止!)*** *用来展示你的作业进度*
-
-依赖: `requests`
-
-### 配置
-
-https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/homework_device.py#L5-L9
-
-### 使用
-
-脚本提供了一些函数:
-
-- `left(num: int)`: 设置剩余作业的数量 (为 `0` 则移除) *[device id: `homework-left`]*
-- `writing(name: str)`: 设置正在写的作业 (名称为空字符串则移除) *[device id: `homework-writing`]*
-
-还有一些扩展函数, 可以调用 ~~全部 *(存疑)*~~ 大部分 API:
-
-<details>
-<summary>点击展开列表</summary>
-
-> 点击链接跳转 api 文档
-
-- [`query()`](../doc/api.md#query): 查看当前状态 *(未格式化输出)*
-- [`status_list()`](../doc/api.md#status-list): 查看可用状态列表 *(未格式化输出)*
-- [`metrics()`](../doc/api.md#metrics): 查看统计数据 *(未格式化输出)*
-- [`status(stat: int)`](../doc/api.md#status-set): 设置状态
-- [`device_set(id: str, show_name: str, msg: str, using: bool = True)`](../doc/api.md#device-set): 设备状态设置
-- [`device_remove(id: str)`](../doc/api.md#device-remove): 移除设备状态
-- [`device_clear()`](../doc/api.md#device-clear): 清除设备状态
-- [`private_mode(private: bool)`](../doc/api.md#device-private-mode): 开关隐私模式
-- [`save_data()`](../doc/api.md#storage-save-data): 保存数据到 `data.json`
-
-</details>
-
-那么，如何使用这两个函数呢？
-
-1. 直接使用
-
-使用 `python homework_device.py` 直接打开, 并用执行函数 *(`eval()`)* 的方式发送请求，
-
-如：`left(114514)`
-
-> 如何将多个调用写在一行？可用逗号分隔：`left(114513), writing('五 年 中 考 三 年 模 拟')`
-
-2. 其他程序调用
-
-```py
-from time import sleep
-from homework_device import left, writing # import
-
-for i in range(114514, 1, -1):
-    left(i)
-    writing(f'My Homework #{i}')
-    sleep(11.45)
-```
 
 ## [Zhixuewang](./zhixue.py)
 

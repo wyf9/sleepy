@@ -3,11 +3,12 @@
 win_device.py
 在 Windows 上获取窗口名称
 by: @wyf9, @pwnint, @kmizmal, @gongfuture
-基础依赖: pywin32, requests
+基础依赖: pywin32, requests<>
 媒体信息依赖:
  - Python≤3.9: winrt
  - Python≥3.10: winrt.windows.media.control, winrt.windows.foundation
  * (如果你嫌麻烦并且不在乎几十m的包占用, 也可以直接装winsdk :)
+电池状态依赖: psutil
 '''
 
 # ----- Part: Import
@@ -65,11 +66,13 @@ PROXY: str = ''
 # 是否启用媒体信息获取
 MEDIA_INFO_ENABLED: bool = True
 # 媒体信息显示模式: 'prefix' - 作为前缀添加到当前窗口名称, 'standalone' - 使用独立设备
-MEDIA_INFO_MODE: str = 'prefix'
+MEDIA_INFO_MODE: str = 'standalone'
 # 独立设备模式下的设备ID (仅当 MEDIA_INFO_MODE = 'standalone' 时有效)
 MEDIA_DEVICE_ID: str = 'media-device'
 # 独立设备模式下的显示名称 (仅当 MEDIA_INFO_MODE = 'standalone' 时有效)
 MEDIA_DEVICE_SHOW_NAME: str = '正在播放'
+# 是否启用电源状态获取
+BATTERY_INFO_ENABLED: bool = True
 # --- config end
 
 # ----- Part: Functions
@@ -169,6 +172,40 @@ def get_media_info():
         debug(f"主要媒体信息获取方式失败: {primary_error}")
         return False, '', '', ''
 
+
+# 电池状态拎出来导入状态
+if BATTERY_INFO_ENABLED:
+    try:
+        import psutil
+        battery = psutil.sensors_battery()
+        if not battery:
+            print('(预检) 无法获取电池信息, 已禁用')
+            BATTERY_INFO_ENABLED = False
+    except Exception as e:
+        print(f'(预检) 获取电池信息失败: {e}, 已禁用')
+        BATTERY_INFO_ENABLED = False
+
+
+def get_battery_info() -> tuple[int | None, bool | None]:
+    '''
+    获取电量信息
+
+    :return tuple: (int) 电池百分比, (bool) 是否正在充电
+    '''
+    try:
+        # 电池信息变量
+        battery = psutil.sensors_battery()
+        if not battery:
+            return None, None
+
+        percent: int = battery.percent
+        power_plugged: bool = battery.power_plugged
+        # 获取充电状态
+        debug(f'电量: `{percent}%`, 充电中: {power_plugged}')
+        return percent, power_plugged
+    except Exception as e:
+        debug(f'获取电池信息失败: {e}')
+        return None, None
 # ----- Part: Send status
 
 
@@ -356,6 +393,12 @@ def do_update():
     # 始终保持同步的状态变量
     window = current_window
     using = True
+
+    # 获取电池信息
+    if BATTERY_INFO_ENABLED:
+        battery_percent, battery_status = get_battery_info()
+        if (not battery_percent is None) and (not battery_status is None):
+            window = f'[{battery_percent}%{" ⚡" if battery_status else ""}] {window}'
 
     # 获取媒体信息
     prefix_media_info = None

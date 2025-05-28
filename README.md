@@ -43,7 +43,7 @@ Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top) ![
 
 搭建完服务端后，你可在 **[`/client`](./client/README.md)** 找到客户端 (用于**手动更新状态**/**自动更新设备打开应用**)
 
-分类:[Windows](./client/README.md#Windows) [Android](./client/README.md#Android) [Linux](./client/README.md#Linux) [命令行](./client/README.md#CLI) [其它](./client/README.md#Others)
+*目前已有 [Windows](./client/README.md#windevice), [Linux](./client/README.md#linux), [MacOS / IOS](./client/README.md#appleshortcuts), [Android](./client/README.md#autoxjsscript), [油猴脚本](./client/README.md#browserscript) 等客户端*
 
 ## API
 
@@ -58,7 +58,7 @@ Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top) ![
 
 ## Star History
 
-[![如无法加载图片可点击查看](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
+[![Star History Chart (如无法加载图片可点击查看)](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
 
 ## 关于
 

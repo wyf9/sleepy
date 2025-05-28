@@ -6,6 +6,39 @@
 3. [Device status 接口](#device)
 4. [Storage 接口](#storage)
 
+## 快速跳转
+
+- [API](#api)
+  - [快速跳转](#快速跳转)
+  - [鉴权说明](#鉴权说明)
+  - [Read-only](#read-only)
+    - [query](#query)
+      - [Response](#response)
+    - [status-list](#status-list)
+      - [Response](#response-1)
+    - [metrics](#metrics)
+      - [Response](#response-2)
+  - [Status](#status)
+    - [status-set](#status-set)
+      - [Params](#params)
+      - [Response](#response-3)
+  - [Device](#device)
+    - [device-set](#device-set)
+      - [Params (GET)](#params-get)
+      - [Body (POST)](#body-post)
+      - [Response](#response-4)
+    - [device-remove](#device-remove)
+      - [Params](#params-1)
+      - [Response](#response-5)
+    - [device-clear](#device-clear)
+      - [Response](#response-6)
+    - [device-private-mode](#device-private-mode)
+      - [Params](#params-2)
+      - [Response](#response-7)
+  - [Storage](#storage)
+    - [storage-save-data](#storage-save-data)
+      - [Response](#response-8)
+
 ## 鉴权说明
 
 任何标记了需要鉴权的接口，都需要用下面三种方式的一种传入 **与服务端一致** 的 `secret` *(优先级从上到下)*:
