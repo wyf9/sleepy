@@ -42,9 +42,9 @@ def format_dict(dic) -> Response:
     return response
 
 
-def reterr(code: int, message: str) -> str:
+def reterr(code: int, message: str) -> Response:
     '''
-    返回错误信息 json
+    返回错误信息 Response
 
     :param code: 代码
     :param message: 消息

@@ -83,25 +83,25 @@ def require_secret(view_func):
         # 1. body
         # -> {"secret": "my-secret"}
         body: dict = flask.request.get_json(silent=True) or {}
-        if body and body.get('secret') == env.main.secret:
+        if body.get('secret', '') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Body')
             return view_func(*args, **kwargs)
 
         # 2. param
         # -> ?secret=my-secret
-        elif flask.request.args.get('secret') == env.main.secret:
+        elif flask.request.args.get('secret', '') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Param')
             return view_func(*args, **kwargs)
 
         # 3. header (Sleepy-Secret)
         # -> Sleepy-Secret: my-secret
-        elif flask.request.headers.get('Sleepy-Secret') == env.main.secret:
+        elif flask.request.headers.get('Sleepy-Secret', '') == env.main.secret:
             u.debug('[Auth] Verify secret Success from Header (Sleepy-Secret)')
             return view_func(*args, **kwargs)
 
         # 4. header (Authorization)
         # -> Authorization: Bearer my-secret
-        elif flask.request.headers.get('Authorization')[7:] == env.main.secret:
+        elif flask.request.headers.get('Authorization', '')[7:] == env.main.secret:
             u.debug('[Auth] Verify secret Success from Header (Authorization)')
             return view_func(*args, **kwargs)
 
