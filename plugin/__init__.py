@@ -22,7 +22,6 @@ _plugin_admin_cards: Dict[str, Dict[str, Any]] = {}  # 插件注册的管理后�
 
 # 插件装饰器
 
-
 def route(rule: str, methods: List[str] = None):
     """
     装饰器：注册插件路由
@@ -264,6 +263,13 @@ class Plugin:
                 else:
                     u.exception(f'Plugin not exist: {i}')
 
+        # 检查插件是否为第一次运行
+        for i in self.c.plugin_enabled:
+            if not self.is_first_run(i):
+                l.info(f'Plugin {i} is not first run.')
+            else:
+                l.info(f'Plugin {i} is first run, created mark file.')
+
         # 加载插件配置
         if self.c.plugin_enabled:
             for i in self.c.plugin_enabled:
@@ -332,6 +338,37 @@ class Plugin:
         trigger_event('app_started', self)
 
         l.info(f'plugins enabled: {", ".join(self.c.plugin_enabled)}' if self.c.plugin_enabled else 'no plugin enabled.')
+
+    def is_first_run(self, plugin_name: str) -> bool:
+        """
+        检查插件是否为第一次运行
+
+        :param plugin_name: 插件名称
+        :return: 如果是第一次运行返回 True，否则返回 False
+        """
+        
+        # 如果存在 .mark 文件，表示不是第一次运行
+        mark_file = u.get_path(f'plugin/{plugin_name}/.mark')
+        if os.path.exists(mark_file):
+            return False
+        else:
+            # 如果不存在 .mark 文件，表示是第一次运行
+            # 创建 .mark 文件
+            l.info(f'Plugin {plugin_name} is first run, creating mark file.')
+            with open(mark_file, 'w', encoding='utf-8') as f:
+                f.write('SPMF')
+                f.close()
+            # 安装依赖
+            if os.path.exists(u.get_path(f'plugin/{plugin_name}/requirements.txt')):
+                # 检查退出状态
+                if os.system(f'pip install -r {u.get_path(f"plugin/{plugin_name}/requirements.txt")}') != 0:
+                    l.error(f'Failed to install dependencies for plugin {plugin_name}. Please check requirements.txt.')
+                else:
+                    # 安装成功
+                    l.info(f'Plugin {plugin_name} dependencies installed.')
+            else:
+                l.warning(f'Plugin {plugin_name} does not have requirements.txt, skipping dependency installation.')
+            return True
 
     def _register_plugin_routes(self, plugin_name):
         """
