@@ -12,3 +12,11 @@ data.json
 
 # Others
 .vscode/launch.json
+
+client/Win_Simple/build
+
+.vscode
+client/winform/.vs/WindowsFormsApp1
+client/winform/WindowsFormsApp1/.vs
+client/winform/WindowsFormsApp1/bin
+client/winform/WindowsFormsApp1/obj

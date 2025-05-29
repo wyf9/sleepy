@@ -4,5 +4,6 @@
         ".env.example": "ini"
     },
     "prettier.configPath": ".prettierrc.json",
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "dotnet.preferCSharpExtension": true
 }
