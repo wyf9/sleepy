@@ -49,7 +49,7 @@ class _page:
     favicon: str = getenv('sleepy_page_favicon', './static/favicon.ico', str)
     background: str = getenv('sleepy_page_background', 'https://imgapi.siiway.top/image', str)
     learn_more: str = getenv('sleepy_page_learn_more', 'GitHub Repo', str)
-    repo: str = getenv('sleepy_page_repo', 'https://github.com/wyf9/sleepy', str)
+    repo: str = getenv('sleepy_page_repo', 'https://github.com/sleepy-project/sleepy', str)
     more_text: str = getenv('sleepy_page_more_text', '', str)
     sorted: bool = getenv('sleepy_page_sorted', False, bool)
     using_first: bool = getenv('sleepy_page_using_first', False, bool)

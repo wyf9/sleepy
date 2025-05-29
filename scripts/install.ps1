@@ -214,7 +214,7 @@ function Show-CompletionMessage {
     Write-Host "  Use one of the client scripts in the client/ directory"
     Write-Host ""
     Write-Host "For more information, visit:" -ForegroundColor White
-    Write-Host "  https://github.com/wyf9/sleepy"
+    Write-Host "  https://github.com/sleepy-project/sleepy"
     Write-Host ""
     Write-ColorMessage "Enjoy using Sleepy!" "Green"
 }

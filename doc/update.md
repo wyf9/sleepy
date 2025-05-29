@@ -16,7 +16,7 @@ pip install -r requirements.txt # 安装依赖 (如果有新的)
 
 更新完成，重新启动即可.
 
-> 可以 [在这](https://github.com/wyf9/sleepy/commits/main/.env.example) 查看 [`.env.example`](../.env.example) 更新记录，并相应修改 `.env` 文件
+> 可以 [在这](https://github.com/sleepy-project/sleepy/commits/main/.env.example) 查看 [`.env.example`](../.env.example) 更新记录，并相应修改 `.env` 文件
 
 ## Huggingface 部署
 

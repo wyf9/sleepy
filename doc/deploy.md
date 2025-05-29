@@ -21,13 +21,13 @@
 运行命令：
 
 ```bash
-bash <(curl -s https://ghproxy.com/https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/install.sh)
+bash <(curl -s https://ghproxy.com/https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.sh)
 ```
 
 如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/install.sh)
+bash <(curl -s https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.sh)
 ```
 
 ### Windows
@@ -36,14 +36,14 @@ bash <(curl -s https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/instal
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-irm https://ghproxy.com/https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/install.ps1 | iex
+irm https://ghproxy.com/https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.ps1 | iex
 ```
 
 如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-irm https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.ps1 | iex
 ```
 
 ## 手动部署
@@ -57,7 +57,7 @@ irm https://raw.githubusercontent.com/wyf9/sleepy/main/scripts/install.ps1 | iex
 1. Clone 本仓库 (建议先 Fork / Use this template)
 
 ```shell
-git clone --depth=1 -b main https://github.com/wyf9/sleepy.git
+git clone --depth=1 -b main https://github.com/sleepy-project/sleepy.git
 ```
 
 2. 安装依赖
@@ -95,7 +95,7 @@ python3 start.py
 
 只需三步:
 
-1. 复制 Space `wyf9/sleepy` (**[点击直达](https://huggingface.co/spaces/wyf9/sleepy?duplicate=true&visibility=public)**)
+1. 复制 Space `sleepy-project/sleepy` (**[点击直达](https://huggingface.co/spaces/wyf9/sleepy?duplicate=true&visibility=public)**)
 2. 在复制页面设置 secret 和页面信息等环境变量 *[**[配置示例](../.env.example)**]*
 3. 点击部署，等待完成后点击右上角三点 -> `Embed this space`，即可获得你的部署地址 *(类似于: <https://wyf9-sleepy.hf.space>)*
 

@@ -358,7 +358,7 @@ display_completion() {
     echo "  Use one of the client scripts in the client/ directory"
     echo
     echo -e "${BOLD}For more information, visit:${NC}"
-    echo "  https://github.com/wyf9/sleepy"
+    echo "  https://github.com/sleepy-project/sleepy"
     echo
     # Show installation directory
     echo -e "${BOLD}Installation directory:${NC}"
@@ -494,7 +494,7 @@ clone_repository() {
 
     # Clone the repository
     print_message "Cloning Sleepy repository to $install_dir..." "$BLUE"
-    git clone --depth=1 -b main https://github.com/wyf9/sleepy.git .
+    git clone --depth=1 -b main https://github.com/sleepy-project/sleepy.git .
 
     if [ $? -eq 0 ]; then
         print_success "Repository cloned successfully"

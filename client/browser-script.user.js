@@ -8,8 +8,8 @@
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
 // @connect      sleepy.wyf9.top
-// @homepage     https://github.com/wyf9/sleepy
-// @source       https://github.com/wyf9/sleepy/raw/refs/heads/main/client/browser-script.user.js
+// @homepage     https://github.com/sleepy-project/sleepy
+// @source       https://github.com/sleepy-project/sleepy/raw/refs/heads/main/client/browser-script.user.js
 // ==/UserScript==
 
 (function () {

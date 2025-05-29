@@ -1,5 +1,7 @@
 # sleepy
 
+> 欢迎来到 Sleepy Project 的主仓库!
+
 一个用于 ~~*视奸*~~ 查看个人在线状态 (以及正在使用软件) 的 Flask 应用，让他人能知道你不在而不是故意吊他/她
 
 [**功能**](#功能) / [**演示**](#preview) / [**部署**](#部署--更新) / [**服务端配置**](#服务器配置) / [**使用**](#使用) / [**Client**](#client) / [**API**](#api) / [**关于**](#关于)
@@ -14,7 +16,7 @@
 
 > [!TIP]
 > **最新 开发进度 / TODOs 见: [Discord](https://discord.gg/DyBY6gwkeg)** / [Telegram](https://t.me/wyf9_sleepy) / [QQ](https://qm.qq.com/q/uItkv96Wn6)<br/>
-> 如有 Bug / 建议, 可 [issue](https://github.com/wyf9/sleepy/issues/new) 或 *[More contact](https://wyf9.top/#/contact) (注明来意)*.
+> 如有 Bug / 建议, 可 [issue](https://github.com/sleepy-project/sleepy/issues/new) 或 *[More contact](https://wyf9.top/#/contact) (注明来意)*.
 
 ### Preview
 
@@ -58,7 +60,7 @@ Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top) ![
 
 ## Star History
 
-[![Star History Chart (如无法加载图片可点击查看)](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
+[![Star History Chart (如无法加载图片可点击查看)](https://api.star-history.com/svg?repos=sleepy-project/sleepy&type=Date)](https://star-history.com/#sleepy-project/sleepy&Date)
 
 ## 关于
 

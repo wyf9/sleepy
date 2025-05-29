@@ -157,7 +157,7 @@ def git_hub():
     '''
     这里谁来了都改不了!
     '''
-    return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle'+'epy', 301)
+    return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'sleep'+'y-proj'+'ect/sle'+'epy', 301)
 
 
 @app.route('/none')

@@ -44,7 +44,7 @@
 | `sleepy_page_favicon`     | str  | `./static/favicon.ico`            | 网页的图标 (`.png` 或 `.ico` 图片) 路径，可以为绝对路径或相对路径                                            |
 | `sleepy_page_background`  | str  | `https://imgapi.siiway.top/image` | 背景图片地址，可以使用网上的图片 API 或单张图片 *(默认为 [siiway/imgapi](https://github.com/siiway/imgapi))* |
 | `sleepy_page_learn_more`  | str  | `GitHub Repo`                     | 网页底部链接的**显示文字**                                                                                   |
-| `sleepy_page_repo`        | str  | `https://github.com/wyf9/sleepy`  | 网页底部链接的**目标** *(默认为本 repo 地址)*                                                                |
+| `sleepy_page_repo`        | str  | `https://github.com/sleepy-project/sleepy`  | 网页底部链接的**目标** *(默认为本 repo 地址)*                                                                |
 | `sleepy_page_more_text`   | str  | ` `                               | 网页底部链接上方插入的文字 (**支持 HTML**，可以插入 统计代码 / 备案号 等)                                    |
 | `sleepy_page_sorted`      | bool | false                             | 是否按字母顺序排序设备列表                                                                                   |
 | `sleepy_page_using_first` | bool | false                             | 是否设置使用中设备优先显示                                                                                   |
