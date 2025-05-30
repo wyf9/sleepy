@@ -15,7 +15,7 @@ def getenv(key: str, default: any, typeobj: object) -> any:
     :param default: 默认值 (未读取到此项配置时使用)
     :param typeobj: 类型对象 (str / int / bool)
     '''
-    got_value = os.getenv(key.upper())
+    got_value = os.getenv(key.upper()) or os.getenv(key.lower()) # 全大写 / 全小写皆可
     if got_value is None:
         return default
     else:

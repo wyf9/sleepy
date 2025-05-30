@@ -1,9 +1,13 @@
 # 部署
 
+1. **[手动部署](#手动部署)** *(建议有自己的服务器 / 本地部署使用)*
+2. **[Huggingface 部署](#huggingface-部署)** *(无服务器推荐)*
+3. [Vercel 部署](#vercel-部署) *(不推荐使用)*
+
+## 快速跳转
+
 - [部署](#部署)
-  - [一键部署](#一键部署)
-    - [Linux](#linux)
-    - [Windows](#windows)
+  - [快速跳转](#快速跳转)
   - [手动部署](#手动部署)
     - [安装](#安装)
     - [启动](#启动)
@@ -11,40 +15,9 @@
     - [我承认你的代码写的确实很nb，但对我来说还是太吃操作了](#我承认你的代码写的确实很nb但对我来说还是太吃操作了)
     - [卡在 Deploying?](#卡在-deploying)
   - [Vercel 部署](#vercel-部署)
-
-> **注意**: 关于服务器配置和 Linux 服务管理，请参考 [服务器配置](./server-config.md) 文档。
-
-## 一键部署
-
-### Linux
-
-运行命令：
-
-```bash
-bash <(curl -s https://ghproxy.com/https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.sh)
-```
-
-如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
-
-```bash
-bash <(curl -s https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.sh)
-```
-
-### Windows
-
-运行命令：
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-irm https://ghproxy.com/https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.ps1 | iex
-```
-
-如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-irm https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.ps1 | iex
-```
+  - [一键部署 (未测试)](#一键部署-未测试)
+    - [Linux](#linux)
+    - [Windows](#windows)
 
 ## 手动部署
 
@@ -163,3 +136,38 @@ python3 start.py
 ![vercel-4](https://ghimg.siiway.top/sleepy/deploy/vercel-4.1.png)
 
 > 修改环境变量后需重新部署
+
+## 一键部署 (未测试)
+
+> [!WARNING]
+> 未经充分测试, 谨慎使用
+
+### Linux
+
+运行命令：
+
+```bash
+bash <(curl -s https://ghproxy.com/https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.sh)
+```
+
+如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.sh)
+```
+
+### Windows
+
+运行命令：
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+irm https://ghproxy.com/https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.ps1 | iex
+```
+
+如果你的服务器不在中国大陆，可以去掉 `ghproxy.com/` 部分：
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+irm https://raw.githubusercontent.com/sleepy-project/sleepy/main/scripts/install.ps1 | iex
+```

@@ -7,16 +7,14 @@
 
 > [!IMPORTANT]
 > *(特别是)* Windows 用户请确保 `.env` 文件**使用 `UTF-8` 编码保存**，否则会导致**错误读入注释 / 中文乱码** <br/>
-> Huggingface / Vercel 等容器平台部署需将配置放在 **`Environment Variables`**，而**不是** `.env` 文件 *(见 [部署文档](./deploy.md))* <br/>
-> *请确保变量名为全大写 / [全小写 (Linux)]* <br/>
+> Huggingface / Vercel 等容器平台部署需将环境变量放在 **`Environment Variables`**，而**不是** `.env` 文件 *(见 [部署文档](./deploy.md))* <br/>
+> *请确保变量名为全大写或全小写* <br/>
 > *修改配置后需重启服务生效*
 
 > **配置类型**: <br/>
 > - `str`: 字符串，在 `.env` 中**建议使用双引号括起**，如: `sleepy_page_desc = "someone's status page"`
 > - `int`: 整数 *(小数部分会被舍弃)*
 > - `bool`: 布尔值，可选 `true` **(是)** / `false` **(否)**, *(也可简写为 `1` / `0` 等，详见 [此处](../_utils.py))*
-
-<!-- > - `float`: 浮点数 *(可带小数部分)* -->
 
 ## (main) 系统基本配置
 

@@ -1,4 +1,4 @@
-# /client
+# /cli,nt/
 
 此目录存储客户端 (用于更新状态/设备状态)
 
@@ -32,7 +32,7 @@
 
 ## 快速跳转
 
-- [/client](#client)
+- [/cli,nt/](#clint)
   - [快速跳转](#快速跳转)
 - [Windows](#windows)
   - [WinDevice](#windevice)
@@ -51,6 +51,7 @@
     - [配置](#配置-2)
     - [使用](#使用-1)
     - [安卓低版本运行](#安卓低版本运行)
+    - [启动时报错](#启动时报错)
   - [MagiskService](#magiskservice)
     - [配置](#配置-3)
     - [使用](#使用-2)
@@ -183,16 +184,11 @@ pip install psutil
 
 使用 [Autox.js](https://web.archive.org/web/20241224233444/https://github.com/kkevsekk1/AutoX) 编写的安卓自动更新状态脚本
 
-> [!WARNING]
-> Autox.js 已删库，RIP <br/>
-> 备份: [aiselp/AutoX](https://github.com/aiselp/AutoX) <br/>
-> 可自行寻找 [Auto.js](https://github.com/hyb1996/Auto.js) 的其他分支 **(可能需要作一些修改以兼容)**
+### 软件下载
 
 在使用前，请确保**已安装** Autox.js *且*授予**无障碍权限**
 
-### 软件下载
-
-[aiselp/AutoX Release](https://github.com/aiselp/AutoX/releases)
+**下载**: [aiselp/AutoX (Release)](https://github.com/aiselp/AutoX/releases)
 
 ### 配置
 
@@ -230,6 +226,51 @@ console.log('[sleepyc] ' + msg);
 ```
 
 </details>
+
+### 启动时报错
+
+如果可以安装软件, 但首次启动时报错:
+
+<details>
+<summary>展开报错示例</summary>
+
+```java
+错误信息:
+Unable to start activity ComponentInfo{org.autojs.autoxjs.v7/org.autojs.autojs.ui.splash.SplashActivity}: java.lang.SecurityException: Unable to start service Intent { cmp=org.autojs.autoxjs.v7/com.stardust.autojs.IndependentScriptService }: Unable to launch app org.autojs.autoxjs.v7/10361 for service Intent { cmp=org.autojs.autoxjs.v7/com.stardust.autojs.IndependentScriptService }: process is bad
+java.lang.RuntimeException: Unable to start activity ComponentInfo{org.autojs.autoxjs.v7/org.autojs.autojs.ui.splash.SplashActivity}: java.lang.SecurityException: Unable to start service Intent { cmp=org.autojs.autoxjs.v7/com.stardust.autojs.IndependentScriptService }: Unable to launch app org.autojs.autoxjs.v7/10361 for service Intent { cmp=org.autojs.autoxjs.v7/com.stardust.autojs.IndependentScriptService }: process is bad
+	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3903)
+	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4049)
+	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:101)
+	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2443)
+	at android.os.Handler.dispatchMessage(Handler.java:106)
+	at android.os.Looper.loopOnce(Looper.java:211)
+	at android.os.Looper.loop(Looper.java:300)
+	at android.app.ActivityThread.main(ActivityThread.java:8348)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:582)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1028)
+Caused by: java.lang.SecurityException: Unable to start service Intent { cmp=org.autojs.autoxjs.v7/com.stardust.autojs.IndependentScriptService }: Unable to launch app org.autojs.autoxjs.v7/10361 for service Intent { cmp=org.autojs.autoxjs.v7/com.stardust.autojs.IndependentScriptService }: process is bad
+	at android.app.ContextImpl.startServiceCommon(ContextImpl.java:1916)
+	at android.app.ContextImpl.startService(ContextImpl.java:1874)
+	at android.content.ContextWrapper.startService(ContextWrapper.java:827)
+	at com.stardust.autojs.servicecomponents.ScriptServiceConnection$Companion.start(ScriptServiceConnection.kt:129)
+	at org.autojs.autojs.ui.splash.SplashActivity.onCreate(SplashActivity.kt:51)
+	at android.app.Activity.performCreate(Activity.java:8577)
+	at android.app.Activity.performCreate(Activity.java:8541)
+	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1437)
+	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3884)
+	... 12 more
+
+```
+
+</details>
+
+有两种解决方案:
+
+1. 检查系统设置 (如 Google `Play 保护机制` 可能会将其阻止)
+2. 找 wyf9 获取旧版安装包
 
 ## [MagiskService](./magisk/service.sh)
 
