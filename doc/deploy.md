@@ -2,7 +2,8 @@
 
 1. **[手动部署](#手动部署)** *(建议有自己的服务器 / 本地部署使用)*
 2. **[Huggingface 部署](#huggingface-部署)** *(无服务器推荐)*
-3. [Vercel 部署](#vercel-部署) *(不推荐使用)*
+3. [Vercel 部署](#vercel-部署) *(限制较多, 不推荐使用)*
+4. [一键部署](#一键部署-未测试) *(未测试, 不推荐使用)*
 
 ## 快速跳转
 
@@ -12,7 +13,6 @@
     - [安装](#安装)
     - [启动](#启动)
   - [Huggingface 部署](#huggingface-部署)
-    - [我承认你的代码写的确实很nb，但对我来说还是太吃操作了](#我承认你的代码写的确实很nb但对我来说还是太吃操作了)
     - [卡在 Deploying?](#卡在-deploying)
   - [Vercel 部署](#vercel-部署)
   - [一键部署 (未测试)](#一键部署-未测试)
@@ -58,8 +58,6 @@ python3 start.py
 
 默认服务 http 端口: **`9010`**
 
-关于 Linux 服务管理和配置，请参考 [服务器配置](./server-config.md) 文档。
-
 ## Huggingface 部署
 
 > 适合没有服务器部署的同学使用 <br/>
@@ -68,7 +66,7 @@ python3 start.py
 
 只需三步:
 
-1. 复制 Space `sleepy-project/sleepy` (**[点击直达](https://huggingface.co/spaces/wyf9/sleepy?duplicate=true&visibility=public)**)
+1. 复制 Space `wyf9/sleepy` (**[点击直达](https://huggingface.co/spaces/wyf9/sleepy?duplicate=true&visibility=public)**)
 2. 在复制页面设置 secret 和页面信息等环境变量 *[**[配置示例](../.env.example)**]*
 3. 点击部署，等待完成后点击右上角三点 -> `Embed this space`，即可获得你的部署地址 *(类似于: <https://wyf9-sleepy.hf.space>)*
 
@@ -76,33 +74,15 @@ python3 start.py
 > **在创建时请务必选择 Space 类型为公开 (`Public`)，否则无法获取部署地址 (他人无法访问)!** <br/>
 > *Hugging Face Space 如 48h 未访问将会休眠，建议使用定时请求平台 (如 `cron-job.org`, `Uptime Kuma` 等) 定时请求 Space `/none`*
 
-### 我承认你的代码写的确实很nb，但对我来说还是太吃操作了
-
-<details>
-
-***<summary>点!此!展!开! (大图警告)</summary>***
-
-有没有更简单无脑的方法推荐一下
-**有的兄弟，有的！**
-这样的方法有很多个，各个都是`GitHub` T<sub>0.5</sub>的操作
-我怕教太多了你学不会，现在只要点
-[这里](https://huggingface.co/spaces/sadg456/s?duplicate=true&visibility=public)
-然后自己去注册一个账号
-参考`.env.example`在Setting==>Variables and secrets添加环境变量配置
-然后在这里:
-![链接](https://ghimg.siiway.top/sleepy/deploy/huggingface-1.1.png)
-就可以复制你的`URL`，填入你选择的 **[`/client`](./client/README.md)** 对应的url配置中即可快速开始
-
-</details>
-
 ### 卡在 Deploying?
+
+> [!TIP]
+> 适用于日志中程序已经启动, 但部署状态仍然为 `Deploying` 的情况 <br/>
+> *对所有的 Hugging Face 仓库都有效*
 
 <details>
 
 <summary>解决方法</summary>
-
-> [!TIP]
-> *对所有的 Hugging Face 仓库都有效*
 
 1. 点击右上角三点 -> `Duplicate this Space`，**复制** Space 并**填写好和之前一样的环境变量**
 2. 在 `Settings` 页面底部 `Delete this Space` 处**删除**旧 Space
@@ -112,7 +92,7 @@ python3 start.py
 
 ## Vercel 部署
 
-> 可以使用自定义域名，但限制较多 **(如无法使用 SSE)** <br/>
+> 可以使用自定义域名，但**限制较多** (如无法使用 SSE, 请求数 / 请求完成时间有限制等) <br/>
 > *当前端检测到为 Vercel 部署时会回退到轮询方式更新*
 
 1. Fork 本项目
@@ -140,7 +120,7 @@ python3 start.py
 ## 一键部署 (未测试)
 
 > [!WARNING]
-> 未经充分测试, 谨慎使用
+> 完全由 AI 生成, 未经任何测试, **不要使用此方式!!!**
 
 ### Linux
 

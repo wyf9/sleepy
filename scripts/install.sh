@@ -187,25 +187,6 @@ create_env_file() {
     print_message "You can further customize your configuration by editing the .env file." "$BLUE"
 }
 
-# Initialize data file
-initialize_data() {
-    print_step "4" "Initializing data file"
-
-    if [ -f "data.json" ]; then
-        print_warning "A data.json file already exists."
-        read -p "Do you want to overwrite it? (y/n): " choice
-        if [[ ! "$choice" =~ ^[Yy]$ ]]; then
-            print_message "Keeping existing data.json file." "$YELLOW"
-            return
-        fi
-    fi
-
-    print_message "Creating data.json file..." "$BLUE"
-    cp data.template.json data.json
-
-    print_success "data.json file created successfully"
-}
-
 # Create systemd service
 create_systemd_service() {
     print_step "5" "Setting up systemd service"
@@ -567,13 +548,10 @@ main() {
     # Step 4: Create .env file
     create_env_file
 
-    # Step 5: Initialize data file
-    initialize_data
-
-    # Step 6: Create systemd service (optional)
+    # Step 5: Create systemd service (optional)
     create_systemd_service
 
-    # Step 7: Display completion message
+    # Step 6: Display completion message
     display_completion
 }
 

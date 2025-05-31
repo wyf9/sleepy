@@ -45,7 +45,7 @@
 ### 用户可修改配置 / 模板 ###
 -> .env.example # 环境变量 (配置) 的示例
 -> setting/ # 独立于 .env 的设置? (一般是 json 文件存储的列表)
--> data.template.json # 状态文件模板
+-> data.template.jsonc # 状态文件模板
 ```
 
 ```ini

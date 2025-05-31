@@ -179,25 +179,6 @@ function Create-EnvFile {
     Write-ColorMessage "You can further customize your configuration by editing the .env file." "Blue"
 }
 
-# Initialize data file
-function Initialize-DataFile {
-    Write-Step "4" "Initializing data file"
-    
-    if (Test-Path "data.json") {
-        Write-Warning "A data.json file already exists."
-        $choice = Read-Host "Do you want to overwrite it? (y/n)"
-        if ($choice -ne "y") {
-            Write-ColorMessage "Keeping existing data.json file." "Yellow"
-            return
-        }
-    }
-    
-    Write-ColorMessage "Creating data.json file..." "Blue"
-    Copy-Item "data.template.json" "data.json"
-    
-    Write-Success "data.json file created successfully"
-}
-
 # Display completion message
 function Show-CompletionMessage {
     Write-Step "5" "Installation complete"
@@ -254,10 +235,7 @@ function Start-Installation {
     # Step 3: Create .env file
     Create-EnvFile
     
-    # Step 4: Initialize data file
-    Initialize-DataFile
-    
-    # Step 5: Display completion message
+    # Step 4: Display completion message
     Show-CompletionMessage
 }
 
