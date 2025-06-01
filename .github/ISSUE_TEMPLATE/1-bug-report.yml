@@ -60,10 +60,6 @@ body:
   - type: checkboxes
     id: confirm
     attributes:
-      label: 确认提交 / Comfirm
-      description: |
-        1.  <br/>
-        2. 
       options:
         - label: 我却确认现有的 Issues 列表中没有与这个重复的问题 / I confirm there is no duplicate.
           required: true
