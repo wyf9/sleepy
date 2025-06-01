@@ -20,3 +20,5 @@ client/winform/.vs/WindowsFormsApp1
 client/winform/WindowsFormsApp1/.vs
 client/winform/WindowsFormsApp1/bin
 client/winform/WindowsFormsApp1/obj
+client/winform/packages
+.vs/

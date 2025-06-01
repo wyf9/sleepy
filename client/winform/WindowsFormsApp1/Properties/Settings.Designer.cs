@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace sleepy.Properties {
+namespace SleepyWinform.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

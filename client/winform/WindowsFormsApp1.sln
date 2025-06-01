@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sleepywinform", "WindowsFormsApp1\sleepywinform.csproj", "{6CAC851A-DA0B-494C-A7B4-8C1D9384C948}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SleepyWinform", "WindowsFormsApp1\SleepyWinform.csproj", "{6CAC851A-DA0B-494C-A7B4-8C1D9384C948}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
