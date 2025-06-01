@@ -60,8 +60,9 @@ body:
   - type: checkboxes
     id: confirm
     attributes:
+      label: 提交前请确认 / Please confirm before submitting
       options:
-        - label: 我却确认现有的 Issues 列表中没有与这个重复的问题 / I confirm there is no duplicate.
+        - label: 我确认现有的 Issues 列表中没有与这个重复的问题 / I confirm there is no duplicate.
           required: true
         - label: 我确认已经删除日志中的敏感信息 (如 secret) / I confirm there is no secret in logs.
           required: true
