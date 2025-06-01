@@ -32,6 +32,7 @@ class CustomFormatter(Formatter):
         formatted_message = f"{timestamp}{symbol} [{record.levelname}] {message}"
         return formatted_message
 
+
 def format_dict(dic: dict | list) -> Response:
     '''
     字典 -> Response (内容为格式化后的 json 文本) \n
@@ -57,6 +58,26 @@ def reterr(code: str, message: str) -> Response:
         'message': message
     }
     return format_dict(ret)
+
+
+def cache_response(*args):
+    '''
+    给返回添加缓存标头
+    '''
+    resp = make_response(*args)
+    resp.headers['Cache-Control'] = 'max-age=86400, must-revalidate'
+    resp.headers['Expires'] = '86400'
+    return resp
+
+def no_cache_response(*args):
+    '''
+    给返回添加阻止缓存标头
+    '''
+    resp = make_response(*args)
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
+    return resp
 
 
 class SleepyException(Exception):

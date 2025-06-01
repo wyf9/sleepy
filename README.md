@@ -15,7 +15,7 @@
 - [x] 开放的 状态 / 统计 **[API](./doc/api.md)**
 
 > [!TIP]
-> **最新 开发进度 / TODOs 见: [Discord][link-dc]** / [Telegram][link-tg] / [QQ][link-qq]<br/>
+> **最新 开发进度 / TODOs 见: [Discord][link-dc]** / [QQ][link-qq]<br/>
 > 如有 Bug / 建议, 可发 issue (**[Bug][link-issue-bug]** / **[Feature][link-issue-feature]**) 或选择上面的联系方式 *(注明来意)*.
 
 ### Preview

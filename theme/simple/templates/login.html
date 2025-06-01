@@ -26,11 +26,6 @@
         </div>
     </div>
 
-    <script>
-        // 设置当前主题，供 theme.js 使用
-        document.body.setAttribute('data-theme', "{{ current_theme }}");
-    </script>
-    <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <script src="{{ url_for('static', filename='login.js') }}"></script>
 </body>
 </html>

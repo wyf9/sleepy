@@ -53,11 +53,6 @@
             font-weight: bold;
         }
     </style>
-    <script>
-        // 设置当前主题，供 theme.js 使用
-        document.body.setAttribute('data-theme', "{{ current_theme }}");
-    </script>
-    <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <script src="{{ url_for('static', filename='panel.js') }}"></script>
 </head>
 
@@ -80,7 +75,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <!-- <div class="card">
             <h2>主题设置</h2>
             <p>当前主题: <span id="current-theme">{{ current_theme }}</span></p>
             <div id="theme-selector">
@@ -89,7 +84,7 @@
                     data-theme="{{ theme }}">{{ theme }}主题</div>
                 {% endfor %}
             </div>
-        </div>
+        </div> -->
 
         <div class="card">
             <h2>设备管理</h2>

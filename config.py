@@ -132,6 +132,7 @@ class Config:
         timezone: str = get(str, _, 'timezone')
         checkdata_interval: int = get(int, _, 'checkdata_interval')
         secret: str = get(str, _, 'secret')
+        cache_age: int = get(int, _, 'cache_age')
 
     class _page:
         '''

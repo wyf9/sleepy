@@ -70,8 +70,8 @@ async function login() {
 // 验证 cookie 是否有效
 async function validateCookie() {
     try {
-        // 使用 /api/login 验证 cookie 是否有效
-        const response = await fetch('/api/login', {
+        // 使用 /verify-secret 验证 cookie 是否有效
+        const response = await fetch('/verify-secret', {
             method: 'GET',
             credentials: 'include', // 包含 cookie
             cache: 'no-cache' // 禁用缓存

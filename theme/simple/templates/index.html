@@ -31,23 +31,19 @@
                 <a href="{{ c.page.learn_more_link }}" target="_blank">{{ c.page.learn_more_text | safe }}</a>
                 |
                 <a href="/webui/login">管理面板</a>
-                <div style="margin-top: 10px;">
+                <!-- <div style="margin-top: 10px;">
                     主题:
                     {% for theme in available_themes %}
                     <a href="/?theme={{ theme }}">{{ theme }}</a>{% if not loop.last %} | {% endif %}
                     {% endfor %}
-                </div>
+                </div> -->
             </p>
         </div>
     </div>
 
     <script>
         document.getElementById('status').classList.add("{{ status['color'] }}");
-
-        // 设置当前主题，供 theme.js 使用
-        document.body.setAttribute('data-theme', "{{ current_theme }}");
     </script>
-    <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <script src="{{ url_for('static', filename='get.js') }}" defer></script>
 </body>
 </html>

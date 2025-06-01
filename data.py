@@ -2,13 +2,14 @@
 
 import os
 import threading
-from time import sleep
+from time import sleep, time
 from datetime import datetime
 from logging import getLogger
 
 import pytz
 import json
 import json5
+from werkzeug.security import safe_join
 
 import utils as u
 from config import Config
@@ -18,37 +19,44 @@ l = getLogger(__name__)
 
 class Data:
     '''
-    data 类，存储当前/设备状态
+    data 类，存储当前/设备状态 <br/>
     可用 `.data['xxx']` 直接调取数据 (加载后) *(?)*
 
     :param config: 用户配置对象
     '''
     data: dict
-    preload_data: dict
-    data_check_interval: int = 60
-    c: Config
+    _preload_data: dict
+    _cache: dict[str, tuple[float, str]] = {}
+    _data_check_interval: int = 60
+    _c: Config
 
     def __init__(self, config: Config):
-        self.c = config
+        # --- init
+        self._c = config
 
         with open(u.get_path('data.example.jsonc'), 'r', encoding='utf-8') as file:
-            self.preload_data = json5.load(file)
+            self._preload_data = json5.load(file)
         if os.path.exists(u.get_path('data/data.json')):
             try:
                 self.load()
             except Exception as e:
                 l.warning(f'Error when loading data: {e}, try re-create')
                 os.remove(u.get_path('data/data.json'))
-                self.data = self.preload_data
+                self.data = self._preload_data
                 self.save()
                 self.load()
         else:
             l.info('Could not find data/data.json, creating.')
             try:
-                self.data = self.preload_data
+                self.data = self._preload_data
                 self.save()
             except Exception as e:
                 u.exception(f'Create data/data.json failed: {e}')
+        # --- load & start timer
+        self.load()
+        self._start_timer_check(
+            data_check_interval=self._c.main.checkdata_interval
+        )
 
     # --- Storage functions
 
@@ -60,14 +68,13 @@ class Data:
         :param preload: 将会将 data/data.json 的内容追加到此后
         '''
         if not preload:
-            preload = self.preload_data
-        attempts = error_count
+            preload = self._preload_data
 
-        while attempts > 0:
+        while error_count > 0:
             try:
                 if not os.path.exists(u.get_path('data/data.json')):
                     l.warning('data/data.json not exist, try re-create')
-                    self.data = self.preload_data
+                    self.data = self._preload_data
                     self.save()
                 with open(u.get_path('data/data.json'), 'r', encoding='utf-8') as file:
                     Data = json.load(file)
@@ -78,9 +85,9 @@ class Data:
                         self.data = DATA
                 break  # 成功加载数据后跳出循环
             except Exception as e:
-                attempts -= 1
-                if attempts > 0:
-                    l.warning(f'Load data error: {e}, retrying ({attempts} attempts left)')
+                error_count -= 1
+                if error_count > 0:
+                    l.warning(f'Load data error: {e}, retrying ({error_count} attempts left)')
                 else:
                     l.error(f'Load data error: {e}, reached max retry count!')
                     raise
@@ -113,27 +120,11 @@ class Data:
             }
             self.record_metrics()
 
-    def get_metrics_resp(self, json_only: bool = False):
-        now = datetime.now(pytz.timezone(self.c.main.timezone))
-        '''
-        if json_only:
-            # 仅用于调试
-            return {
-                'time': f'{now}',
-                'timezone': c.main.timezone,
-                'today_is': self.data['metrics']['today_is'],
-                'month_is': self.data['metrics']['month_is'],
-                'year_is': self.data['metrics']['year_is'],
-                'today': self.data['metrics']['today'],
-                'month': self.data['metrics']['month'],
-                'year': self.data['metrics']['year'],
-                'total': self.data['metrics']['total']
-            }
-        else:
-        '''
+    def get_metrics_resp(self):
+        now = datetime.now(pytz.timezone(self._c.main.timezone))
         return u.format_dict({
             'time': f'{now}',
-            'timezone': self.c.main.timezone,
+            'timezone': self._c.main.timezone,
             'today_is': self.data['metrics']['today_is'],
             'month_is': self.data['metrics']['month_is'],
             'year_is': self.data['metrics']['year_is'],
@@ -143,15 +134,45 @@ class Data:
             'total': self.data['metrics']['total']
         })
 
+    def record_metrics(self, path: str | None = None) -> None:
+        '''
+        记录调用
+
+        :param path: 访问的路径
+        '''
+
+        # check metrics list
+        if not path in self._c.metrics.allow_list:
+            return
+
+        self.check_metrics_time()
+
+        # - record num
+        today = self.data['metrics'].setdefault('today', {})
+        month = self.data['metrics'].setdefault('month', {})
+        year = self.data['metrics'].setdefault('year', {})
+        total = self.data['metrics'].setdefault('total', {})
+
+        today[path] = today.get(path, 0) + 1
+        month[path] = month.get(path, 0) + 1
+        year[path] = year.get(path, 0) + 1
+        total[path] = total.get(path, 0) + 1
+
+    # --- Timer check
+    # - check metrics time
+    # - check device status
+    # - check cache expire
+    # - auto save data
+
     def check_metrics_time(self) -> None:
         '''
         跨 日 / 月 / 年 检测
         '''
-        if not self.c.metrics.enabled:
+        if not self._c.metrics.enabled:
             return
 
         # get time now
-        now = datetime.now(pytz.timezone(self.c.main.timezone))
+        now = datetime.now(pytz.timezone(self._c.main.timezone))
         year_is = str(now.year)
         month_is = f'{now.year}-{now.month}'
         today_is = f'{now.year}-{now.month}-{now.day}'
@@ -171,42 +192,6 @@ class Data:
             l.debug(f'[metrics] year_is changed: {self.data["metrics"]["year_is"]} -> {year_is}')
             self.data['metrics']['year_is'] = year_is
             self.data['metrics']['year'] = {}
-
-    def record_metrics(self, path: str | None = None) -> None:
-        '''
-        记录调用
-
-        :param path: 访问的路径
-        '''
-
-        # check metrics list
-        if not path in self.c.metrics.allow_list:
-            return
-
-        self.check_metrics_time()
-
-        # - record num
-        today = self.data['metrics'].setdefault('today', {})
-        month = self.data['metrics'].setdefault('month', {})
-        year = self.data['metrics'].setdefault('year', {})
-        total = self.data['metrics'].setdefault('total', {})
-
-        today[path] = today.get(path, 0) + 1
-        month[path] = month.get(path, 0) + 1
-        year[path] = year.get(path, 0) + 1
-        total[path] = total.get(path, 0) + 1
-
-    # --- Timer check - save data
-
-    def start_timer_check(self, data_check_interval: int = 60):
-        '''
-        使用 threading 启动下面的 `timer_check()`
-
-        :param data_check_interval: 检查间隔 *(秒)*
-        '''
-        self.data_check_interval = data_check_interval
-        self.timer_thread = threading.Thread(target=self.timer_check, daemon=True)
-        self.timer_thread.start()
 
     def check_device_status(self):
         '''
@@ -232,26 +217,88 @@ class Data:
             else:
                 l.debug(f'[check_device_status] 当前状态为 {current_status}, 不适用自动切换.')
 
-    def timer_check(self):
+    def clean_cache(self):
+        '''
+        清理缓存中的过期项
+        '''
+        now = time()
+        for i in self._cache:
+            if now - self._cache[i][0] > self._c.main.cache_age:
+                del self._cache[i]
+
+    def _auto_save(self):
+        try:
+            file_data = self.load(ret=True)
+            if file_data != self.data:
+                self.save()
+                l.debug('[auto_save] data changed, saved to disk.')
+        except Exception as e:
+            l.warning(f'[auto_save] saving error: {e}')
+
+    def _data_check_timer(self):
         '''
         定时检查更改并自动保存
         * 根据 `data_check_interval` 参数调整 sleep() 的秒数
         * 需要使用 threading 启动新线程运行
         '''
-        l.info(f'[timer_check] started, interval: {self.data_check_interval} seconds.')
+        l.info(f'[timer_check] started, interval: {self._data_check_interval} seconds.')
         while True:
-            sleep(self.data_check_interval)
+            now = time()
+            l.debug('[timer_check] running...')
             try:
-                self.check_metrics_time()  # 检测是否跨日
-                self.check_device_status()  # 检测设备状态并更新 status
-                file_data = self.load(ret=True)
-                if file_data == self.data:
-                    l.debug('[timer_check] data not changed, skip saving.')
-                else:
-                    self.save()
-                    l.debug('[timer_check] data changed, saved to disk.')
+                self.check_metrics_time()
+                self.check_device_status()
+                self.clean_cache()
+                self._auto_save()
             except Exception as e:
-                l.warning(f'[timer_check] saving error: {e}, retrying.')
+                l.warning(f'[timer_check] error: {e}')
+            l.debug(f'[timer_check] finished in {time()-now}s.')
+            sleep(self._data_check_interval)
 
-    # --- check device heartbeat
-    # TODO
+    def _start_timer_check(self, data_check_interval: int = 60):
+        '''
+        使用 threading 启动下面的 `timer_check()`
+
+        :param data_check_interval: 检查间隔 *(秒)*
+        '''
+        self._data_check_interval = data_check_interval
+        self.timer_thread = threading.Thread(target=self._data_check_timer, daemon=True)
+        self.timer_thread.start()
+    # --- simple cache system
+
+    def get_cached(self, filename: str) -> tuple[str, str] | None:
+        '''
+        加载文件 (经过缓存)
+
+        :param filename: 文件名
+        :return str: (加载成功) 文件内容
+        :return None: (加载失败) 空
+        '''
+        filepath = safe_join(u.current_dir(), filename)
+        if not filepath:
+            # unsafe -> none
+            return None
+        try:
+            if self._c.main.debug:
+                # debug -> load directly
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    ret = f.read()
+                    f.close()
+                return ret
+            else:
+                # check cache & expire
+                now = time()
+                cached = self._cache.get(filename)
+                if cached and now - cached[0] < self._c.main.cache_age:
+                    # has cache, and not expired
+                    return cached[1]
+                else:
+                    # no cache, or expired
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        ret = f.read()
+                        f.close()
+                    self._cache[filename] = (now, ret)
+                    return ret
+        except FileNotFoundError or IsADirectoryError:
+            # not found / isn't file -> none
+            return None

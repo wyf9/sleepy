@@ -348,17 +348,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 主题选择器
-    const themeItems = document.querySelectorAll('#theme-selector .status-item');
-    themeItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const themeName = this.getAttribute('data-theme');
-            if (themeName) {
-                switchTheme(themeName);
-            }
-        });
-    });
-
     // 设备删除按钮
     document.addEventListener('click', function(event) {
         const target = event.target;

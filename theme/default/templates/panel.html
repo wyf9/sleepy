@@ -16,37 +16,24 @@
             padding: 20px;
         }
     </style>
-    <script>
-        // 设置当前主题，供 theme.js 使用
-        document.body.setAttribute('data-theme', "{{ current_theme }}");
-    </script>
-    <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <script src="{{ url_for('static', filename='panel.js') }}"></script>
 </head>
 
 <body class="admin-panel">
     <div class="panel-container">
         <div class="panel-header">
-            <div class="ascii-art">
-  _____                      _        _____                    _
- / ____|                    | |      |  __ \                  | |
-| |     ___  _ __  ___  ___ | | ___  | |__) |_ _ _ __   ___  | |
-| |    / _ \| '_ \/ __|/ _ \| |/ _ \ |  ___/ _` | '_ \ / _ \ | |
-| |___| (_) | | | \__ \ (_) | |  __/ | |  | (_| | | | |  __/ | |
- \_____\___/|_| |_|___/\___/|_|\___| |_|   \__,_|_| |_|\___| |_|
-            </div>
-            <h3 class="panel-title">{{ c.page.name }}'s Admin Terminal</h3>
+            <h1 class="panel-title">{{ c.page.name }} 的管理面板</h1>
             <div class="panel-actions">
-                <button class="btn btn-primary" id="save-data-btn">$ save_data.sh</button>
-                <a href="/" class="btn btn-secondary">$ cd /home</a>
-                <button class="btn btn-danger" id="logout-btn">$ logout.sh</button>
+                <button class="btn btn-primary" id="save-data-btn">保存数据</button>
+                <a href="/" class="btn btn-secondary">查看前台</a>
+                <button class="btn btn-danger" id="logout-btn">退出登录</button>
             </div>
         </div>
 
         <div class="panel-card">
             <div class="panel-section">
-                <h2 class="panel-section-title">$ status_manager.sh</h2>
-                <p>> 当前状态: <span id="current-status-name">加载中...</span><span class="console-cursor">_</span></p>
+                <h2 class="panel-section-title">状态管理</h2>
+                <p>当前状态: <span id="current-status-name">加载中...</span></p>
                 <div class="status-selector" id="status-selector">
                     <!-- 状态选择器将通过 JavaScript 动态生成 -->
                 </div>
@@ -55,12 +42,12 @@
 
         <div class="panel-card">
             <div class="panel-section">
-                <h2 class="panel-section-title">$ theme_manager.sh</h2>
-                <p>> 当前主题: <span id="current-theme">{{ current_theme }}</span><span class="console-cursor">_</span></p>
-                <div class="status-selector" id="theme-selector">
+                <h2 class="panel-section-title">主题设置</h2>
+                <p>当前主题: <span id="current-theme">{{ current_theme }}</span></p>
+                <div style="margin-top: 10px;">
+                    主题:
                     {% for theme in available_themes %}
-                    <div class="status-item {% if current_theme == theme %}active{% endif %}"
-                        data-theme="{{ theme }}">theme {{ theme }}</div>
+                    <a href="/webui/panel?theme={{ theme }}" style="color: rgb(0, 255, 0);">{{ theme }}</a>{% if not loop.last %} | {% endif %}
                     {% endfor %}
                 </div>
             </div>
@@ -68,15 +55,15 @@
 
         <div class="panel-card">
             <div class="panel-section">
-                <h2 class="panel-section-title">$ device_manager.sh</h2>
+                <h2 class="panel-section-title">设备管理</h2>
                 <div class="panel-actions" style="margin-bottom: 15px;">
-                    <button class="btn btn-danger" id="clear-devices-btn">rm -rf devices/*</button>
+                    <button class="btn btn-danger" id="clear-devices-btn">清除所有设备</button>
                     <div>
                         <label class="toggle-switch">
                             <input type="checkbox" id="private-mode-toggle">
                             <span class="toggle-slider"></span>
                         </label>
-                        <span style="vertical-align: middle; margin-left: 5px;">private_mode</span>
+                        <span style="vertical-align: middle; margin-left: 5px;">隐私模式</span>
                     </div>
                 </div>
                 <table class="device-list">
@@ -99,13 +86,27 @@
         {% if c.metrics.enabled %}
         <div class="panel-card">
             <div class="panel-section">
-                <h2 class="panel-section-title">$ metrics.sh</h2>
-                <p>> 正在获取统计数据...<span class="console-cursor">_</span></p>
+                <h2 class="panel-section-title">访问统计</h2>
                 <div class="metrics-container" id="metrics-container">
                     <!-- 统计数据将通过 JavaScript 动态生成 -->
                 </div>
             </div>
         </div>
+        {% endif %}
+
+        <!-- 插件管理后台卡片 -->
+        {% if plugin_admin_cards %}
+        {% for card in plugin_admin_cards %}
+        <div class="panel-card plugin-card" id="{{ card.id }}">
+            <div class="panel-section">
+                <h2 class="panel-section-title">{{ card.title }} <span
+                        class="plugin-badge">{{ card.plugin_name }}</span></h2>
+                <div class="plugin-card-content">
+                    {{ card.content|safe }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
         {% endif %}
     </div>
 
