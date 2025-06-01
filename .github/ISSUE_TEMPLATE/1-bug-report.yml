@@ -60,11 +60,11 @@ body:
   - type: checkboxes
     id: confirm
     attributes:
-      label: 确认提交 / Comfirm
-      description: |
-        1. 确认现有的 Issues 列表中没有重复的问题 / Make sure there's no duplicate. <br/>
-        2. 确认已经删除日志中的敏感信息 (如 secret) / Make sure there's no secret in logs.
       options:
+        - label: 我却确认现有的 Issues 列表中没有与这个重复的问题 / I confirm there is no duplicate.
+          required: true
+        - label: 我确认已经删除日志中的敏感信息 (如 secret) / I confirm there is no secret in logs.
+          required: true
         - label: 我确认检查了上面的事项，并创建此 Issue / I confirm to commit this issue.
           required: true
         - label: 我未认真查看上面所有内容，只是一味勾选所有复选框 / Don't check me.
