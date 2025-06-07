@@ -527,21 +527,3 @@ class Plugin:
                     'message': 'wrong secret'
                 }, 401
         return wrapped_view
-
-'''
-# coding: utf-8
-
-import importlib
-from logging import getLogger
-
-from yaml import safe_load
-from flask import Flask
-
-
-l = getLogger(__name__)
-
-class Plugin:
-    \'''
-    Plugin System for Sleepy
-    \'''
-'''

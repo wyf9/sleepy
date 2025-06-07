@@ -252,7 +252,7 @@ class Data:
                 self._auto_save()
             except Exception as e:
                 l.warning(f'[timer_check] error: {e}')
-            l.debug(f'[timer_check] finished in {time()-now:.7f}s.')
+            l.debug(f'[timer_check] finished in {(time()*-now)*1000:.7f}ms.')
             sleep(self._data_check_interval)
 
     def _start_timer_check(self, data_check_interval: int = 60):

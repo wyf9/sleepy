@@ -14,8 +14,8 @@
 
 ```jsonc
 {
-    "secret": "MySecretCannotGuess",
-    // ...
+  "secret": "MySecretCannotGuess",
+  // ...
 }
 ```
 
@@ -50,9 +50,9 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 401 Unauthorized
 {
-    "success": false, // 请求是否成功
-    "code": "not authorized", // 返回代码
-    "message": "wrong secret" // 详细信息
+  "success": false, // 请求是否成功
+  "code": "not authorized", // 返回代码
+  "message": "wrong secret" // 详细信息
 }
 ```
 
@@ -83,25 +83,25 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK
 {
-    "time": "2024-12-28 00:21:24", // 服务端时间
-    "timezone": "Asia/Shanghai", // 服务端配置的时区
-    "success": true, // 请求是否成功
-    "status": 0, // 获取到的状态码
-    "info": { // 对应状态码的信息
-        "name": "活着", // 状态名称
-        "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
-        "color": "awake"// 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
-    },
-    "device": { // 设备列表
-        "device-1": { // 标识符，唯一
-            "show_name": "MyDevice1", // 前台显示名称
-            "using": "false", // 是否正在使用
-            "app_name": "bilibili" // 应用名 (如 using == false 且设置了 status.not_using 则会被替换)
-        }
-    },
-    "last_updated": "2024-12-20 23:51:34", // 信息上次更新的时间
-    "refresh": 5000, // 刷新时间 (ms)
-    "device_status_slice": 20 // 设备状态截取文字数
+  "time": "2024-12-28 00:21:24", // 服务端时间
+  "timezone": "Asia/Shanghai", // 服务端配置的时区
+  "success": true, // 请求是否成功
+  "status": 0, // 获取到的状态码
+  "info": { // 对应状态码的信息
+    "name": "活着", // 状态名称
+    "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
+    "color": "awake"// 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
+  },
+  "device": { // 设备列表
+    "device-1": { // 标识符，唯一
+      "show_name": "MyDevice1", // 前台显示名称
+      "using": "false", // 是否正在使用
+      "app_name": "bilibili" // 应用名 (如 using == false 且设置了 status.not_using 则会被替换)
+    }
+  },
+  "last_updated": "2024-12-20 23:51:34", // 信息上次更新的时间
+  "refresh": 5000, // 刷新时间 (ms)
+  "device_status_slice": 20 // 设备状态截取文字数
 }
 ```
 
@@ -123,19 +123,19 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK
 [
-    {
-        "id": 0, // 索引，取决于配置文件中的有无
-        "name": "活着", // 状态名称
-        "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
-        "color": "awake" // 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
-    }, 
-    {
-        "id": 1, 
-        "name": "似了", 
-        "desc": "睡似了或其他原因不在线，紧急情况请使用电话联系。", 
-        "color": "sleeping"
-    }, 
-    // 以此类推
+  {
+    "id": 0, // 索引，取决于配置文件中的有无
+    "name": "活着", // 状态名称
+    "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
+    "color": "awake" // 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
+  }, 
+  {
+    "id": 1, 
+    "name": "似了", 
+    "desc": "睡似了或其他原因不在线，紧急情况请使用电话联系。", 
+    "color": "sleeping"
+  }, 
+  // 以此类推
 ]
 ```
 
@@ -161,35 +161,35 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK
 {
-    "time": "2025-01-22 08:40:48.564728+08:00", // 服务端时间
-    "timezone": "Asia/Shanghai", // 时区
-    "today_is": "2025-1-22", // 今日日期
-    "month_is": "2025-1", // 今日月份
-    "year_is": "2025", // 今日年份
-    "today": { // 今天的数据
-        "/device/set": 18,
-        "/": 2,
-        "/style.css": 1,
-        "/query": 2
-    }, 
-    "month": { // 今月的数据
-        "/device/set": 18,
-        "/": 2,
-        "/style.css": 1,
-        "/query": 2
-    }, 
-    "year": { // 今年的数据
-        "/device/set": 18,
-        "/": 2,
-        "/style.css": 1,
-        "/query": 2
-    }, 
-    "total": { // 总统计数据，不清除
-        "/device/set": 18,
-        "/": 2,
-        "/style.css": 1,
-        "/query": 2
-    }
+  "time": "2025-01-22 08:40:48.564728+08:00", // 服务端时间
+  "timezone": "Asia/Shanghai", // 时区
+  "today_is": "2025-1-22", // 今日日期
+  "month_is": "2025-1", // 今日月份
+  "year_is": "2025", // 今日年份
+  "today": { // 今天的数据
+    "/device/set": 18,
+    "/": 2,
+    "/style.css": 1,
+    "/query": 2
+  }, 
+  "month": { // 今月的数据
+    "/device/set": 18,
+    "/": 2,
+    "/style.css": 1,
+    "/query": 2
+  }, 
+  "year": { // 今年的数据
+    "/device/set": 18,
+    "/": 2,
+    "/style.css": 1,
+    "/query": 2
+  }, 
+  "total": { // 总统计数据，不清除
+    "/device/set": 18,
+    "/": 2,
+    "/style.css": 1,
+    "/query": 2
+  }
 }
 ```
 
@@ -221,16 +221,16 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK | 成功
 {
-    "success": true, // 请求是否成功
-    "code": "OK", // 返回代码
-    "set_to": 0 // 设置到的状态码
+  "success": true, // 请求是否成功
+  "code": "OK", // 返回代码
+  "set_to": 0 // 设置到的状态码
 }
 
 // 400 Bad Request | 失败 - 请求无效
 {
-    "success": false, // 请求是否成功
-    "code": "bad request", // 返回代码
-    "message": "argument 'status' must be a number" // 详细信息
+  "success": false, // 请求是否成功
+  "code": "bad request", // 返回代码
+  "message": "argument 'status' must be a number" // 详细信息
 }
 ```
 
@@ -275,10 +275,10 @@ sleepy-token=MySecretCannotGuess
 
 ```jsonc
 {
-    "id": "device-1", // 设备标识符
-    "show_name": "MyDevice1", // 显示名称
-    "using": true, // 是否正在使用
-    "app_name": "VSCode" // 正在使用应用的名称
+  "id": "device-1", // 设备标识符
+  "show_name": "MyDevice1", // 显示名称
+  "using": true, // 是否正在使用
+  "app_name": "VSCode" // 正在使用应用的名称
 }
 ```
 
@@ -293,9 +293,9 @@ sleepy-token=MySecretCannotGuess
 
 // 400 Bad Request | 失败 - 缺少参数 / 参数类型错误
 {
-    "success": false,
-    "code": "bad request",
-    "message": "missing param or wrong param type"
+  "success": false,
+  "code": "bad request",
+  "message": "missing param or wrong param type"
 }
 ```
 
@@ -319,15 +319,15 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK | 成功
 {
-    "success": true,
-    "code": "OK"
+  "success": true,
+  "code": "OK"
 }
 
 // 404 Not Found | 失败 - 不存在 (也不算失败了?)
 {
-    "success": false,
-    "code": "not found",
-    "message": "cannot find item"
+  "success": false,
+  "code": "not found",
+  "message": "cannot find item"
 }
 ```
 
@@ -347,8 +347,8 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK | 成功
 {
-    "success": true,
-    "code": "OK"
+  "success": true,
+  "code": "OK"
 }
 ```
 
@@ -372,15 +372,15 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK | 成功
 {
-    "success": true,
-    "code": "OK"
+  "success": true,
+  "code": "OK"
 }
 
 // 400 Bad Request | 失败 - 请求无效
 {
-    "success": false,
-    "code": "invaild request",
-    "message": "\"private\" arg must be boolean"
+  "success": false,
+  "code": "invaild request",
+  "message": "\"private\" arg must be boolean"
 }
 ```
 
@@ -410,19 +410,19 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK | 成功
 {
-    "success": true,
-    "code": "OK",
-    "data": { // data/data.json 内容
-        "status": 0,
-        "device_status": {},
-        "last_updated": "2024-12-21 13:58:38"
-    }
+  "success": true,
+  "code": "OK",
+  "data": { // data/data.json 内容
+    "status": 0,
+    "device_status": {},
+    "last_updated": "2024-12-21 13:58:38"
+  }
 }
 
 // 500 Internal Server Error | 失败 - 保存出错
 {
-    "success": false,
-    "code": "exception",
-    "message": "..." // 报错内容
+  "success": false,
+  "code": "exception",
+  "message": "..." // 报错内容
 }
 ```

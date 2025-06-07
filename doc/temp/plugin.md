@@ -1,4 +1,13 @@
-# plugin temp doc
+# Plugin System
+
+sleepy 的插件系统主要有以下几个功能:
+
+1. 在启动时加载插件 (前端 / 后端)
+2. 在访问 `/` 或 `/webui/admin`
+
+> 没写完(
+
+<!-- # plugin temp doc
 
 ## events
 
@@ -17,4 +26,4 @@
   - str: to html
   - others: to str
 
-## add functions
+## add functions -->

@@ -190,7 +190,7 @@ def before_request():
         # 提取 theme 并删除
         theme = flask.request.args.get('theme')
         parsed = urlparse(flask.request.full_path)
-        params = parse_qs(parsed.params)
+        params = parse_qs(parsed.query)
         l.debug(f'parsed url: {parsed}')
         if 'theme' in params:
             del params['theme']
