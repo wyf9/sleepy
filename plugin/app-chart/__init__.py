@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timedelta
 from flask import request
 from plugin import route, on_event, admin_card
-import _utils
+import utils
 
 # 数据库连接
 _db_path = None
@@ -25,17 +25,17 @@ def init_plugin(config):
     # 获取插件配置
     db_path = config.getconf('db_path')
 
-    # 确保使用 /data/ 目录存储数据
-    if not db_path.startswith('/data/'):
-        # 如果配置的路径不是以 /data/ 开头，则修改为使用 /data/ 目录
+    # 确保使用 data/ 目录存储数据
+    if not db_path.startswith('data/'):
+        # 如果配置的路径不是以 data/ 开头，则修改为使用 data/ 目录
         db_filename = os.path.basename(db_path)
-        db_path = f'/data/{db_filename}'
-        config.u.info(f'[app-chart] 数据库路径已调整为使用 /data/ 目录: {db_path}')
+        db_path = f'data/{db_filename}'
+        config.u.info(f'[app-chart] 数据库路径已调整为使用 data/ 目录: {db_path}')
 
     # 确保数据库路径是绝对路径
-    _db_path = _utils.get_path(db_path)
+    _db_path = utils.get_path(db_path)
 
-    # 确保 /data/ 目录存在
+    # 确保 data/ 目录存在
     data_dir = os.path.dirname(_db_path)
     if not os.path.exists(data_dir):
         try:
@@ -601,11 +601,11 @@ def save_settings():
         if not db_path:
             return {'success': False, 'message': '数据库路径不能为空'}
 
-        # 确保使用 /data/ 目录
+        # 确保使用 data/ 目录
         import os
-        if not db_path.startswith('/data/'):
+        if not db_path.startswith('data/'):
             db_filename = os.path.basename(db_path)
-            db_path = f'/data/{db_filename}'
+            db_path = f'data/{db_filename}'
 
         if max_apps < 1 or max_apps > 50:
             return {'success': False, 'message': '最大应用数量必须在1-50之间'}
@@ -620,7 +620,7 @@ def save_settings():
             return {'success': False, 'message': '至少需要一种颜色'}
 
         # 更新配置文件
-        config_path = _utils.get_path('data/config.yaml')
+        config_path = utils.get_path('data/config.yaml')
 
         try:
             import yaml

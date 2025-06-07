@@ -2,15 +2,17 @@
 import os
 from datetime import datetime
 from pathlib import Path
-import json
 from logging import Formatter, getLogger, DEBUG
 
-from flask import make_response, Response
+from flask import make_response
 
 l = getLogger(__name__)
 
 
 class CustomFormatter(Formatter):
+    '''
+    自定义的 logging formatter
+    '''
     symbols = {
         'DEBUG': '⚙️ ',
         'INFO': 'ℹ️ ',
@@ -33,33 +35,6 @@ class CustomFormatter(Formatter):
         return formatted_message
 
 
-def format_dict(dic: dict | list) -> Response:
-    '''
-    字典 -> Response (内容为格式化后的 json 文本) \n
-    @param dic: 字典
-    '''
-    response = make_response(
-        json.dumps(dic, indent=4, ensure_ascii=False, sort_keys=False, separators=(', ', ': '))
-    )
-    response.mimetype = 'application/json'
-    return response
-
-
-def reterr(code: str, message: str) -> Response:
-    '''
-    返回错误信息 ~~json~~ response
-
-    :param code: 代码
-    :param message: 消息
-    '''
-    ret = {
-        'success': False,
-        'code': code,
-        'message': message
-    }
-    return format_dict(ret)
-
-
 def cache_response(*args):
     '''
     给返回添加缓存标头
@@ -68,6 +43,7 @@ def cache_response(*args):
     resp.headers['Cache-Control'] = 'max-age=86400, must-revalidate'
     resp.headers['Expires'] = '86400'
     return resp
+
 
 def no_cache_response(*args):
     '''

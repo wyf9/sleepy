@@ -39,8 +39,6 @@ Authorization: Bearer MySecretCannotGuess
 
 5. Cookie *(`Cookie`)* 的 `sleepy-token`
 
-对于 `webui/panel` 特别有用
-
 ```
 sleepy-token=MySecretCannotGuess
 ```
@@ -367,7 +365,7 @@ sleepy-token=MySecretCannotGuess
 
 #### Params
 
-- `<isprivate>`: bool (仅接受 `true` / `false`), 开关状态
+- `<isprivate>`: bool, 开关状态
 
 #### Response
 
@@ -382,7 +380,7 @@ sleepy-token=MySecretCannotGuess
 {
     "success": false,
     "code": "invaild request",
-    "message": "\"private\" arg only supports boolean type"
+    "message": "\"private\" arg must be boolean"
 }
 ```
 

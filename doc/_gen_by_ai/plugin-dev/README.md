@@ -45,8 +45,9 @@ frontend: true              # 是否包含前端功能
 backend: true               # 是否包含后端功能
 frontend-card: true         # 是否创建卡片 (为是则将 index.html 内容插入到卡片中，为否则插入到网页底部)
 config:                     # 插件配置
-  title: "我的插件"          # 插件标题
-  description: "这是一个示例插件" # 插件描述
+  # FIXME
+  # title: "我的插件"          # 插件标题
+  # description: "这是一个示例插件" # 插件描述
   # 其他配置项...
 ```
 

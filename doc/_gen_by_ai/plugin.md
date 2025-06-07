@@ -2,7 +2,7 @@
 
 本文档介绍如何使用 sleepy 的插件功能，适合普通用户阅读。
 
-> 注意：如果您是插件开发者，请参阅 [plugin-dev/index.md](plugin-dev/index.md) 获取开发相关信息。
+> 注意：如果您是插件开发者，请参阅 [plugin-dev/README.md](plugin-dev/README.md) 获取开发相关信息。
 
 ## 什么是插件？
 
@@ -44,7 +44,7 @@ plugin:
     content: |
       <b>这是自定义HTML内容</b><br/>
       <p style="color: blue;">这是蓝色文字</p>
-      <a href="https://github.com/wyf9/sleepy">项目链接</a>
+      <a href="https://github.com/sleepy-project/sleepy">项目链接</a>
 
   example_backend:
     message: "这是一个自定义的后端插件示例"

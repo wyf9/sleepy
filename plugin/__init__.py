@@ -5,8 +5,8 @@ import importlib
 import functools
 from typing import Dict, List, Callable, Any, Tuple
 from logging import getLogger
-from flask import Flask
 
+from flask import Flask, request
 import yaml
 
 from config import Config
@@ -158,6 +158,7 @@ def trigger_event(event_name: str, *args, **kwargs):
     :param kwargs: 传递给事件处理器的关键字参数
     :return: 所有事件处理器的返回值列表
     '''
+    l.debug(f'[plugin] triggered event: {event_name}, args: {args}, kwargs: {kwargs}')
     results = []
 
     if event_name in _plugin_event_handlers:
@@ -166,7 +167,7 @@ def trigger_event(event_name: str, *args, **kwargs):
                 result = handler(*args, **kwargs)
                 results.append((plugin_name, result))
             except Exception as e:
-                print(f"Error in plugin {plugin_name} event handler for {event_name}: {e}")
+                l.error(f"Error in plugin {plugin_name} event handler for {event_name}: {e}")
 
     return results
 
@@ -293,7 +294,7 @@ class Plugin:
             if os.path.exists(plugin_path) and os.path.isfile(plugin_path):
                 pass
             else:
-                u.exception(f'Plugin not exist: {i}')
+                u.exception(f'Plugin does not exist: {i}')
 
         # 加载插件配置
         for i in self.c.plugin_enabled:
@@ -364,9 +365,6 @@ class Plugin:
 
         # 注册管理后台卡片
         self._register_admin_cards()
-
-        # 触发应用启动事件
-        trigger_event('app_started', self)
 
         l.info(f'plugins enabled: {", ".join(self.c.plugin_enabled)}' if self.c.plugin_enabled else 'no plugin enabled.')
 
@@ -476,3 +474,56 @@ class Plugin:
         :return: 所有事件处理器的返回值列表
         '''
         return trigger_event(event_name, *args, **kwargs)
+
+    def require_secret(self, view_func):
+        '''
+        require_secret 修饰器, 用于指定函数需要 secret 鉴权
+        - ***请确保修饰器紧跟函数定义，如:***
+        ```
+        @app.route('/set')
+        @require_secret
+        def set_normal(): ...
+        ```
+        '''
+        @functools.wraps(view_func)
+        def wrapped_view(*args, **kwargs):
+            # 1. body
+            # -> {"secret": "my-secret"}
+            body: dict = request.get_json(silent=True) or {}
+            if body and body.get('secret') == self.c.main.secret:
+                l.debug('[Auth] Verify secret Success from Body')
+                return view_func(*args, **kwargs)
+
+            # 2. param
+            # -> ?secret=my-secret
+            elif request.args.get('secret') == self.c.main.secret:
+                l.debug('[Auth] Verify secret Success from Param')
+                return view_func(*args, **kwargs)
+
+            # 3. header (Sleepy-Secret)
+            # -> Sleepy-Secret: my-secret
+            elif request.headers.get('Sleepy-Secret') == self.c.main.secret:
+                l.debug('[Auth] Verify secret Success from Header (Sleepy-Secret)')
+                return view_func(*args, **kwargs)
+
+            # 4. header (Authorization)
+            # -> Authorization: Bearer my-secret
+            elif request.headers.get('Authorization', '')[7:] == self.c.main.secret:
+                l.debug('[Auth] Verify secret Success from Header (Authorization)')
+                return view_func(*args, **kwargs)
+
+            # 5. cookie (sleepy-token)
+            # -> Cookie: sleepy-token=my-secret
+            elif request.cookies.get('sleepy-token') == self.c.main.secret:
+                l.debug('[Auth] Verify secret Success from Cookie (sleepy-token)')
+                return view_func(*args, **kwargs)
+
+            # -1. no any secret
+            else:
+                l.debug('[Auth] Verify secret Failed')
+                return {
+                    'success': False,
+                    'code': 'not authorized',
+                    'message': 'wrong secret'
+                }, 401
+        return wrapped_view

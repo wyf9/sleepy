@@ -120,9 +120,9 @@ class Data:
             }
             self.record_metrics()
 
-    def get_metrics_resp(self):
+    def get_metrics_data(self):
         now = datetime.now(pytz.timezone(self._c.main.timezone))
-        return u.format_dict({
+        return {
             'time': f'{now}',
             'timezone': self._c.main.timezone,
             'today_is': self.data['metrics']['today_is'],
@@ -132,7 +132,7 @@ class Data:
             'month': self.data['metrics']['month'],
             'year': self.data['metrics']['year'],
             'total': self.data['metrics']['total']
-        })
+        }
 
     def record_metrics(self, path: str | None = None) -> None:
         '''
@@ -252,7 +252,7 @@ class Data:
                 self._auto_save()
             except Exception as e:
                 l.warning(f'[timer_check] error: {e}')
-            l.debug(f'[timer_check] finished in {time()-now}s.')
+            l.debug(f'[timer_check] finished in {time()-now:.7f}s.')
             sleep(self._data_check_interval)
 
     def _start_timer_check(self, data_check_interval: int = 60):
