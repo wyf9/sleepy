@@ -243,7 +243,7 @@ class Data:
         '''
         l.info(f'[timer_check] started, interval: {self._data_check_interval} seconds.')
         while True:
-            now = time()
+            t = u.perf_counter()
             l.debug('[timer_check] running...')
             try:
                 self.check_metrics_time()
@@ -252,7 +252,7 @@ class Data:
                 self._auto_save()
             except Exception as e:
                 l.warning(f'[timer_check] error: {e}')
-            l.debug(f'[timer_check] finished in {(time()*-now)*1000:.7f}ms.')
+            l.debug(f'[timer_check] finished in {t()}ms.')
             sleep(self._data_check_interval)
 
     def _start_timer_check(self, data_check_interval: int = 60):

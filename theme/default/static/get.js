@@ -99,7 +99,7 @@ function updateElement(data) {
     class="awake"
     title="${escapedAppName}"
     href="javascript:${escapedJsCode}">
-${sliceText(escapedAppName, data.device_status_slice).replaceAll('.\n', ' <br/>\n')}
+${sliceText(escapedAppName, data.device_status_slice).replaceAll('\n', ' <br/>\n')}
 </a>`;
         } else {
             device_app = `

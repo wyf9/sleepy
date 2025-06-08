@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# coding: utf-:
+# coding: utf-8
 
 # show welcome text
 print(f'''
@@ -30,6 +30,7 @@ try:
     import utils as u
     from data import Data as data_init
     from plugin import Plugin as plugin_init
+    from plugin import require_secret
 except:
     print(f'''
 Import module Failed!
@@ -140,7 +141,7 @@ def static_proxy(filename: str):
     '''
     静态文件的主题处理 (重定向到 /static-themed/主题名/文件名)
     '''
-    # 获取当前主题
+    # 重定向
     return u.no_cache_response(flask.redirect(f'/static-themed/{flask.g.theme}/{filename}', 302))
 
 
@@ -171,21 +172,13 @@ def static_themed(theme: str, filename: str):
 @app.before_request
 def before_request():
     '''
-    在日志中显示 ip, 并记录 metrics 信息
-
-    :param req: `flask.request` 对象, 用于取 ip
-    :param msg: 信息 (一般是路径, 同时作为 metrics 的项名)
+    before_request:
+    - 性能计数器
+    - 检测主题参数, 重定向
+    - 设置会话变量 (theme, secret)
     '''
-    # --- get path
-    path = flask.request.path
-    # --- log
-    ip1 = flask.request.remote_addr
-    ip2 = flask.request.headers.get('X-Forwarded-For')
-    if ip2:
-        l.info(f'- Request: {ip1} / {ip2} : {path}')
-    else:
-        l.info(f'- Request: {ip1} : {path}')
-    # --- set theme & redirect
+    flask.g.perf = u.perf_counter()
+    # --- get theme arg
     if flask.request.args.get('theme'):
         # 提取 theme 并删除
         theme = flask.request.args.get('theme')
@@ -214,23 +207,34 @@ def before_request():
         resp.set_cookie('sleepy-theme', theme, samesite='Lax')
         return resp
 
-    # got sleepy-theme
+    # --- set context vars
     elif flask.request.cookies.get('sleepy-theme'):
+        # got sleepy-theme
         flask.g.theme = flask.request.cookies.get('sleepy-theme')
-    # use default theme
     else:
+        # use default theme
         flask.g.theme = c.page.theme
-    # --- count
-    if c.metrics.enabled:
-        d.record_metrics(path)
+    flask.g.secret = c.main.secret
 
 
 @app.after_request
 def after_request(response: flask.Response):
     '''
     after_request:
-    - 格式化响应
+    - 显示访问日志
+    - 记录 metrics 信息
     '''
+    # --- access log
+    path = flask.request.path
+    ip1 = flask.request.remote_addr
+    ip2 = flask.request.headers.get('X-Forwarded-For')
+    if ip2:
+        l.info(f'[Request] {ip1} / {ip2} | {path} ({flask.g.perf()}ms)')
+    else:
+        l.info(f'[Request] {ip1} | {path} ({flask.g.perf()}ms)')
+    # --- metrics
+    if c.metrics.enabled:
+        d.record_metrics(path)
     return response
 
 # --- Templates
@@ -263,19 +267,19 @@ def index():
         )
 
     # 处理插件注入
-    plugin_templates: list[tuple[str, str]] = []
-    for i in p.plugins:
-        if i[1]:
-            plugin_templates.append((
-                i[0],
-                flask.render_template_string(
-                    i[1],
-                    config=i[3].config,
-                    global_config=c,
-                    data=d.data,
-                    utils=u,
-                    current_theme=flask.g.theme
-                )))
+    # plugin_templates: list[tuple[str, str]] = []
+    # for i in p.plugins:
+    #     if i[1]:
+    #         plugin_templates.append((
+    #             i[0],
+    #             flask.render_template_string(
+    #                 i[1],
+    #                 config=i[3].config,
+    #                 global_config=c,
+    #                 data=d.data,
+    #                 utils=u,
+    #                 current_theme=flask.g.theme
+    #             )))
 
     # 返回 html
     return render_template(
@@ -284,7 +288,7 @@ def index():
         more_text=more_text,
         status=status,
         last_updated=d.data['last_updated'],
-        plugins=plugin_templates,
+        # plugins=plugin_templates,
         current_theme=flask.g.theme,
         available_themes=u.themes_available()
     ), 200
@@ -379,7 +383,7 @@ def get_status_list():
 
 
 @app.route('/set')
-@p.require_secret
+@require_secret
 def set_normal():
     '''
     设置状态
@@ -411,7 +415,7 @@ def set_normal():
 # --- Device API
 
 @app.route('/device/set', methods=['GET', 'POST'])
-@p.require_secret
+@require_secret
 def device_set():
     '''
     设置单个设备的信息/打开应用
@@ -464,7 +468,7 @@ def device_set():
 
 
 @app.route('/device/remove')
-@p.require_secret
+@require_secret
 def remove_device():
     '''
     移除单个设备的状态
@@ -496,7 +500,7 @@ def remove_device():
 
 
 @app.route('/device/clear')
-@p.require_secret
+@require_secret
 def clear_device():
     '''
     清除所有设备状态
@@ -519,7 +523,7 @@ def clear_device():
 
 
 @app.route('/device/private_mode')
-@p.require_secret
+@require_secret
 def private_mode():
     '''
     隐私模式, 即不在返回中显示设备状态 (仍可正常更新)
@@ -546,7 +550,7 @@ def private_mode():
 
 
 @app.route('/save_data')
-@p.require_secret
+@require_secret
 def save_data():
     '''
     保存内存中的状态信息到 `data/data.json`
@@ -616,39 +620,39 @@ def events():
 
 
 @app.route('/webui/panel')
-@p.require_secret
+@require_secret
 def admin_panel():
     '''
     管理面板
     - Method: **GET**
     '''
-    # 获取插件注册的管理后台卡片
-    plugin_admin_cards = p.get_admin_cards()
+    # # 获取插件注册的管理后台卡片
+    # plugin_admin_cards = p.get_admin_cards()
 
-    # 渲染插件卡片内容
-    rendered_cards = []
-    for card in plugin_admin_cards:
-        try:
-            # 渲染卡片内容（如果是模板字符串）
-            if isinstance(card['content'], str) and '{{' in card['content']:
-                card_content = flask.render_template_string(
-                    card['content'],
-                    c=c,
-                    d=d.data,
-                    u=u,
-                    current_theme=flask.g.theme
-                )
-            else:
-                card_content = card['content']
+    # # 渲染插件卡片内容
+    # rendered_cards = []
+    # for card in plugin_admin_cards:
+    #     try:
+    #         # 渲染卡片内容（如果是模板字符串）
+    #         if isinstance(card['content'], str) and '{{' in card['content']:
+    #             card_content = flask.render_template_string(
+    #                 card['content'],
+    #                 c=c,
+    #                 d=d.data,
+    #                 u=u,
+    #                 current_theme=flask.g.theme
+    #             )
+    #         else:
+    #             card_content = card['content']
 
-            rendered_cards.append({
-                'id': card['id'],
-                'plugin_name': card['plugin_name'],
-                'title': card['title'],
-                'content': card_content
-            })
-        except Exception as e:
-            l.error(f"Error rendering admin card '{card['title']}' for plugin '{card['plugin_name']}': {e}")
+    #         rendered_cards.append({
+    #             'id': card['id'],
+    #             'plugin_name': card['plugin_name'],
+    #             'title': card['title'],
+    #             'content': card_content
+    #         })
+    #     except Exception as e:
+    #         l.error(f"Error rendering admin card '{card['title']}' for plugin '{card['plugin_name']}': {e}")
 
     return render_template(
         'panel.html',
@@ -656,7 +660,7 @@ def admin_panel():
         d=d.data,
         current_theme=flask.g.theme,
         available_themes=u.themes_available(),
-        plugin_admin_cards=rendered_cards
+        # plugin_admin_cards=rendered_cards
     ), 200
 
 
@@ -680,7 +684,7 @@ def login():
 
 
 @app.route('/webui/auth', methods=['POST'])
-@p.require_secret
+@require_secret
 def auth():
     '''
     处理登录请求，验证密钥并设置 cookie
@@ -718,7 +722,7 @@ def logout():
 
 
 @app.route('/verify-secret', methods=['GET', 'POST'])
-@p.require_secret
+@require_secret
 def verify_secret():
     '''
     验证密钥是否有效

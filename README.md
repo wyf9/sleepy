@@ -26,9 +26,9 @@
 
 <summary>展开更多</summary>
 
-**开放预览站**: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)  
-**HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)  
-**Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)  
+**开放预览站**: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+**HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
+**Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
 **开发服务器**: [请在 Discord 服务器获取](link-dc)
 
 </details>
@@ -45,11 +45,11 @@
 
 详细的 API 文档见 [doc/api.md](./doc/api.md).
 
-## 插件系统
+<!-- ## 插件系统
 
 (普通用户看这个) **[doc/plugin.md](./doc/plugin.md)**
 
-(插件开发看这个) **[doc/plugin-dev/README.md](./doc/plugin-dev/README.md)**
+(插件开发看这个) **[doc/plugin-dev/README.md](./doc/plugin-dev/README.md)** -->
 
 ## Star History
 
@@ -78,7 +78,6 @@
 ---
 
 [link-dc]: https://wyf9.top/t/sleepy/dc
-[link-tg]: https://wyf9.top/t/sleepy/tg
 [link-qq]: https://wyf9.top/t/sleepy/qq
 [link-issue-bug]: https://wyf9.top/t/sleepy/bug
 [link-issue-feature]: https://wyf9.top/t/sleepy/feature

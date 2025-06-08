@@ -1,5 +1,6 @@
 # coding: utf-8
 import os
+import time
 from datetime import datetime
 from pathlib import Path
 from logging import Formatter, getLogger, DEBUG
@@ -225,3 +226,11 @@ def get_path(path: str, create_dirs: bool = True, is_dir: bool = False) -> str:
             else:
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
     return full_path
+
+
+def perf_counter():
+    '''
+    获取一个性能计数器, 执行返回函数来结束计时, 并返回保留两位小数的毫秒值
+    '''
+    start = time.perf_counter()
+    return lambda: round((time.perf_counter() - start)*1000, 2)
