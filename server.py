@@ -30,7 +30,7 @@ try:
     import utils as u
     from data import Data as data_init
     from plugin import Plugin as plugin_init
-    from plugin import require_secret
+    from plugin import require_secret, trigger_event
 except:
     print(f'''
 Import module Failed!
@@ -403,7 +403,7 @@ def set_normal():
     d.data['status'] = status
 
     # 触发状态更新事件
-    p.trigger_event('status_updated', old_status, status)
+    trigger_event('status_updated', old_status, status)
 
     return {
         'success': True,
@@ -459,7 +459,7 @@ def device_set():
     d.check_device_status()
 
     # 触发设备更新事件
-    p.trigger_event('device_updated', device_id, d.data['device_status'][device_id])
+    trigger_event('device_updated', device_id, d.data['device_status'][device_id])
 
     return {
         'success': True,
@@ -485,7 +485,7 @@ def remove_device():
 
         # 触发设备删除事件
         if device_info:
-            p.trigger_event('device_removed', device_id, device_info)
+            trigger_event('device_removed', device_id, device_info)
 
     except KeyError:
         return {
@@ -514,7 +514,7 @@ def clear_device():
     d.check_device_status()
 
     # 触发设备清除事件
-    p.trigger_event('devices_cleared', old_devices)
+    trigger_event('devices_cleared', old_devices)
 
     return {
         'success': True,
@@ -541,7 +541,7 @@ def private_mode():
     d.data['last_updated'] = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
 
     # 触发隐私模式切换事件
-    p.trigger_event('private_mode_changed', old_private_mode, private)
+    trigger_event('private_mode_changed', old_private_mode, private)
 
     return {
         'success': True,
@@ -560,7 +560,7 @@ def save_data():
         d.save()
 
         # 触发数据保存事件
-        p.trigger_event('data_saved', d.data)
+        trigger_event('data_saved', d.data)
 
     except Exception as e:
         return {
@@ -760,7 +760,7 @@ if c.metrics.enabled:
 # --- End
 
 if __name__ == '__main__':
-    p.trigger_event('app_started')
+    trigger_event('app_started')
     l.info(f'Hi {c.page.name}!')
     l.info(f'Listening service on: {f"[{c.main.host}]" if ":" in c.main.host else c.main.host}:{c.main.port}{" (debug enabled)" if c.main.debug else ""}')
     try:
