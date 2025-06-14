@@ -8,7 +8,6 @@ pyyaml
 toml
 python-dotenv
 pydantic
-json5
 
 # 时区处理
 pytz

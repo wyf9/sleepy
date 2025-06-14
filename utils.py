@@ -167,7 +167,7 @@ def themes_available() -> list[str]:
         return _themes_available_cache
 
 
-def tobool(string: str, throw: bool = False) -> bool | None:
+def tobool(string, throw: bool = False) -> bool | None:
     '''
     将形似 `true`, `1`, `yes` 之类的内容转换为布尔值
 
@@ -191,7 +191,8 @@ def tobool(string: str, throw: bool = False) -> bool | None:
         'enable': True,
         'disable': False,
         'v': True,
-        'x': False
+        'x': False,
+        'none': False
     }
     ret = booldict.get(str(string).lower(), None)
     assert ret or (not throw), ValueError
