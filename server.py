@@ -4,7 +4,7 @@
 # show welcome text
 print(f'''
 Welcome to Sleepy 2025!
-Give us a Star 🌟 please: https://github.com/wyf9/sleepy
+Give us a Star 🌟 please: https://github.com/sleepy-project/sleepy
 Bug Report: https://wyf9.top/t/sleepy/bug
 Feature Request: https://wyf9.top/t/sleepy/feature
 Security Report: https://wyf9.top/t/sleepy/security

@@ -20,7 +20,7 @@ page:
   favicon: "/static/favicon.ico" # 页面图标 (favicon) url, 默认为 /static/favicon.ico
   background: "https://imgapi.siiway.top/image" # 背景图片 url
   learn_more_text: "GitHub Repo" # 更多信息链接的提示, 默认为 "GitHub Repo"
-  learn_more_link: "https://github.com/wyf9/sleepy" # 更多信息链接的目标, 默认为本仓库链接
+  learn_more_link: "https://github.com/sleepy-project/sleepy" # 更多信息链接的目标, 默认为本仓库链接
   more_text: "" # 内容将在状态页底部 learn_more 上方插入 (不转义)
   theme: "default" # 设置主题 (theme 下的文件夹名)
 

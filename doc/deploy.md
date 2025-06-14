@@ -18,17 +18,28 @@
 
 ### 安装
 
-1. Clone 本仓库 (建议先 Fork / Use this template)
+1. Clone 本仓库 *(也可先 Fork)*
 
 ```shell
-git clone --depth=1 -b main https://github.com/wyf9/sleepy.git
+git clone --depth=1 -b main https://github.com/sleepy-project/sleepy.git
 ```
 
 2. 安装依赖
 
 ```shell
-pip install -r requirements.txt
+# 安装稳定依赖
+pip install -r requirements-lock.txt
 ```
+
+也可以使用虚拟环境安装:
+
+```shell
+# 适用于非 Windows 系统 / Git Bash
+./env.sh create # 创建虚拟环境
+./env.sh install-locked # 安装稳定依赖
+```
+
+> *开发建议安装最新依赖: `pip install -r requirements.txt`*
 
 3. 编辑配置文件
 

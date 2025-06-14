@@ -1,6 +1,14 @@
+# 依赖在此手动定义
+
+# 服务器
 flask
-pytz
-json5
-python-dotenv
+
+# 配置 / 数据处理
 pyyaml
 toml
+python-dotenv
+pydantic
+json5
+
+# 时区处理
+pytz

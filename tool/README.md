@@ -12,7 +12,7 @@
 <summary>点击展开示例</summary>
 
 ```json
-[02:02:44 wyf9@SRserver /sync/dev/wyf9/sleepy]$ cd "/sync/dev/wyf9/sleepy/" && python req.test.py
+[02:02:44 wyf9@SRserver /sync/dev/sleepy-project/sleepy]$ cd "/sync/dev/sleepy-project/sleepy/" && python req.test.py
 I < p /device/set {"id": "device-1", "show_name": "MyDevice2", "using": true, "app_name": "VSCode"}
 O > POST http://[::]:9011/device/set 200
 {
@@ -72,7 +72,7 @@ O > GET http://[::]:9011/query 200
     "last_updated": "2025-03-17 17:36:32", 
     "refresh": 6000
 }
-I < ^C[02:26:59 wyf9@SRserver /sync/dev/wyf9/sleepy/tools]$ 
+I < ^C[02:26:59 wyf9@SRserver /sync/dev/sleepy-project/sleepy/tools]$ 
 ```
 
 </details>

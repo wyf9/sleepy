@@ -62,7 +62,7 @@
 
 ### 配置
 
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console.py#L14-L21
+https://github.com/sleepy-project/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console.py#L14-L21
 
 ### 使用
 
@@ -76,7 +76,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### 配置
 
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console_multi.py#L14-L23
+https://github.com/sleepy-project/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/cmd_console_multi.py#L14-L23
 
 ### 使用
 
@@ -95,7 +95,7 @@ https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/cli
 
 ### 配置
 
-https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/client/win_device.py#L28-L70
+https://github.com/sleepy-project/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/client/win_device.py#L28-L70
 
 ### 自启动
 
@@ -144,7 +144,7 @@ https://github.com/wyf9/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/cli
 
 ### 配置
 
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/autoxjs_device.js#L8-L15
+https://github.com/sleepy-project/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/autoxjs_device.js#L8-L15
 
 ### 使用
 
@@ -187,13 +187,13 @@ console.log('[sleepyc] ' + msg);
 
 在任何支持油猴脚本的浏览器均可使用，*据作者↑说是为了解决 Mac 无法获取窗口标题，遂退而求其次获取浏览器页面（有系统就有浏览器，即有用户脚本）*
 
-- [点击安装 (GitHub raw)](https://github.com/wyf9/sleepy/raw/refs/heads/main/client/browser-script.user.js)
+- [点击安装 (GitHub raw)](https://github.com/sleepy-project/sleepy/raw/refs/heads/main/client/browser-script.user.js)
 
-- [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/wyf9/sleepy/main/client/browser-script.user.js)
+- [点击安装 (ghp.ci)](https://ghp.ci/https://raw.githubusercontent.com/sleepy-project/sleepy/main/client/browser-script.user.js)
 
 ### 配置
 
-https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/browser-script.user.js#L18-L25
+https://github.com/sleepy-project/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/browser-script.user.js#L18-L25
 
 ## [HomeworkDevice](./homework_device.py)
 
@@ -205,7 +205,7 @@ https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/cli
 
 ### 配置
 
-https://github.com/wyf9/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/homework_device.py#L5-L9
+https://github.com/sleepy-project/sleepy/blob/2df5d622844816867506adc6d211dc5138fdefc0/client/homework_device.py#L5-L9
 
 ### 使用
 
@@ -289,11 +289,11 @@ python="C:\Program Files\Python312\python.exe"
 
 1. 基本服务
 
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L16-L24
+https://github.com/sleepy-project/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L16-L24
 
 2. `app_name` 格式
 
-https://github.com/wyf9/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L116
+https://github.com/sleepy-project/sleepy/blob/e6b77af1e4333ad570983b5bf9ac397cb1d40d7b/client/mc_script.py#L116
 
 ### 使用
 
@@ -319,7 +319,7 @@ autorun[*]=eval 'execute("\\sleepy")'
 
 ### 配置
 
-https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_kde.py#L18-L28
+https://github.com/sleepy-project/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_kde.py#L18-L28
 
 ### 使用
 
@@ -335,7 +335,7 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 
 ### 配置
 
-https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_hyprland.sh#L7-L12
+https://github.com/sleepy-project/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/client/linux_device_hyprland.sh#L7-L12
 
 ### 使用
 
@@ -355,7 +355,7 @@ https://github.com/wyf9/sleepy/blob/7fc21380a259247533db76f3a0443fa550fcffec/cli
 
 [./magisk/config.cfg](./magisk/config.cfg)
 
-https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/client/magisk/config.cfg#L1-L6
+https://github.com/sleepy-project/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/client/magisk/config.cfg#L1-L6
 
 > [!TIP]
 > 详见 [说明](./magisk/README.md)
@@ -414,7 +414,7 @@ https://github.com/wyf9/sleepy/blob/7bb1866e8448d921f6161f1200164a19914d9910/cli
 
 ### 配置
 
-https://github.com/wyf9/sleepy/blob/73a5e3507c1ca0454bc39c685541d53d228df41f/client/zhixue.py#L38-L47
+https://github.com/sleepy-project/sleepy/blob/73a5e3507c1ca0454bc39c685541d53d228df41f/client/zhixue.py#L38-L47
 
 同时需要添加环境变量:
 
@@ -426,7 +426,7 @@ sleepy_page_zhixue = true
 
 需要将本脚本放在服务器的 `server.py` 同级目录运行，或编辑 L195-L197:
 
-https://github.com/wyf9/sleepy/blob/73a5e3507c1ca0454bc39c685541d53d228df41f/client/zhixue.py#L195-L197
+https://github.com/sleepy-project/sleepy/blob/73a5e3507c1ca0454bc39c685541d53d228df41f/client/zhixue.py#L195-L197
 
 ## Other repos
 

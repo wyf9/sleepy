@@ -53,7 +53,7 @@
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=wyf9/sleepy&type=Date)](https://star-history.com/#wyf9/sleepy&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=sleepy-project/sleepy&type=Date)](https://star-history.com/#sleepy-project/sleepy&Date)
 
 ## 贡献者
 
