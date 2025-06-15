@@ -2,8 +2,8 @@
 '''
 win_device.py
 在 Windows 上获取窗口名称
-by: @wyf9, @pwnint, @kmizmal, @gongfuture
-基础依赖: pywin32, requests<>
+by: @wyf9, @pwnint, @kmizmal, @gongfuture, @LeiSureLyYrsc
+基础依赖: pywin32, httpx
 媒体信息依赖:
  - Python≤3.9: winrt
  - Python≥3.10: winrt.windows.media.control, winrt.windows.foundation
@@ -15,10 +15,10 @@ by: @wyf9, @pwnint, @kmizmal, @gongfuture
 
 import sys
 import io
-from time import sleep
+import asyncio
 import time  # 改用 time 模块以获取更精确的时间
 from datetime import datetime
-from requests import post
+import httpx
 import threading
 import win32api  # type: ignore - 勿删，用于强忽略非 windows 系统上 vscode 找不到模块的警告
 import win32con  # type: ignore
@@ -51,6 +51,7 @@ SKIPPED_NAMES: list = [
 # 当窗口标题为其中任意一项时视为未在使用
 NOT_USING_NAMES: list = [
     '启动', '「开始」菜单',  # 开始菜单
+    '我们喜欢这张图片，因此我们将它与你共享。', '就像你看到的图像一样？选择以下选项', '喜欢这张图片吗?'  # 锁屏界面
     '我们喜欢这张图片，因此我们将它与你共享。', '就像你看到的图像一样？选择以下选项', '喜欢这张图片吗?'  # 锁屏界面
 ]
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
@@ -126,10 +127,9 @@ if MEDIA_INFO_ENABLED:
         import winrt.windows.media.control as media  # type: ignore
     except ImportError:
         import winrt.windows.media.control as media  # type: ignore
-    from asyncio import run  # type: ignore
 
 
-def get_media_info():
+async def get_media_info():
     '''
     使用 pywinrt 获取 Windows SMTC 媒体信息 (正在播放的音乐等)
     Returns:
@@ -137,75 +137,68 @@ def get_media_info():
     '''
     # 首先尝试使用 pywinrt
     try:
-        # 以异步方式获取媒体会话管理器
-        async def get_media_session():
-            # 获取媒体会话管理器
-            manager = await media.GlobalSystemMediaTransportControlsSessionManager.request_async()
-            return manager.get_current_session()
+        # 获取媒体会话管理器
+        manager = await media.GlobalSystemMediaTransportControlsSessionManager.request_async()  # type: ignore
+        session = manager.get_current_session()
 
-        # 使用异步函数包装整个操作
-        async def get_media_info_async():
-            session = await get_media_session()
-            if not session:
-                return False, '', '', ''
+        if not session:
+            return False, '', '', ''
 
-            # 获取播放状态
-            info = session.get_playback_info()
-            is_playing = info.playback_status == media.GlobalSystemMediaTransportControlsSessionPlaybackStatus.PLAYING
+        # 获取播放状态
+        info = session.get_playback_info()
+        is_playing = info.playback_status == media.GlobalSystemMediaTransportControlsSessionPlaybackStatus.PLAYING  # type: ignore
 
-            # 获取媒体属性
-            props = await session.try_get_media_properties_async()
+        # 获取媒体属性
+        props = await session.try_get_media_properties_async()
 
-            title = props.title or ''
-            artist = props.artist or ''
-            album = props.album_title or ''
+        title = props.title or '' if props else ''  # type: ignore
+        artist = props.artist or '' if props else ''  # type: ignore
+        album = props.album_title or '' if props else ''  # type: ignore
 
-            if '未知唱片集' in album or '<' in album and '>' in album:
-                album = ''
+        if '未知唱片集' in album or '<' in album and '>' in album:
+            album = ''
 
-            return is_playing, title, artist, album
-
-        # 运行异步函数
-        return run(get_media_info_async())
+        debug(f'[get_media_info] return: {is_playing}, {title}, {artist}, {album}')
+        return is_playing, title, artist, album
 
     except Exception as primary_error:
         debug(f"主要媒体信息获取方式失败: {primary_error}")
         return False, '', '', ''
 
-
 # 电池状态拎出来导入状态
 if BATTERY_INFO_ENABLED:
     try:
-        import psutil
+        import psutil  # type: ignore
         battery = psutil.sensors_battery()
-        if not battery:
-            print('(预检) 无法获取电池信息, 已禁用')
+        if battery is None:
+            print("无法获取电池信息")
             BATTERY_INFO_ENABLED = False
     except Exception as e:
-        print(f'(预检) 获取电池信息失败: {e}, 已禁用')
+        print(f"获取电池信息失败: {e}")
         BATTERY_INFO_ENABLED = False
 
 
-def get_battery_info() -> tuple[int | None, bool | None]:
-    '''
-    获取电量信息
-
-    :return tuple: (int) 电池百分比, (bool) 是否正在充电
-    '''
+def get_battery_info():
+    """
+    获取电池信息
+    Returns:
+        tuple: (电池百分比, 充电状态)
+    """
     try:
         # 电池信息变量
-        battery = psutil.sensors_battery()
-        if not battery:
-            return None, None
+        battery = psutil.sensors_battery()  # type: ignore
+        if battery is None:
+            return 0, "未知"
 
-        percent: int = battery.percent
-        power_plugged: bool = battery.power_plugged
+        percent = battery.percent
+        power_plugged = battery.power_plugged
         # 获取充电状态
-        debug(f'电量: `{percent}%`, 充电中: {power_plugged}')
-        return percent, power_plugged
+        status = "⚡" if power_plugged else ""
+        debug(f'--- 电量: `{percent}%`, 状态: {status}')
+        return percent, status
     except Exception as e:
-        debug(f'获取电池信息失败: {e}')
-        return None, None
+        debug(f"获取电池信息失败: {e}")
+        return 0, "未知"
 # ----- Part: Send status
 
 
@@ -213,9 +206,9 @@ Url = f'{SERVER}/device/set'
 last_window = ''
 
 
-def send_status(using: bool = True, app_name: str = '', id: str = DEVICE_ID, show_name: str = DEVICE_SHOW_NAME, **kwargs):
+async def send_status(using: bool = True, app_name: str = '', id: str = DEVICE_ID, show_name: str = DEVICE_SHOW_NAME, timeout: float = 7.5, **kwargs):
     '''
-    post 发送设备状态信息
+    httpx.AsyncClient.post 发送设备状态信息
     设置了 headers 和 proxies
     '''
     json_data = {
@@ -225,27 +218,29 @@ def send_status(using: bool = True, app_name: str = '', id: str = DEVICE_ID, sho
         'using': using,
         'app_name': app_name
     }
+
     if PROXY:
-        return post(
-            url=Url,
-            json=json_data,
-            headers={
-                'Content-Type': 'application/json'
-            },
-            proxies={
-                'all': PROXY
-            },
-            **kwargs
-        )
+        async with httpx.AsyncClient(proxy=PROXY, timeout=timeout) as client:  # type: ignore
+            return await client.post(
+                url=Url,
+                json=json_data,
+                headers={
+                    'Content-Type': 'application/json'
+                },
+                timeout=timeout,
+                **kwargs
+            )
     else:
-        return post(
-            url=Url,
-            json=json_data,
-            headers={
-                'Content-Type': 'application/json'
-            },
-            **kwargs
-        )
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            return await client.post(
+                url=Url,
+                json=json_data,
+                headers={
+                    'Content-Type': 'application/json'
+                },
+                timeout=timeout,
+                **kwargs
+            )
 
 # ----- Part: Shutdown handler
 
@@ -257,12 +252,16 @@ def on_shutdown(hwnd, msg, wparam, lparam):
     if msg == win32con.WM_QUERYENDSESSION:
         print("Received logout event, sending not using...")
         try:
-            resp = send_status(
+            # 在新的事件循环中运行异步函数
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            resp = loop.run_until_complete(send_status(
                 using=False,
                 app_name="要关机了喵",
                 id=DEVICE_ID,
                 show_name=DEVICE_SHOW_NAME
-            )
+            ))
+            loop.close()
             debug(f'Response: {resp.status_code} - {resp.json()}')
             if resp.status_code != 200:
                 print(f'Error! Response: {resp.status_code} - {resp.json()}')
@@ -274,9 +273,9 @@ def on_shutdown(hwnd, msg, wparam, lparam):
 
 # 注册窗口类
 wc = win32gui.WNDCLASS()
-wc.lpfnWndProc = on_shutdown  # 设置回调函数
-wc.lpszClassName = "ShutdownListener"
-wc.hInstance = win32api.GetModuleHandle(None)
+wc.lpfnWndProc = on_shutdown  # type: ignore - 设置回调函数
+wc.lpszClassName = "ShutdownListener"  # type: ignore
+wc.hInstance = win32api.GetModuleHandle(None)  # type: ignore
 
 # 创建窗口类并注册
 class_atom = win32gui.RegisterClass(wc)
@@ -341,8 +340,7 @@ def check_mouse_idle() -> bool:
 
     # 打印详细的鼠标状态信息（为了保持日志一致性，仍然显示计算后的距离）
     distance = distance_squared ** 0.5 if DEBUG else 0  # 仅在需要打印日志时计算
-    debug(
-        f'Mouse: current={current_pos}, last={last_mouse_pos}, distance={distance:.1f}px')
+    debug(f'Mouse: current={current_pos}, last={last_mouse_pos}, distance={distance:.1f}px')
 
     # 如果移动距离超过阈值（使用平方值比较）
     if distance_squared > threshold_squared:
@@ -350,11 +348,11 @@ def check_mouse_idle() -> bool:
         last_mouse_move_time = current_time
         if is_mouse_idle:
             is_mouse_idle = False
-        #     actual_distance = distance_squared ** 0.5  # 仅在状态变化时计算实际距离用于日志
-        #     print(
-        #         f'Mouse wake up: moved {actual_distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
-        # else:
-        #     debug(f'Mouse moving: {distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
+            actual_distance = distance_squared ** 0.5  # 仅在状态变化时计算实际距离用于日志
+            print(
+                f'Mouse wake up: moved {actual_distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
+        else:
+            debug(f'Mouse moving: {distance:.1f}px > {MOUSE_MOVE_THRESHOLD}px')
         return False
 
     # 检查是否超过静止时间
@@ -376,7 +374,7 @@ last_media_playing = False  # 跟踪上一次的媒体播放状态
 last_media_content = ''  # 跟踪上一次的媒体内容
 
 
-def do_update():
+async def do_update():
     # 全局变量
     global last_window, cached_window_title, is_mouse_idle, last_media_playing, last_media_content
 
@@ -397,15 +395,15 @@ def do_update():
     # 获取电池信息
     if BATTERY_INFO_ENABLED:
         battery_percent, battery_status = get_battery_info()
-        if (not battery_percent is None) and (not battery_status is None):
-            window = f'[{battery_percent}%{" ⚡" if battery_status else ""}] {window}'
+        if battery_percent > 0:
+            window = f"[🔋{battery_percent}%{battery_status}] {window}"
 
     # 获取媒体信息
     prefix_media_info = None
     standalone_media_info = None
 
     if MEDIA_INFO_ENABLED:
-        is_playing, title, artist, album = get_media_info()
+        is_playing, title, artist, album = await get_media_info()
         if is_playing and (title or artist):
             # 为 prefix 模式创建格式化后的媒体信息 [♪歌曲名]
             if title:
@@ -424,7 +422,7 @@ def do_update():
 
             standalone_media_info = " - ".join(parts) if parts else "♪播放中"
 
-            debug(f"检测到媒体 - title: {title or ''} - artist: {artist or ''} - album: {album or ''}")
+            debug(f"独立媒体信息: {standalone_media_info}")
 
     # 处理媒体信息 (prefix 模式)
     if MEDIA_INFO_ENABLED and prefix_media_info and MEDIA_INFO_MODE == 'prefix':
@@ -474,10 +472,9 @@ def do_update():
                 window = last_window
 
         # 发送状态更新
-        print(
-            f'Sending update: using = {using}, app_name = "{window}", idle = {mouse_idle}')
+        print(f'Sending update: using = {using}, app_name = "{window}" (idle = {mouse_idle})')
         try:
-            resp = send_status(
+            resp = await send_status(
                 using=using,
                 app_name=window,
                 id=DEVICE_ID,
@@ -509,7 +506,7 @@ def do_update():
 
                 if current_media_playing:
                     # 从不播放变为播放或歌曲内容变化
-                    media_resp = send_status(
+                    media_resp = await send_status(
                         using=True,
                         app_name=standalone_media_info,
                         id=MEDIA_DEVICE_ID,
@@ -517,7 +514,7 @@ def do_update():
                     )
                 else:
                     # 从播放变为不播放
-                    media_resp = send_status(
+                    media_resp = await send_status(
                         using=False,
                         app_name='没有媒体播放',
                         id=MEDIA_DEVICE_ID,
@@ -532,16 +529,19 @@ def do_update():
             debug(f'Media Info Error: {e}')
 
 
-if __name__ == '__main__':
+async def main():
+    '''
+    主程序异步函数
+    '''
     try:
         while True:
-            do_update()
-            sleep(CHECK_INTERVAL)
+            await do_update()
+            await asyncio.sleep(CHECK_INTERVAL)
     except (KeyboardInterrupt, SystemExit) as e:
         # 如果中断或被 taskkill 则发送未在使用
         debug(f'Interrupt: {e}')
         try:
-            resp = send_status(
+            resp = await send_status(
                 using=False,
                 app_name='未在使用',
                 id=DEVICE_ID,
@@ -551,7 +551,7 @@ if __name__ == '__main__':
 
             # 如果启用了独立媒体设备，也发送该设备的退出状态
             if MEDIA_INFO_ENABLED and MEDIA_INFO_MODE == 'standalone':
-                media_resp = send_status(
+                media_resp = await send_status(
                     using=False,
                     app_name='未在使用',
                     id=MEDIA_DEVICE_ID,
@@ -563,3 +563,7 @@ if __name__ == '__main__':
                 print(f'Error! Response: {resp.status_code} - {resp.json()}')
         except Exception as e:
             print(f'Exception: {e}')
+
+
+if __name__ == '__main__':
+    asyncio.run(main())

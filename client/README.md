@@ -93,14 +93,19 @@
 
 ## [WinDevice](./win_device.py)
 
-> by: [@wyf9](https://github.com/wyf9) <br/>
-> Co-authored-by: [@kmizmal](https://github.com/kmizmal) <br/>
-> Co-authored-by: [@pwnInt](https://github.com/pwnInt) - ^C / 鼠标空闲检测 <br/>
-> Co-authored-by: [@gongfuture](https://github.com/gongfuture) - 媒体信息获取
+> by: [@wyf9](https://github.com/wyf9)
+> Co-authored-by: [@kmizmal](https://github.com/kmizmal)
+> Co-authored-by: [@pwnInt](https://github.com/pwnInt) - **^C / 鼠标空闲检测**
+> Co-authored-by: [@gongfuture](https://github.com/gongfuture) - **媒体信息获取**
+> Co-authored-by: [@LeiSureLyYrsc](https://github.com/LeiSureLyYrsc) - **异步支持**
 
 在 Windows 上自动更新设备状态
 
+依赖: `httpx`, `pywin32`
+
 ### 配置
+
+TODO: update
 
 https://github.com/sleepy-project/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/client/win_device.py#L28-L70
 
