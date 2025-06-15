@@ -12,8 +12,7 @@ from werkzeug.security import safe_join
 from pydantic import ValidationError
 
 import utils as u
-from config import Config
-from models import DataModel
+from models import DataModel, ConfigModel
 
 l = getLogger(__name__)
 
@@ -28,9 +27,10 @@ class Data:
     data: DataModel
     _cache: dict[str, tuple[float, str]] = {}
     _data_check_interval: int = 60
-    _c: Config
+    _c: ConfigModel
 
-    def __init__(self, config: Config):
+    def __init__(self, config: ConfigModel):
+        perf = u.perf_counter()
         # --- init
         self._c = config
 
@@ -54,6 +54,7 @@ class Data:
         self._start_timer_check(
             data_check_interval=self._c.main.checkdata_interval
         )
+        l.debug(f'[data] init took {perf()}ms')
 
     # --- Storage functions
 
@@ -73,9 +74,11 @@ class Data:
                     self.save()
                 with open(u.get_path('data/data.json'), 'r', encoding='utf-8') as file:
                     data_file_loaded = json.load(file)
-                    self.data = DataModel(**data_file_loaded)
+                    data_model = DataModel(**data_file_loaded)
                     if ret:
-                        return self.data
+                        return data_model
+                    else:
+                        self.data = data_model
                 break  # 成功加载数据后跳出循环
             except ValidationError as e:
                 l.error(f'Invaild data file format: {e}')

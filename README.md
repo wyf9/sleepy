@@ -1,7 +1,8 @@
 # sleepy
 
 > [!WARNING]
-> **请勿使用本分支，功能不稳定!**
+> **请勿使用本分支，功能不稳定!** <br/>
+> **[Sleepy Summer Update 更新进度](https://github.com/orgs/sleepy-project/projects/1)**
 
 一个用于 ~~*视奸*~~ 查看个人在线状态 (以及正在使用软件) 的 Flask 应用，让他人能知道你不在而不是故意吊他/她
 
@@ -22,14 +23,17 @@
 
 演示站: [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
+**开放预览站**: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
+
 <details>
 
 <summary>展开更多</summary>
 
-**开放预览站**: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 **HuggingFace** 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
+
 **Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
-**开发服务器**: [请在 Discord 服务器获取](link-dc)
+
+**开发服务器**: [请在 Discord 服务器查看](link-dc)
 
 </details>
 
@@ -58,7 +62,7 @@
 ## 贡献者
 
 > [!WARNING]
-> 在提交贡献前, 请先查阅 **[贡献准则](./CODE_OF_CONDUCT.md#贡献准则)**
+> 在提交代码前, 请先查阅 **[贡献准则](./CODE_OF_CONDUCT.md)**
 
 <!-- readme: contributors -start -->
 <!-- readme: contributors -end -->

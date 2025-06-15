@@ -8,7 +8,7 @@ from functools import wraps
 
 import flask
 
-from config import Config
+from models import ConfigModel
 from data import Data
 import utils as u
 
@@ -23,10 +23,10 @@ class Plugin:
     '''
     name: str
     example_config: dict
-    user_config: Config
+    user_config: ConfigModel
     data: Data
 
-    def __init__(self, name: str, user_config: Config, data: Data):
+    def __init__(self, name: str, user_config: ConfigModel, data: Data):
         '''
         初始化 PluginClass
         '''
@@ -72,7 +72,7 @@ _plugins: list[Plugin] = []  # 已启用的插件类 (PluginClass) 列表 [plugi
 _index_cards: list[str] = []  # 前端 (index.html) 卡片列表 [content: str]
 _webui_cards: list[str] = []  # 管理面板 (/webui/panel) 卡片列表 [content: str]
 _routes: dict[str, tuple[str, tuple, dict, t.Callable]] = {}  # 插件路由列表 {rule: [str: by_plugin, *args, **kwargs, Callable]}
-_event_handlers: dict[str, list[t.Callable]] = []  # 事件处理器列表 [event: str, Callable]
+_event_handlers: dict[str, list[t.Callable]] = {}  # 事件处理器列表 [event: str, Callable]
 _current_plugin: t.Optional[str] = None
 _plugin_instances: dict[str, Plugin] = {}
 
@@ -183,11 +183,11 @@ class PluginInit:
     '''
     Plugin System for Sleepy
     '''
-    c: Config
+    c: ConfigModel
     d: Data
     app: flask.Flask
 
-    def __init__(self, config: Config, data: Data, app: flask.Flask):
+    def __init__(self, config: ConfigModel, data: Data, app: flask.Flask):
         '''
         初始化插件功能
         '''
@@ -196,7 +196,7 @@ class PluginInit:
         self.app = app
 
         # 加载插件
-        for i in self.c.plugin_enabled:
+        for i in self.c.plugins_enabled:
             try:
                 globals()['_current_plugin'] = i  # 当前插件名
 
@@ -212,7 +212,7 @@ class PluginInit:
 
                     # 执行 init (如存在)
                     if hasattr(instance, 'init'):
-                        instance.init()
+                        instance.init() # type: ignore
 
                 # 重置插件名
                 globals()['_current_plugin'] = None

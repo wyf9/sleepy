@@ -235,3 +235,55 @@ def perf_counter():
     '''
     start = time.perf_counter()
     return lambda: round((time.perf_counter() - start)*1000, 2)
+
+
+def process_env_split(keys: list[str], value: str) -> dict:
+    '''
+    处理环境变量配置项分割
+    - `page_user=wyf9` -> `['page', 'user'], 'wyf9'` -> `{'page': {'user': 'wyf9'}, 'page_user': 'wyf9'}`
+    '''
+    if len(keys) == 1:
+        return {keys[0]: value}
+    else:
+        sub_dict = process_env_split(keys[1:], value)
+        result = {
+            keys[0]: sub_dict,
+            '_'.join(keys): value,
+            keys[0] + '_' + keys[1]: sub_dict[keys[1]]
+        }
+        return result
+
+
+def deep_merge_dict(*dicts: dict) -> dict:
+    '''
+    递归合并多个嵌套字典 (先后顺序) \n
+    例:
+    ```
+    >>> dict1 = {'a': {'x': 1}, 'b': 2, 'n': 1}
+    >>> dict2 = {'a': {'y': 3}, 'c': 4, 'n': 2}
+    >>> dict3 = {'a': {'z': 5}, 'd': 6, 'n': 3}
+    >>> print(deep_merge_dict(dict1, dict2, dict3))
+    {'a': {'z': 5, 'x': 1, 'y': 3}, 'b': 2, 'n': 3, 'c': 4, 'd': 6}
+    ```
+    '''
+    if not dicts:
+        return {}
+
+    # 创建基础字典的深拷贝（避免修改原始输入）
+    base = {}
+    for d in dicts:
+        if d:  # 跳过空字典
+            base.update(d.copy())
+
+    # 递归合并所有字典
+    for d in dicts:
+        for key, value in d.items():
+            # 如果当前键存在于基础字典且双方值都是字典，则递归合并
+            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
+                # 递归合并嵌套字典
+                base[key] = deep_merge_dict(base[key], value)
+            else:
+                # 直接赋值（覆盖原有值）
+                base[key] = value
+
+    return base

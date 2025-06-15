@@ -50,19 +50,21 @@ try:
     )
     app.json.ensure_ascii = False  # type: ignore - disable json ensure_ascii
 
-    # init config
-    c = config_init()
-
     # init logger
     l = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     root_logger = logging.getLogger()
-    root_logger.level = logging.DEBUG if c.main.debug else logging.INFO  # set log level
     root_logger.handlers.clear()  # clear default handler
     # set stream handler
     shandler = logging.StreamHandler()
     shandler.setFormatter(u.CustomFormatter(show_symbol=True))
     root_logger.addHandler(shandler)
+
+    # init config
+    c = config_init().config
+
+    # continue init logger
+    root_logger.level = logging.DEBUG if c.main.debug else logging.INFO  # set log level
     # set file handler
     if c.main.log_file:
         log_file_path = u.get_path(c.main.log_file)
@@ -247,10 +249,11 @@ def index():
     '''
     # 获取手动状态
     try:
-        status: dict = c.status.status_list[d.data.status]
+        status = c.status.status_list[d.data.status].model_dump()
     except:
         l.warning(f"Index {d.data.status} out of range!")
         status = {
+            'id': d.data.status,
             'name': 'Unknown',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
@@ -572,7 +575,7 @@ def save_data():
         return {
             'success': True,
             'code': 'OK',
-            'data': d.data
+            'data': d.data.model_dump()
         }, 200
 
 
@@ -583,7 +586,7 @@ def events():
     - Method: **GET**
     '''
     try:
-        last_event_id = int(flask.request.headers.get('Last-Event-ID', 0))
+        last_event_id = int(flask.request.headers.get('Last-Event-ID', '0'))
     except ValueError:
         return {
             'success': False,

@@ -289,7 +289,7 @@ class Plugin:
         self.app = app
 
         # 检查目录是否存在 (以及是否有插件定义 (plugin.yaml))
-        for i in self.c.plugin_enabled:
+        for i in self.c.plugins_enabled:
             plugin_path = u.get_path(f'plugin/{i}/plugin.yaml')
             if os.path.exists(plugin_path) and os.path.isfile(plugin_path):
                 pass
@@ -297,7 +297,7 @@ class Plugin:
                 u.exception(f'Plugin does not exist: {i}')
 
         # 加载插件配置
-        for i in self.c.plugin_enabled:
+        for i in self.c.plugins_enabled:
             # 加载单个插件配置
             with open(u.get_path(f'plugin/{i}/plugin.yaml'), 'r', encoding='utf-8') as f:
                 plugin: dict = yaml.safe_load(f)
@@ -366,7 +366,7 @@ class Plugin:
         # 注册管理后台卡片
         self._register_admin_cards()
 
-        l.info(f'plugins enabled: {", ".join(self.c.plugin_enabled)}' if self.c.plugin_enabled else 'no plugin enabled.')
+        l.info(f'plugins enabled: {", ".join(self.c.plugins_enabled)}' if self.c.plugins_enabled else 'no plugin enabled.')
 
     def _register_plugin_routes(self, plugin_name):
         '''
@@ -424,7 +424,7 @@ class Plugin:
         self.admin_cards = []
 
         # 遍历所有启用的插件
-        for plugin_name in self.c.plugin_enabled:
+        for plugin_name in self.c.plugins_enabled:
             # 检查插件是否注册了管理后台卡片
             if plugin_name in _plugin_admin_cards:
                 for card_id, card_info in _plugin_admin_cards[plugin_name].items():

@@ -77,7 +77,7 @@ metrics:
     # 还可添加更多
 
 # 启用的插件列表，按从上到下的顺序加载
-plugin_enabled:
+plugins_enabled:
   # - test
   # - hitokoto
 

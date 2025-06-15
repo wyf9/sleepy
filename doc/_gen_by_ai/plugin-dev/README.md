@@ -128,7 +128,7 @@ def on_app_started(plugin_manager):
 在 `data/config.yaml` 或 `data/config.toml` 文件中启用您的插件：
 
 ```yaml
-plugin_enabled:
+plugins_enabled:
   - my_plugin
 ```
 
