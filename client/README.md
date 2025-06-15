@@ -105,9 +105,7 @@
 
 ### 配置
 
-TODO: update
-
-https://github.com/sleepy-project/sleepy/blob/b0580b451036fac1beb64b640c2d8d7b889c9a05/client/win_device.py#L28-L70
+https://github.com/sleepy-project/sleepy/blob/23c14c9a8a32a29a6f60b3d4347e07a5e32e64fc/client/win_device.py#L29-L75
 
 ### 依赖安装
 
