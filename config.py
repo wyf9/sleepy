@@ -3,8 +3,9 @@ import os
 from logging import getLogger
 
 from dotenv import load_dotenv
-import yaml
-import toml
+from yaml import safe_load as yaml_load
+from toml import load as toml_load
+from json import load as json_load
 
 import utils as u
 from models import ConfigModel
@@ -23,7 +24,7 @@ class Config:
         perf = u.perf_counter()  # 性能计数器
 
         # ===== prepare .env =====
-        load_dotenv(dotenv_path=u.get_path('.env'))
+        load_dotenv(dotenv_path=u.get_path('data/.env'))
         config_env = {}
         try:
             # 筛选有效配置项
@@ -44,7 +45,7 @@ class Config:
         try:
             if os.path.exists(u.get_path('data/config.yaml')):
                 with open(u.get_path('data/config.yaml'), 'r', encoding='utf-8') as f:
-                    config_yaml = yaml.safe_load(f)
+                    config_yaml = yaml_load(f)
                     f.close()
         except Exception as e:
             l.warning(f'Error when loading data/config.yaml: {e}')
@@ -54,13 +55,23 @@ class Config:
         try:
             if os.path.exists(u.get_path('data/config.toml')):
                 with open(u.get_path('data/config.toml'), 'r', encoding='utf-8') as f:
-                    config_toml = toml.load(f)
+                    config_toml = toml_load(f)
                     f.close()
         except Exception as e:
             l.warning(f'Error when loading data/config.toml: {e}')
 
+        # ===== prepare config.json =====
+        config_json = {}
+        try:
+            if os.path.exists(u.get_path('data/config.json')):
+                with open(u.get_path('data/config.json'), 'r', encoding='utf-8') as f:
+                    config_json = json_load(f)
+                    f.close()
+        except Exception as e:
+            l.warning(f'Error when loading data/config.json: {e}')
+
         # ===== mix sources =====
-        self.config = ConfigModel(**u.deep_merge_dict(config_env, config_yaml, config_toml))
+        self.config = ConfigModel(**u.deep_merge_dict(config_env, config_yaml, config_toml, config_json))
 
         # ===== optimize =====
         # status_list 中自动补全 id

@@ -43,11 +43,15 @@ pip install -r requirements-lock.txt
 
 3. 编辑配置文件
 
-> *配置文件变化史: ~~`data.json`~~ -> ~~`config.json`~~ -> ~~`config.jsonc`~~ -> `.env` -> `config.yaml` -> `data/config.yaml` 或 `data/config.toml` 或 `.env`*
+> *配置文件变化史* <br/> 
+> ~~`data.json`~~ <br/>
+> -> ~~`config.json`~~ <br/>
+> -> ~~`config.jsonc`~~ <br/>
+> -> ~~环境变量 & `.env`~~ <br/>
+> -> ~~`config.yaml` & 环境变量 & `.env`~~ <br/>
+> -> **环境变量 & `data/.env` & `data/config.yaml` & `data/config.toml` & `data/config.json`**
 
-在 `data` 目录下新建 `config.yaml` 或 `config.toml`，并**按照 [此处](./config.md) 的说明编辑配置**
-
-*默认配置文件: [`config.default.yaml`](../config.default.yaml)*
+在 `data` 目录下新建上面几种配置文件中的**一种**，并**按照 [此处](./config.md) 的说明编辑配置**
 
 ### 启动
 
@@ -68,7 +72,8 @@ python3 start.py
 
 > 适合没有服务器部署的同学使用 <br/>
 > *~~有服务器也推荐，不怕被打~~* <br/>
-> ~~唯一的缺点: 不能使用自定义域名~~ **可用内网穿透方式使用自定义域名，见 [如何使用自定义域名](#如何使用自定义域名)**
+> ~~唯一的缺点: 不能使用自定义域名~~ <br/>
+> **可用 Cloudflared Tunnel 方式使用自定义域名，见 [如何使用自定义域名](#如何使用自定义域名)**
 
 只需三步:
 
@@ -172,4 +177,4 @@ CMD bash cfd.sh
 
 ![vercel-4](https://ghimg.siiway.top/sleepy/deploy/vercel-4.1.png)
 
-> 修改环境变量后需重启 Space
+> 修改环境变量后需重新部署
