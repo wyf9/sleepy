@@ -1,4 +1,4 @@
-# /cli,nt/
+# 客户端文档
 
 此目录存储客户端 (用于更新状态/设备状态)
 
@@ -116,7 +116,7 @@ pip install pywin32 requests
 
 ```bat
 :: 媒体状态依赖 (Python <= 3.9)
-pip install winrt
+pip install winrt-runtime
 ```
 
 ```bat
