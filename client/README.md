@@ -32,7 +32,7 @@
 
 ## 快速跳转
 
-- [/cli,nt/](#clint)
+- [客户端文档](#客户端文档)
   - [快速跳转](#快速跳转)
 - [Windows](#windows)
   - [WinDevice](#windevice)
@@ -116,7 +116,8 @@ pip install pywin32 requests
 
 ```bat
 :: 媒体状态依赖 (Python <= 3.9)
-pip install winrt-runtime
+:: winrt-runtime 仅适用于 python 3.10+ (下面两个 winrt.windows.xxx 的依赖中有, 无需手动安装)
+pip install winrt
 ```
 
 ```bat

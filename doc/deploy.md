@@ -41,7 +41,19 @@ pip install -r requirements.txt
 
 3. 编辑配置文件
 
-请参考 [服务器配置](./server-config.md) 文档进行配置。
+在项目目录创建 `.env` 文件:
+
+```ini
+sleepy_main_host = "0.0.0.0" # 监听地址
+sleepy_main_port = "9010" # 端口号
+sleepy_secret = "改成别人猜不出来的密钥" # 密钥，相当于密码
+sleepy_page_user = "你的名字" # 将显示在网页中
+sleepy_page_favicon = "./static/favicon.ico" # 网站图标, 可替换 static/favicon.ico 自定义 (也可以用其他格式的, 自己改路径)
+sleepy_page_more_text = "欢迎来到我的状态页!" # 说两句? (也可以留空)
+sleepy_page_using_first = true # 使用中设备优先显示
+```
+
+更多配置项详见 [此处](./env.md)
 
 ### 启动
 

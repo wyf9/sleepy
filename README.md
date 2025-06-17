@@ -15,31 +15,28 @@
 - [x] 支持 HTTPS (需要自行配置 SSL 证书)
 
 > [!TIP]
-> **最新 开发进度 / TODOs 见: [Discord](https://discord.gg/DyBY6gwkeg)** / [Telegram](https://t.me/wyf9_sleepy) / [QQ](https://qm.qq.com/q/uItkv96Wn6)<br/>
-> 如有 Bug / 建议, 可 [issue](https://github.com/sleepy-project/sleepy/issues/new) 或 *[More contact](https://wyf9.top/#/contact) (注明来意)*.
+> **最新 开发进度 / TODOs 见: [Discord](https://discord.gg/DyBY6gwkeg)** / [QQ](https://qm.qq.com/q/uItkv96Wn6) <br/>
+> 如有 Bug / 建议, 可 [issue](https://github.com/sleepy-project/sleepy/issues/new) 或 *[More contact](https://siiway.top/about/contact) (注明来意)*. <br/>
+> **[Summer Update 进度](https://github.com/orgs/sleepy-project/projects/1)**
 
 ### Preview
 
-演示站 (*较*稳定): [sleepy.wyf9.top](https://sleepy.wyf9.top) ![](https://uptime.wyf9.top/api/badge/9/status) ![](https://uptime.wyf9.top/api/badge/9/uptime)
+个人站点: [sleepy.wyf9.top](https://sleepy.wyf9.top)
 
-开发预览 (*不保证可用*): [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top) ![](https://uptime.wyf9.top/api/badge/10/status) ![](https://uptime.wyf9.top/api/badge/10/uptime)
+演示站: [sleepy-preview.wyf9.top](https://sleepy-preview.wyf9.top)
 
-HuggingFace 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space) ![](https://uptime.wyf9.top/api/badge/22/status) ![](https://uptime.wyf9.top/api/badge/22/uptime)
+HuggingFace 部署预览: [wyf9-sleepy.hf.space](https://wyf9-sleepy.hf.space)
 
-Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top) ![](https://uptime.wyf9.top/api/badge/23/status) ![](https://uptime.wyf9.top/api/badge/23/uptime)
+Vercel 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
 
-> 区别: 演示站为 wyf9 个人站点; 预览站允许测试 API，且直接运行开发版本 (**密钥均为 `wyf9test`**)
+> 预览站允许测试 API，且直接运行开发版本 (**密钥均为 `wyf9test`**)
 
 > [!WARNING]
-> *不要拿演示站做坏事 (比如 js 注入，已由 DeepSeek 强力修复) ~~，没准哪天我会加访问日志~~*
+> *不要拿演示站做坏事 (比如 js 注入，已由 DeepSeek 强力修复 / 违法信息) ~~，没准哪天我会加访问日志~~*
 
 ## 部署 / 更新
 
 请移步 **[部署教程](./doc/deploy.md)** 或 **[更新教程](./doc/update.md)** *(多图警告)*
-
-## 服务器配置
-
-请移步 **[服务器配置](./doc/server-config.md)**
 
 ## Client
 

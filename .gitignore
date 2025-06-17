@@ -1,7 +1,10 @@
 # Python Cache
 __pycache__/
 
-# Env and Data
+# Config and Data
+data/
+config.yaml
+config.toml
 .env
 data.json
 
@@ -12,3 +15,4 @@ data.json
 
 # Others
 .vscode/launch.json
+*.db
