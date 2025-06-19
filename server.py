@@ -56,7 +56,7 @@ try:
     root_logger.handlers.clear()  # clear default handler
     # set stream handler
     shandler = logging.StreamHandler()
-    shandler.setFormatter(u.CustomFormatter(show_symbol=True))
+    shandler.setFormatter(u.CustomFormatter(colorful=True))
     root_logger.addHandler(shandler)
 
     # init config
@@ -69,7 +69,7 @@ try:
         log_file_path = u.get_path(c.main.log_file)
         l.info(f'Saving logs to {log_file_path}')
         fhandler = logging.FileHandler(log_file_path, encoding='utf-8', errors='ignore')
-        fhandler.setFormatter(u.CustomFormatter(show_symbol=False))
+        fhandler.setFormatter(u.CustomFormatter(colorful=False))
         root_logger.addHandler(fhandler)
 
     l.info(f'{"="*15} Application Startup {"="*15}')
@@ -101,6 +101,13 @@ try:
         app=app
     )
     p.load_plugins()
+
+    # debug log
+    l.debug('debug')
+    l.info('info')
+    l.warning('warning')
+    l.error('error')
+    l.critical('critical')
 
 except KeyboardInterrupt:
     l.info('Interrupt init, quitting')

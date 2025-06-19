@@ -11,3 +11,6 @@ pydantic
 
 # 时区处理
 pytz
+
+# 格式化日志
+colorama

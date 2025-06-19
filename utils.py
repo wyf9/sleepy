@@ -7,6 +7,7 @@ from logging import Formatter, getLogger, DEBUG
 from functools import wraps
 
 import flask
+from colorama import Fore, Style
 
 l = getLogger(__name__)
 
@@ -22,18 +23,36 @@ class CustomFormatter(Formatter):
         'ERROR': '❌',
         'CRITICAL': '💥'
     }
+    replaces = {
+        'DEBUG': f'[DEBUG]',
+        'INFO': f'[INFO] ',
+        'WARNING': f'[WARN] ',
+        'ERROR': f'[ERROR]',
+        'CRITICAL': f'[CRIT] '
+    }
+    replaces_colorful = {
+        'DEBUG': f'{Fore.BLUE}[DEBUG]{Style.RESET_ALL}',
+        'INFO': f'{Fore.GREEN}[INFO]{Style.RESET_ALL} ',
+        'WARNING': f'{Fore.YELLOW}[WARN]{Style.RESET_ALL} ',
+        'ERROR': f'{Fore.RED}[ERROR]{Style.RESET_ALL}',
+        'CRITICAL': f'{Fore.MAGENTA}[CRIT]{Style.RESET_ALL} '
+    }
     default_symbol = '📢'
-    show_symbol: bool
+    colorful: bool
 
-    def __init__(self, show_symbol: bool = True):
+    def __init__(self, colorful: bool = True):
         super().__init__()
-        self.show_symbol = show_symbol
+        self.colorful = colorful
 
     def format(self, record):
         timestamp = datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')
         message = super().format(record)
-        symbol = f' {self.symbols.get(record.levelname, self.default_symbol)}' if self.show_symbol else ''
-        formatted_message = f"{timestamp}{symbol} [{record.levelname}] {message}"
+        symbol = f' {self.symbols.get(record.levelname, self.default_symbol)}' if self.colorful else ''
+        level = self.replaces_colorful.get(record.levelname, f'[{record.levelname}]') if self.colorful else self.replaces.get(record.levelname, f'[{record.levelname}]')
+        file = relative_path(record.pathname)
+        # func = '__main__' if record.funcName == '<module>' else record.funcName
+        # formatted_message = f"{timestamp}{symbol} {level} | {file}:{record.lineno} @{func} | {message}"
+        formatted_message = f"{timestamp}{symbol} {level} | {file}:{record.lineno} | {message}"
         return formatted_message
 
 
@@ -110,6 +129,7 @@ def require_secret(view_func):
                 'message': 'wrong secret'
             }, 401
     return wrapped_view
+
 
 class SleepyException(Exception):
     '''
@@ -283,6 +303,13 @@ def get_path(path: str, create_dirs: bool = True, is_dir: bool = False) -> str:
     return full_path
 
 
+def relative_path(path: str) -> str:
+    '''
+    绝对路径 -> 相对路径
+    '''
+    return os.path.relpath(path)
+
+
 def perf_counter():
     '''
     获取一个性能计数器, 执行返回函数来结束计时, 并返回保留两位小数的毫秒值
@@ -294,7 +321,7 @@ def perf_counter():
 def process_env_split(keys: list[str], value: str) -> dict:
     '''
     处理环境变量配置项分割
-    - `page_user=wyf9` -> `['page', 'user'], 'wyf9'` -> `{'page': {'user': 'wyf9'}, 'page_user': 'wyf9'}`
+    - `page_name=wyf9` -> `['page', 'name'], 'wyf9'` -> `{'page': {'name': 'wyf9'}, 'page_name': 'wyf9'}`
     '''
     if len(keys) == 1:
         return {keys[0]: value}
