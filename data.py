@@ -20,7 +20,7 @@ l = getLogger(__name__)
 class Data:
     '''
     data 类，存储当前/设备状态 <br/>
-    可用 `data.data.xxx 调取数据 (加载后)
+    可用 `data.data.xxx` 调取数据 (加载后)
 
     :param config: 用户配置对象
     '''
@@ -69,7 +69,7 @@ class Data:
         while error_count > 0:
             try:
                 if not os.path.exists(u.get_path('data/data.json')):
-                    l.warning('data/data.json not exist, try re-create')
+                    l.warning('data/data.json not exist, creating a new one')
                     self.data = DataModel()
                     self.save()
                 with open(u.get_path('data/data.json'), 'r', encoding='utf-8') as file:
@@ -81,7 +81,7 @@ class Data:
                         self.data = data_model
                 break  # 成功加载数据后跳出循环
             except ValidationError as e:
-                l.error(f'Invaild data file format: {e}')
+                raise
             except Exception as e:
                 error_count -= 1
                 if error_count > 0:

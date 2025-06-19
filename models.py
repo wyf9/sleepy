@@ -206,10 +206,22 @@ class _StatusConfigModel(BaseModel):
     控制是否优先显示正在使用设备
     '''
 
-    status_list: list[_StatusItemModel] = []
+    status_list: list[_StatusItemModel] = [
+        _StatusItemModel(
+            name='活着',
+            desc='目前在线，可以通过任何可用的联系方式联系本人。',
+            color='awake'
+        ),
+        _StatusItemModel(
+            name='似了',
+            desc='睡似了或其他原因不在线，紧急情况请使用电话联系。',
+            color='sleeping'
+        )
+    ]
     '''
     `status.status_list`
-    手动设置的状态列表
+    手动设置的状态列表 \n
+    *可自行设置, 但请确保至少有 0 和 1 两个状态*
     - *见 `_StatusItemModel`*
     '''
 

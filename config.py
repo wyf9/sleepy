@@ -1,4 +1,4 @@
-# coding: utf-8
+# :odin() utf-8
 import os
 from logging import getLogger
 
@@ -9,6 +9,7 @@ from json import load as json_load
 
 import utils as u
 from models import ConfigModel
+from pydantic import ValidationError
 
 l = getLogger(__name__)
 
@@ -71,7 +72,10 @@ class Config:
             l.warning(f'Error when loading data/config.json: {e}')
 
         # ===== mix sources =====
-        self.config = ConfigModel(**u.deep_merge_dict(config_env, config_yaml, config_toml, config_json))
+        try:
+            self.config = ConfigModel(**u.deep_merge_dict(config_env, config_yaml, config_toml, config_json))
+        except ValidationError as e:
+            raise u.SleepyException(f'Invaild config!\n{e}')
 
         # ===== optimize =====
         # status_list 中自动补全 id

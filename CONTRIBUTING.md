@@ -20,12 +20,12 @@
 
 ```py
 @app.route('/route') # 路由定义在前
-@require_secret # 鉴权在后
+@u.require_secret # 鉴权在后
 def function():
   # ...
 ```
 
-即 **需要鉴权的修饰器紧跟函数定义**，如果顺序搞反会导致 `@require_secret` 修饰器被忽略，**从而绕过鉴权** *([History](https://github.com/sleepy-project/sleepy/commit/797e3441096a3644a58e1baf9988972b61a47def))*
+即 **需要鉴权的修饰器紧跟函数定义**，如果顺序搞反会导致 `@u.require_secret` 修饰器被忽略，**从而绕过鉴权** *([History](https://github.com/sleepy-project/sleepy/commit/797e3441096a3644a58e1baf9988972b61a47def))*
 
 <details>
 <summary>关于这个 commit 是怎么来的</summary>

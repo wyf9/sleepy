@@ -4,8 +4,9 @@ import time
 from datetime import datetime
 from pathlib import Path
 from logging import Formatter, getLogger, DEBUG
+from functools import wraps
 
-from flask import make_response
+import flask
 
 l = getLogger(__name__)
 
@@ -40,7 +41,7 @@ def cache_response(*args):
     '''
     给返回添加缓存标头
     '''
-    resp = make_response(*args)
+    resp = flask.make_response(*args)
     resp.headers['Cache-Control'] = 'max-age=86400, must-revalidate'
     resp.headers['Expires'] = '86400'
     return resp
@@ -50,12 +51,65 @@ def no_cache_response(*args):
     '''
     给返回添加阻止缓存标头
     '''
-    resp = make_response(*args)
+    resp = flask.make_response(*args)
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     resp.headers['Pragma'] = 'no-cache'
     resp.headers['Expires'] = '0'
     return resp
 
+
+def require_secret(view_func):
+    '''
+    (装饰器) require_secret, 用于指定函数需要 secret 鉴权
+    - ***请确保修饰器紧跟函数定义，如:***
+    ```
+    @app.route('/set')
+    @u.require_secret
+    def set_normal(): ...
+    ```
+    '''
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        # 1. body
+        # -> {"secret": "my-secret"}
+        body: dict = flask.request.get_json(silent=True) or {}
+        if body and body.get('secret') == flask.g.secret:
+            l.debug('[Auth] Verify secret Success from Body')
+            return view_func(*args, **kwargs)
+
+        # 2. param
+        # -> ?secret=my-secret
+        elif flask.request.args.get('secret') == flask.g.secret:
+            l.debug('[Auth] Verify secret Success from Param')
+            return view_func(*args, **kwargs)
+
+        # 3. header (Sleepy-Secret)
+        # -> Sleepy-Secret: my-secret
+        elif flask.request.headers.get('Sleepy-Secret') == flask.g.secret:
+            l.debug('[Auth] Verify secret Success from Header (Sleepy-Secret)')
+            return view_func(*args, **kwargs)
+
+        # 4. header (Authorization)
+        # -> Authorization: Bearer my-secret
+        elif flask.request.headers.get('Authorization', '')[7:] == flask.g.secret:
+            l.debug('[Auth] Verify secret Success from Header (Authorization)')
+            return view_func(*args, **kwargs)
+
+        # 5. cookie (sleepy-token)
+        # -> Cookie: sleepy-token=my-secret
+        elif flask.request.cookies.get('sleepy-token') == flask.g.secret:
+            l.debug('[Auth] Verify secret Success from Cookie (sleepy-token)')
+            return view_func(*args, **kwargs)
+
+        # -1. no any secret
+        else:
+            l.debug('[Auth] Verify secret Failed')
+            return {
+                'success': False,
+                'code': 'not authorized',
+                'message': 'wrong secret'
+            }, 401
+    return wrapped_view
 
 class SleepyException(Exception):
     '''

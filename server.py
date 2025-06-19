@@ -30,7 +30,6 @@ try:
     import utils as u
     from data import Data as data_init
     from plugin import PluginInit as plugin_init
-    from plugin import require_secret, trigger_event
 except:
     print(f'''
 Import module Failed!
@@ -101,6 +100,7 @@ try:
         data=d,
         app=app
     )
+    p.load_plugins()
 
 except KeyboardInterrupt:
     l.info('Interrupt init, quitting')
@@ -219,11 +219,11 @@ def before_request():
 
 
 @app.after_request
-def after_request(response: flask.Response):
+def after_request(resp: flask.Response):
     '''
     after_request:
-    - 显示访问日志
     - 记录 metrics 信息
+    - 显示访问日志
     '''
     # --- metrics
     path = flask.request.path
@@ -233,10 +233,10 @@ def after_request(response: flask.Response):
     ip1 = flask.request.remote_addr
     ip2 = flask.request.headers.get('X-Real-IP') or flask.request.headers.get('X-Forwarded-For')
     if ip2:
-        l.info(f'[Request] {ip1} / {ip2} | {path} ({flask.g.perf()}ms)')
+        l.info(f'[Request] {ip1} / {ip2} | {path} - {resp.status_code} ({flask.g.perf()}ms)')
     else:
-        l.info(f'[Request] {ip1} | {path} ({flask.g.perf()}ms)')
-    return response
+        l.info(f'[Request] {ip1} | {path} - {resp.status_code} ({flask.g.perf()}ms)')
+    return resp
 
 # --- Templates
 
@@ -301,7 +301,9 @@ def git_hub():
     '''
     这里谁来了都改不了!
     '''
-    return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'wyf'+'9/sle'+'epy', 301)
+    # 我要改
+    # -- NT
+    return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'slee'+'py-'+'project/sle'+'epy', 301)
 
 
 @app.route('/none')
@@ -325,7 +327,7 @@ def query():
     # 获取手动状态
     st: int = d.data.status
     try:
-        stinfo = c.status.status_list[st]
+        stinfo = c.status.status_list[st].model_dump()
     except:
         stinfo = {
             'id': -1,
@@ -378,14 +380,14 @@ def get_status_list():
     - 无需鉴权
     - Method: **GET**
     '''
-    return c.status.status_list
+    return [i.model_dump() for i in c.status.status_list]
 
 
 # --- Status API
 
 
 @app.route('/set')
-@require_secret
+@u.require_secret
 def set_normal():
     '''
     设置状态
@@ -405,7 +407,7 @@ def set_normal():
     d.data.status = status
 
     # 触发状态更新事件
-    trigger_event('status_updated', old_status, status)
+    # trigger_event('status_updated', old_status, status)
 
     return {
         'success': True,
@@ -417,7 +419,7 @@ def set_normal():
 # --- Device API
 
 @app.route('/device/set', methods=['GET', 'POST'])
-@require_secret
+@u.require_secret
 def device_set():
     '''
     设置单个设备的信息/打开应用
@@ -464,7 +466,7 @@ def device_set():
     d.check_device_status()
 
     # 触发设备更新事件
-    trigger_event('device_updated', device_id, d.data.device_status[device_id])
+    # trigger_event('device_updated', device_id, d.data.device_status[device_id])
 
     return {
         'success': True,
@@ -473,7 +475,7 @@ def device_set():
 
 
 @app.route('/device/remove')
-@require_secret
+@u.require_secret
 def remove_device():
     '''
     移除单个设备的状态
@@ -490,8 +492,8 @@ def remove_device():
 
         # 触发设备删除事件
         if device_info:
-            trigger_event('device_removed', device_id, device_info)
-
+            pass
+            # trigger_event('device_removed', device_id, device_info)
     except KeyError:
         return {
             'success': False,
@@ -505,7 +507,7 @@ def remove_device():
 
 
 @app.route('/device/clear')
-@require_secret
+@u.require_secret
 def clear_device():
     '''
     清除所有设备状态
@@ -519,7 +521,7 @@ def clear_device():
     d.check_device_status()
 
     # 触发设备清除事件
-    trigger_event('devices_cleared', old_devices)
+    # trigger_event('devices_cleared', old_devices)
 
     return {
         'success': True,
@@ -528,7 +530,7 @@ def clear_device():
 
 
 @app.route('/device/private_mode')
-@require_secret
+@u.require_secret
 def private_mode():
     '''
     隐私模式, 即不在返回中显示设备状态 (仍可正常更新)
@@ -546,7 +548,7 @@ def private_mode():
     d.data.last_updated = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
 
     # 触发隐私模式切换事件
-    trigger_event('private_mode_changed', old_private_mode, private)
+    # trigger_event('private_mode_changed', old_private_mode, private)
 
     return {
         'success': True,
@@ -555,7 +557,7 @@ def private_mode():
 
 
 @app.route('/save_data')
-@require_secret
+@u.require_secret
 def save_data():
     '''
     保存内存中的状态信息到 `data/data.json`
@@ -564,7 +566,7 @@ def save_data():
     try:
         d.save()
         # 触发数据保存事件
-        trigger_event('data_saved', d.data)
+        # trigger_event('data_saved', d.data)
     except Exception as e:
         return {
             'success': False,
@@ -631,7 +633,7 @@ def events():
 
 
 @app.route('/webui/panel')
-@require_secret
+@u.require_secret
 def admin_panel():
     '''
     管理面板
@@ -695,7 +697,7 @@ def login():
 
 
 @app.route('/webui/auth', methods=['POST'])
-@require_secret
+@u.require_secret
 def auth():
     '''
     处理登录请求，验证密钥并设置 cookie
@@ -733,7 +735,7 @@ def logout():
 
 
 @app.route('/verify-secret', methods=['GET', 'POST'])
-@require_secret
+@u.require_secret
 def verify_secret():
     '''
     验证密钥是否有效
@@ -771,7 +773,7 @@ if c.metrics.enabled:
 # --- End
 
 if __name__ == '__main__':
-    trigger_event('app_started')
+    # trigger_event('app_started')
     l.info(f'Hi {c.page.name}!')
     l.info(f'Listening service on: {f"[{c.main.host}]" if ":" in c.main.host else c.main.host}:{c.main.port}{" (debug enabled)" if c.main.debug else ""}')
     try:
