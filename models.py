@@ -394,3 +394,8 @@ class DataModel(BaseModel):
     metrics (访问统计) 数据
     - *见 `_MetricsModel`*
     '''
+
+    plugin: dict[str, Any] = {}
+    '''
+    插件数据
+    '''

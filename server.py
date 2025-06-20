@@ -3,7 +3,7 @@
 
 # show welcome text
 print(f'''
-Welcome to Sleepy 2025!
+Welcome to Sleepy Project 2025!
 Give us a Star 🌟 please: https://github.com/sleepy-project/sleepy
 Bug Report: https://wyf9.top/t/sleepy/bug
 Feature Request: https://wyf9.top/t/sleepy/feature
@@ -101,22 +101,27 @@ try:
         app=app
     )
     p.load_plugins()
+    d.start_timer_check(
+        data_check_interval=c.main.checkdata_interval,
+        plugins_enabled=p.plugins_loaded
+    )
 
     # debug log
-    l.debug('debug')
-    l.info('info')
-    l.warning('warning')
-    l.error('error')
-    l.critical('critical')
+    if c.main.debug:
+        l.debug('debug')
+        l.info('info')
+        l.warning('warning')
+        l.error('error')
+        l.critical('critical')
 
 except KeyboardInterrupt:
     l.info('Interrupt init, quitting')
     exit(0)
 except u.SleepyException as e:
-    l.error(e)
+    l.critical(e)
     exit(1)
 except:
-    l.error('Unexpected Error!')
+    l.critical('Unexpected Error!')
     raise
 
 # --- Theme
@@ -308,8 +313,9 @@ def git_hub():
     '''
     这里谁来了都改不了!
     '''
-    # 我要改
-    # -- NT
+    # ~~我要改~~
+    # ~~-- NT~~
+    # **不准改, 敢改我就撤了你的 member** -- wyf9
     return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'slee'+'py-'+'project/sle'+'epy', 301)
 
 
@@ -792,7 +798,7 @@ if __name__ == '__main__':
             threaded=True
         )
     except Exception as e:
-        l.error(f"Error running server: {e}")
+        l.critical(f"Error running server: {e}")
         l.info('Saving data before raise...')
         d.save()
         l.info('(data saved) Error Stack below:')

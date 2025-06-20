@@ -14,33 +14,53 @@ import utils as u
 l = getLogger(__name__)
 
 
-class PluginConfig(BaseModel):
-    '''
-    插件默认配置 (使用 pydantic 解析)
-    '''
-
-
 class Plugin:
     '''
     Sleepy 插件接口
     '''
+    name: str
+    '''插件名称'''
+    config: t.Any
+    '''插件配置 (如传入 Model 则为对应 Model 实例, 否则为字典)'''
+    data: t.Any
+    '''插件数据 (如传入 Model 则为对应 Model 实例, 否则为字典)'''
     _registry = {}
     _routes = []
 
-    def __init__(self, name: str, config: type[PluginConfig] = PluginConfig):
-        """
+    def __init__(self, name: str, config=None, data=None):  # : type[BaseModel]):
+        '''
         初始化插件
 
         :param name: 插件名称 (通常为 `__name__`)
-        :param config: 插件默认配置 (可选)
-        """
+        :param config: *[Model / dict]* 插件默认配置 (可选)
+        '''
         # 初始化 & 注册插件
         self.name = name.split('.')[-1]
         Plugin._registry[self.name] = self
 
         # 加载配置
-        
-        l.debug(f'[plugin] {self.name} registered')
+        if not config:
+            # 1. None -> raw
+            self.config = PluginInit.instance.c.plugin.get(self.name, {})
+        elif isinstance(config, dict):
+            # 2. dict -> default + raw -> dict
+            config_dict = u.deep_merge_dict(config, PluginInit.instance.c.plugin.get(self.name, {}))
+            self.config = config_dict
+        else:
+            # 3. model -> default model + raw -> model
+            config_dict = PluginInit.instance.c.plugin.get(self.name, {})
+            self.config = config.model_validate(config_dict)
+
+        # 加载数据
+        if not data:
+            # 1. None -> raw
+            self.data = PluginInit.instance.d.data.plugin.get(self.name, {})
+        elif isinstance(data, dict):
+            # 2. dict -> default + raw -> dict
+            self.data = u.deep_merge_dict(PluginInit.instance.d.data.plugin.get(self.name, {}))
+        else:
+            # 3. model -> default model + raw -> model
+            self.data = data.model_validate(PluginInit.instance.d.data.plugin.get(self.name, {}))
 
     @property
     def global_config(self) -> ConfigModel:
@@ -57,13 +77,15 @@ class Plugin:
         return PluginInit.instance.d
 
     @property
-    def app(self) -> flask.Flask:
-        """访问 flask.Flask 应用实例"""
+    def _app(self) -> flask.Flask:
+        '''
+        直接访问 flask.Flask 实例 (不建议使用)
+        '''
         return PluginInit.instance.app
 
     def route(self, rule: str, **options: t.Any):
         '''
-        注册插件路由 (访问: `/plugin/<name>/<rule>`)
+        注册插件路由 **(访问: `/plugin/<name>/<rule>`)**
 
         :param rule: 路由规则 (路径)
         ```
@@ -92,7 +114,7 @@ class Plugin:
 
     def global_route(self, rule: str, **options: t.Any):
         '''
-        注册全局插件路由 (访问: `/<rule>`)
+        注册全局插件路由 **(访问: `/<rule>`)**
 
         :param rule: 路由规则 (路径)
         ```
@@ -132,19 +154,20 @@ class PluginInit:
     c: ConfigModel
     d: Data
     app: flask.Flask
+    plugins_loaded: list[Plugin] = []
 
     def __init__(self, config: ConfigModel, data: Data, app: flask.Flask):
         self.c = config
         self.d = data
         self.app = app
         PluginInit.instance = self
-        self._loaded_plugins = {}
 
     def load_plugins(self):
         '''
         加载插件
         '''
         for plugin_name in self.c.plugins_enabled:
+            # 加载单个插件
             try:
                 if not os.path.isfile(u.get_path(f'plugins/{plugin_name}/__init__.py')):
                     l.warning(f'[plugin] Invaild plugin {plugin_name}! it doesn\'t exist!')
@@ -159,7 +182,7 @@ class PluginInit:
                     if isinstance(obj, Plugin) and obj.name == plugin_name:
                         obj.init()
                         self._register_routes(obj)
-                        self._loaded_plugins[plugin_name] = obj
+                        self.plugins_loaded.append(obj)
                         l.debug(f'[plugin] init plugin {plugin_name} took {perf()}ms')
                         break
                 else:
@@ -167,6 +190,10 @@ class PluginInit:
 
             except Exception as e:
                 l.warning(f'[plugin] Error when loading plugin {plugin_name}: {e}')
+
+        loaded_count = len(self.plugins_loaded)
+        loaded_names = ", ".join([n.name for n in self.plugins_loaded])
+        l.info(f'{loaded_count} plugin{"s" if loaded_count > 1 else ""} enabled: {loaded_names}' if loaded_count > 0 else f'No plugins enabled.')
 
     def _register_routes(self, plugin: Plugin):
         '''
@@ -181,10 +208,4 @@ class PluginInit:
                 view_func=route['view_func'],
                 **route['options']
             )
-            l.debug(f"Registered Route: {route['rule']} -> {route['endpoint']}")
-
-    def get_plugin(self, name: str) -> t.Optional[Plugin]:
-        '''
-        获取已加载插件实例
-        '''
-        return self._loaded_plugins.get(name)
+            l.debug(f'Registered Route: {route["rule"]} -> {route["endpoint"]}')

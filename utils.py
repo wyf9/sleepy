@@ -149,15 +149,6 @@ class SleepyException(Exception):
         return self.msg
 
 
-def exception(msg: str) -> SleepyException:
-    '''
-    抛出 SleepyException
-
-    :param msg: 错误描述
-    '''
-    raise SleepyException(msg)
-
-
 def list_files(path: str, include_subfolder: bool = False, name_only: bool = False, strict_exist: bool = False, ext: str = '') -> list:
     '''
     列出目录下的**文件**列表

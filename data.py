@@ -27,6 +27,7 @@ class Data:
     data: DataModel
     _cache: dict[str, tuple[float, str]] = {}
     _data_check_interval: int = 60
+    _plugins_enabled: list = []
     _c: ConfigModel
 
     def __init__(self, config: ConfigModel):
@@ -48,12 +49,9 @@ class Data:
                 self.data = DataModel()
                 self.save()
             except Exception as e:
-                u.exception(f'Create data/data.json failed: {e}')
-        # --- load & start timer
+                raise u.SleepyException(f'Create data/data.json failed: {e}')
+        # --- load
         self.load()
-        self._start_timer_check(
-            data_check_interval=self._c.main.checkdata_interval
-        )
         l.debug(f'[data] init took {perf()}ms')
 
     # --- Storage functions
@@ -62,7 +60,7 @@ class Data:
         '''
         加载状态
 
-        :param ret: 是否返回加载后的 dict (为否则只设置 self.data)
+        :param ret: 是否直接返回加载后的 data (为否则设置 self.data 为加载后数据)
         :param preload: 将会将 data/data.json 的内容追加到此后
         '''
 
@@ -95,12 +93,15 @@ class Data:
         保存配置
         '''
         try:
+            for i in self._plugins_enabled:
+                self.data.plugin[i.name] = i.data
             with open(u.get_path('data/data.json'), 'w', encoding='utf-8') as file:
                 json.dump(self.data.model_dump(), file, indent=4, ensure_ascii=False)
         except Exception as e:
             l.error(f'Failed to save data/data.json: {e}')
 
     # --- Metrics
+
     def get_metrics_data(self):
         now = datetime.now(pytz.timezone(self._c.main.timezone))
         return {
@@ -187,27 +188,31 @@ class Data:
                 else:
                     self.data.status = 1
                 if last_status != self.data.status:
-                    l.debug(f'[check_device_status] 已自动切换状态 ({last_status} -> {self.data.status}).')
+                    l.debug(f'[check_device_status] switched status ({last_status} -> {self.data.status}).')
                 else:
-                    l.debug(f'[check_device_status] 当前状态已为 {current_status}, 无需切换.')
+                    l.debug(f'[check_device_status] current status is {current_status} already.')
             else:
-                l.debug(f'[check_device_status] 当前状态为 {current_status}, 不适用自动切换.')
+                l.debug(f'[check_device_status] curent status: {current_status}, can\'t switch automatically.')
 
     def clean_cache(self):
         '''
         清理缓存中的过期项
         '''
+        if self._c.main.debug:
+            # 不用检查了, 直接返回
+            return
         now = time()
-        for i in self._cache:
+        for i in list(self._cache.keys()):
             if now - self._cache[i][0] > self._c.main.cache_age:
                 del self._cache[i]
 
     def _auto_save(self):
         try:
+            
             file_data = self.load(ret=True)
             if file_data != self.data:
                 self.save()
-                l.debug('[auto_save] data changed, saved to disk.')
+                l.info('[auto_save] data changed, saved to disk.')
         except Exception as e:
             l.warning(f'[auto_save] saving error: {e}')
 
@@ -231,20 +236,22 @@ class Data:
             l.debug(f'[timer_check] finished in {t()}ms.')
             sleep(self._data_check_interval)
 
-    def _start_timer_check(self, data_check_interval: int = 60):
+    def start_timer_check(self, data_check_interval: int = 60, plugins_enabled: list = []):
         '''
         使用 threading 启动下面的 `timer_check()`
 
         :param data_check_interval: 检查间隔 *(秒)*
         '''
         self._data_check_interval = data_check_interval
+        self._plugins_enabled = plugins_enabled
         self.timer_thread = threading.Thread(target=self._data_check_timer, daemon=True)
         self.timer_thread.start()
+
     # --- simple cache system
 
     def get_cached(self, filename: str) -> str | None:
         '''
-        加载文件 (经过缓存)
+        加载文本文件 (经过缓存)
 
         :param filename: 文件名
         :return str: (加载成功) 文件内容
