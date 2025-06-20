@@ -1,5 +1,0 @@
-frontend: true
-backend: true
-config:
-  message: "这是一个全局路由示例插件"
-  routes_enabled: true

@@ -1,7 +1,0 @@
-frontend: true
-frontend-card: true
-backend: false
-config:
-  content: |
-    <b>this is default config</b> <br/>
-    go <b><code>plugin/custom_html/README.md</code></b> to view details
