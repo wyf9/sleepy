@@ -1,0 +1,8 @@
+[project]
+name = "sleepy"
+version = "5.0-dev-20250622"
+description = "A Flask application to see if you're online or not."
+license = { text = "MIT" }
+
+[project.urls]
+homepage = "https://github.com/sleepy-project/sleepy"

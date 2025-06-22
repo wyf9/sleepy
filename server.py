@@ -8,7 +8,8 @@ Give us a Star 🌟 please: https://github.com/sleepy-project/sleepy
 Bug Report: https://wyf9.top/t/sleepy/bug
 Feature Request: https://wyf9.top/t/sleepy/feature
 Security Report: https://wyf9.top/t/sleepy/security
-'''[1:])
+'''[1:], flush=True  # 突然想到的
+)
 
 # import modules
 try:
@@ -18,17 +19,20 @@ try:
     import time
     from urllib.parse import urlparse, parse_qs, urlunparse
     import json
+    import typing as t
 
     # 3rd-party
     import flask
     import pytz
     from markupsafe import escape
-    from werkzeug.exceptions import NotFound
+    from werkzeug.exceptions import HTTPException, NotFound
+    from toml import load as load_toml
 
     # local modules
     from config import Config as config_init
     import utils as u
     from data import Data as data_init
+    from data_old import Data as data_old_init
     from plugin import PluginInit as plugin_init
 except:
     print(f'''
@@ -41,6 +45,11 @@ Import module Failed!
     raise
 
 try:
+    # version info
+    with open(u.get_path('pyproject.toml'), 'r', encoding='utf-8') as f:
+        version: str = load_toml(f).get('project', {}).get('version', 'unknown')
+        f.close()
+
     # init flask app
     app = flask.Flask(
         import_name=__name__,
@@ -56,7 +65,7 @@ try:
     root_logger.handlers.clear()  # clear default handler
     # set stream handler
     shandler = logging.StreamHandler()
-    shandler.setFormatter(u.CustomFormatter(colorful=True))
+    shandler.setFormatter(u.CustomFormatter(colorful=False))
     root_logger.addHandler(shandler)
 
     # init config
@@ -64,15 +73,21 @@ try:
 
     # continue init logger
     root_logger.level = logging.DEBUG if c.main.debug else logging.INFO  # set log level
+    # reset stream handler
+    root_logger.handlers.clear()
+    shandler = logging.StreamHandler()
+    shandler.setFormatter(u.CustomFormatter(colorful=c.main.colorful_log, timezone=c.main.timezone))
+    root_logger.addHandler(shandler)
     # set file handler
     if c.main.log_file:
         log_file_path = u.get_path(c.main.log_file)
         l.info(f'Saving logs to {log_file_path}')
         fhandler = logging.FileHandler(log_file_path, encoding='utf-8', errors='ignore')
-        fhandler.setFormatter(u.CustomFormatter(colorful=False))
+        fhandler.setFormatter(u.CustomFormatter(colorful=False, timezone=c.main.timezone))
         root_logger.addHandler(fhandler)
 
     l.info(f'{"="*15} Application Startup {"="*15}')
+    l.info(f'Sleepy Server version {version}')
 
     # debug: disable static cache
     if c.main.debug:
@@ -86,8 +101,12 @@ try:
     cli.show_server_banner = lambda *_: None
 
     # init data
-    d = data_init(
+    d = data_old_init(
         config=c
+    )
+    d1 = data_init(
+        config=c,
+        app=app
     )
 
     # init metrics if enabled
@@ -250,6 +269,33 @@ def after_request(resp: flask.Response):
         l.info(f'[Request] {ip1} | {path} - {resp.status_code} ({flask.g.perf()}ms)')
     return resp
 
+
+@app.errorhandler(u.APIUnsuccessful)
+def api_unsuccessful_handler(e: u.APIUnsuccessful):
+    '''
+    处理 `APIUnsuccessful` 错误
+    '''
+    l.error(f'API Calling Error: {e}')
+    return {
+        'success': False,
+        'code': e.code,
+        'details': e.details,
+        'message': e.message
+    }, e.code
+
+
+@app.errorhandler(Exception)
+def error_handler(e: Exception):
+    '''
+    处理未捕获运行时错误
+    '''
+    if isinstance(e, HTTPException):
+        l.warning(f'HTTP Error: {e}')
+        return e
+    else:
+        l.error(f'Unhandled Error: {e}')
+        return flask.abort(500)
+
 # --- Templates
 
 
@@ -261,11 +307,11 @@ def index():
     '''
     # 获取手动状态
     try:
-        status = c.status.status_list[d.data.status].model_dump()
+        status = c.status.status_list[d1.status].model_dump()
     except:
-        l.warning(f"Index {d.data.status} out of range!")
+        l.warning(f"Index {d1.status} out of range!")
         status = {
-            'id': d.data.status,
+            'id': d1.status,
             'name': 'Unknown',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
@@ -301,7 +347,7 @@ def index():
         c=c,
         more_text=more_text,
         status=status,
-        last_updated=d.data.last_updated,
+        last_updated=d1.last_updated,
         # plugins=plugin_templates,
         current_theme=flask.g.theme,
         available_themes=u.themes_available()
@@ -338,7 +384,7 @@ def query():
     - Method: **GET**
     '''
     # 获取手动状态
-    st: int = d.data.status
+    st: int = d1.status
     try:
         stinfo = c.status.status_list[st].model_dump()
     except:
@@ -348,41 +394,59 @@ def query():
             'desc': f'未知的标识符 {st}，可能是配置问题。',
             'color': 'error'
         }
-    # 获取设备状态
-    if d.data.private_mode:
-        # 隐私模式
-        devicelst = {}
-    elif c.status.using_first:
-        # 使用中优先
-        devicelst = {}  # devicelst = device_using
-        device_not_using = {}
-        for n in d.data.device_status:
-            i = d.data.device_status[n]
-            if i.using:
-                devicelst[n] = i.model_dump()
-            else:
-                device_not_using[n] = i.model_dump()
-        if c.status.sorted:
-            devicelst = dict(sorted(devicelst.items()))
-            device_not_using = dict(sorted(device_not_using.items()))
-        devicelst.update(device_not_using)  # append not_using items to end
-    else:
-        # 正常获取
-        devicelst: dict = d.data.model_dump(include={'device_status'}).get('device_status', {})
-        if c.status.sorted:
-            devicelst = dict(sorted(devicelst.items()))
 
     # 返回数据
+    v1 = u.tobool(flask.request.args.get('version', 0)) if flask.request else 0
+    if v1:
+        # 旧版返回兼容 (本地时间字符串，但性能不佳)
+        return {
+            'time': datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S'),
+            'timezone': c.main.timezone,
+            'success': True,
+            'status': st,
+            'info': stinfo,
+            'device': d1.device_list,
+            'last_updated': d1.last_updated.astimezone(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S'),
+            'refresh': c.status.refresh_interval,
+            'device_status_slice': c.status.device_slice
+        }
+    else:
+        # 新版返回 (时间戳)
+        return {
+            'success': True,
+            'time': datetime.now().timestamp(),
+            'status': stinfo,
+            'device': d1.device_list,
+            'last_updated': d1.last_updated.timestamp()
+            # 'device_status_slice': c.status.device_slice,
+            # 'refresh': c.status.refresh_interval
+        }
+
+
+@app.route('/metadata')
+def metadata():
+    '''
+    获取站点元数据
+    '''
     return {
-        'time': datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S'),
+        'version': version,
         'timezone': c.main.timezone,
-        'success': True,
-        'status': st,
-        'info': stinfo,
-        'device': devicelst,
-        'device_status_slice': c.status.device_slice,
-        'last_updated': d.data.last_updated,
-        'refresh': c.status.refresh_interval
+        'page': {
+            'name': c.page.name,
+            'title': c.page.title,
+            'desc': c.page.desc,
+            'favicon': c.page.favicon,
+            'background': c.page.background,
+            'theme': c.page.theme
+        },
+        'status': {
+            'device_slice': c.status.device_slice,
+            'refresh_interval': c.status.refresh_interval,
+            'not_using': c.status.not_using,
+            'sorted': c.status.sorted,
+            'using_first': c.status.using_first
+        },
+        'metrics': c.metrics.enabled
     }
 
 
@@ -411,13 +475,9 @@ def set_normal():
     try:
         status = int(status)
     except:
-        return {
-            'success': False,
-            'code': 'bad request',
-            'message': 'argument \'status\' must be int'
-        }, 400
-    old_status = d.data.status
-    d.data.status = status
+        raise u.APIUnsuccessful(400, 'argument \'status\' must be int')
+    # old_status = d1.status
+    d1.status = status
 
     # 触发状态更新事件
     # trigger_event('status_updated', old_status, status)
@@ -441,42 +501,43 @@ def device_set():
     # 分 get / post 从 params / body 获取参数
     if flask.request.method == 'GET':
         try:
-            device_id = escape(flask.request.args.get('id'))
-            device_show_name = escape(flask.request.args.get('show_name'))
-            device_using = u.tobool(escape(flask.request.args.get('using')), throw=True) or False
-            app_name = escape(flask.request.args.get('app_name'))
-        except:
-            return {
-                'success': False,
-                'code': 'bad request',
-                'message': 'missing param or wrong param type'
-            }, 400
+            d1.device_set(
+                id=flask.request.args['id'],
+                show_name=flask.request.args.get('show_name'),
+                desc=flask.request.args.get('desc'),
+                online=u.tobool(flask.request.args.get('online')),
+                using=u.tobool(flask.request.args.get('using')),
+                app_name=flask.request.args.get('app_name'),
+                playing=flask.request.args.get('playing'),
+                battery=int(flask.request.args.get('battery', '')) if flask.request.args.get('battery') else None,
+                is_charging=u.tobool(flask.request.args.get('is_charging'))
+            )
+        except Exception as e:
+            if isinstance(e, u.APIUnsuccessful):
+                raise e
+            else:
+                raise u.APIUnsuccessful(400, f'missing param or wrong param type: {e}')
     elif flask.request.method == 'POST':
-        req = flask.request.get_json()
         try:
-            device_id: str = req['id']
-            device_show_name: str = req['show_name']
-            device_using: bool = u.tobool(req['using'], throw=True) or False
-            app_name: str = req['app_name']
-        except:
-            return {
-                'success': False,
-                'code': 'bad request',
-                'message': 'missing param or wrong param type'
-            }, 400
-
-    # 如未在使用且锁定了提示，则替换
-    if (not device_using) and c.status.not_using:
-        app_name = c.status.not_using
-
-    # 保存设备信息
-    device = d.data.device_status[device_id]
-    device.show_name = device_show_name
-    device.using = device_using
-    device.app_name = app_name
-
-    d.data.last_updated = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-    d.check_device_status()
+            req: dict = flask.request.get_json()
+            d1.device_set(
+                id=req['id'],
+                show_name=req.get('show_name'),
+                desc=req.get('desc'),
+                online=req.get('online'),
+                using=req.get('using'),
+                app_name=req.get('app_name'),
+                playing=req.get('playing'),
+                battery=req.get('battery'),
+                is_charging=req.get('is_charging')
+            )
+        except Exception as e:
+            if isinstance(e, u.APIUnsuccessful):
+                raise e
+            else:
+                raise u.APIUnsuccessful(400, f'missing param or wrong param type: {e}')
+    else:
+        raise u.APIUnsuccessful(405, '/device/set only supports GET and POST method!')
 
     # 触发设备更新事件
     # trigger_event('device_updated', device_id, d.data.device_status[device_id])
@@ -494,25 +555,19 @@ def remove_device():
     移除单个设备的状态
     - Method: **GET**
     '''
-    device_id = escape(flask.request.args.get('id'))
-    try:
-        # 保存设备信息用于事件触发
-        device_info = d.data.device_status[device_id].model_copy()
+    device_id = flask.request.args.get('id')
+    if not device_id:
+        raise u.APIUnsuccessful(400, 'Missing device id!')
+    # 保存设备信息用于事件触发
+    # device_info = d1.device_get(device_id)
 
-        del d.data.device_status[device_id]
-        d.data.last_updated = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
-        d.check_device_status()
+    d1.device_remove(device_id)
+    d.check_device_status()
 
-        # 触发设备删除事件
-        if device_info:
-            pass
-            # trigger_event('device_removed', device_id, device_info)
-    except KeyError:
-        return {
-            'success': False,
-            'code': 'not found',
-            'message': 'cannot find item'
-        }, 404
+    # 触发设备删除事件
+    # if device_info:
+    #     pass
+    # trigger_event('device_removed', device_id, device_info)
     return {
         'success': True,
         'code': 'OK'
@@ -527,10 +582,9 @@ def clear_device():
     - Method: **GET**
     '''
     # 保存设备信息用于事件触发
-    old_devices = d.data.device_status.copy()
+    # old_devices = d.data.device_status.copy()
 
-    d.data.device_status.clear()
-    d.data.last_updated = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+    d1.device_clear()
     d.check_device_status()
 
     # 触发设备清除事件
@@ -551,14 +605,10 @@ def private_mode():
     '''
     private = u.tobool(flask.request.args.get('private'))
     if private == None:
-        return {
-            'success': False,
-            'code': 'invaild request',
-            'message': '"private" arg must be boolean'
-        }, 400
-    old_private_mode = d.data.private_mode
-    d.data.private_mode = private
-    d.data.last_updated = datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S')
+        raise u.APIUnsuccessful(400, '"private" arg must be boolean')
+    # old_private_mode = d1.private_mode
+    else:
+        d1.private_mode = private
 
     # 触发隐私模式切换事件
     # trigger_event('private_mode_changed', old_private_mode, private)
@@ -581,11 +631,7 @@ def save_data():
         # 触发数据保存事件
         # trigger_event('data_saved', d.data)
     except Exception as e:
-        return {
-            'success': False,
-            'code': 'exception',
-            'message': f'{e}'
-        }, 500
+        raise u.APIUnsuccessful(500, f'Exception: {e}')
     else:
         return {
             'success': True,
@@ -603,11 +649,7 @@ def events():
     try:
         last_event_id = int(flask.request.headers.get('Last-Event-ID', '0'))
     except ValueError:
-        return {
-            'success': False,
-            'code': 'invaild request',
-            'message': 'invaild Last-Event-ID header, it must be int!'
-        }, 400
+        raise u.APIUnsuccessful(400, 'Invaild Last-Event-ID header, it must be int!')
 
     def event_stream(event_id: int = last_event_id):
         last_updated = None
@@ -616,9 +658,9 @@ def events():
         while True:
             current_time = time.time()
             # 检查数据是否已更新
-            current_updated = d.data.last_updated
+            current_updated = d1.last_updated
 
-            # 如果数据有更新，发送更新事件并重置心跳计时器
+            # 如果数据有更新, 发送更新事件并重置心跳计时器
             if last_updated != current_updated:
                 last_updated = current_updated
                 # 重置心跳计时器

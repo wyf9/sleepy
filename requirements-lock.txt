@@ -1,13 +1,12 @@
-# Generated on 2025-06-19 15:46:58
+# Generated on 2025-06-21 16:40:35
 
 annotated-types==0.7.0
 blinker==1.9.0
-certifi==2025.4.26
-charset-normalizer==3.4.2
 click==8.2.1
 colorama==0.4.6
 Flask==3.1.1
-idna==3.10
+Flask-SQLAlchemy==3.1.1
+greenlet==3.2.3
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
@@ -16,9 +15,8 @@ pydantic_core==2.33.2
 python-dotenv==1.1.0
 pytz==2025.2
 PyYAML==6.0.2
-requests==2.32.4
+SQLAlchemy==2.0.41
 toml==0.10.2
 typing-inspection==0.4.1
 typing_extensions==4.14.0
-urllib3==2.4.0
 Werkzeug==3.1.3

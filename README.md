@@ -33,7 +33,7 @@
 
 **Vercel** 部署预览: [sleepy-vercel.wyf9.top](https://sleepy-vercel.wyf9.top)
 
-**开发服务器**: [请在 Discord 服务器查看](link-dc)
+**开发服务器**: [请在 Discord 服务器查看][link-dc]
 
 </details>
 
@@ -62,7 +62,7 @@
 ## 贡献者
 
 > [!WARNING]
-> 在提交代码前, 请先查阅 **[贡献准则](./CODE_OF_CONDUCT.md)**
+> 在提交代码前, 请先查阅 **[贡献准则](https://github.com/sleepy-project/.github/blob/main/CODE_OF_CONDUCT.md)** 和 **[贡献指南](./CONTRIBUTING.md)**
 
 <!-- readme: contributors -start -->
 <!-- readme: contributors -end -->

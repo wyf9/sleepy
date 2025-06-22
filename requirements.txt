@@ -3,14 +3,18 @@
 # 服务器
 flask
 
-# 配置 / 数据处理
+# 配置文件处理
 pyyaml
 toml
 python-dotenv
 pydantic
 
+# 数据存储
+flask-sqlalchemy
+objtyping
+
 # 时区处理
 pytz
 
-# 格式化日志
+# 日志处理
 colorama

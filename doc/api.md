@@ -1,12 +1,27 @@
 # API
 
-0. [鉴权说明](#鉴权说明)
+0. [鉴权说明](#一些说明)
 1. [只读接口](#read-only)
 2. [Status 接口](#status)
 3. [Device status 接口](#device)
 4. [Storage 接口](#storage)
 
-## 鉴权说明
+## 一些说明
+
+### 关于错误
+
+所有 API 返回的错误都会通过 `u.APIUnsuccessful` 格式化:
+
+```jsonc
+{
+  "success": false, // 表示请求未成功
+  "code": 500, // 数字 HTTP Code (如 404, 500, ...)
+  "details": "Internal Server Error", // HTTP Code 描述 (如 Not Found, Internal Server Error, ...)
+  "message": "..." // 附带的错误详情
+}
+```
+
+### 关于鉴权
 
 任何标记了需要鉴权的接口，都需要用下面三种方式的一种传入 **与服务端一致** 的 `secret` *(优先级从上到下)*:
 
@@ -48,7 +63,7 @@ sleepy-token=MySecretCannotGuess
 如 `secret` 错误，则会返回:
 
 ```jsonc
-// 401 Unauthorized
+// 403 Forbidden
 {
   "success": false, // 请求是否成功
   "code": "not authorized", // 返回代码
@@ -82,6 +97,19 @@ sleepy-token=MySecretCannotGuess
 
 ```jsonc
 // 200 OK
+
+```
+
+#### Response (OLD)
+
+> [!IMPORTANT]
+> 作为兼容旧版选项提供, 需要加上参数请求: `/query?version=1`
+
+<details>
+<summary>点击展开</summary>
+
+```jsonc
+// 200 OK
 {
   "time": "2024-12-28 00:21:24", // 服务端时间
   "timezone": "Asia/Shanghai", // 服务端配置的时区
@@ -106,6 +134,8 @@ sleepy-token=MySecretCannotGuess
 ```
 
 > 返回中 **日期/时间** 的时区默认为 **`Asia/Shanghai`** *(即北京时间)*, 可在配置中修改
+
+</details>
 
 ### status-list
 
@@ -138,8 +168,6 @@ sleepy-token=MySecretCannotGuess
   // 以此类推
 ]
 ```
-
-> 就是返回 `setting/status_list.json` 的内容
 
 ### metrics
 

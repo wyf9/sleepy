@@ -1,287 +1,342 @@
 # coding: utf-8
 
 import os
-import threading
-from time import sleep, time
 from datetime import datetime
 from logging import getLogger
+import typing as t
 
-import pytz
-import json
 from werkzeug.security import safe_join
-from pydantic import ValidationError
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import JSON, Integer, String, Boolean, Text, DateTime
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.exc import SQLAlchemyError
+from objtyping import to_primitive
 
 import utils as u
-from models import DataModel, ConfigModel
+from models import ConfigModel
 
 l = getLogger(__name__)
+
+db = SQLAlchemy()
+LIMIT = 255
+
+# -----
+
+
+class _DeviceStatusData(db.Model):
+    '''
+    设备状态
+    '''
+    __tablename__ = 'device_status_data'
+    id: Mapped[str] = mapped_column(String(LIMIT), primary_key=True, unique=True, nullable=False)
+    '''[必选] 设备唯一 id'''
+    show_name: Mapped[str] = mapped_column(String(LIMIT), nullable=False)
+    '''[必选] 设备显示名称'''
+    desc: Mapped[str] = mapped_column(String(LIMIT), nullable=True)
+    '''[可选] 设备描述'''
+    online: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    '''[可选] 设备是否在线'''
+    using: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    '''[可选] 设备是否正在使用'''
+    app_name: Mapped[str] = mapped_column(Text, nullable=True)
+    '''[可选] 设备打开的应用名'''
+    playing: Mapped[str] = mapped_column(Text, nullable=True)
+    '''[可选] 设备正在播放的媒体名'''
+    battery: Mapped[int] = mapped_column(Integer, nullable=True)
+    '''[可选] 设备电量 (0~100)'''
+    is_charging: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    '''[可选] 设备是否正在充电'''
+    last_updated: Mapped[datetime] = mapped_column(DateTime, default=u.nowutc, onupdate=u.nowutc)
+    '''(本设备) 数据最后更新时间 (UTC)'''
+
+
+class _PluginData(db.Model):
+    '''
+    插件数据
+    '''
+    __tablename__ = 'plugin_data'
+    name: Mapped[str] = mapped_column(String(LIMIT), primary_key=True, unique=True, nullable=False)
+    '''插件名称 (== id?)'''
+    data: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    '''插件数据'''
+
+
+class _MainData(db.Model):
+    '''
+    主数据
+    '''
+    __tablename__ = 'main_data'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=0)
+    status: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    '''当前的状态 id'''
+    private_mode: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    '''是否开启隐私模式 (不返回设备状态)'''
+    last_updated: Mapped[datetime] = mapped_column(DateTime, default=u.nowutc, onupdate=u.nowutc)
+    '''数据最后更新时间 (utc)'''
+
+
+# -----
 
 
 class Data:
     '''
-    data 类，存储当前/设备状态 <br/>
-    可用 `data.data.xxx` 调取数据 (加载后)
-
-    :param config: 用户配置对象
+    data 类, 定义 sql 数据表格式
     '''
-    data: DataModel
-    _cache: dict[str, tuple[float, str]] = {}
-    _data_check_interval: int = 60
-    _plugins_enabled: list = []
-    _c: ConfigModel
 
-    def __init__(self, config: ConfigModel):
+    def __init__(self, config: ConfigModel, app: Flask):
         perf = u.perf_counter()
-        # --- init
+        self._app = app
         self._c = config
+        # 配置数据库地址
+        app.config['SQLALCHEMY_DATABASE_URI'] = self._c.main.database
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-        if os.path.exists(u.get_path('data/data.json')):
-            try:
-                self.load()
-            except Exception as e:
-                l.warning(f'Error when loading data: {e}, try re-create')
-                os.remove(u.get_path('data/data.json'))
-                self.data = DataModel()
-                self.save()
-        else:
-            l.info('Could not find data/data.json, creating.')
-            try:
-                self.data = DataModel()
-                self.save()
-            except Exception as e:
-                raise u.SleepyException(f'Create data/data.json failed: {e}')
-        # --- load
-        self.load()
+        # 初始化数据库
+        db.init_app(app)
+        with app.app_context():
+            db.create_all()
+            main_data = _MainData.query.first()
+            if not main_data:
+                l.debug(f'[data] main_data not exist, creating a new one')
+                main_data = _MainData()
+                db.session.add(main_data)
+                db.session.commit()
+
+            # 缓存最后更新时间
+            self._last_updated_cache = main_data.last_updated
+
         l.debug(f'[data] init took {perf()}ms')
 
-    # --- Storage functions
-
-    def load(self, ret: bool = False, error_count: int = 5) -> DataModel | None:
+    def _throw(self, e: SQLAlchemyError):
         '''
-        加载状态
-
-        :param ret: 是否直接返回加载后的 data (为否则设置 self.data 为加载后数据)
-        :param preload: 将会将 data/data.json 的内容追加到此后
+        简化抛出 sql call failed error
         '''
+        l.error(f'SQL Call Failed: {e}')
+        raise u.APIUnsuccessful(500, 'Database Error')
 
-        while error_count > 0:
-            try:
-                if not os.path.exists(u.get_path('data/data.json')):
-                    l.warning('data/data.json not exist, creating a new one')
-                    self.data = DataModel()
-                    self.save()
-                with open(u.get_path('data/data.json'), 'r', encoding='utf-8') as file:
-                    data_file_loaded = json.load(file)
-                    data_model = DataModel(**data_file_loaded)
-                    if ret:
-                        return data_model
-                    else:
-                        self.data = data_model
-                break  # 成功加载数据后跳出循环
-            except ValidationError as e:
-                raise
-            except Exception as e:
-                error_count -= 1
-                if error_count > 0:
-                    l.warning(f'Load data error: {e}, retrying ({error_count} attempts left)')
-                else:
-                    l.error(f'Load data error: {e}, reached max retry count!')
-                    raise
+    # --- _MainData 属性访问
 
-    def save(self):
+    @property
+    def status(self) -> int:
         '''
-        保存配置
+        当前的状态 id
         '''
         try:
-            for i in self._plugins_enabled:
-                self.data.plugin[i.name] = i.data
-            with open(u.get_path('data/data.json'), 'w', encoding='utf-8') as file:
-                json.dump(self.data.model_dump(), file, indent=4, ensure_ascii=False)
-        except Exception as e:
-            l.error(f'Failed to save data/data.json: {e}')
+            with self._app.app_context():
+                maindata: _MainData = _MainData.query.first()  # type: ignore
+                return maindata.status
+        except SQLAlchemyError as e:
+            self._throw(e)
 
-    # --- Metrics
+    @status.setter
+    def status(self, value: int):
+        try:
+            with self._app.app_context():
+                maindata: _MainData = _MainData.query.first()  # type: ignore
+                maindata.status = value
+                db.session.commit()
+        except SQLAlchemyError as e:
+            self._throw(e)
 
-    def get_metrics_data(self):
-        now = datetime.now(pytz.timezone(self._c.main.timezone))
-        return {
-            'time': f'{now}',
-            'timezone': self._c.main.timezone,
-            'today_is': self.data.metrics.today_is,
-            'month_is': self.data.metrics.month_is,
-            'year_is': self.data.metrics.year_is,
-            'today': self.data.metrics.today,
-            'month': self.data.metrics.month,
-            'year': self.data.metrics.year,
-            'total': self.data.metrics.total
-        }
-
-    def record_metrics(self, path: str | None = None) -> None:
+    @property
+    def private_mode(self) -> bool:
         '''
-        记录调用
-
-        :param path: 访问的路径
+        是否开启隐私模式 (不返回设备状态)
         '''
+        try:
+            with self._app.app_context():
+                maindata: _MainData = _MainData.query.first()  # type: ignore
+                return maindata.private_mode
+        except SQLAlchemyError as e:
+            self._throw(e)
 
-        # check metrics list
-        if not path in self._c.metrics.allow_list:
-            return
+    @private_mode.setter
+    def private_mode(self, value: bool):
+        try:
+            with self._app.app_context():
+                maindata: _MainData = _MainData.query.first()  # type: ignore
+                maindata.private_mode = value
+                db.session.commit()
+        except SQLAlchemyError as e:
+            self._throw(e)
 
-        self.check_metrics_time()
-
-        # - record num
-        self.data.metrics.today[path] = self.data.metrics.today.get(path, 0) + 1
-        self.data.metrics.month[path] = self.data.metrics.month.get(path, 0) + 1
-        self.data.metrics.year[path] = self.data.metrics.year.get(path, 0) + 1
-        self.data.metrics.total[path] = self.data.metrics.total.get(path, 0) + 1
-
-    # --- Timer check
-    # - check metrics time
-    # - check device status
-    # - check cache expire
-    # - auto save data
-
-    def check_metrics_time(self) -> None:
+    @property
+    def last_updated(self) -> datetime:
         '''
-        跨 日 / 月 / 年 检测
+        数据最后更新时间 (utc)
         '''
-        if not self._c.metrics.enabled:
-            return
+        try:
+            with self._app.app_context():
+                maindata: _MainData = _MainData.query.first()  # type: ignore
+                return maindata.last_updated
+        except SQLAlchemyError as e:
+            self._throw(e)
 
-        # get time now
-        now = datetime.now(pytz.timezone(self._c.main.timezone))
-        year_is = str(now.year)
-        month_is = f'{now.year}-{now.month}'
-        today_is = f'{now.year}-{now.month}-{now.day}'
+    @last_updated.setter
+    def last_updated(self, value: datetime):
+        try:
+            with self._app.app_context():
+                maindata: _MainData = _MainData.query.first()  # type: ignore
+                maindata.last_updated = value
+                db.session.commit()
+        except SQLAlchemyError as e:
+            self._throw(e)
 
-        # - check time
-        if self.data.metrics.today_is != today_is:
-            l.debug(f'[metrics] today_is changed: {self.data.metrics.today_is} -> {today_is}')
-            self.data.metrics.today_is = today_is
-            self.data.metrics.today = {}
-        # this month
-        if self.data.metrics.month_is != month_is:
-            l.debug(f'[metrics] month_is changed: {self.data.metrics.month_is} -> {month_is}')
-            self.data.metrics.month_is = month_is
-            self.data.metrics.month = {}
-        # this year
-        if self.data.metrics.year_is != year_is:
-            l.debug(f'[metrics] year_is changed: {self.data.metrics.year_is} -> {year_is}')
-            self.data.metrics.year_is = year_is
-            self.data.metrics.year = {}
+    # --- 设备状态接口
 
-    def check_device_status(self):
+    @property
+    def _raw_device_list(self) -> dict[str, dict[str, str | int | float | bool]]:
         '''
-        按情况自动切换状态
+        原始设备列表 (未排序)
         '''
-        device_status = self.data.device_status
-        current_status = self.data.status
-        auto_switch_enabled: bool = False  # c.util.auto_switch_status - wait for plugin
+        try:
+            # 判断隐私模式
+            if self.private_mode:
+                return {}
+            with self._app.app_context():
+                devices: list[_DeviceStatusData] = _DeviceStatusData.query.all().copy()
+                for d in devices:
+                    d.last_updated = d.last_updated.timestamp()  # type: ignore
+                return to_primitive({d.id: d for d in devices}, format_date_time=False)  # type: ignore
+        except SQLAlchemyError as e:
+            self._throw(e)
 
-        # 检查是否启用自动切换功能，并且当前 status 为 0 或 1
-        last_status = self.data.status
-        if auto_switch_enabled:
-            if current_status in [0, 1]:
-                any_using = any(device.using for device in device_status.values())
-                if any_using:
-                    self.data.status = 0
-                else:
-                    self.data.status = 1
-                if last_status != self.data.status:
-                    l.debug(f'[check_device_status] switched status ({last_status} -> {self.data.status}).')
-                else:
-                    l.debug(f'[check_device_status] current status is {current_status} already.')
+    @property
+    def device_list(self) -> dict[str, dict[str, str | int | float | bool]]:
+        '''
+        排序后设备列表
+        '''
+        try:
+            if self.private_mode:
+                # 隐私模式
+                devicelst = {}
+            elif self._c.status.using_first:
+                # 使用中优先
+                devicelst = {}  # devicelst = device_using
+                device_not_using = {}
+                device_offline = {}
+                device_unknown = {}
+                for k, v in self._raw_device_list.items():
+                    if v.get('online') == True:  # - 首先确保在线
+                        if v.get('using') == True:  # * 正在使用
+                            devicelst[k] = v
+                        elif v.get('using') == False:  # * 未在使用
+                            if self._c.status.not_using:
+                                v['app_name'] = self._c.status.not_using  # 如锁定了未在使用时设备名, 则替换
+                            device_not_using[k] = v
+                    elif v.get('online') == False:  # - 不在线
+                        if self._c.status.offline:
+                            v['app_name'] = self._c.status.offline  # 如锁定了离线时设备名, 则替换
+                        device_offline[k] = v
+                    else:  # - 无此字段
+                        device_unknown[k] = v
+                if self._c.status.sorted:
+                    devicelst = dict(sorted(devicelst.items()))
+                    device_not_using = dict(sorted(device_not_using.items()))
+                devicelst.update(device_not_using)  # append items to end
+                devicelst.update(device_offline)
+                devicelst.update(device_unknown)
             else:
-                l.debug(f'[check_device_status] curent status: {current_status}, can\'t switch automatically.')
+                # 正常获取
+                devicelst = self._raw_device_list
+                # 如锁定了离线 / 未在使用时设备名, 则替换 (离线优先)
+                for d in devicelst.keys():
+                    if self._c.status.offline and devicelst[d].get('online') == False:  # 离线
+                        devicelst[d]['app_name'] = self._c.status.offline
+                    elif self._c.status.not_using and devicelst[d].get('using') == False:  # 未在使用
+                        devicelst[d]['app_name'] = self._c.status.not_using
+                if self._c.status.sorted:
+                    devicelst = dict(sorted(devicelst.items()))
+            return devicelst
+        except SQLAlchemyError as e:
+            self._throw(e)
 
-    def clean_cache(self):
+    def device_get(self, id: str) -> dict[str, str | int | float | bool] | None:
         '''
-        清理缓存中的过期项
+        获取指定设备状态
         '''
-        if self._c.main.debug:
-            # 不用检查了, 直接返回
-            return
-        now = time()
-        for i in list(self._cache.keys()):
-            if now - self._cache[i][0] > self._c.main.cache_age:
-                del self._cache[i]
-
-    def _auto_save(self):
         try:
-            
-            file_data = self.load(ret=True)
-            if file_data != self.data:
-                self.save()
-                l.info('[auto_save] data changed, saved to disk.')
-        except Exception as e:
-            l.warning(f'[auto_save] saving error: {e}')
-
-    def _data_check_timer(self):
-        '''
-        定时检查更改并自动保存
-        * 根据 `data_check_interval` 参数调整 sleep() 的秒数
-        * 需要使用 threading 启动新线程运行
-        '''
-        l.info(f'[timer_check] started, interval: {self._data_check_interval} seconds.')
-        while True:
-            t = u.perf_counter()
-            l.debug('[timer_check] running...')
-            try:
-                self.check_metrics_time()
-                self.check_device_status()
-                self.clean_cache()
-                self._auto_save()
-            except Exception as e:
-                l.warning(f'[timer_check] error: {e}')
-            l.debug(f'[timer_check] finished in {t()}ms.')
-            sleep(self._data_check_interval)
-
-    def start_timer_check(self, data_check_interval: int = 60, plugins_enabled: list = []):
-        '''
-        使用 threading 启动下面的 `timer_check()`
-
-        :param data_check_interval: 检查间隔 *(秒)*
-        '''
-        self._data_check_interval = data_check_interval
-        self._plugins_enabled = plugins_enabled
-        self.timer_thread = threading.Thread(target=self._data_check_timer, daemon=True)
-        self.timer_thread.start()
-
-    # --- simple cache system
-
-    def get_cached(self, filename: str) -> str | None:
-        '''
-        加载文本文件 (经过缓存)
-
-        :param filename: 文件名
-        :return str: (加载成功) 文件内容
-        :return None: (加载失败) 空
-        '''
-        filepath = safe_join(u.current_dir(), filename)
-        if not filepath:
-            # unsafe -> none
-            return None
-        try:
-            if self._c.main.debug:
-                # debug -> load directly
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    ret = f.read()
-                    f.close()
-                return ret
-            else:
-                # check cache & expire
-                now = time()
-                cached = self._cache.get(filename)
-                if cached and now - cached[0] < self._c.main.cache_age:
-                    # has cache, and not expired
-                    return cached[1]
+            with self._app.app_context():
+                device: _DeviceStatusData | None = _DeviceStatusData.query.filter_by(id=id).first()
+                if device:
+                    return to_primitive(device)  # type: ignore
                 else:
-                    # no cache, or expired
-                    with open(filepath, 'r', encoding='utf-8') as f:
-                        ret = f.read()
-                        f.close()
-                    self._cache[filename] = (now, ret)
-                    return ret
-        except FileNotFoundError or IsADirectoryError:
-            # not found / isn't file -> none
-            return None
+                    return None
+        except SQLAlchemyError as e:
+            self._throw(e)
+
+    def device_set(self, id: str,
+                   show_name: str | None = None,
+                   desc: str | None = None,
+                   online: bool | None = None,
+                   using: bool | None = None,
+                   app_name: str | None = None,
+                   playing: str | None = None,
+                   battery: int | None = None,
+                   is_charging: bool | None = None
+                   ):
+        '''
+        设备状态设置
+
+        :param id: 设备唯一 id
+        '''
+        try:
+            with self._app.app_context():
+                device = _DeviceStatusData.query.filter_by(id=id).first()
+                if not device:
+                    # 验证必填字段 (显示名称不能为空)
+                    if not show_name:
+                        raise u.APIUnsuccessful(400, 'show_name cannot be empty!')
+                    device = _DeviceStatusData()
+                    device.id = id
+                    db.session.add(device)
+                update_fields = {
+                    'show_name': show_name or device.show_name,
+                    'desc': desc,
+                    'online': online,
+                    'using': using,
+                    'app_name': app_name,
+                    'playing': playing,
+                    'battery': battery,
+                    'is_charging': is_charging
+                }
+                for k, v in update_fields.items():
+                    if v is not None:
+                        # 验证特殊字段 (0 <= 电量 <= 100)
+                        if k == 'battery' and not (0 <= v <= 100):
+                            db.session.rollback()
+                            raise u.APIUnsuccessful(400, 'Invaild battery value! it must be a number between 0 and 100.')
+                    setattr(device, k, v)
+                db.session.commit()
+                self.last_updated = u.nowutc()
+        except SQLAlchemyError as e:
+            self._throw(e)
+
+    def device_remove(self, id: str):
+        '''
+        移除单个设备
+
+        :param id: 设备唯一 id
+        '''
+        try:
+            with self._app.app_context():
+                device: _DeviceStatusData | None = _DeviceStatusData.query.filter_by(id=id).first()
+                if device:
+                    db.session.delete(device)
+                    db.session.commit()
+                    self.last_updated = u.nowutc()
+        except SQLAlchemyError as e:
+            self._throw(e)
+
+    def device_clear(self):
+        '''
+        清除设备状态
+        '''
+        try:
+            with self._app.app_context():
+                _DeviceStatusData.query.delete()
+                db.session.commit()
+                self.last_updated = u.nowutc()
+        except SQLAlchemyError as e:
+            self._throw(e)

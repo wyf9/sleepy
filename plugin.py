@@ -8,7 +8,7 @@ import flask
 from pydantic import BaseModel
 
 from models import ConfigModel
-from data import Data
+from data_old import Data
 import utils as u
 
 l = getLogger(__name__)
