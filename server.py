@@ -32,7 +32,6 @@ try:
     from config import Config as config_init
     import utils as u
     from data import Data as data_init
-    from data_old import Data as data_old_init
     from plugin import PluginInit as plugin_init
 except:
     print(f'''
@@ -101,10 +100,7 @@ try:
     cli.show_server_banner = lambda *_: None
 
     # init data
-    d = data_old_init(
-        config=c
-    )
-    d1 = data_init(
+    d = data_init(
         config=c,
         app=app
     )
@@ -120,18 +116,6 @@ try:
         app=app
     )
     p.load_plugins()
-    d.start_timer_check(
-        data_check_interval=c.main.checkdata_interval,
-        plugins_enabled=p.plugins_loaded
-    )
-
-    # debug log
-    if c.main.debug:
-        l.debug('debug')
-        l.info('info')
-        l.warning('warning')
-        l.error('error')
-        l.critical('critical')
 
 except KeyboardInterrupt:
     l.info('Interrupt init, quitting')
@@ -151,14 +135,14 @@ def render_template(filename: str, **context):
     渲染模板 (从请求参数获取主题)
     '''
     theme = flask.g.theme
-    content = d.get_cached(f'theme/{theme}/templates/{filename}')
+    content = d.get_cached_file('theme', f'{theme}/templates/{filename}')
     # 1. 返回主题
     if not content is None:
         l.debug(f'[theme] return template {filename} from theme {theme}')
         return u.no_cache_response(flask.render_template_string(content, **context))
 
     # 2. 主题不存在 -> fallback 到默认
-    content = d.get_cached(f'theme/default/templates/{filename}')
+    content = d.get_cached_file('theme', f'default/templates/{filename}')
     if not content is None:
         l.debug(f'[theme] return template {filename} from default theme')
         return u.no_cache_response(flask.render_template_string(content, **context))
@@ -184,7 +168,7 @@ def static_themed(theme: str, filename: str):
     '''
     try:
         # 1. 返回主题
-        resp = flask.send_from_directory(f'theme/{theme}', f'static/{filename}')
+        resp = flask.send_from_directory(f'theme', f'{theme}/static/{filename}')
         l.debug(f'[theme] return static file {filename} from theme {theme}')
         return resp
     except NotFound:
@@ -196,7 +180,7 @@ def static_themed(theme: str, filename: str):
         # 3. 默认主题也没有 -> 404
         else:
             l.warning(f'[theme] static file {filename} not found')
-            return u.no_cache_response(f'Template file {filename} in theme {theme} not found!', 404)
+            return u.no_cache_response(f'Static file {filename} in theme {theme} not found!', 404)
 
 # --- Functions
 
@@ -307,11 +291,11 @@ def index():
     '''
     # 获取手动状态
     try:
-        status = c.status.status_list[d1.status].model_dump()
+        status = c.status.status_list[d.status].model_dump()
     except:
-        l.warning(f"Index {d1.status} out of range!")
+        l.warning(f"Index {d.status} out of range!")
         status = {
-            'id': d1.status,
+            'id': d.status,
             'name': 'Unknown',
             'desc': '未知的标识符，可能是配置问题。',
             'color': 'error'
@@ -319,11 +303,10 @@ def index():
     # 获取更多信息 (more_text)
     more_text: str = c.page.more_text
     if c.metrics.enabled:
+        today, total = d.metrics_data
         more_text = more_text.format(
-            visit_today=d.data.metrics.today.get('/', 0),
-            visit_month=d.data.metrics.month.get('/', 0),
-            visit_year=d.data.metrics.year.get('/', 0),
-            visit_total=d.data.metrics.total.get('/', 0)
+            visit_today=today.get('/', 0),
+            visit_total=total.get('/', 0)
         )
 
     # 处理插件注入
@@ -347,7 +330,7 @@ def index():
         c=c,
         more_text=more_text,
         status=status,
-        last_updated=d1.last_updated,
+        last_updated=d.last_updated,
         # plugins=plugin_templates,
         current_theme=flask.g.theme,
         available_themes=u.themes_available()
@@ -384,7 +367,7 @@ def query():
     - Method: **GET**
     '''
     # 获取手动状态
-    st: int = d1.status
+    st: int = d.status
     try:
         stinfo = c.status.status_list[st].model_dump()
     except:
@@ -405,8 +388,8 @@ def query():
             'success': True,
             'status': st,
             'info': stinfo,
-            'device': d1.device_list,
-            'last_updated': d1.last_updated.astimezone(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S'),
+            'device': d.device_list,
+            'last_updated': d.last_updated.astimezone(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S'),
             'refresh': c.status.refresh_interval,
             'device_status_slice': c.status.device_slice
         }
@@ -416,8 +399,8 @@ def query():
             'success': True,
             'time': datetime.now().timestamp(),
             'status': stinfo,
-            'device': d1.device_list,
-            'last_updated': d1.last_updated.timestamp()
+            'device': d.device_list,
+            'last_updated': d.last_updated.timestamp()
             # 'device_status_slice': c.status.device_slice,
             # 'refresh': c.status.refresh_interval
         }
@@ -477,7 +460,7 @@ def set_normal():
     except:
         raise u.APIUnsuccessful(400, 'argument \'status\' must be int')
     # old_status = d1.status
-    d1.status = status
+    d.status = status
 
     # 触发状态更新事件
     # trigger_event('status_updated', old_status, status)
@@ -501,7 +484,7 @@ def device_set():
     # 分 get / post 从 params / body 获取参数
     if flask.request.method == 'GET':
         try:
-            d1.device_set(
+            d.device_set(
                 id=flask.request.args['id'],
                 show_name=flask.request.args.get('show_name'),
                 desc=flask.request.args.get('desc'),
@@ -520,7 +503,7 @@ def device_set():
     elif flask.request.method == 'POST':
         try:
             req: dict = flask.request.get_json()
-            d1.device_set(
+            d.device_set(
                 id=req['id'],
                 show_name=req.get('show_name'),
                 desc=req.get('desc'),
@@ -561,8 +544,7 @@ def remove_device():
     # 保存设备信息用于事件触发
     # device_info = d1.device_get(device_id)
 
-    d1.device_remove(device_id)
-    d.check_device_status()
+    d.device_remove(device_id)
 
     # 触发设备删除事件
     # if device_info:
@@ -584,8 +566,7 @@ def clear_device():
     # 保存设备信息用于事件触发
     # old_devices = d.data.device_status.copy()
 
-    d1.device_clear()
-    d.check_device_status()
+    d.device_clear()
 
     # 触发设备清除事件
     # trigger_event('devices_cleared', old_devices)
@@ -608,7 +589,7 @@ def private_mode():
         raise u.APIUnsuccessful(400, '"private" arg must be boolean')
     # old_private_mode = d1.private_mode
     else:
-        d1.private_mode = private
+        d.private_mode = private
 
     # 触发隐私模式切换事件
     # trigger_event('private_mode_changed', old_private_mode, private)
@@ -617,27 +598,6 @@ def private_mode():
         'success': True,
         'code': 'OK'
     }, 200
-
-
-@app.route('/save_data')
-@u.require_secret
-def save_data():
-    '''
-    保存内存中的状态信息到 `data/data.json`
-    - Method: **GET**
-    '''
-    try:
-        d.save()
-        # 触发数据保存事件
-        # trigger_event('data_saved', d.data)
-    except Exception as e:
-        raise u.APIUnsuccessful(500, f'Exception: {e}')
-    else:
-        return {
-            'success': True,
-            'code': 'OK',
-            'data': d.data.model_dump()
-        }, 200
 
 
 @app.route('/events')
@@ -658,7 +618,7 @@ def events():
         while True:
             current_time = time.time()
             # 检查数据是否已更新
-            current_updated = d1.last_updated
+            current_updated = d.last_updated
 
             # 如果数据有更新, 发送更新事件并重置心跳计时器
             if last_updated != current_updated:
@@ -725,7 +685,7 @@ def admin_panel():
     return render_template(
         'panel.html',
         c=c,
-        d=d.data,
+        # d=d1.data, TODO: admin card
         current_theme=flask.g.theme,
         available_themes=u.themes_available(),
         # plugin_admin_cards=rendered_cards
@@ -813,7 +773,7 @@ if c.metrics.enabled:
         获取统计信息
         - Method: **GET**
         '''
-        return d.get_metrics_data(), 200
+        return d.metrics_resp, 200
 
 # if c.util.steam_enabled:
 #     @app.route('/steam-iframe')
@@ -840,13 +800,8 @@ if __name__ == '__main__':
             threaded=True
         )
     except Exception as e:
-        l.critical(f"Error running server: {e}")
-        l.info('Saving data before raise...')
-        d.save()
-        l.info('(data saved) Error Stack below:')
+        l.critical(f"Ctitical error when running server: {e}")
         raise
     else:
         print()
-        l.info('Server exited, saving data...')
-        d.save()
         l.info('Bye.')

@@ -1,6 +1,6 @@
 [project]
 name = "sleepy"
-version = "5.0-dev-20250622"
+version = "5.0-dev-20250623"
 description = "A Flask application to see if you're online or not."
 license = { text = "MIT" }
 

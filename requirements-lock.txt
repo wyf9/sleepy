@@ -1,4 +1,4 @@
-# Generated on 2025-06-21 16:40:35
+# Generated on 2025-06-23 00:02:56
 
 annotated-types==0.7.0
 blinker==1.9.0
@@ -10,11 +10,13 @@ greenlet==3.2.3
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
+objtyping==0.5.4
 pydantic==2.11.7
 pydantic_core==2.33.2
 python-dotenv==1.1.0
 pytz==2025.2
 PyYAML==6.0.2
+schedule==1.2.2
 SQLAlchemy==2.0.41
 toml==0.10.2
 typing-inspection==0.4.1

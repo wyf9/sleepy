@@ -3,7 +3,8 @@
 import os
 from datetime import datetime
 from logging import getLogger
-import typing as t
+from threading import Thread
+from time import sleep, time
 
 from werkzeug.security import safe_join
 from flask import Flask
@@ -12,6 +13,8 @@ from sqlalchemy import JSON, Integer, String, Boolean, Text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.exc import SQLAlchemyError
 from objtyping import to_primitive
+import pytz
+import schedule
 
 import utils as u
 from models import ConfigModel
@@ -19,16 +22,30 @@ from models import ConfigModel
 l = getLogger(__name__)
 
 db = SQLAlchemy()
-LIMIT = 255
+LIMIT = 128
 
 # -----
+
+
+class _MainData(db.Model):
+    '''
+    主程序数据
+    '''
+    __tablename__ = 'main'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=0)
+    status: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    '''当前状态 id *(即 status_list 中的列表索引)*'''
+    private_mode: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    '''是否开启隐私模式 *(启用时 /query 返回中的 `device` 替换为空字典)*'''
+    last_updated: Mapped[datetime] = mapped_column(DateTime, default=u.nowutc, onupdate=u.nowutc)
+    '''数据最后更新时间 (utc)'''
 
 
 class _DeviceStatusData(db.Model):
     '''
     设备状态
     '''
-    __tablename__ = 'device_status_data'
+    __tablename__ = 'device_status'
     id: Mapped[str] = mapped_column(String(LIMIT), primary_key=True, unique=True, nullable=False)
     '''[必选] 设备唯一 id'''
     show_name: Mapped[str] = mapped_column(String(LIMIT), nullable=False)
@@ -51,29 +68,25 @@ class _DeviceStatusData(db.Model):
     '''(本设备) 数据最后更新时间 (UTC)'''
 
 
+class _MetricsData(db.Model):
+    '''
+    访问统计数据
+    '''
+    __tablename__ = 'metrics'
+    path: Mapped[str] = mapped_column(String(LIMIT), primary_key=True, unique=True, nullable=False)
+    today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    total: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
 class _PluginData(db.Model):
     '''
     插件数据
     '''
-    __tablename__ = 'plugin_data'
-    name: Mapped[str] = mapped_column(String(LIMIT), primary_key=True, unique=True, nullable=False)
-    '''插件名称 (== id?)'''
+    __tablename__ = 'plugin'
+    id: Mapped[str] = mapped_column(String(LIMIT), primary_key=True, unique=True, nullable=False)
+    '''插件 id'''
     data: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     '''插件数据'''
-
-
-class _MainData(db.Model):
-    '''
-    主数据
-    '''
-    __tablename__ = 'main_data'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=0)
-    status: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    '''当前的状态 id'''
-    private_mode: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    '''是否开启隐私模式 (不返回设备状态)'''
-    last_updated: Mapped[datetime] = mapped_column(DateTime, default=u.nowutc, onupdate=u.nowutc)
-    '''数据最后更新时间 (utc)'''
 
 
 # -----
@@ -103,8 +116,9 @@ class Data:
                 db.session.add(main_data)
                 db.session.commit()
 
-            # 缓存最后更新时间
-            self._last_updated_cache = main_data.last_updated
+            # 启动 schedule loop
+            self._schedule_loop_th = Thread(target=self._schedule_loop, daemon=True)
+            self._schedule_loop_th.start()
 
         l.debug(f'[data] init took {perf()}ms')
 
@@ -115,7 +129,15 @@ class Data:
         l.error(f'SQL Call Failed: {e}')
         raise u.APIUnsuccessful(500, 'Database Error')
 
-    # --- _MainData 属性访问
+    def _schedule_loop(self):
+        schedule.every().day.at('00:00:00', self._c.main.timezone).do(self._metrics_refresh)  # metrics
+        schedule.every(self._c.main.cache_age).seconds.do(self._clean_cache) # cache
+
+        while True:
+            schedule.run_pending()
+            sleep(1)
+
+    # --- 主程序数据访问
 
     @property
     def status(self) -> int:
@@ -255,6 +277,8 @@ class Data:
     def device_get(self, id: str) -> dict[str, str | int | float | bool] | None:
         '''
         获取指定设备状态
+
+        :param id: 设备 id
         '''
         try:
             with self._app.app_context():
@@ -340,3 +364,158 @@ class Data:
                 self.last_updated = u.nowutc()
         except SQLAlchemyError as e:
             self._throw(e)
+
+    # --- 统计数据访问
+
+    def record_metrics(self, path: str):
+        '''
+        记录 metrics 数据
+
+        :param path: 路径
+        '''
+        try:
+            with self._app.app_context():
+                metric: _MetricsData | None = _MetricsData.query.filter_by(path=path).first()
+                if not metric:
+                    metric = _MetricsData()
+                    metric.path = path
+                    metric.today = 0
+                    metric.total = 0
+                    db.session.add(metric)
+                metric.today += 1
+                metric.total += 1
+        except SQLAlchemyError as e:
+            self._throw(e)
+
+    @property
+    def metrics_data(self) -> tuple[dict[str, float], dict[str, float]]:
+        '''
+        获取 metrics 数据
+
+        :return: (`今日`, `全部`)
+        '''
+        try:
+            raw_metrics: list[_MetricsData] = _MetricsData.query.all()
+            today = {}
+            total = {}
+            for i in raw_metrics:
+                today[i.path] = i.today
+                total[i.path] = i.total
+            return (today, total)
+        except SQLAlchemyError as e:
+            self._throw(e)
+
+    @property
+    def metrics_resp(self) -> dict[str, float | str | dict]:
+        '''
+        获取 metrics 返回
+        '''
+        today, total = self.metrics_data
+        now = datetime.now(pytz.timezone(self._c.main.timezone))
+        return {
+            'time': now.timestamp(),
+            'time_local': now.strftime('%Y-%m-%d %H:%M:%S'),
+            'timezone': self._c.main.timezone,
+            'today': today,
+            'total': total
+        }
+
+    def _metrics_refresh(self):
+        '''
+        (在每日 0 点执行) 刷新今日 metrics 数据
+        '''
+        perf = u.perf_counter()
+        try:
+            with self._app.app_context():
+                raw_metrics: list[_MetricsData] = _MetricsData.query.all()
+                for i in raw_metrics:
+                    i.today = 0
+        except SQLAlchemyError as e:
+            l.error(f'[_metrics_refresh] Error: {e}')
+        l.debug(f'[_metrics_refresh] took {perf()}ms')
+
+    # --- 插件数据访问
+
+    def get_plugin_data(self, id: str) -> dict:
+        '''
+        获取插件数据 (没有则会创建)
+        '''
+        try:
+            with self._app.app_context():
+                plugin: _PluginData | None = _PluginData.query.filter_by(id=id).first()
+                if plugin is None:
+                    plugin = _PluginData()
+                    plugin.id = id
+                    db.session.add(plugin)
+                return plugin.data
+        except SQLAlchemyError as e:
+            self._throw(e)
+
+    def set_plugin_data(self, id: str, data: dict):
+        '''
+        设置插件数据
+        '''
+        try:
+            with self._app.app_context():
+                plugin: _PluginData | None = _PluginData.query.filter_by(id=id).first()
+                if plugin is None:
+                    plugin = _PluginData()
+                    plugin.id = id
+                    plugin.data = {}
+                    db.session.add(plugin)
+                plugin.data = data
+        except SQLAlchemyError as e:
+            self._throw(e)
+
+    # --- 缓存系统
+
+    _cache: dict[str, tuple[float, str]] = {}
+
+    def get_cached_file(self, dirname: str, filename: str) -> str | None:
+        '''
+        加载文本文件 (经过缓存)
+
+        :param dirname: 路径
+        :param filename: 文件名
+        :return str: (加载成功) 文件内容
+        :return None: (加载失败) 空
+        '''
+        filepath = safe_join(u.get_path(dirname), filename)
+        if not filepath:
+            # unsafe -> none
+            return None
+        try:
+            if self._c.main.debug:
+                # debug -> load directly
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    ret = f.read()
+                    f.close()
+                return ret
+            else:
+                # check cache & expire
+                now = time()
+                cached = self._cache.get(f'file-{filename}')
+                if cached and now - cached[0] < self._c.main.cache_age:
+                    # has cache, and not expired
+                    return cached[1]
+                else:
+                    # no cache, or expired
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        ret = f.read()
+                        f.close()
+                    self._cache[f'file-{filename}'] = (now, ret)
+                    return ret
+        except FileNotFoundError or IsADirectoryError:
+            # not found / isn't file -> none
+            return None
+
+    def _clean_cache(self):
+        '''
+        清理过期缓存
+        '''
+        if self._c.main.debug:
+            return
+        now = time()
+        for name in self._cache.keys():
+            if now - self._cache.get(name, (now, ''))[0] > self._c.main.cache_age:
+                self._cache.pop(name, None)

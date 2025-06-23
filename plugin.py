@@ -5,10 +5,9 @@ from logging import getLogger
 from functools import wraps
 
 import flask
-from pydantic import BaseModel
 
 from models import ConfigModel
-from data_old import Data
+from data import Data
 import utils as u
 
 l = getLogger(__name__)
@@ -22,17 +21,16 @@ class Plugin:
     '''插件名称'''
     config: t.Any
     '''插件配置 (如传入 Model 则为对应 Model 实例, 否则为字典)'''
-    data: t.Any
-    '''插件数据 (如传入 Model 则为对应 Model 实例, 否则为字典)'''
     _registry = {}
     _routes = []
 
-    def __init__(self, name: str, config=None, data=None):  # : type[BaseModel]):
+    def __init__(self, name: str, config={}, data: dict = {}):  # : type[BaseModel]):
         '''
         初始化插件
 
         :param name: 插件名称 (通常为 `__name__`)
         :param config: *[Model / dict]* 插件默认配置 (可选)
+        :param data: 插件默认数据 (可选)
         '''
         # 初始化 & 注册插件
         self.name = name.split('.')[-1]
@@ -51,16 +49,18 @@ class Plugin:
             config_dict = PluginInit.instance.c.plugin.get(self.name, {})
             self.config = config.model_validate(config_dict)
 
-        # 加载数据
-        if not data:
-            # 1. None -> raw
-            self.data = PluginInit.instance.d.data.plugin.get(self.name, {})
-        elif isinstance(data, dict):
-            # 2. dict -> default + raw -> dict
-            self.data = u.deep_merge_dict(PluginInit.instance.d.data.plugin.get(self.name, {}))
-        else:
-            # 3. model -> default model + raw -> model
-            self.data = data.model_validate(PluginInit.instance.d.data.plugin.get(self.name, {}))
+        self.data = u.deep_merge_dict(data, self.data)
+
+    @property
+    def data(self):
+        '''
+        插件数据存储
+        '''
+        return PluginInit.instance.d.get_plugin_data(self.name)
+
+    @data.setter
+    def data(self, value: dict):
+        PluginInit.instance.d.set_plugin_data(id=self.name, data=value)
 
     @property
     def global_config(self) -> ConfigModel:
@@ -91,7 +91,7 @@ class Plugin:
         ```
         @plugin.route('/endpoint')
         def handler():
-            return "Hello from plugin"
+            return 'Hello from plugin!'
         ```
         '''
         def decorator(f):

@@ -428,14 +428,15 @@ def deep_merge_dict(*dicts: dict) -> dict:
 
     # 递归合并所有字典
     for d in dicts:
-        for key, value in d.items():
-            # 如果当前键存在于基础字典且双方值都是字典，则递归合并
-            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
-                # 递归合并嵌套字典
-                base[key] = deep_merge_dict(base[key], value)
-            else:
-                # 直接赋值（覆盖原有值）
-                base[key] = value
+        if d:
+            for key, value in d.items():
+                # 如果当前键存在于基础字典且双方值都是字典，则递归合并
+                if key in base and isinstance(base[key], dict) and isinstance(value, dict):
+                    # 递归合并嵌套字典
+                    base[key] = deep_merge_dict(base[key], value)
+                else:
+                    # 直接赋值（覆盖原有值）
+                    base[key] = value
 
     return base
 
