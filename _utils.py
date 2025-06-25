@@ -1,4 +1,4 @@
-# coding: _f-8
+# coding: utf-8
 # 存放 utils.py 和 env.py 都使用到的函数
 
 from pathlib import Path
