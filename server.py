@@ -34,15 +34,15 @@ try:
     if env.util.metrics:
         u.info('[metrics] metrics enabled, open /metrics to see the count.')
         d.metrics_init()
+except u.SleepyException as e:
+    u.error(f'==========\n{e}')
+    exit(1)
 except Exception as e:
     u.error(f"Error initing: {e}")
     exit(1)
 except KeyboardInterrupt:
     u.debug('Interrupt init')
     exit(0)
-except u.SleepyException as e:
-    u.error(f'==========\n{e}')
-    exit(1)
 except:
     u.error('Unexpected Error!')
     raise
@@ -303,7 +303,7 @@ def device_set():
                 code='bad request',
                 message='missing param or wrong param type'
             ), 400
-    devices: dict = d.dget('device_status')
+    devices: dict = d.dget('device_status') # type: ignore
     if (not device_using) and env.status.not_using:
         # 如未在使用且锁定了提示，则替换
         app_name = env.status.not_using

@@ -44,7 +44,7 @@ class data:
 
     # --- Storage functions
 
-    def load(self, ret: bool = False, preload: dict = {}, error_count: int = 5) -> dict:
+    def load(self, ret: bool = False, preload: dict = {}, error_count: int = 5) -> dict | None:
         '''
         加载状态
 
@@ -180,7 +180,7 @@ class data:
             self.data['metrics']['year_is'] = year_is
             self.data['metrics']['year'] = {}
 
-    def record_metrics(self, path: str = None) -> None:
+    def record_metrics(self, path: str | None = None) -> None:
         '''
         记录调用
 

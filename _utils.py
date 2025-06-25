@@ -1,10 +1,10 @@
-# coding: utf-8
+# coding: _f-8
 # 存放 utils.py 和 env.py 都使用到的函数
 
 from pathlib import Path
 
 
-def tobool(string: str, throw: bool = False) -> bool:
+def tobool(string: str, throw: bool = False) -> bool | None:
     '''
     将形似 `true`, `1`, `yes` 之类的内容转换为布尔值
 
@@ -47,7 +47,7 @@ def current_dir() -> str:
     return str(Path(__file__).parent)
 
 
-def get_path(path: str) -> Path:
+def get_path(path: str) -> str:
     '''
     相对路径 (基于主程序目录) -> 绝对路径
     '''

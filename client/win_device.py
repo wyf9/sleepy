@@ -52,7 +52,6 @@ SKIPPED_NAMES: list = [
 NOT_USING_NAMES: list = [
     '启动', '「开始」菜单',  # 开始菜单
     '我们喜欢这张图片，因此我们将它与你共享。', '就像你看到的图像一样？选择以下选项', '喜欢这张图片吗?'  # 锁屏界面
-    '我们喜欢这张图片，因此我们将它与你共享。', '就像你看到的图像一样？选择以下选项', '喜欢这张图片吗?'  # 锁屏界面
 ]
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
 REVERSE_APP_NAME: bool = False
@@ -83,21 +82,16 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 _print_ = print
 
 
-def print(msg: str, **kwargs, print_only: bool = False):
+def print(msg: str, **kwargs):
     '''
     修改后的 `print()` 函数，解决不刷新日志的问题
     原: `_print_()`
     '''
     msg = str(msg).replace('\u200b', '')
     try:
-        if print_only:
-            _print_(msg, flush=True, **kwargs)
-        else:
-            _print_(
-                f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {msg}', flush=True, **kwargs)
+        _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {msg}', flush=True, **kwargs)
     except Exception as e:
-        _print_(
-            f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Log Error: {e}', flush=True)
+        _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Log Error: {e}', flush=True)
 
 
 def debug(msg: str, **kwargs):

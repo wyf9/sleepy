@@ -1,5 +1,7 @@
 # coding: utf-8
 import os
+from typing import Any, Callable
+
 from dotenv import load_dotenv
 
 from _utils import tobool, get_path
@@ -7,7 +9,7 @@ from _utils import tobool, get_path
 load_dotenv(dotenv_path=get_path('.env'))
 
 
-def getenv(key: str, default: any, typeobj: object) -> any:
+def getenv(key: str, default: Any, typeobj: Callable) -> Any:
     '''
     获取环境变量
 
