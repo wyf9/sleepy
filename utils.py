@@ -14,20 +14,20 @@ def info(*log):
 
 
 def infon(*log):
-    print(f"\n{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ℹ️  [Info]",*log)
+    print(f"\n{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ℹ️  [Info]", *log)
 
 
 def warning(*log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚠️  [Warning]",*log)
+    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚠️  [Warning]", *log)
 
 
 def error(*log):
-    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ❌  [Error]",*log)
+    print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ❌  [Error]", *log)
 
 
 def debug(*log):
     if mainenv.debug:
-        print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚙️  [Debug]",*log)
+        print(f"{datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')} ⚙️  [Debug]", *log)
 
 
 def format_dict(dic) -> Response:
@@ -42,7 +42,7 @@ def format_dict(dic) -> Response:
     return response
 
 
-def reterr(code: int, message: str) -> Response:
+def reterr(code: int | str, message: str) -> Response:
     '''
     返回错误信息 Response
 
@@ -56,11 +56,6 @@ def reterr(code: int, message: str) -> Response:
     }
     error(f'Response: {code} - {message}')
     return format_dict(ret)
-
-
-@property
-def show_404() -> str:
-    return '<!DOCTYPE HTML>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>', 404
 
 
 class SleepyException(Exception):
@@ -85,7 +80,7 @@ def exception(msg: str) -> SleepyException:
     raise SleepyException(msg)
 
 
-def list_dir(path: str, include_subfolder: bool = True, strict_exist: bool = False, ext: str = '') -> list:
+def list_dir(path: str | Path, include_subfolder: bool = True, strict_exist: bool = False, ext: str = '') -> list:
     '''
     列出目录下的**文件**
 

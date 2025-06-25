@@ -52,7 +52,6 @@ SKIPPED_NAMES: list = [
 NOT_USING_NAMES: list = [
     '启动', '「开始」菜单',  # 开始菜单
     '我们喜欢这张图片，因此我们将它与你共享。', '就像你看到的图像一样？选择以下选项', '喜欢这张图片吗?'  # 锁屏界面
-    '我们喜欢这张图片，因此我们将它与你共享。', '就像你看到的图像一样？选择以下选项', '喜欢这张图片吗?'  # 锁屏界面
 ]
 # 是否反转窗口标题，以此让应用名显示在最前 (以 ` - ` 分隔)
 REVERSE_APP_NAME: bool = False
@@ -83,21 +82,16 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 _print_ = print
 
 
-def print(msg: str, print_only: bool = False, **kwargs):
+def print(msg: str, **kwargs):
     '''
     修改后的 `print()` 函数，解决不刷新日志的问题
     原: `_print_()`
     '''
     msg = str(msg).replace('\u200b', '')
     try:
-        if print_only:
-            _print_(msg, flush=True, **kwargs)
-        else:
-            _print_(
-                f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {msg}', flush=True, **kwargs)
+        _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {msg}', flush=True, **kwargs)
     except Exception as e:
-        _print_(
-            f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Log Error: {e}', flush=True)
+        _print_(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] Log Error: {e}', flush=True)
 
 
 def debug(msg: str, **kwargs):
@@ -422,7 +416,7 @@ async def do_update():
 
             standalone_media_info = " - ".join(parts) if parts else "♪播放中"
 
-            debug(f"独立媒体信息: {standalone_media_info}")
+            print(f"独立媒体信息: {standalone_media_info}")
 
     # 处理媒体信息 (prefix 模式)
     if MEDIA_INFO_ENABLED and prefix_media_info and MEDIA_INFO_MODE == 'prefix':
@@ -502,7 +496,7 @@ async def do_update():
             media_changed = (current_media_playing != last_media_playing) or (current_media_playing and current_media_content != last_media_content)
 
             if media_changed:
-                debug(f'Media changed: status: {last_media_playing} -> {current_media_playing}, content: {last_media_content != current_media_content} - `{standalone_media_info}`')
+                print(f'Media changed: status: {last_media_playing} -> {current_media_playing}, content: {last_media_content != current_media_content} - `{standalone_media_info}`')
 
                 if current_media_playing:
                     # 从不播放变为播放或歌曲内容变化
