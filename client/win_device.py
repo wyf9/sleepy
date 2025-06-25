@@ -83,7 +83,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 _print_ = print
 
 
-def print(msg: str, print_only: bool = False, **kwargs):
+def print(msg: str, **kwargs, print_only: bool = False):
     '''
     修改后的 `print()` 函数，解决不刷新日志的问题
     原: `_print_()`
@@ -422,7 +422,7 @@ async def do_update():
 
             standalone_media_info = " - ".join(parts) if parts else "♪播放中"
 
-            debug(f"独立媒体信息: {standalone_media_info}")
+            print(f"独立媒体信息: {standalone_media_info}")
 
     # 处理媒体信息 (prefix 模式)
     if MEDIA_INFO_ENABLED and prefix_media_info and MEDIA_INFO_MODE == 'prefix':
@@ -502,7 +502,7 @@ async def do_update():
             media_changed = (current_media_playing != last_media_playing) or (current_media_playing and current_media_content != last_media_content)
 
             if media_changed:
-                debug(f'Media changed: status: {last_media_playing} -> {current_media_playing}, content: {last_media_content != current_media_content} - `{standalone_media_info}`')
+                print(f'Media changed: status: {last_media_playing} -> {current_media_playing}, content: {last_media_content != current_media_content} - `{standalone_media_info}`')
 
                 if current_media_playing:
                     # 从不播放变为播放或歌曲内容变化
