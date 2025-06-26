@@ -6,6 +6,7 @@ from datetime import datetime
 from functools import wraps  # 用于修饰器
 
 import flask
+from flask_cors import CORS
 import json5
 import pytz
 from markupsafe import escape
@@ -435,8 +436,13 @@ def events():
     response = flask.Response(event_stream(), mimetype="text/event-stream", status=200)
     response.headers["Cache-Control"] = "no-cache"  # 禁用缓存
     response.headers["X-Accel-Buffering"] = "no"  # 禁用 Nginx 缓冲
+    response.headers["Access-Control-Allow-Origin"] = "*"  # 允许跨域访问
     return response
 
+CORS(app, resources={
+    r"/events": {"origins": "*"},
+    r"/query": {"origins": "*"}
+})
 
 # --- Special
 
