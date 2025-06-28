@@ -8,14 +8,13 @@ Give us a Star 🌟 please: https://github.com/sleepy-project/sleepy
 Bug Report: https://wyf9.top/t/sleepy/bug
 Feature Request: https://wyf9.top/t/sleepy/feature
 Security Report: https://wyf9.top/t/sleepy/security
-'''[1:], flush=True  # 突然想到的
-)
+'''[1:], flush=True)  # 突然想到的
 
 # import modules
 try:
     # bulit-in
     import logging
-    from datetime import datetime
+    from datetime import datetime, timedelta
     import time
     from urllib.parse import urlparse, parse_qs, urlunparse
     import json
@@ -33,6 +32,7 @@ try:
     import utils as u
     from data import Data as data_init
     from plugin import PluginInit as plugin_init
+    from models import redirect_map
 except:
     print(f'''
 Import module Failed!
@@ -40,11 +40,11 @@ Import module Failed!
  * If you don't know how, see doc/deploy.md
  * If you believe that's our fault, report to us: https://wyf9.top/t/sleepy/bug
  * And provide the logs (below) to us:
-'''[1:-1])
+'''[1:-1], flush=True)  # 也是突然想到的
     raise
 
 try:
-    # version info
+    # get version info
     with open(u.get_path('pyproject.toml'), 'r', encoding='utf-8') as f:
         version: str = load_toml(f).get('project', {}).get('version', 'unknown')
         f.close()
@@ -92,7 +92,7 @@ try:
     if c.main.debug:
         app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
     else:
-        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = c.main.cache_age
+        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = timedelta(seconds=c.main.cache_age)
 
     # disable flask access log
     logging.getLogger('werkzeug').disabled = True
@@ -190,10 +190,17 @@ def before_request():
     '''
     before_request:
     - 性能计数器
-    - 检测主题参数, 重定向
+    - 检测主题参数, 设置 cookie & 去除参数
     - 设置会话变量 (theme, secret)
+    - 旧 API 重定向
     '''
     flask.g.perf = u.perf_counter()
+    # --- api redirect (/xxx -> /api/xxx)
+    if flask.request.path in redirect_map:
+        new_path = redirect_map.get(flask.request.path, '/')
+        redirect_path = flask.request.full_path.replace(flask.request.path, new_path)
+        return u.cache_response(flask.redirect(redirect_path, 301))
+
     # --- get theme arg
     if flask.request.args.get('theme'):
         # 提取 theme 并删除
@@ -334,7 +341,7 @@ def index():
         # plugins=plugin_templates,
         current_theme=flask.g.theme,
         available_themes=u.themes_available()
-    ), 200
+    )
 
 
 @app.route('/'+'git'+'hub')
@@ -345,6 +352,7 @@ def git_hub():
     # ~~我要改~~
     # ~~-- NT~~
     # **不准改, 敢改我就撤了你的 member** -- wyf9
+    # noooooooooooooooo -- NT
     return flask.redirect('ht'+'tps:'+'//git'+'hub.com/'+'slee'+'py-'+'project/sle'+'epy', 301)
 
 
@@ -359,7 +367,7 @@ def none():
 # --- Read-only
 
 
-@app.route('/query')
+@app.route('/api/query')
 def query():
     '''
     获取当前状态
@@ -395,18 +403,25 @@ def query():
         }
     else:
         # 新版返回 (时间戳)
-        return {
+        ret = {
             'success': True,
             'time': datetime.now().timestamp(),
             'status': stinfo,
             'device': d.device_list,
             'last_updated': d.last_updated.timestamp()
-            # 'device_status_slice': c.status.device_slice,
-            # 'refresh': c.status.refresh_interval
         }
+        # 同时包含 metadata / metrics 返回
+        if u.tobool(flask.request.args.get('meta', False)) if flask.request else False:
+            ret['meta'] = metadata()
+        if u.tobool(flask.request.args.get('metrics', False)) if flask.request else False:
+            if c.metrics.enabled:
+                ret['metrics'] = metrics()
+            else:
+                ret['metrics'] = {}
+        return ret
 
 
-@app.route('/metadata')
+@app.route('/api/status/meta')
 def metadata():
     '''
     获取站点元数据
@@ -433,7 +448,7 @@ def metadata():
     }
 
 
-@app.route('/status_list')
+@app.route('/api/status/list')
 def get_status_list():
     '''
     获取 `status_list`
@@ -446,7 +461,7 @@ def get_status_list():
 # --- Status API
 
 
-@app.route('/set')
+@app.route('/api/status/set')
 @u.require_secret
 def set_normal():
     '''
@@ -469,12 +484,12 @@ def set_normal():
         'success': True,
         'code': 'OK',
         'set_to': status
-    }, 200
+    }
 
 
 # --- Device API
 
-@app.route('/device/set', methods=['GET', 'POST'])
+@app.route('/api/device/set', methods=['GET', 'POST'])
 @u.require_secret
 def device_set():
     '''
@@ -483,36 +498,28 @@ def device_set():
     '''
     # 分 get / post 从 params / body 获取参数
     if flask.request.method == 'GET':
-        try:
-            d.device_set(
-                id=flask.request.args['id'],
-                show_name=flask.request.args.get('show_name'),
-                desc=flask.request.args.get('desc'),
-                online=u.tobool(flask.request.args.get('online')),
-                using=u.tobool(flask.request.args.get('using')),
-                app_name=flask.request.args.get('app_name'),
-                playing=flask.request.args.get('playing'),
-                battery=int(flask.request.args.get('battery', '')) if flask.request.args.get('battery') else None,
-                is_charging=u.tobool(flask.request.args.get('is_charging'))
-            )
-        except Exception as e:
-            if isinstance(e, u.APIUnsuccessful):
-                raise e
-            else:
-                raise u.APIUnsuccessful(400, f'missing param or wrong param type: {e}')
+        device_id = flask.request.args.pop('id')
+        device_show_name = flask.request.args.pop('show_name')
+        device_using = u.tobool(flask.request.args.pop('using'))
+        device_status = flask.request.args.pop('status') or flask.request.args.pop('app_name') # 兼容旧版名称
+        flask.request.args.pop('secret')
+        fields = dict(flask.request.args.items())
+        d.device_set(
+            id=device_id,
+            show_name=device_show_name,
+            using=device_using,
+            status=device_status,
+            fields=fields
+        )
     elif flask.request.method == 'POST':
         try:
             req: dict = flask.request.get_json()
             d.device_set(
-                id=req['id'],
+                id=req.get('id'),
                 show_name=req.get('show_name'),
-                desc=req.get('desc'),
-                online=req.get('online'),
                 using=req.get('using'),
-                app_name=req.get('app_name'),
-                playing=req.get('playing'),
-                battery=req.get('battery'),
-                is_charging=req.get('is_charging')
+                status=req.get('status') or req.get('app_name'), # 兼容旧版名称
+                fields=req.get('fields') # type: ignore
             )
         except Exception as e:
             if isinstance(e, u.APIUnsuccessful):
@@ -528,10 +535,10 @@ def device_set():
     return {
         'success': True,
         'code': 'OK'
-    }, 200
+    }
 
 
-@app.route('/device/remove')
+@app.route('/api/device/remove')
 @u.require_secret
 def remove_device():
     '''
@@ -553,10 +560,10 @@ def remove_device():
     return {
         'success': True,
         'code': 'OK'
-    }, 200
+    }
 
 
-@app.route('/device/clear')
+@app.route('/api/device/clear')
 @u.require_secret
 def clear_device():
     '''
@@ -574,10 +581,10 @@ def clear_device():
     return {
         'success': True,
         'code': 'OK'
-    }, 200
+    }
 
 
-@app.route('/device/private_mode')
+@app.route('/api/device/private')
 @u.require_secret
 def private_mode():
     '''
@@ -597,7 +604,7 @@ def private_mode():
     return {
         'success': True,
         'code': 'OK'
-    }, 200
+    }
 
 
 @app.route('/events')
@@ -689,7 +696,7 @@ def admin_panel():
         current_theme=flask.g.theme,
         available_themes=u.themes_available(),
         # plugin_admin_cards=rendered_cards
-    ), 200
+    )
 
 
 @app.route('/webui/login')
@@ -708,7 +715,7 @@ def login():
         'login.html',
         c=c,
         current_theme=flask.g.theme
-    ), 200
+    )
 
 
 @app.route('/webui/auth', methods=['POST'])
@@ -730,7 +737,7 @@ def auth():
     response.set_cookie('sleepy-token', c.main.secret, max_age=max_age, httponly=True, samesite='Lax')
 
     l.debug('[Auth] Login successful, cookie set')
-    return response, 200
+    return response
 
 
 @app.route('/webui/logout')
@@ -749,7 +756,7 @@ def logout():
     return response
 
 
-@app.route('/verify-secret', methods=['GET', 'POST'])
+@app.route('/webui/verify', methods=['GET', 'POST'])
 @u.require_secret
 def verify_secret():
     '''
@@ -761,19 +768,19 @@ def verify_secret():
         'success': True,
         'code': 'OK',
         'message': 'Secret verified'
-    }, 200
+    }
 
 
 # --- Special
 
 if c.metrics.enabled:
-    @app.route('/metrics')
+    @app.route('/api/status/metrics')
     def metrics():
         '''
         获取统计信息
         - Method: **GET**
         '''
-        return d.metrics_resp, 200
+        return d.metrics_resp
 
 # if c.util.steam_enabled:
 #     @app.route('/steam-iframe')
@@ -783,7 +790,7 @@ if c.metrics.enabled:
 #             c=c,
 #             steamids=c.util.steam_ids,
 #             steam_refresh_interval=c.util.steam_refresh_interval
-#         ), 200
+#         )
 
 # --- End
 

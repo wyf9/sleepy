@@ -24,14 +24,15 @@ c: Config = p.config
 
 @p.route('/hello')
 def hello():
-    p.data['calls'] += 1
-    return {
-        'message': f'Hello from {p.name} plugin',
-        'username': p.global_config.page.name,  # Config Way 2: 直接读取全局配置
-        'test': c.test,
-        'debug': c.debug,
-        'calls': p.data['calls']
-    }
+    with p.data_context() as d:
+        d['calls'] += 1
+        return {
+            'message': f'Hello from {p.name} plugin',
+            'username': p.global_config.page.name,  # Config Way 2: 直接读取全局配置
+            'test': c.test,
+            'debug': c.debug,
+            'calls': d['calls']
+        }
 
 
 @p.global_route('/testplugin')

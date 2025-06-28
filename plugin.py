@@ -3,6 +3,7 @@ import importlib
 import typing as t
 from logging import getLogger
 from functools import wraps
+from contextlib import contextmanager
 
 import flask
 
@@ -24,7 +25,7 @@ class Plugin:
     _registry = {}
     _routes = []
 
-    def __init__(self, name: str, config={}, data: dict = {}):  # : type[BaseModel]):
+    def __init__(self, name: str, config={}, data: dict = {}):
         '''
         初始化插件
 
@@ -61,6 +62,35 @@ class Plugin:
     @data.setter
     def data(self, value: dict):
         PluginInit.instance.d.set_plugin_data(id=self.name, data=value)
+
+    @contextmanager
+    def data_context(self):
+        '''
+        数据上下文 (在退出时自动保存)
+
+        ```
+        with plugin.data_context() as data:
+            data['calls'] = data.get('calls', 0) + 1
+        ```
+        '''
+        data = self.data
+        yield data
+        if data != self.data:
+            self.data = data
+
+    def set_data(self, key, value):
+        '''
+        设置数据值
+        '''
+        data = self.data
+        data[key] = value
+        self.data = data
+
+    def get_data(self, key, default = None):
+        '''
+        获取数据值
+        '''
+        return self.data.get(key, default)
 
     @property
     def global_config(self) -> ConfigModel:
@@ -134,7 +164,7 @@ class Plugin:
             # 临时存储理由信息
             self._routes.append({
                 'rule': full_rule,
-                'endpoint': f"plugin._global_.{endpoint}",
+                'endpoint': f"plugin_global.{self.name}.{endpoint}",
                 'view_func': wrapper,
                 'options': options
             })

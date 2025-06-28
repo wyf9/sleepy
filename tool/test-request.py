@@ -7,7 +7,7 @@ sys.path.append('./')
 sys.path.append('../')
 if True:
     from config import Config
-    c = Config()
+    c = Config().config
 
 BASE = f'http://{f"[{c.main.host}]" if ":" in c.main.host else c.main.host}:{c.main.port}'
 SECRET = c.main.secret

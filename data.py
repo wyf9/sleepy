@@ -5,6 +5,7 @@ from datetime import datetime
 from logging import getLogger
 from threading import Thread
 from time import sleep, time
+from typing import Any
 
 from werkzeug.security import safe_join
 from flask import Flask
@@ -50,20 +51,22 @@ class _DeviceStatusData(db.Model):
     '''[必选] 设备唯一 id'''
     show_name: Mapped[str] = mapped_column(String(LIMIT), nullable=False)
     '''[必选] 设备显示名称'''
-    desc: Mapped[str] = mapped_column(String(LIMIT), nullable=True)
-    '''[可选] 设备描述'''
-    online: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    '''[可选] 设备是否在线'''
+    # desc: Mapped[str] = mapped_column(String(LIMIT), nullable=True)
+    # '''[可选] 设备描述'''
+    # online: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    # '''[可选] 设备是否在线'''
     using: Mapped[bool] = mapped_column(Boolean, nullable=True)
     '''[可选] 设备是否正在使用'''
-    app_name: Mapped[str] = mapped_column(Text, nullable=True)
-    '''[可选] 设备打开的应用名'''
-    playing: Mapped[str] = mapped_column(Text, nullable=True)
-    '''[可选] 设备正在播放的媒体名'''
-    battery: Mapped[int] = mapped_column(Integer, nullable=True)
-    '''[可选] 设备电量 (0~100)'''
-    is_charging: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    '''[可选] 设备是否正在充电'''
+    status: Mapped[str] = mapped_column(Text, nullable=True)
+    '''[可选] 设备状态文本 (如打开的应用名)'''
+    # playing: Mapped[str] = mapped_column(Text, nullable=True)
+    # '''[可选] 设备正在播放的媒体名'''
+    # battery: Mapped[int] = mapped_column(Integer, nullable=True)
+    # '''[可选] 设备电量 (0~100)'''
+    # is_charging: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    # '''[可选] 设备是否正在充电'''
+    fields: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    '''[可选] 设备的扩展字段'''
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=u.nowutc, onupdate=u.nowutc)
     '''(本设备) 数据最后更新时间 (UTC)'''
 
@@ -131,7 +134,7 @@ class Data:
 
     def _schedule_loop(self):
         schedule.every().day.at('00:00:00', self._c.main.timezone).do(self._metrics_refresh)  # metrics
-        schedule.every(self._c.main.cache_age).seconds.do(self._clean_cache) # cache
+        schedule.every(self._c.main.cache_age).seconds.do(self._clean_cache)  # cache
 
         while True:
             schedule.run_pending()
@@ -225,7 +228,7 @@ class Data:
             self._throw(e)
 
     @property
-    def device_list(self) -> dict[str, dict[str, str | int | float | bool]]:
+    def device_list(self) -> dict[str, dict[str, Any]]:
         '''
         排序后设备列表
         '''
@@ -237,37 +240,25 @@ class Data:
                 # 使用中优先
                 devicelst = {}  # devicelst = device_using
                 device_not_using = {}
-                device_offline = {}
-                device_unknown = {}
                 for k, v in self._raw_device_list.items():
-                    if v.get('online') == True:  # - 首先确保在线
-                        if v.get('using') == True:  # * 正在使用
-                            devicelst[k] = v
-                        elif v.get('using') == False:  # * 未在使用
-                            if self._c.status.not_using:
-                                v['app_name'] = self._c.status.not_using  # 如锁定了未在使用时设备名, 则替换
-                            device_not_using[k] = v
-                    elif v.get('online') == False:  # - 不在线
-                        if self._c.status.offline:
-                            v['app_name'] = self._c.status.offline  # 如锁定了离线时设备名, 则替换
-                        device_offline[k] = v
-                    else:  # - 无此字段
-                        device_unknown[k] = v
+                    if v.get('using') == True:  # * 正在使用
+                        devicelst[k] = v
+                    elif v.get('using') == False:  # * 未在使用
+                        if self._c.status.not_using:
+                            v['app_name'] = self._c.status.not_using  # 如锁定了未在使用时设备名, 则替换
+                        device_not_using[k] = v
                 if self._c.status.sorted:
                     devicelst = dict(sorted(devicelst.items()))
                     device_not_using = dict(sorted(device_not_using.items()))
-                devicelst.update(device_not_using)  # append items to end
-                devicelst.update(device_offline)
-                devicelst.update(device_unknown)
+                devicelst.update(device_not_using)  # 追加到末尾
             else:
                 # 正常获取
                 devicelst = self._raw_device_list
-                # 如锁定了离线 / 未在使用时设备名, 则替换 (离线优先)
-                for d in devicelst.keys():
-                    if self._c.status.offline and devicelst[d].get('online') == False:  # 离线
-                        devicelst[d]['app_name'] = self._c.status.offline
-                    elif self._c.status.not_using and devicelst[d].get('using') == False:  # 未在使用
-                        devicelst[d]['app_name'] = self._c.status.not_using
+                # 如锁定了未在使用时设备名, 则替换
+                if self._c.status.not_using:
+                    for d in devicelst.keys():
+                        if devicelst[d].get('using') == False:
+                            devicelst[d]['app_name'] = self._c.status.not_using
                 if self._c.status.sorted:
                     devicelst = dict(sorted(devicelst.items()))
             return devicelst
@@ -290,48 +281,38 @@ class Data:
         except SQLAlchemyError as e:
             self._throw(e)
 
-    def device_set(self, id: str,
+    def device_set(self, id: str | None = None,
                    show_name: str | None = None,
-                   desc: str | None = None,
-                   online: bool | None = None,
                    using: bool | None = None,
-                   app_name: str | None = None,
-                   playing: str | None = None,
-                   battery: int | None = None,
-                   is_charging: bool | None = None
+                   status: str | None = None,
+                   fields: dict = {}
                    ):
         '''
         设备状态设置
 
         :param id: 设备唯一 id
+        :param show_name: 设备显示名称
+        :param using: 设备是否正在使用
+        :param status: 设备状态文本
+        :param fields: 扩展字段
         '''
         try:
             with self._app.app_context():
                 device = _DeviceStatusData.query.filter_by(id=id).first()
+                if not id:
+                    # 验证设备 id 不为空
+                    raise u.APIUnsuccessful(400, 'device id cannot be empty!')
                 if not device:
-                    # 验证必填字段 (显示名称不能为空)
+                    # 在创建时验证必填字段 (显示名称不能为空)
                     if not show_name:
-                        raise u.APIUnsuccessful(400, 'show_name cannot be empty!')
+                        raise u.APIUnsuccessful(400, 'device show_name cannot be empty!')
                     device = _DeviceStatusData()
                     device.id = id
                     db.session.add(device)
-                update_fields = {
-                    'show_name': show_name or device.show_name,
-                    'desc': desc,
-                    'online': online,
-                    'using': using,
-                    'app_name': app_name,
-                    'playing': playing,
-                    'battery': battery,
-                    'is_charging': is_charging
-                }
-                for k, v in update_fields.items():
-                    if v is not None:
-                        # 验证特殊字段 (0 <= 电量 <= 100)
-                        if k == 'battery' and not (0 <= v <= 100):
-                            db.session.rollback()
-                            raise u.APIUnsuccessful(400, 'Invaild battery value! it must be a number between 0 and 100.')
-                    setattr(device, k, v)
+                device.show_name = show_name or device.show_name
+                device.using = using if using is not None else device.using
+                device.status = status or device.status
+                device.fields = u.deep_merge_dict(device.fields, fields)
                 db.session.commit()
                 self.last_updated = u.nowutc()
         except SQLAlchemyError as e:
@@ -384,6 +365,7 @@ class Data:
                     db.session.add(metric)
                 metric.today += 1
                 metric.total += 1
+                db.session.commit()
         except SQLAlchemyError as e:
             self._throw(e)
 
@@ -430,6 +412,7 @@ class Data:
                 raw_metrics: list[_MetricsData] = _MetricsData.query.all()
                 for i in raw_metrics:
                     i.today = 0
+                db.session.commit()
         except SQLAlchemyError as e:
             l.error(f'[_metrics_refresh] Error: {e}')
         l.debug(f'[_metrics_refresh] took {perf()}ms')
@@ -447,6 +430,7 @@ class Data:
                     plugin = _PluginData()
                     plugin.id = id
                     db.session.add(plugin)
+                    db.session.commit()
                 return plugin.data
         except SQLAlchemyError as e:
             self._throw(e)
@@ -464,6 +448,7 @@ class Data:
                     plugin.data = {}
                     db.session.add(plugin)
                 plugin.data = data
+                db.session.commit()
         except SQLAlchemyError as e:
             self._throw(e)
 

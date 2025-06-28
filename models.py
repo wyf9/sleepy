@@ -209,11 +209,11 @@ class _StatusConfigModel(BaseModel):
     锁定设备未在使用时的提示 *(如为空则使用设备提交值)*
     '''
 
-    offline: str = '设备不在线'
-    '''
-    `status.offline`
-    锁定设备离线时的提示 *(如为空则使用设备提交值)*
-    '''
+    # offline: str = '设备不在线'
+    # '''
+    # `status.offline`
+    # 锁定设备离线时的提示 *(如为空则使用设备提交值)*
+    # '''
 
     sorted: bool = False
     '''
@@ -311,3 +311,20 @@ class ConfigModel(BaseModel):
     '''
 
 # ========== 用户配置结束 ==========
+
+
+redirect_map = {
+    '/query': '/api/status/query',
+    '/status_list': '/api/status/list',
+    '/metrics': '/api/status/metrics',
+    '/set': '/api/status/set',
+    '/device/set': '/api/device/set',
+    '/device/remove': '/api/device/remove',
+    '/device/clear': '/api/device/clear',
+    '/device/private_mode': '/api/device/private',
+    '/metadata': '/api/status/meta',
+    '/verify-secret': '/webui/verify'
+}
+'''
+将旧版 API 地址重定向到新版 (`/xxx` -> `/api/xxx`)
+'''
