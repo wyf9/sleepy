@@ -54,14 +54,14 @@ main:
 metrics:
   allow_list:
     - /
-    - /query
-    - /metrics
+    - /api/status/query
+    - /api/metrics
 
 # 也可以这样配置
 main.host: '0.0.0.0'
 main.port: 9010
 main.debug: false
-metrics.allow_list: ["/", "/query", "/metrics"]
+metrics.allow_list: ["/", "/api/status/query", "/api/metrics"]
 ```
 
 ### `data/config.toml`
@@ -73,7 +73,7 @@ port = 9010
 debug = false
 
 [metrics]
-allow_list = ["/", "/query", "/metrics"]
+allow_list = ["/", "/api/status/query", "/api/metrics"]
 ```
 
 ### `data/config.json`
@@ -89,7 +89,7 @@ allow_list = ["/", "/query", "/metrics"]
         "allow_list": [
             "/",
             "/query",
-            "/metrics"
+            "/api/metrics"
         ]
     }
 }

@@ -316,14 +316,15 @@ class ConfigModel(BaseModel):
 redirect_map = {
     '/query': '/api/status/query',
     '/status_list': '/api/status/list',
-    '/metrics': '/api/status/metrics',
+    '/metrics': '/api/metrics',
     '/set': '/api/status/set',
     '/device/set': '/api/device/set',
     '/device/remove': '/api/device/remove',
     '/device/clear': '/api/device/clear',
     '/device/private_mode': '/api/device/private',
-    '/metadata': '/api/status/meta',
-    '/verify-secret': '/webui/verify'
+    '/metadata': '/api/meta',
+    '/verify-secret': '/webui/verify',
+    '/events': '/api/status/events'
 }
 '''
 将旧版 API 地址重定向到新版 (`/xxx` -> `/api/xxx`)

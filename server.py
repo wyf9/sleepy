@@ -107,7 +107,7 @@ try:
 
     # init metrics if enabled
     if c.metrics.enabled:
-        l.info('[metrics] metrics enabled, open /metrics to see the count.')
+        l.info('[metrics] metrics enabled, open /api/metrics to see the count.')
 
     # init plugin
     p = plugin_init(
@@ -190,11 +190,13 @@ def before_request():
     '''
     before_request:
     - 性能计数器
+    - 旧 API 重定向
     - 检测主题参数, 设置 cookie & 去除参数
     - 设置会话变量 (theme, secret)
-    - 旧 API 重定向
     '''
     flask.g.perf = u.perf_counter()
+    fip = flask.request.headers.get('X-Real-IP') or flask.request.headers.get('X-Forwarded-For')
+    flask.g.ipstr = ((flask.request.remote_addr or '') + (f' / {fip}' if fip else ''))
     # --- api redirect (/xxx -> /api/xxx)
     if flask.request.path in redirect_map:
         new_path = redirect_map.get(flask.request.path, '/')
@@ -252,12 +254,7 @@ def after_request(resp: flask.Response):
     if c.metrics.enabled:
         d.record_metrics(path)
     # --- access log
-    ip1 = flask.request.remote_addr
-    ip2 = flask.request.headers.get('X-Real-IP') or flask.request.headers.get('X-Forwarded-For')
-    if ip2:
-        l.info(f'[Request] {ip1} / {ip2} | {path} - {resp.status_code} ({flask.g.perf()}ms)')
-    else:
-        l.info(f'[Request] {ip1} | {path} - {resp.status_code} ({flask.g.perf()}ms)')
+    l.info(f'[Request] {flask.g.ipstr} | {path} -> {resp.status_code} ({flask.g.perf()}ms)')
     return resp
 
 
@@ -275,17 +272,17 @@ def api_unsuccessful_handler(e: u.APIUnsuccessful):
     }, e.code
 
 
-@app.errorhandler(Exception)
-def error_handler(e: Exception):
-    '''
-    处理未捕获运行时错误
-    '''
-    if isinstance(e, HTTPException):
-        l.warning(f'HTTP Error: {e}')
-        return e
-    else:
-        l.error(f'Unhandled Error: {e}')
-        return flask.abort(500)
+# @app.errorhandler(Exception)
+# def error_handler(e: Exception):
+#     '''
+#     处理未捕获运行时错误
+#     '''
+#     if isinstance(e, HTTPException):
+#         l.warning(f'HTTP Error: {e}')
+#         return e
+#     else:
+#         l.error(f'Unhandled Error: {e}')
+#         return flask.abort(500)
 
 # --- Templates
 
@@ -367,8 +364,8 @@ def none():
 # --- Read-only
 
 
-@app.route('/api/query')
-def query():
+@app.route('/api/status/query')
+def query(version: str = '2'):
     '''
     获取当前状态
     - 无需鉴权
@@ -387,9 +384,10 @@ def query():
         }
 
     # 返回数据
-    v1 = u.tobool(flask.request.args.get('version', 0)) if flask.request else 0
-    if v1:
+    ver = flask.request.args.get('version', '2') if flask.request else version
+    if ver == '1':
         # 旧版返回兼容 (本地时间字符串，但性能不佳)
+        # l.debug('[/query] Using legacy (version 1) response format')
         return {
             'time': datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S'),
             'timezone': c.main.timezone,
@@ -410,7 +408,7 @@ def query():
             'device': d.device_list,
             'last_updated': d.last_updated.timestamp()
         }
-        # 同时包含 metadata / metrics 返回
+        # 如同时包含 metadata / metrics 返回
         if u.tobool(flask.request.args.get('meta', False)) if flask.request else False:
             ret['meta'] = metadata()
         if u.tobool(flask.request.args.get('metrics', False)) if flask.request else False:
@@ -421,7 +419,7 @@ def query():
         return ret
 
 
-@app.route('/api/status/meta')
+@app.route('/api/meta')
 def metadata():
     '''
     获取站点元数据
@@ -501,7 +499,7 @@ def device_set():
         device_id = flask.request.args.pop('id')
         device_show_name = flask.request.args.pop('show_name')
         device_using = u.tobool(flask.request.args.pop('using'))
-        device_status = flask.request.args.pop('status') or flask.request.args.pop('app_name') # 兼容旧版名称
+        device_status = flask.request.args.pop('status') or flask.request.args.pop('app_name')  # 兼容旧版名称
         flask.request.args.pop('secret')
         fields = dict(flask.request.args.items())
         d.device_set(
@@ -518,8 +516,8 @@ def device_set():
                 id=req.get('id'),
                 show_name=req.get('show_name'),
                 using=req.get('using'),
-                status=req.get('status') or req.get('app_name'), # 兼容旧版名称
-                fields=req.get('fields') # type: ignore
+                status=req.get('status') or req.get('app_name'),  # 兼容旧版名称
+                fields=req.get('fields')  # type: ignore
             )
         except Exception as e:
             if isinstance(e, u.APIUnsuccessful):
@@ -527,7 +525,7 @@ def device_set():
             else:
                 raise u.APIUnsuccessful(400, f'missing param or wrong param type: {e}')
     else:
-        raise u.APIUnsuccessful(405, '/device/set only supports GET and POST method!')
+        raise u.APIUnsuccessful(405, '/api/device/set only supports GET and POST method!')
 
     # 触发设备更新事件
     # trigger_event('device_updated', device_id, d.data.device_status[device_id])
@@ -607,7 +605,7 @@ def private_mode():
     }
 
 
-@app.route('/events')
+@app.route('/api/status/events')
 def events():
     '''
     SSE 事件流，用于推送状态更新
@@ -618,10 +616,14 @@ def events():
     except ValueError:
         raise u.APIUnsuccessful(400, 'Invaild Last-Event-ID header, it must be int!')
 
-    def event_stream(event_id: int = last_event_id):
+    version = flask.request.args.get('version', '2') if flask.request else '2'
+    ip: str = flask.g.ipstr
+
+    def event_stream(event_id: int = last_event_id, version: str = version):
         last_updated = None
         last_heartbeat = time.time()
 
+        l.info(f'[SSE] Event stream connected: {ip}')
         while True:
             current_time = time.time()
             # 检查数据是否已更新
@@ -634,14 +636,14 @@ def events():
                 last_heartbeat = current_time
 
                 # 获取 /query 返回数据
-                update_data = json.dumps(query(), ensure_ascii=False)
+                update_data = json.dumps(query(version=version), ensure_ascii=False)
                 event_id += 1
                 yield f'id: {event_id}\nevent: update\ndata: {update_data}\n\n'
 
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
                 event_id += 1
-                yield f'id: {event_id}\nevent: heartbeat\ndata:\n\n'
+                yield f'id: {event_id}\nevent: heartbeat\n\n'
                 last_heartbeat = current_time
 
             time.sleep(1)  # 每秒检查一次更新
@@ -649,6 +651,7 @@ def events():
     response = flask.Response(event_stream(last_event_id), mimetype='text/event-stream', status=200)
     response.headers['Cache-Control'] = 'no-cache'  # 禁用缓存
     response.headers['X-Accel-Buffering'] = 'no'  # 禁用 Nginx 缓冲
+    response.call_on_close(lambda: l.info(f'[SSE] Event stream disconnected: {ip}'))
     return response
 
 # --- WebUI (Admin Panel)
@@ -736,7 +739,7 @@ def auth():
     max_age = 30 * 24 * 60 * 60  # 30 days in seconds
     response.set_cookie('sleepy-token', c.main.secret, max_age=max_age, httponly=True, samesite='Lax')
 
-    l.debug('[Auth] Login successful, cookie set')
+    l.debug('[WebUI] Login successful, cookie set')
     return response
 
 
@@ -752,7 +755,7 @@ def logout():
     # 清除认证 cookie
     response.delete_cookie('sleepy-token')
 
-    l.debug('[Auth] Logout successful')
+    l.debug('[WebUI] Logout successful')
     return response
 
 
@@ -763,7 +766,7 @@ def verify_secret():
     验证密钥是否有效
     - Method: **GET / POST**
     '''
-    l.debug('[API] Secret verified')
+    l.debug('[WebUI] Secret verified')
     return {
         'success': True,
         'code': 'OK',
@@ -774,7 +777,7 @@ def verify_secret():
 # --- Special
 
 if c.metrics.enabled:
-    @app.route('/api/status/metrics')
+    @app.route('/api/metrics')
     def metrics():
         '''
         获取统计信息

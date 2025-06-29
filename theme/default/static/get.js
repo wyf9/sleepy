@@ -44,6 +44,9 @@ async function checkVercelDeploy() {
     /*
     检查是否为 Vercel 部署 (经测试 Vercel 不支持 SSE)
     测试方法: 请求 /none，检查返回 Headers 中是否包含 x-vercel-id
+    - true: 是 Vercel 部署
+    - false: 不是 Vercel 部署
+    - null: *请求失败*
     */
     console.log(`[Vercel] 测试请求 ${baseUrl + 'none'} 中...`);
     return await fetch(baseUrl + 'none', { timeout: 10000 })
@@ -60,8 +63,19 @@ async function checkVercelDeploy() {
         })
         .catch(error => {
             console.log(`[Vercel] 请求错误: ${error}`);
-            return false;
+            return null;
         });
+}
+
+async function getMetadata() {
+    /*
+    请求站点元数据接口 (/api/meta)
+    */
+    return await fetch(baseUrl + 'api/meta', { timeout: 10000 })
+        .then(resp => {
+            
+        }
+    )
 }
 
 function updateElement(data) {
@@ -74,11 +88,11 @@ function updateElement(data) {
 
     // 更新状态
     if (statusElement) {
-        statusElement.textContent = data.info.name;
-        document.getElementById('additional-info').innerHTML = data.info.desc;
+        statusElement.textContent = data.status.name;
+        document.getElementById('additional-info').innerHTML = data.status.desc;
         let last_status = statusElement.classList.item(0);
         statusElement.classList.remove(last_status);
-        statusElement.classList.add(data.info.color);
+        statusElement.classList.add(data.status.color);
     }
 
     // 更新设备状态
@@ -237,7 +251,7 @@ function setupEventSource() {
     }
 
     // 创建新连接
-    evtSource = new EventSource('/events');
+    evtSource = new EventSource('/api/status/events');
 
     // 监听连接打开事件
     evtSource.onopen = function () {
@@ -273,14 +287,15 @@ function setupEventSource() {
         lastEventTime = Date.now(); // 更新最后收到消息的时间
     });
 
-    // 错误处理 - 立即开始重连
+    // 错误处理 (定时重连 / 回退)
     evtSource.onerror = async function (e) {
         console.error(`[SSE] 连接错误: ${e}`);
         evtSource.close();
 
         // 如是第一次错误，检查是否为 Vercel 部署
         if (firstError) {
-            if (await checkVercelDeploy()) {
+            isVercel = await checkVercelDeploy();
+            if (isVercel === true) {
                 // 如是，清除所有定时器，并回退到原始轮询函数
                 if (countdownInterval) {
                     clearInterval(countdownInterval);
@@ -292,8 +307,8 @@ function setupEventSource() {
                 }
                 update();
                 return;
-            } else {
-                // 如不是，以后错误跳过检查
+            } else if (isVercel === false) {
+                // 如不是 (非错误)，以后错误跳过检查
                 firstError = false;
             }
         }

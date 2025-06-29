@@ -10,7 +10,7 @@ from typing import Any
 from werkzeug.security import safe_join
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import JSON, Integer, String, Boolean, Text, DateTime
+from sqlalchemy import JSON, Integer, String, Boolean, Text, DateTime, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.exc import SQLAlchemyError
 from objtyping import to_primitive
@@ -348,11 +348,13 @@ class Data:
 
     # --- 统计数据访问
 
-    def record_metrics(self, path: str):
+    def record_metrics(self, path: str, count: int = 1, override: bool = False):
         '''
         记录 metrics 数据
 
         :param path: 路径
+        :param count: 记录增加次数 (调试使用?)
+        :param override: 是否直接替换值而不是增加
         '''
         try:
             with self._app.app_context():
@@ -363,18 +365,22 @@ class Data:
                     metric.today = 0
                     metric.total = 0
                     db.session.add(metric)
-                metric.today += 1
-                metric.total += 1
+                if override:
+                    metric.today = count
+                    metric.total = count
+                else:
+                    metric.today += count
+                    metric.total += count
                 db.session.commit()
         except SQLAlchemyError as e:
             self._throw(e)
 
     @property
-    def metrics_data(self) -> tuple[dict[str, float], dict[str, float]]:
+    def metrics_data(self) -> tuple[dict[str, int], dict[str, int]]:
         '''
         获取 metrics 数据
 
-        :return: (`今日`, `全部`)
+        :return: (今日, 全部)
         '''
         try:
             raw_metrics: list[_MetricsData] = _MetricsData.query.all()
@@ -388,13 +394,15 @@ class Data:
             self._throw(e)
 
     @property
-    def metrics_resp(self) -> dict[str, float | str | dict]:
+    def metrics_resp(self) -> dict[str, Any]:
         '''
         获取 metrics 返回
         '''
-        today, total = self.metrics_data
+        enabled = self._c.metrics.enabled
+        today, total = self.metrics_data if enabled else ({}, {})
         now = datetime.now(pytz.timezone(self._c.main.timezone))
         return {
+            'enabled': enabled,
             'time': now.timestamp(),
             'time_local': now.strftime('%Y-%m-%d %H:%M:%S'),
             'timezone': self._c.main.timezone,

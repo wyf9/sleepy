@@ -3,6 +3,7 @@
 0. [鉴权说明](#一些说明)
 1. [Status 接口](#status)
 2. [Device 接口](#device)
+3. [其他接口](#others)
 
 ## 一些说明
 
@@ -80,7 +81,7 @@ sleepy-token=MySecretCannotGuess
 | [Jump](#query)       | `/api/status/query`               | `GET` | 获取状态         |
 | [Jump](#status-set)  | `/api/status/set?status=<status>` | `GET` | 设置状态         |
 | [Jump](#status-list) | `/api/status/list`                | `GET` | 获取可用状态列表 |
-| [Jump](#metrics)     | `/api/status/metrics`             | `GET` | 获取统计信息     |
+| [Jump](#metrics)     | `/api/metrics`             | `GET` | 获取统计信息     |
 
 ### query
 
@@ -222,7 +223,7 @@ sleepy-token=MySecretCannotGuess
 
 [Back to ## status](#status)
 
-> `/api/status/metrics`
+> `/api/metrics`
 
 获取统计信息
 
@@ -230,7 +231,7 @@ sleepy-token=MySecretCannotGuess
 * 无需鉴权
 
 > [!TIP]
-> 本接口较特殊: 如服务器关闭了统计, 则 **`/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果  
+> 本接口较特殊: 如服务器关闭了统计, 则 **`/api/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果  
 > ~~*我也不知道自己怎么想的*~~
 
 #### Response
@@ -419,3 +420,11 @@ sleepy-token=MySecretCannotGuess
   "message": "\"private\" arg must be boolean"
 }
 ```
+
+## Others
+
+[Back to # api](#api)
+
+|                              | 路径                                                                              | 方法   | 作用                          |
+| ---------------------------- | --------------------------------------------------------------------------------- | ------ | ----------------------------- |
+| [Jump](#device-set)          | `/api/meta`                                                                 | `POST` | 设置单个设备的状态 (打开应用) |

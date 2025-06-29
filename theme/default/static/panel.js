@@ -218,7 +218,7 @@ async function togglePrivateMode(isPrivate) {
 // 获取统计数据
 async function fetchMetrics() {
     try {
-        const response = await fetch('/metrics');
+        const response = await fetch('/api/metrics');
         const data = await response.json();
 
         const container = document.getElementById('metrics-container');
