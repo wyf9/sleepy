@@ -10,8 +10,18 @@
     <link rel="icon" href="{{ env.page.favicon }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <style>
-        body {
-            background: url('{{ env.page.background }}') no-repeat center center fixed;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background: url('{{ env.page.background }}') no-repeat center center;
+            background-size: cover; 
+            will-change: transform; /* ai让我加上这两行 汗 */
+            transform: translateZ(0); /* Safari 强制开启 GPU 合成，防抖动 */
         }
     </style>
 
