@@ -71,13 +71,28 @@ class _DeviceStatusData(db.Model):
     '''(本设备) 数据最后更新时间 (UTC)'''
 
 
+class _MetricsMetaData(db.Model):
+    '''
+    访问统计元数据
+    '''
+    __tablename__ = 'metrics_meta'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=0)
+    today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    week: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    month: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    year: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
 class _MetricsData(db.Model):
     '''
     访问统计数据
     '''
     __tablename__ = 'metrics'
     path: Mapped[str] = mapped_column(String(LIMIT), primary_key=True, unique=True, nullable=False)
-    today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    daily: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    weekly: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    monthly: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    yearly: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     total: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
 
@@ -119,6 +134,13 @@ class Data:
                 db.session.add(main_data)
                 db.session.commit()
 
+            metrics_metadata = _MetricsMetaData.query.first()
+            if self._c.metrics.enabled and not metrics_metadata:
+                l.debug(f'[data] metrics_metadata not exist, creating a new one')
+                metrics_metadata = _MetricsMetaData()
+                db.session.add(metrics_metadata)
+                db.session.commit()
+
             # 启动 schedule loop
             self._schedule_loop_th = Thread(target=self._schedule_loop, daemon=True)
             self._schedule_loop_th.start()
@@ -133,7 +155,10 @@ class Data:
         raise u.APIUnsuccessful(500, 'Database Error')
 
     def _schedule_loop(self):
-        schedule.every().day.at('00:00:00', self._c.main.timezone).do(self._metrics_refresh)  # metrics
+        if self._c.metrics.enabled:
+            # 先执行一次
+            self._metrics_refresh()
+            schedule.every().day.at('00:00:00', self._c.main.timezone).do(self._metrics_refresh)  # metrics check
         schedule.every(self._c.main.cache_age).seconds.do(self._clean_cache)  # cache
 
         while True:
@@ -363,27 +388,38 @@ class Data:
         :param count: 记录增加次数 (调试使用?)
         :param override: 是否直接替换值而不是增加
         '''
+        if not path in self._c.metrics.allow_list:
+            return
         try:
             with self._app.app_context():
                 metric: _MetricsData | None = _MetricsData.query.filter_by(path=path).first()
                 if not metric:
                     metric = _MetricsData()
                     metric.path = path
-                    metric.today = 0
+                    metric.daily = 0
+                    metric.weekly = 0
+                    metric.monthly = 0
+                    metric.yearly = 0
                     metric.total = 0
                     db.session.add(metric)
                 if override:
-                    metric.today = count
+                    metric.daily = count
+                    metric.weekly = count
+                    metric.monthly = count
+                    metric.yearly = count
                     metric.total = count
                 else:
-                    metric.today += count
+                    metric.daily += count
+                    metric.weekly += count
+                    metric.monthly += count
+                    metric.yearly += count
                     metric.total += count
                 db.session.commit()
         except SQLAlchemyError as e:
             self._throw(e)
 
     @property
-    def metrics_data(self) -> tuple[dict[str, int], dict[str, int]]:
+    def metrics_data(self) -> list[dict[str, str]]:
         '''
         获取 metrics 数据
 
@@ -391,12 +427,18 @@ class Data:
         '''
         try:
             raw_metrics: list[_MetricsData] = _MetricsData.query.all()
-            today = {}
+            daily = {}
+            weekly = {}
+            monthly = {}
+            yearly = {}
             total = {}
             for i in raw_metrics:
-                today[i.path] = i.today
+                daily[i.path] = i.daily
+                weekly[i.path] = i.weekly
+                monthly[i.path] = i.monthly
+                yearly[i.path] = i.yearly
                 total[i.path] = i.total
-            return (today, total)
+            return [daily, weekly, monthly, yearly, total]
         except SQLAlchemyError as e:
             self._throw(e)
 
@@ -406,27 +448,63 @@ class Data:
         获取 metrics 返回
         '''
         enabled = self._c.metrics.enabled
-        today, total = self.metrics_data if enabled else ({}, {})
-        now = datetime.now(pytz.timezone(self._c.main.timezone))
-        return {
-            'enabled': enabled,
-            'time': now.timestamp(),
-            'time_local': now.strftime('%Y-%m-%d %H:%M:%S'),
-            'timezone': self._c.main.timezone,
-            'today': today,
-            'total': total
-        }
+        if enabled:
+            daily, weekly, monthly, yearly, total = self.metrics_data if enabled else ({}, {}, {}, {}, {})
+            now = datetime.now(pytz.timezone(self._c.main.timezone))
+            return {
+                'enabled': True,
+                'time': now.timestamp(),
+                'time_local': now.strftime('%Y-%m-%d %H:%M:%S'),
+                'timezone': self._c.main.timezone,
+                'daily': daily,
+                'weekly': weekly,
+                'monthly': monthly,
+                'yearly': yearly,
+                'total': total
+            }
+        else:
+            return {
+                'enabled': False
+            }
 
     def _metrics_refresh(self):
         '''
-        (在每日 0 点执行) 刷新今日 metrics 数据
+        (在 每日 0 点 / 启动时 执行) 刷新 metrics 数据
         '''
         perf = u.perf_counter()
         try:
             with self._app.app_context():
                 raw_metrics: list[_MetricsData] = _MetricsData.query.all()
-                for i in raw_metrics:
-                    i.today = 0
+                meta_metrics: _MetricsMetaData = _MetricsMetaData.query.first()  # type: ignore
+
+                # get today
+                now = datetime.now(pytz.timezone(self._c.main.timezone))
+                today = now.day
+                week = now.weekday()
+                month = now.month
+                year = now.year
+
+                # compare
+                if today != meta_metrics.today:
+                    meta_metrics.today = today
+                    for i in raw_metrics:
+                        i.daily = 0
+
+                if week != meta_metrics.week:
+                    meta_metrics.week = week
+                    for i in raw_metrics:
+                        i.weekly = 0
+
+                if month != meta_metrics.month:
+                    meta_metrics.month = month
+                    for i in raw_metrics:
+                        i.monthly = 0
+
+                if year != meta_metrics.year:
+                    meta_metrics.year = year
+                    for i in raw_metrics:
+                        i.yearly = 0
+
                 db.session.commit()
         except SQLAlchemyError as e:
             l.error(f'[_metrics_refresh] Error: {e}')

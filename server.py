@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+# ========== Init ==========
+
+# region init
+
 # show welcome text
 print(f'''
 Welcome to Sleepy Project 2025!
@@ -24,7 +28,7 @@ try:
     import flask
     import pytz
     from markupsafe import escape
-    from werkzeug.exceptions import HTTPException, NotFound
+    from werkzeug.exceptions import NotFound
     from toml import load as load_toml
 
     # local modules
@@ -127,7 +131,11 @@ except:
     l.critical('Unexpected Error!')
     raise
 
-# --- Theme
+# endregion init
+
+# ========== Theme ==========
+
+# region theme
 
 
 def render_template(filename: str, **context):
@@ -186,7 +194,7 @@ def static_themed(theme: str, filename: str):
 @app.route('/default/<path:filename>')
 def static_default_theme(filename: str):
     '''
-    兼容在非默认主题中使用
+    兼容在非默认主题中使用:
     ```
     import { ... } from "../../default/static/utils";
     ```
@@ -195,7 +203,43 @@ def static_default_theme(filename: str):
         filename += '.js'
     return flask.send_from_directory('theme/default', filename)
 
-# --- Functions
+# endregion theme
+
+# ========== Error Handler ==========
+
+# region errorhandler
+
+
+@app.errorhandler(u.APIUnsuccessful)
+def api_unsuccessful_handler(e: u.APIUnsuccessful):
+    '''
+    处理 `APIUnsuccessful` 错误
+    '''
+    l.error(f'API Calling Error: {e}')
+    return {
+        'success': False,
+        'code': e.code,
+        'details': e.details,
+        'message': e.message
+    }, e.code
+
+# @app.errorhandler(Exception)
+# def error_handler(e: Exception):
+#     '''
+#     处理未捕获运行时错误
+#     '''
+#     if isinstance(e, HTTPException):
+#         l.warning(f'HTTP Error: {e}')
+#         return e
+#     else:
+#         l.error(f'Unhandled Error: {e}')
+#         return flask.abort(500)
+
+# endregion errorhandler
+
+# ========== Request Inject ==========
+
+# region inject
 
 
 @app.before_request
@@ -210,7 +254,8 @@ def before_request():
     flask.g.perf = u.perf_counter()
     fip = flask.request.headers.get('X-Real-IP') or flask.request.headers.get('X-Forwarded-For')
     flask.g.ipstr = ((flask.request.remote_addr or '') + (f' / {fip}' if fip else ''))
-    # --- api redirect (/xxx -> /api/xxx)
+
+    # --- old api redirect (/xxx -> /api/xxx)
     if flask.request.path in redirect_map:
         new_path = redirect_map.get(flask.request.path, '/')
         redirect_path = flask.request.full_path.replace(flask.request.path, new_path)
@@ -259,9 +304,12 @@ def before_request():
 def after_request(resp: flask.Response):
     '''
     after_request:
+    - 插入 oEmbed
     - 记录 metrics 信息
     - 显示访问日志
     '''
+    # --- oembed
+    resp.headers.add('Link', '</oembed.json>; rel="alternate"; type="application/json+oembed"; title="Sleepy oEmbed Profile"')
     # --- metrics
     path = flask.request.path
     if c.metrics.enabled:
@@ -270,34 +318,15 @@ def after_request(resp: flask.Response):
     l.info(f'[Request] {flask.g.ipstr} | {path} -> {resp.status_code} ({flask.g.perf()}ms)')
     return resp
 
+# endregion inject
 
-@app.errorhandler(u.APIUnsuccessful)
-def api_unsuccessful_handler(e: u.APIUnsuccessful):
-    '''
-    处理 `APIUnsuccessful` 错误
-    '''
-    l.error(f'API Calling Error: {e}')
-    return {
-        'success': False,
-        'code': e.code,
-        'details': e.details,
-        'message': e.message
-    }, e.code
+# ========== Routes ==========
 
+# region routes
 
-# @app.errorhandler(Exception)
-# def error_handler(e: Exception):
-#     '''
-#     处理未捕获运行时错误
-#     '''
-#     if isinstance(e, HTTPException):
-#         l.warning(f'HTTP Error: {e}')
-#         return e
-#     else:
-#         l.error(f'Unhandled Error: {e}')
-#         return flask.abort(500)
+# ----- Special -----
 
-# --- Templates
+# region routes-special
 
 
 @app.route('/')
@@ -354,6 +383,14 @@ def index():
     )
 
 
+@app.route('/favicon.ico')
+def favicon():
+    '''
+    重定向 /favicon.ico 到用户自定义的 favicon
+    '''
+    return flask.redirect(c.page.favicon, 302)
+
+
 @app.route('/'+'git'+'hub')
 def git_hub():
     '''
@@ -374,7 +411,37 @@ def none():
     return '', 204
 
 
-# --- Read-only
+@app.route('/api/meta')
+def metadata():
+    '''
+    获取站点元数据
+    '''
+    return {
+        'version': version,
+        'timezone': c.main.timezone,
+        'page': {
+            'name': c.page.name,
+            'title': c.page.title,
+            'desc': c.page.desc,
+            'favicon': c.page.favicon,
+            'background': c.page.background,
+            'theme': c.page.theme
+        },
+        'status': {
+            'device_slice': c.status.device_slice,
+            'refresh_interval': c.status.refresh_interval,
+            'not_using': c.status.not_using,
+            'sorted': c.status.sorted,
+            'using_first': c.status.using_first
+        },
+        'metrics': c.metrics.enabled
+    }
+
+# endregion routes-special
+
+# ----- Status -----
+
+# region routes-status
 
 
 @app.route('/api/status/query')
@@ -399,7 +466,7 @@ def query(version: str = '2'):
     # 返回数据
     ver = flask.request.args.get('version', '2') if flask.request else version
     if ver == '1':
-        # 旧版返回兼容 (本地时间字符串，但性能不佳)
+        # 旧版返回兼容 (本地时间字符串，但冗余字段多, 性能不佳)
         # l.debug('[/query] Using legacy (version 1) response format')
         device_list = d.device_list
         for k in device_list:
@@ -429,51 +496,8 @@ def query(version: str = '2'):
         if u.tobool(flask.request.args.get('meta', False)) if flask.request else False:
             ret['meta'] = metadata()
         if u.tobool(flask.request.args.get('metrics', False)) if flask.request else False:
-            if c.metrics.enabled:
-                ret['metrics'] = metrics()
-            else:
-                ret['metrics'] = {}
+            ret['metrics'] = d.metrics_resp
         return ret
-
-
-@app.route('/api/meta')
-def metadata():
-    '''
-    获取站点元数据
-    '''
-    return {
-        'version': version,
-        'timezone': c.main.timezone,
-        'page': {
-            'name': c.page.name,
-            'title': c.page.title,
-            'desc': c.page.desc,
-            'favicon': c.page.favicon,
-            'background': c.page.background,
-            'theme': c.page.theme
-        },
-        'status': {
-            'device_slice': c.status.device_slice,
-            'refresh_interval': c.status.refresh_interval,
-            'not_using': c.status.not_using,
-            'sorted': c.status.sorted,
-            'using_first': c.status.using_first
-        },
-        'metrics': c.metrics.enabled
-    }
-
-
-@app.route('/api/status/list')
-def get_status_list():
-    '''
-    获取 `status_list`
-    - 无需鉴权
-    - Method: **GET**
-    '''
-    return [i.model_dump() for i in c.status.status_list]
-
-
-# --- Status API
 
 
 @app.route('/api/status/set')
@@ -502,7 +526,29 @@ def set_normal():
     }
 
 
-# --- Device API
+@app.route('/api/status/list')
+def get_status_list():
+    '''
+    获取 `status_list`
+    - 无需鉴权
+    - Method: **GET**
+    '''
+    return [i.model_dump() for i in c.status.status_list]
+
+@app.route('/api/metrics')
+def metrics():
+    '''
+    获取统计信息
+    - Method: **GET**
+    '''
+    return d.metrics_resp
+
+# endregion routes-ststus
+
+# ----- Device -----
+
+# region routes-device
+
 
 @app.route('/api/device/set', methods=['GET', 'POST'])
 @u.require_secret()
@@ -672,7 +718,11 @@ def events():
     response.call_on_close(lambda: l.info(f'[SSE] Event stream disconnected: {ip}'))
     return response
 
-# --- WebUI (Admin Panel)
+# endregion routes-status
+
+# ----- WebUI (Admin) -----
+
+# region routes-webui
 
 
 @app.route('/webui/panel')
@@ -791,17 +841,7 @@ def verify_secret():
         'message': 'Secret verified'
     }
 
-
-# --- Special
-
-if c.metrics.enabled:
-    @app.route('/api/metrics')
-    def metrics():
-        '''
-        获取统计信息
-        - Method: **GET**
-        '''
-        return d.metrics_resp
+# endregion routes-webui
 
 # if c.util.steam_enabled:
 #     @app.route('/steam-iframe')
@@ -813,7 +853,12 @@ if c.metrics.enabled:
 #             steam_refresh_interval=c.util.steam_refresh_interval
 #         )
 
-# --- End
+# endregion routes
+
+# ========== End ==========
+
+# region end
+
 
 if __name__ == '__main__':
     # trigger_event('app_started')
@@ -822,7 +867,7 @@ if __name__ == '__main__':
     try:
         app.run(  # 启↗动↘
             host=c.main.host,
-            port=c.main.port,
+            port=c.main.port,  # type: ignore
             debug=c.main.debug,
             use_reloader=False,
             threaded=True
@@ -833,3 +878,5 @@ if __name__ == '__main__':
     else:
         print()
         l.info('Bye.')
+
+# endregion end

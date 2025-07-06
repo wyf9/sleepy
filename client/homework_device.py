@@ -181,17 +181,6 @@ def private_mode(private: bool):
     resp = get(f'{SERVER}/device/private_mode?secret={SECRET}&private={private}')
     print(f'[/device/clear] Response: {resp.status_code} - {resp.json()}')
 
-# - storage
-
-
-def save_data():
-    '''
-    /save_data using GET
-    - save memory data (status, device, metrics) to server `data/data.json`
-    '''
-    resp = get(f'{SERVER}/save_data?secret={SECRET}')
-    print(f'[/save_data] Response: {resp.status_code} - {resp.json()}')
-
 # - custom
 
 

@@ -1,9 +1,9 @@
 # API
 
 0. [鉴权说明](#一些说明)
-1. [Status 接口](#status)
-2. [Device 接口](#device)
-3. [其他接口](#others)
+1. [特殊接口](#special)
+2. [Status 接口](#status)
+3. [Device 接口](#device)
 
 ## 一些说明
 
@@ -72,18 +72,58 @@ sleepy-token=MySecretCannotGuess
 }
 ```
 
+## Special
+
+[Back to # api](#api)
+
+|                  | 路径        | 方法  | 作用           |
+| ---------------- | ----------- | ----- | -------------- |
+| [Jump](#apimeta) | `/api/meta` | `GET` | 获取站点元数据 |
+
+### /api/meta
+
+> `/api/meta`
+
+获取站点的元数据 (个性化设置, 版本等)
+
+#### Response
+
+```jsonc
+// 200 OK
+{
+  "version": "5.0-dev-20250629", // 版本号
+  "metrics": true, // 是否已启用 metrics
+  "timezone": "Asia/Shanghai", // 服务器时区 (用于 metrics)
+  "page": { // 页面设置
+    "background": "https://imgapi.siiway.top/image", // 背景
+    "desc": "Development Site of Sleepy Project", // 描述
+    "favicon": "/static/favicon.ico", // 图标
+    "name": "Fake_wyf9", // 名字
+    "theme": "default", // 默认主题
+    "title": "SleepyDev" // 页面标题
+  },
+  "status": { // 状态设置
+    "device_slice": 40, // 设备状态截取文字数
+    "not_using": "关掉了~", // 未在使用提示覆盖
+    "refresh_interval": 5000, // 刷新间隔 (ms)
+    "sorted": true, // 是否启用排序
+    "using_first": true // 是否优先显示使用中设备
+  }
+}
+```
+
 ## Status
 
 [Back to # api](#api)
 
-|                      | 路径                              | 方法  | 作用             |
-| -------------------- | --------------------------------- | ----- | ---------------- |
-| [Jump](#query)       | `/api/status/query`               | `GET` | 获取状态         |
-| [Jump](#status-set)  | `/api/status/set?status=<status>` | `GET` | 设置状态         |
-| [Jump](#status-list) | `/api/status/list`                | `GET` | 获取可用状态列表 |
-| [Jump](#metrics)     | `/api/metrics`                    | `GET` | 获取统计信息     |
+|                         | 路径                              | 方法  | 作用             |
+| ----------------------- | --------------------------------- | ----- | ---------------- |
+| [Jump](#apistatusquery) | `/api/status/query`               | `GET` | 获取状态         |
+| [Jump](#apistatusset)   | `/api/status/set?status=<status>` | `GET` | 设置状态         |
+| [Jump](#apistatuslist)  | `/api/status/list`                | `GET` | 获取可用状态列表 |
+| [Jump](#apimetrics)     | `/api/metrics`                    | `GET` | 获取统计信息     |
 
-### query
+### /api/status/query
 
 [Back to ## status](#status)
 
@@ -130,6 +170,37 @@ sleepy-token=MySecretCannotGuess
       "last_updated": 1751668359.072248
     }
   },
+  "meta": { // 元数据 (仅在指定 ?meta=true 时包含)
+    "metrics": true,
+    "page": {
+      "background": "https://imgapi.siiway.top/image",
+      "desc": "Development Site of Sleepy Project",
+      "favicon": "/static/favicon.ico",
+      "name": "Fake_wyf9",
+      "theme": "default",
+      "title": "SleepyDev"
+    },
+    "status": {
+      "device_slice": 40,
+      "not_using": "关掉了~",
+      "refresh_interval": 5000,
+      "sorted": true,
+      "using_first": true
+    },
+    "timezone": "Asia/Shanghai",
+    "version": "5.0-dev-20250629"
+  },
+  "metrics": { // 统计数据 (仅在指定 ?metrics=true 时包含)
+    "enabled": true,
+    "time": 1751782809.226177,
+    "time_local": "2025-07-06 14:20:09",
+    "timezone": "Asia/Shanghai",
+    "daily": {},
+    "weekly": {},
+    "monthly": {},
+    "yearly": {},
+    "total": {}
+  },
   "last_updated": 1751668399.061304 // 所有数据最后更新时间
 }
 ```
@@ -171,7 +242,7 @@ sleepy-token=MySecretCannotGuess
 
 </details>
 
-### status-set
+### /api/status/set
 
 [Back to ## status](#status)
 
@@ -204,7 +275,7 @@ sleepy-token=MySecretCannotGuess
 }
 ```
 
-### status-list
+### /api/status/list
 
 [Back to ## status](#status)
 
@@ -236,7 +307,7 @@ sleepy-token=MySecretCannotGuess
 ]
 ```
 
-### metrics
+### /api/metrics
 
 [Back to ## status](#status)
 
@@ -247,38 +318,39 @@ sleepy-token=MySecretCannotGuess
 * Method: GET
 * 无需鉴权
 
-> [!TIP]
-> 本接口较特殊: 如服务器关闭了统计, 则 **`/api/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果
-> ~~*我也不知道自己怎么想的*~~
-
 #### Response
 
 ```jsonc
-// 200 OK
+// 200 OK (功能已启用)
 {
-  "time": "2025-01-22 08:40:48.564728+08:00", // 服务端时间
+  "time": 1751790785.572329, // 服务端时间
+  "enabled": true, // 是否启用 metrics 功能
+  "time_local": "2025-07-06 16:33:05", // 服务端时间字符串 (基于设置的时区)
   "timezone": "Asia/Shanghai", // 时区
-  "today_is": "2025-1-22", // 今日日期
-  "month_is": "2025-1", // 今日月份
-  "year_is": "2025", // 今日年份
-  "today": { // 今天的数据
+  "daily": { // 今天的数据
     "/device/set": 18,
     "/": 2,
     "/style.css": 1,
     "/query": 2
-  }, 
-  "month": { // 今月的数据
+  },
+  "weekly": { // 本周的数据
     "/device/set": 18,
     "/": 2,
     "/style.css": 1,
     "/query": 2
-  }, 
+  },
+  "month": { // 本月的数据
+    "/device/set": 18,
+    "/": 2,
+    "/style.css": 1,
+    "/query": 2
+  },
   "year": { // 今年的数据
     "/device/set": 18,
     "/": 2,
     "/style.css": 1,
     "/query": 2
-  }, 
+  },
   "total": { // 总统计数据，不清除
     "/device/set": 18,
     "/": 2,
@@ -288,19 +360,26 @@ sleepy-token=MySecretCannotGuess
 }
 ```
 
+```jsonc
+// 200 OK (功能已禁用)
+{
+  "enabled": false // 是否启用 metrics 功能
+}
+```
+
 ## Device
 
 [Back to # api](#api)
 
-|                              | 路径                                                                              | 方法   | 作用                          |
-| ---------------------------- | --------------------------------------------------------------------------------- | ------ | ----------------------------- |
-| [Jump](#device-set)          | `/api/device/set`                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
-|                              | `/api/device/set?id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
-| [Jump](#device-remove)       | `/api/device/remove?name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
-| [Jump](#device-clear)        | `/api/device/clear`                                                               | `GET`  | 清除所有设备的状态            |
-| [Jump](#device-private-mode) | `/api/device/private_mode?private=<isprivate>`                                    | `GET`  | 设置隐私模式                  |
+|                           | 路径                                                                              | 方法   | 作用                          |
+| ------------------------- | --------------------------------------------------------------------------------- | ------ | ----------------------------- |
+| [Jump](#apideviceset)     | `/api/device/set`                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
+|                           | `/api/device/set?id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
+| [Jump](#apideviceremove)  | `/api/device/remove?name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
+| [Jump](#apideviceclear)   | `/api/device/clear`                                                               | `GET`  | 清除所有设备的状态            |
+| [Jump](#apideviceprivate) | `/api/device/private?private=<isprivate>`                                         | `GET`  | 设置隐私模式                  |
 
-### device-set
+### /api/device/set
 
 [Back to ## device](#device)
 
@@ -353,7 +432,7 @@ sleepy-token=MySecretCannotGuess
 }
 ```
 
-### device-remove
+### /api/device/remove
 
 [Back to ## device](#device)
 
@@ -385,7 +464,7 @@ sleepy-token=MySecretCannotGuess
 }
 ```
 
-### device-clear
+### /api/device/clear
 
 [Back to ## device](#device)
 
@@ -406,13 +485,13 @@ sleepy-token=MySecretCannotGuess
 }
 ```
 
-### device-private-mode
+### /api/device/private
 
 [Back to ## device](#device)
 
-> `/api/device/private_mode?private=<isprivate>`
+> `/api/device/private?private=<isprivate>`
 
-设置隐私模式 *(即在 [`/api/status/query`](#query) 的返回中设置 `device` 项为空 (`{}`))*
+设置隐私模式 *(即在 [`/api/status/query`](#apistatusquery) 的返回中设置 `device` 项为空 (`{}`))*
 
 * Method: GET
 * **需要鉴权**
@@ -437,11 +516,3 @@ sleepy-token=MySecretCannotGuess
   "message": "\"private\" arg must be boolean"
 }
 ```
-
-## Others
-
-[Back to # api](#api)
-
-|                     | 路径        | 方法   | 作用                          |
-| ------------------- | ----------- | ------ | ----------------------------- |
-| [Jump](#device-set) | `/api/meta` | `POST` | 设置单个设备的状态 (打开应用) |

@@ -221,15 +221,14 @@ https://github.com/sleepy-project/sleepy/blob/2df5d622844816867506adc6d211dc5138
 
 > 点击链接跳转 api 文档
 
-- [`query()`](../doc/api.md#query): 查看当前状态 *(未格式化输出)*
-- [`status_list()`](../doc/api.md#status-list): 查看可用状态列表 *(未格式化输出)*
-- [`metrics()`](../doc/api.md#metrics): 查看统计数据 *(未格式化输出)*
+- [`query()`](../doc/api.md#apistatusquery): 查看当前状态 *(未格式化输出)*
+- [`status_list()`](../doc/api.md#apistatuslist): 查看可用状态列表 *(未格式化输出)*
+- [`metrics()`](../doc/api.md#apimetrics): 查看统计数据 *(未格式化输出)*
 - [`status(stat: int)`](../doc/api.md#status-set): 设置状态
-- [`device_set(id: str, show_name: str, msg: str, using: bool = True)`](../doc/api.md#device-set): 设备状态设置
-- [`device_remove(id: str)`](../doc/api.md#device-remove): 移除设备状态
-- [`device_clear()`](../doc/api.md#device-clear): 清除设备状态
-- [`private_mode(private: bool)`](../doc/api.md#device-private-mode): 开关隐私模式
-- [`save_data()`](../doc/api.md#storage-save-data): 保存数据到 `data/data.json`
+- [`device_set(id: str, show_name: str, msg: str, using: bool = True)`](../doc/api.md#apideviceset): 设备状态设置
+- [`device_remove(id: str)`](../doc/api.md#apideviceremove): 移除设备状态
+- [`device_clear()`](../doc/api.md#apideviceclear): 清除设备状态
+- [`private_mode(private: bool)`](../doc/api.md#apideviceprivate): 开关隐私模式
 
 </details>
 
@@ -431,7 +430,7 @@ https://github.com/sleepy-project/sleepy/blob/73a5e3507c1ca0454bc39c685541d53d22
 ## Other repos
 
 > [!IMPORTANT]
-> 在功能 / API 实现上有不同，需要进行修改以与本分支适配 (见 [API #device-set](../doc/api.md#device-set))
+> 在功能 / API 实现上有不同，需要进行修改以与本分支适配 (见 [API #device-set](../doc/api.md#apideviceset))
 
 - [1812z/sleepy] Android [Macrodroid](https://www.bing.com/search?q=Macrodroid%20download): [(main) `前台应用状态.macro`](https://github.com/1812z/sleepy/blob/main/%E5%89%8D%E5%8F%B0%E5%BA%94%E7%94%A8%E7%8A%B6%E6%80%81.macro)
 - [HBWuChang/sleepy] Android Magisk: [(main) `_example/magisk/service.sh`](https://github.com/HBWuChang/sleepy/blob/main/_example/magisk/service.sh) *(详见脚本目录)*
