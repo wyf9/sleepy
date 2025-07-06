@@ -23,9 +23,10 @@
     <div class="panel-container">
         <div class="panel-header">
             <h1 class="panel-title">{{ c.page.name }} 的管理面板</h1>
+            &nbsp;
             <div class="panel-actions">
-                <button class="btn btn-primary" id="save-data-btn">保存数据</button>
-                <a href="/" class="btn btn-secondary">查看前台</a>
+                <button class="btn btn-primary" id="refresh-btn">刷新数据</button>
+                <a href="/"><button class="btn btn-secondary">查看前台</button></a>
                 <button class="btn btn-danger" id="logout-btn">退出登录</button>
             </div>
         </div>
@@ -47,7 +48,8 @@
                 <div style="margin-top: 10px;">
                     主题:
                     {% for theme in available_themes %}
-                    <a href="/webui/panel?theme={{ theme }}" style="color: rgb(0, 255, 0);">{{ theme }}</a>{% if not loop.last %} | {% endif %}
+                    <a href="/webui/panel?theme={{ theme }}" style="color: rgb(0, 255, 0);">{{ theme }}</a>{% if not
+                    loop.last %} | {% endif %}
                     {% endfor %}
                 </div>
             </div>

@@ -9,9 +9,6 @@ async function login() {
         return;
     }
 
-    // 获取当前保存的主题
-    const savedTheme = localStorage.getItem('sleepy_theme');
-
     // 检查是否支持现代API登录方式
     const useModernAuth = document.body.hasAttribute('data-use-modern-auth');
 
@@ -29,15 +26,8 @@ async function login() {
             if (response.ok) {
                 // 登录成功，重定向到管理面板
                 // 构建重定向URL，保留主题参数
-                const currentUrl = new URL(window.location.href);
-                const theme = currentUrl.searchParams.get('theme');
 
-                let redirectUrl = '/webui/panel';
-                if (theme) {
-                    redirectUrl += `?theme=${theme}`;
-                }
-
-                window.location.href = redirectUrl;
+                window.location.href = '/webui/panel';
             } else {
                 // 登录失败
                 const data = await response.json();
@@ -52,18 +42,9 @@ async function login() {
     } else {
         // 传统方式：使用 cookie 进行身份验证，不再在 URL 中传递密钥
         // 由于没有 /webui/auth 接口，我们需要手动设置 cookie
-        document.cookie = `sleepy-token=${encodeURIComponent(secret)}; max-age=${30*24*60*60}; path=/; samesite=Lax`;
+        document.cookie = `sleepy-token=${encodeURIComponent(secret)}; max-age=${30 * 24 * 60 * 60}; path=/; samesite=Lax`;
 
-        // 构建重定向URL，保留主题参数
-        const currentUrl = new URL(window.location.href);
-        const theme = currentUrl.searchParams.get('theme');
-
-        let redirectUrl = '/webui/panel';
-        if (theme) {
-            redirectUrl += `?theme=${theme}`;
-        }
-
-        window.location.href = redirectUrl;
+        window.location.href = '/webui/panel';
     }
 }
 
@@ -80,17 +61,7 @@ async function validateCookie() {
         if (response.ok) {
             // cookie 有效，重定向到管理面板
             console.log('Cookie 验证成功，正在重定向到管理面板...');
-
-            // 构建重定向URL，保留主题参数
-            const currentUrl = new URL(window.location.href);
-            const theme = currentUrl.searchParams.get('theme');
-
-            let redirectUrl = '/webui/panel';
-            if (theme) {
-                redirectUrl += `?theme=${theme}`;
-            }
-
-            window.location.href = redirectUrl;
+            window.location.href = '/webui/panel';
             return true;
         } else {
             // cookie 无效，显示登录表单
@@ -104,20 +75,14 @@ async function validateCookie() {
 }
 
 // 初始化事件监听器
-document.addEventListener('DOMContentLoaded', function() {
-    // 自动清除 localStorage 中存储的 secret
-    if (localStorage.getItem('sleepy_secret')) {
-        localStorage.removeItem('sleepy_secret');
-        console.log('已清除 localStorage 中存储的 secret');
-    }
-
+document.addEventListener('DOMContentLoaded', function () {
     // 验证 cookie 是否有效
     validateCookie().then(isValid => {
         if (!isValid) {
             // 如果 cookie 无效，设置登录表单事件监听器
 
             // 按下回车键时触发登录按钮
-            document.getElementById('secret').addEventListener('keyup', function(event) {
+            document.getElementById('secret').addEventListener('keyup', function (event) {
                 if (event.key === 'Enter') {
                     login();
                 }

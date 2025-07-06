@@ -22,18 +22,10 @@
 <body class="admin-panel">
     <div class="panel-container">
         <div class="panel-header">
-            <div class="ascii-art">
-  _____                      _        _____                    _
- / ____|                    | |      |  __ \                  | |
-| |     ___  _ __  ___  ___ | | ___  | |__) |_ _ _ __   ___  | |
-| |    / _ \| '_ \/ __|/ _ \| |/ _ \ |  ___/ _` | '_ \ / _ \ | |
-| |___| (_) | | | \__ \ (_) | |  __/ | |  | (_| | | | |  __/ | |
- \_____\___/|_| |_|___/\___/|_|\___| |_|   \__,_|_| |_|\___| |_|
-            </div>
             <h3 class="panel-title">{{ c.page.name }}'s Admin Terminal</h3>
             <div class="panel-actions">
-                <button class="btn btn-primary" id="save-data-btn">$ save_data.sh</button>
-                <a href="/" class="btn btn-secondary">$ cd /home</a>
+                <button class="btn btn-primary" id="refresh-btn">$ refresh.sh</button>
+                <a href="/" class="btn btn-secondary">$ cd /</a>
                 <button class="btn btn-danger" id="logout-btn">$ logout.sh</button>
             </div>
         </div>
@@ -54,7 +46,7 @@
                 <p>> 当前主题: <span id="current-theme">{{ current_theme }}</span><span class="console-cursor">_</span></p>
                 <div class="status-selector" id="theme-selector">
                     {% for theme in available_themes %}
-                    <div class="status-item {% if current_theme == theme %}active{% endif %}">theme {{ theme }}</div>
+                    <a href="/webui/panel?theme={{ theme }}"><div class="status-item {% if current_theme == theme %}active{% endif %}">theme {{ theme }}</div></a>
                     {% endfor %}
                 </div>
             </div>
@@ -94,7 +86,6 @@
         <div class="panel-card">
             <div class="panel-section">
                 <h2 class="panel-section-title">$ metrics.sh</h2>
-                <p>> 正在获取统计数据...<span class="console-cursor">_</span></p>
                 <div class="metrics-container" id="metrics-container">
                     <!-- 统计数据将通过 JavaScript 动态生成 -->
                 </div>
@@ -102,7 +93,6 @@
         </div>
         {% endif %}
     </div>
-
 
 </body>
 

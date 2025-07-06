@@ -1,84 +1,13 @@
-// 获取 base url
-const routerIndex = window.location.href.indexOf('?');
-const baseUrl = window.location.href.slice(0, routerIndex > 0 ? routerIndex : window.location.href.length);
+import {
+    sleep,
+    sliceText,
+    escapeHtml,
+    escapeJs,
+    getFormattedTime,
+    checkVercelDeploy
+} from './utils.js';
 
-// sleep (只能加 await 在 async 函数中使用)
-const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
-
-function sliceText(text, maxLength) {
-    /*
-    截取指定长度文本
-    */
-    if (
-        text.length <= maxLength || // 文本长度小于指定截取长度
-        maxLength == 0 // 截取长度设置为 0 (禁用)
-    ) {
-        return text;
-    }
-    return text.slice(0, maxLength - 3) + '...';
-}
-
-function escapeHtml(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
-function escapeJs(str) {
-    return String(str)
-        .replace(/'/g, "\\'")
-    // .replace(/\\/g, '\\\\')
-    // .replace(/\n/g, '\\n')
-    // .replace(/\r/g, '\\r');
-}
-
-function getFormattedDate(date) {
-    const pad = (num) => (num < 10 ? '0' + num : num);
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
-
-async function checkVercelDeploy() {
-    /*
-    检查是否为 Vercel 部署 (经测试 Vercel 不支持 SSE)
-    测试方法: 请求 /none，检查返回 Headers 中是否包含 x-vercel-id
-    - true: 是 Vercel 部署
-    - false: 不是 Vercel 部署
-    - null: *请求失败*
-    */
-    console.log(`[Vercel] 测试请求 ${baseUrl + 'none'} 中...`);
-    return await fetch(baseUrl + 'none', { timeout: 10000 })
-        .then(resp => {
-            const xVercelId = resp.headers.get('x-vercel-id');
-            console.log(`[Vercel] 获取到 x-vercel-id: ${xVercelId}`);
-            if (xVercelId) {
-                console.log(`[Vercel] 确定为 Vercel 部署`);
-                return true;
-            } else {
-                console.log(`[Vercel] 非 Vercel 部署`);
-                return false;
-            }
-        })
-        .catch(error => {
-            console.log(`[Vercel] 请求错误: ${error}`);
-            return null;
-        });
-}
-
-async function getMetadata() {
-    /*
-    请求站点元数据接口 (/api/meta)
-    */
-    return await fetch(baseUrl + 'api/meta', { timeout: 10000 })
-        .then(resp => {
-            
-        }
-    )
-}
-
-function updateElement(data) {
+function updateDeviceStatus(data) {
     /*
     正常更新状态使用
     data: api / events 返回数据
@@ -100,30 +29,30 @@ function updateElement(data) {
     const devices = Object.values(data.device);
 
     for (let device of devices) {
-        let device_app;
-        const escapedAppName = escapeHtml(device.app_name);
+        let device_status;
+        const escapedAppName = escapeHtml(device.status || '...');
         if (device.using) {
             const jsShowName = escapeJs(device.show_name);
-            const jsAppName = escapeJs(device.app_name);
+            const jsAppName = escapeJs(device.status || '...');
             const jsCode = `alert('${jsShowName}: \\n${jsAppName}')`;
             const escapedJsCode = escapeHtml(jsCode);
 
-            device_app = `
+            device_status = `
 <a
     class="awake"
     title="${escapedAppName}"
     href="javascript:${escapedJsCode}">
-${sliceText(escapedAppName, data.device_status_slice).replaceAll('\n', ' <br/>\n')}
+${sliceText(escapedAppName, metadata.status.device_slice).replaceAll('\n', ' <br/>\n')}
 </a>`;
         } else {
-            device_app = `
+            device_status = `
 <a
     class="sleeping"
     title="${escapedAppName}">
-${sliceText(escapedAppName, data.device_status_slice).replaceAll('\n', ' <br/>\n')}
+${sliceText(escapedAppName, metadata.status.device_slice).replaceAll('\n', ' <br/>\n')}
 </a>`
         }
-        deviceStatus += `${escapeHtml(device.show_name)}: ${device_app} <br/>`;
+        deviceStatus += `${escapeHtml(device.show_name)}: ${device_status} <br/>`;
     }
 
     if (deviceStatus == '<hr/><b><p id="device-status"><i>Device</i> Status</p></b>') {
@@ -136,14 +65,14 @@ ${sliceText(escapedAppName, data.device_status_slice).replaceAll('\n', ' <br/>\n
     }
 
     // 更新最后更新时间
-    const timenow = getFormattedDate(new Date());
+    const timenow = getFormattedTime(new Date());
+    const last_updated = getFormattedTime(new Date(data.last_updated * 1000));
     if (lastUpdatedElement) {
         lastUpdatedElement.innerHTML = `
 最后更新:
 <a class="awake" 
-title="服务器时区: ${data.timezone}" 
-href="javascript:alert('浏览器最后更新时间: ${timenow}\\n数据最后更新时间 (基于服务器时区): ${data.last_updated}\\n服务端时区: ${data.timezone}')">
-${data.last_updated}
+href="javascript:alert('浏览器最后更新时间: ${timenow}\\n数据最后更新时间: ${last_updated}')">
+${last_updated}
 </a>`;
     }
 }
@@ -267,13 +196,17 @@ function setupEventSource() {
         const data = JSON.parse(event.data);
         console.log(`[SSE] [#${event.lastEventId}] 收到数据更新:`, data);
 
+        if (!metadata) {
+            getMetadata();
+        }
+
         // 处理更新数据
         if (data.success) {
-            updateElement(data);
+            updateDeviceStatus(data);
         } else {
             if (statusElement) {
                 statusElement.textContent = '[!错误!]';
-                document.getElementById('additional-info').textContent = data.info || '未知错误';
+                document.getElementById('additional-info').textContent = data.details || '未知错误';
                 let last_status = statusElement.classList.item(0);
                 statusElement.classList.remove(last_status);
                 statusElement.classList.add('error');
@@ -292,11 +225,11 @@ function setupEventSource() {
         console.error(`[SSE] 连接错误: ${e}`);
         evtSource.close();
 
-        // 如是第一次错误，检查是否为 Vercel 部署
+        // 如是第一次错误, 检查是否为 Vercel 部署
         if (firstError) {
-            isVercel = await checkVercelDeploy();
-            if (isVercel === true) {
-                // 如是，清除所有定时器，并回退到原始轮询函数
+            const isVercel = await checkVercelDeploy();
+            if (isVercel === 1) {
+                // 如是，清除所有定时器, 并回退到原始轮询函数
                 if (countdownInterval) {
                     clearInterval(countdownInterval);
                     countdownInterval = null;
@@ -307,10 +240,11 @@ function setupEventSource() {
                 }
                 update();
                 return;
-            } else if (isVercel === false) {
-                // 如不是 (非错误)，以后错误跳过检查
+            } else if (isVercel === 0) {
+                // 如不是 (非错误), 以后错误跳过检查
                 firstError = false;
             }
+            // 如请求错误, 下次继续检查
         }
 
 
@@ -357,25 +291,35 @@ function setupEventSource() {
 
 // 初始化SSE连接或回退到轮询
 document.addEventListener('DOMContentLoaded', function () {
-    // 初始化变量
-    lastEventTime = Date.now();
-    connectionAttempts = 0;
+    try {
+        // 获取元数据
+        fetch('/api/meta', { timeout: 10000 })
+            .then((response) => response.json())
+            .then((data) => {
+                window.metadata = data;
+                lastEventTime = Date.now();
+                connectionAttempts = 0;
 
-    // 检查浏览器是否支持SSE
-    if (typeof (EventSource) !== "undefined") {
-        console.log('[SSE] 浏览器支持SSE，开始建立连接...');
-        // 初始建立连接
-        setupEventSource();
-    } else {
-        // 浏览器不支持SSE，回退到轮询方案
-        console.log('[SSE] 浏览器不支持SSE，回退到轮询方案');
-        update();
+                // 检查浏览器是否支持SSE
+                if (typeof (EventSource) !== "undefined") {
+                    console.log('[SSE] 浏览器支持SSE，开始建立连接...');
+                    // 初始建立连接
+                    setupEventSource();
+                } else {
+                    // 浏览器不支持SSE，回退到轮询方案
+                    console.log('[SSE] 浏览器不支持SSE，回退到轮询方案');
+                    update();
+                }
+            })
+    } catch (e) {
+        alert(`请求元数据错误: ${e}, 请刷新页面`);
     }
+    
 });
 
 // 原始轮询函数 (仅作为后备方案)
 async function update() {
-    let refresh_time = 5000;
+    let refresh_time = metadata.status.refresh_interval || 5000;
     while (true) {
         if (document.visibilityState == 'visible') {
             console.log('[Update] 页面可见，更新中...');
@@ -385,16 +329,14 @@ async function update() {
             // --- show updating
             document.getElementById('last-updated').innerHTML = `正在更新状态, 请稍候... <a href="javascript:location.reload();" target="_self" style="color: rgb(0, 255, 0);">刷新页面</a>`;
             // fetch data
-            fetch(baseUrl + 'query', { timeout: 10000 })
+            fetch('/api/status/query', { timeout: 10000 })
                 .then(response => response.json())
                 .then(async (data) => {
                     console.log(`[Update] 返回: ${data}`);
                     if (data.success) {
-                        updateElement(data);
-                        // update refresh time
-                        refresh_time = data.refresh;
+                        updateDeviceStatus(data);
                     } else {
-                        errorinfo = data.info;
+                        errorinfo = data.details || '未知错误';
                         success_flag = false;
                     }
                 })

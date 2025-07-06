@@ -168,7 +168,7 @@ def static_themed(theme: str, filename: str):
     '''
     try:
         # 1. 返回主题
-        resp = flask.send_from_directory(f'theme', f'{theme}/static/{filename}')
+        resp = flask.send_from_directory('theme', f'{theme}/static/{filename}')
         l.debug(f'[theme] return static file {filename} from theme {theme}')
         return resp
     except NotFound:
@@ -181,6 +181,19 @@ def static_themed(theme: str, filename: str):
         else:
             l.warning(f'[theme] static file {filename} not found')
             return u.no_cache_response(f'Static file {filename} in theme {theme} not found!', 404)
+
+
+@app.route('/default/<path:filename>')
+def static_default_theme(filename: str):
+    '''
+    兼容在非默认主题中使用
+    ```
+    import { ... } from "../../default/static/utils";
+    ```
+    '''
+    if not filename.endswith('.js'):
+        filename += '.js'
+    return flask.send_from_directory('theme/default', filename)
 
 # --- Functions
 
@@ -334,7 +347,7 @@ def index():
         c=c,
         more_text=more_text,
         status=status,
-        last_updated=d.last_updated,
+        last_updated=d.last_updated.strftime(f'%Y-%m-%d %H:%M:%S') + ' (UTC+8)',
         # plugins=plugin_templates,
         current_theme=flask.g.theme,
         available_themes=u.themes_available()
@@ -388,13 +401,17 @@ def query(version: str = '2'):
     if ver == '1':
         # 旧版返回兼容 (本地时间字符串，但性能不佳)
         # l.debug('[/query] Using legacy (version 1) response format')
+        device_list = d.device_list
+        for k in device_list:
+            device_list[k]['app_name'] = device_list[k].pop('status', None)
+            device_list[k].pop('fields', None)
         return {
             'time': datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S'),
             'timezone': c.main.timezone,
             'success': True,
             'status': st,
             'info': stinfo,
-            'device': d.device_list,
+            'device': device_list,
             'last_updated': d.last_updated.astimezone(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S'),
             'refresh': c.status.refresh_interval,
             'device_status_slice': c.status.device_slice
@@ -460,7 +477,7 @@ def get_status_list():
 
 
 @app.route('/api/status/set')
-@u.require_secret
+@u.require_secret()
 def set_normal():
     '''
     设置状态
@@ -488,7 +505,7 @@ def set_normal():
 # --- Device API
 
 @app.route('/api/device/set', methods=['GET', 'POST'])
-@u.require_secret
+@u.require_secret()
 def device_set():
     '''
     设置单个设备的信息/打开应用
@@ -496,18 +513,19 @@ def device_set():
     '''
     # 分 get / post 从 params / body 获取参数
     if flask.request.method == 'GET':
-        device_id = flask.request.args.pop('id')
-        device_show_name = flask.request.args.pop('show_name')
-        device_using = u.tobool(flask.request.args.pop('using'))
-        device_status = flask.request.args.pop('status') or flask.request.args.pop('app_name')  # 兼容旧版名称
-        flask.request.args.pop('secret')
-        fields = dict(flask.request.args.items())
+        args = dict(flask.request.args)
+        l.debug(f'args: {args}')
+        device_id = args.pop('id', None)
+        device_show_name = args.pop('show_name', None)
+        device_using = u.tobool(args.pop('using', None))
+        device_status = args.pop('status', None) or args.pop('app_name', None)  # 兼容旧版名称
+        args.pop('secret', None)
         d.device_set(
             id=device_id,
             show_name=device_show_name,
             using=device_using,
             status=device_status,
-            fields=fields
+            fields=args
         )
     elif flask.request.method == 'POST':
         try:
@@ -517,7 +535,7 @@ def device_set():
                 show_name=req.get('show_name'),
                 using=req.get('using'),
                 status=req.get('status') or req.get('app_name'),  # 兼容旧版名称
-                fields=req.get('fields')  # type: ignore
+                fields=req.get('fields') or {}  # type: ignore
             )
         except Exception as e:
             if isinstance(e, u.APIUnsuccessful):
@@ -537,7 +555,7 @@ def device_set():
 
 
 @app.route('/api/device/remove')
-@u.require_secret
+@u.require_secret()
 def remove_device():
     '''
     移除单个设备的状态
@@ -562,7 +580,7 @@ def remove_device():
 
 
 @app.route('/api/device/clear')
-@u.require_secret
+@u.require_secret()
 def clear_device():
     '''
     清除所有设备状态
@@ -583,7 +601,7 @@ def clear_device():
 
 
 @app.route('/api/device/private')
-@u.require_secret
+@u.require_secret()
 def private_mode():
     '''
     隐私模式, 即不在返回中显示设备状态 (仍可正常更新)
@@ -643,7 +661,7 @@ def events():
             # 只有在没有数据更新的情况下才检查是否需要发送心跳
             elif current_time - last_heartbeat >= 30:
                 event_id += 1
-                yield f'id: {event_id}\nevent: heartbeat\n\n'
+                yield f'id: {event_id}\nevent: heartbeat\ndata:\n\n'
                 last_heartbeat = current_time
 
             time.sleep(1)  # 每秒检查一次更新
@@ -658,7 +676,7 @@ def events():
 
 
 @app.route('/webui/panel')
-@u.require_secret
+@u.require_secret(redirect_to='/webui/login')
 def admin_panel():
     '''
     管理面板
@@ -722,7 +740,7 @@ def login():
 
 
 @app.route('/webui/auth', methods=['POST'])
-@u.require_secret
+@u.require_secret()
 def auth():
     '''
     处理登录请求，验证密钥并设置 cookie
@@ -760,7 +778,7 @@ def logout():
 
 
 @app.route('/webui/verify', methods=['GET', 'POST'])
-@u.require_secret
+@u.require_secret()
 def verify_secret():
     '''
     验证密钥是否有效

@@ -44,6 +44,6 @@
     <script>
         document.getElementById('status').classList.add("{{ status['color'] }}");
     </script>
-    <script src="{{ url_for('static', filename='get.js') }}" defer></script>
+    <script type="module" src="{{ url_for('static', filename='get.js') }}" defer></script>
 </body>
 </html>

@@ -61,8 +61,8 @@
         <div class="card">
             <h1>{{ c.page.name }} 的管理面板</h1>
             <div>
-                <button id="save-data-btn">保存数据</button>
-                <a href="/">查看前台</a>
+                <button class="btn btn-primary" id="refresh-btn">刷新数据</button>
+                <a href="/"><button>查看前台</button></a>
                 <button id="logout-btn">退出登录</button>
             </div>
         </div>
@@ -75,16 +75,16 @@
             </div>
         </div>
 
-        <!-- <div class="card">
+        <div class="card">
             <h2>主题设置</h2>
             <p>当前主题: <span id="current-theme">{{ current_theme }}</span></p>
             <div id="theme-selector">
                 {% for theme in available_themes %}
-                <div class="status-item {% if current_theme == theme %}active{% endif %}"
-                    data-theme="{{ theme }}">{{ theme }}主题</div>
+                <a href="/webui/panel?theme={{ theme }}">
+                <div class="status-item {% if current_theme == theme %}active{% endif %}" style="color: black;">{{ theme }} 主题</div></a>
                 {% endfor %}
             </div>
-        </div> -->
+        </div>
 
         <div class="card">
             <h2>设备管理</h2>

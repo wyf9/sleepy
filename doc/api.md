@@ -81,7 +81,7 @@ sleepy-token=MySecretCannotGuess
 | [Jump](#query)       | `/api/status/query`               | `GET` | 获取状态         |
 | [Jump](#status-set)  | `/api/status/set?status=<status>` | `GET` | 设置状态         |
 | [Jump](#status-list) | `/api/status/list`                | `GET` | 获取可用状态列表 |
-| [Jump](#metrics)     | `/api/metrics`             | `GET` | 获取统计信息     |
+| [Jump](#metrics)     | `/api/metrics`                    | `GET` | 获取统计信息     |
 
 ### query
 
@@ -104,16 +104,33 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK
 {
-  "time": 1751074053.782428, // 服务端时间 (UTC 时间戳)
   "success": true, // 请求是否成功
-  "status": { // 手动状态
-    "color": "awake", // 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
-    "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
+  "time": 1751697213.46574, // 服务端时间 (UTC 时间戳)
+  "status": {
     "id": 0, // 状态数字 id
-    "name": "活着" // 状态名称
+    "name": "活着", // 状态名称
+    "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
+    "color": "awake" // 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
   },
-  "device": {}, // 设备列表 (见下)
-  "last_updated": 1750640868.938035 // 最后更新时间
+  "device": { // 设备状态列表
+    "test1": { // 设备 id
+      "show_name": "Test 1", // 设备显示名称
+      "status": null, // 状态文本 (之前的 app_name, 可为 null)
+      "using": true, // 是否正在使用 (可为 null)
+      "fields": { // 其他状态字段
+        "online": "true"
+      },
+      "last_updated": 1751668348.684424 // 本设备最后更新时间
+    },
+    "test2": {
+      "show_name": "Test 2",
+      "status": "关掉了~",
+      "using": false,
+      "fields": {},
+      "last_updated": 1751668359.072248
+    }
+  },
+  "last_updated": 1751668399.061304 // 所有数据最后更新时间
 }
 ```
 
@@ -231,7 +248,7 @@ sleepy-token=MySecretCannotGuess
 * 无需鉴权
 
 > [!TIP]
-> 本接口较特殊: 如服务器关闭了统计, 则 **`/api/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果  
+> 本接口较特殊: 如服务器关闭了统计, 则 **`/api/metrics` 路由将不会被创建**, 体现为访问显示 404 页面而不是返回结果
 > ~~*我也不知道自己怎么想的*~~
 
 #### Response
@@ -425,6 +442,6 @@ sleepy-token=MySecretCannotGuess
 
 [Back to # api](#api)
 
-|                              | 路径                                                                              | 方法   | 作用                          |
-| ---------------------------- | --------------------------------------------------------------------------------- | ------ | ----------------------------- |
-| [Jump](#device-set)          | `/api/meta`                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
+|                     | 路径        | 方法   | 作用                          |
+| ------------------- | ----------- | ------ | ----------------------------- |
+| [Jump](#device-set) | `/api/meta` | `POST` | 设置单个设备的状态 (打开应用) |

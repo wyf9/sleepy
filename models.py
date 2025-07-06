@@ -261,18 +261,18 @@ class _MetricsConfigModel(BaseModel):
 
     allow_list: list[str] = [
         '/',
-        '/style.css',
-        '/query',
-        '/status_list',
-        '/set',
-        '/device/set',
-        '/device/remove',
-        '/device/clear',
-        '/device/private_mode',
-        '/save_data',
-        '/events',
-        '/metrics',
+        '/api/status/query',
+        '/api/status/list',
+        '/api/status/set',
+        '/api/device/set',
+        '/api/device/remove',
+        '/api/device/clear',
+        '/api/device/private',
+        '/api/status/events',
+        '/api/metrics',
+        '/api/meta',
         '/robots.txt',
+        '/favicon.ico',
         '[static]'
     ]
     '''

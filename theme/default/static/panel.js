@@ -1,25 +1,19 @@
 // 全局变量
 let statusList = [];
-let currentStatus = 0;
+let currentStatus = {'color': 'sleeping', 'desc': '', 'id': -1, 'name': '未知'};
 let deviceData = {};
 let privateMode = false;
 
 // 初始化页面
 async function initPage() {
-    // 自动清除 localStorage 中存储的 secret
-    if (localStorage.getItem('sleepy_secret')) {
-        localStorage.removeItem('sleepy_secret');
-        console.log('已清除 localStorage 中存储的 secret');
-    }
-
     try {
         // 获取状态列表
-        const statusResponse = await fetch('/status_list');
+        const statusResponse = await fetch('/api/status/list');
         statusList = await statusResponse.json();
         renderStatusSelector();
 
         // 获取当前状态和设备信息
-        const queryResponse = await fetch('/query');
+        const queryResponse = await fetch('/api/status/query');
         const queryData = await queryResponse.json();
         currentStatus = queryData.status;
         deviceData = queryData.device;
@@ -47,7 +41,7 @@ function renderStatusSelector() {
 
     statusList.forEach((status, index) => {
         const statusItem = document.createElement('div');
-        statusItem.className = `status-item ${currentStatus === index ? 'active' : ''}`;
+        statusItem.className = `status-item ${currentStatus.id === index ? 'active' : ''}`;
         statusItem.style.backgroundColor = getStatusColor(status.color);
         statusItem.textContent = status.name;
         statusItem.dataset.index = index;
@@ -71,10 +65,10 @@ function getStatusColor(colorName) {
 // 更新当前状态显示
 function updateCurrentStatus() {
     const statusName = document.getElementById('current-status-name');
-    if (statusList[currentStatus]) {
-        statusName.textContent = statusList[currentStatus].name;
-        statusName.style.color = statusList[currentStatus].color === 'awake' ? 'green' :
-            statusList[currentStatus].color === 'error' ? 'red' : 'gray';
+    if (statusList[currentStatus.id]) {
+        statusName.textContent = statusList[currentStatus.id].name;
+        statusName.style.color = statusList[currentStatus.id].color === 'awake' ? 'green' :
+            statusList[currentStatus.id].color === 'error' ? 'red' : 'gray';
     } else {
         statusName.textContent = '未知状态';
         statusName.style.color = 'red';
@@ -82,18 +76,18 @@ function updateCurrentStatus() {
 
     // 更新状态选择器中的活动状态
     document.querySelectorAll('.status-item').forEach((item, index) => {
-        item.classList.toggle('active', index === currentStatus);
+        item.classList.toggle('active', index === currentStatus.id);
     });
 }
 
 // 设置状态
 async function setStatus(statusIndex) {
     try {
-        const response = await fetch(`/set?status=${statusIndex}`);
+        const response = await fetch(`/api/status/set?status=${statusIndex}`);
         const data = await response.json();
 
         if (data.success) {
-            currentStatus = statusIndex;
+            currentStatus.id = statusIndex;
             updateCurrentStatus();
         } else {
             alert('设置状态失败: ' + (data.message || '未知错误'));
@@ -137,7 +131,7 @@ function renderDeviceList() {
         tdUsing.textContent = device.using ? '使用中' : '未使用';
 
         const tdApp = document.createElement('td');
-        tdApp.textContent = device.app_name;
+        tdApp.textContent = device.status;
 
         const tdAction = document.createElement('td');
         tdAction.appendChild(deleteButton);
@@ -159,7 +153,7 @@ async function removeDevice(deviceId) {
     }
 
     try {
-        const response = await fetch(`/device/remove?id=${deviceId}`);
+        const response = await fetch(`/api/device/remove?id=${deviceId}`);
         const data = await response.json();
 
         if (data.success) {
@@ -181,7 +175,7 @@ async function clearAllDevices() {
     }
 
     try {
-        const response = await fetch(`/device/clear`);
+        const response = await fetch(`/api/device/clear`);
         const data = await response.json();
 
         if (data.success) {
@@ -199,7 +193,7 @@ async function clearAllDevices() {
 // 切换隐私模式
 async function togglePrivateMode(isPrivate) {
     try {
-        const response = await fetch(`/device/private_mode?private=${isPrivate}`);
+        const response = await fetch(`/api/device/private_mode?private=${isPrivate}`);
         const data = await response.json();
 
         if (data.success) {
@@ -298,23 +292,6 @@ function addMetricCard(container, label, value) {
     container.appendChild(card);
 }
 
-// 保存数据
-async function saveData() {
-    try {
-        const response = await fetch('/save_data');
-        const data = await response.json();
-
-        if (data.success) {
-            alert('数据保存成功！');
-        } else {
-            alert('保存数据失败: ' + (data.message || '未知错误'));
-        }
-    } catch (error) {
-        console.error('保存数据失败:', error);
-        alert('保存数据失败，请检查网络连接');
-    }
-}
-
 // 退出登录
 function logout() {
     // 清除本地存储的密钥
@@ -331,16 +308,19 @@ document.addEventListener('DOMContentLoaded', function() {
         clearDevicesBtn.addEventListener('click', clearAllDevices);
     }
 
-    const saveDataBtn = document.getElementById('save-data-btn');
-    if (saveDataBtn) {
-        saveDataBtn.addEventListener('click', saveData);
+    // 刷新数据按钮
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', initPage)
     }
 
+    // 退出登录按钮
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', logout);
     }
 
+    // 切换隐私模式按钮
     const privateModeToggle = document.getElementById('private-mode-toggle');
     if (privateModeToggle) {
         privateModeToggle.addEventListener('change', function() {

@@ -10,7 +10,7 @@ from typing import Any
 from werkzeug.security import safe_join
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import JSON, Integer, String, Boolean, Text, DateTime, BigInteger
+from sqlalchemy import JSON, Integer, String, Boolean, Text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.exc import SQLAlchemyError
 from objtyping import to_primitive
@@ -23,7 +23,7 @@ from models import ConfigModel
 l = getLogger(__name__)
 
 db = SQLAlchemy()
-LIMIT = 128
+LIMIT = 1024
 
 # -----
 
@@ -223,7 +223,8 @@ class Data:
                 devices: list[_DeviceStatusData] = _DeviceStatusData.query.all().copy()
                 for d in devices:
                     d.last_updated = d.last_updated.timestamp()  # type: ignore
-                return to_primitive({d.id: d for d in devices}, format_date_time=False)  # type: ignore
+                ret = to_primitive({d.id: d for d in devices}, format_date_time=False)
+                return ret  # type: ignore
         except SQLAlchemyError as e:
             self._throw(e)
 
@@ -240,25 +241,31 @@ class Data:
                 # 使用中优先
                 devicelst = {}  # devicelst = device_using
                 device_not_using = {}
+                device_unknown = {}
                 for k, v in self._raw_device_list.items():
                     if v.get('using') == True:  # * 正在使用
                         devicelst[k] = v
                     elif v.get('using') == False:  # * 未在使用
                         if self._c.status.not_using:
-                            v['app_name'] = self._c.status.not_using  # 如锁定了未在使用时设备名, 则替换
+                            v['status'] = self._c.status.not_using  # 如锁定了未在使用时状态名, 则替换
                         device_not_using[k] = v
+                    else:  # * 未知
+                        device_unknown[k] = v
                 if self._c.status.sorted:
                     devicelst = dict(sorted(devicelst.items()))
                     device_not_using = dict(sorted(device_not_using.items()))
-                devicelst.update(device_not_using)  # 追加到末尾
+                    device_unknown = dict(sorted(device_unknown.items()))
+                # 追加到末尾
+                devicelst.update(device_not_using)
+                devicelst.update(device_unknown)
             else:
                 # 正常获取
                 devicelst = self._raw_device_list
-                # 如锁定了未在使用时设备名, 则替换
+                # 如锁定了未在使用时状态名, 则替换
                 if self._c.status.not_using:
                     for d in devicelst.keys():
                         if devicelst[d].get('using') == False:
-                            devicelst[d]['app_name'] = self._c.status.not_using
+                            devicelst[d]['status'] = self._c.status.not_using
                 if self._c.status.sorted:
                     devicelst = dict(sorted(devicelst.items()))
             return devicelst
