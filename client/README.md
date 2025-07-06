@@ -351,6 +351,7 @@ https://github.com/sleepy-project/sleepy/blob/7fc21380a259247533db76f3a0443fa550
 **建议设置自动化 → 打开App → 选择全部App → 设置为不确认，立即执行 → 选择快捷指令为Sleepy Client Shortcuts Fast，即可获得超级好的体验。**
 
 > [!WARNING]
+> **IOS 版本 >= 18 才可使用** *(获取前台 App 命令)*
 > 这里的链接可能不是最新，[建议到项目内查看](https://www.icloud.com/shortcuts/92fbddbf922343f5b076c828f788371f)
 
 > [!TIP]
