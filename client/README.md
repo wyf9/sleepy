@@ -111,7 +111,7 @@ https://github.com/sleepy-project/sleepy/blob/23c14c9a8a32a29a6f60b3d4347e07a5e3
 
 ```bat
 :: 必装依赖，其他为可选 (对应功能需要)
-pip install pywin32 requests
+pip install pywin32 httpx
 ```
 
 ```bat
