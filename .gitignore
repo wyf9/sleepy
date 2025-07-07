@@ -12,6 +12,7 @@ data.json
 *.test.*
 *.local.*
 .venv/
+venv_legacy/
 
 # Others
 .vscode/launch.json
