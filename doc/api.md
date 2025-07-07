@@ -14,11 +14,20 @@
 ```jsonc
 {
   "success": false, // 表示请求未成功
-  "code": 500, // 数字 HTTP Code (如 404, 500, ...)
+  "code": 500, // 数字 HTTP Code (如 404, 500, ...), 同时也是响应的 HTTP 状态
   "details": "Internal Server Error", // HTTP Code 描述 (如 Not Found, Internal Server Error, ...)
   "message": "..." // 附带的错误详情
 }
 ```
+
+<!--
+{
+  "success": false,
+  "code": 0,
+  "details": "",
+  "message": ""
+}
+-->
 
 ### 关于鉴权
 
@@ -64,11 +73,12 @@ sleepy-token=MySecretCannotGuess
 如 `secret` 错误，则会返回:
 
 ```jsonc
-// 403 Forbidden
+// 401 Unauthorized
 {
-  "success": false, // 请求是否成功
-  "code": "not authorized", // 返回代码
-  "message": "wrong secret" // 详细信息
+  "success": false,
+  "code": 401,
+  "details": "Unauthorized",
+  "message": "Wrong Secret"
 }
 ```
 
@@ -91,8 +101,8 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK
 {
+  "success": true,
   "version": "5.0-dev-20250629", // 版本号
-  "metrics": true, // 是否已启用 metrics
   "timezone": "Asia/Shanghai", // 服务器时区 (用于 metrics)
   "page": { // 页面设置
     "background": "https://imgapi.siiway.top/image", // 背景
@@ -108,7 +118,8 @@ sleepy-token=MySecretCannotGuess
     "refresh_interval": 5000, // 刷新间隔 (ms)
     "sorted": true, // 是否启用排序
     "using_first": true // 是否优先显示使用中设备
-  }
+  },
+  "metrics": true // 是否已启用 metrics
 }
 ```
 
@@ -263,15 +274,15 @@ sleepy-token=MySecretCannotGuess
 // 200 OK | 成功
 {
   "success": true, // 请求是否成功
-  "code": "OK", // 返回代码
   "set_to": 0 // 设置到的状态码
 }
 
 // 400 Bad Request | 失败 - 请求无效
 {
-  "success": false, // 请求是否成功
-  "code": "bad request", // 返回代码
-  "message": "argument 'status' must be a number" // 详细信息
+  "success": false,
+  "code": 400,
+  "details": "Bad Request",
+  "message": "argument 'status' must be int"
 }
 ```
 
@@ -290,21 +301,24 @@ sleepy-token=MySecretCannotGuess
 
 ```jsonc
 // 200 OK
-[
-  {
-    "id": 0, // 索引 (从 0 开始)
-    "name": "活着", // 状态名称
-    "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
-    "color": "awake" // 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
-  }, 
-  {
-    "id": 1, 
-    "name": "似了", 
-    "desc": "睡似了或其他原因不在线，紧急情况请使用电话联系。", 
-    "color": "sleeping"
-  }, 
-  // 以此类推
-]
+{
+  "success": true,
+  "status_list": [
+    {
+      "id": 0, // 索引 (从 0 开始)
+      "name": "活着", // 状态名称
+      "desc": "目前在线，可以通过任何可用的联系方式联系本人。", // 状态描述
+      "color": "awake" // 状态颜色, 对应 static/style.css 中的 .sleeping .awake 等类
+    }, 
+    {
+      "id": 1, 
+      "name": "似了", 
+      "desc": "睡似了或其他原因不在线，紧急情况请使用电话联系。", 
+      "color": "sleeping"
+    }, 
+    // 以此类推
+  ]
+}
 ```
 
 ### /api/metrics
@@ -323,6 +337,7 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK (功能已启用)
 {
+  "success": true,
   "time": 1751790785.572329, // 服务端时间
   "enabled": true, // 是否启用 metrics 功能
   "time_local": "2025-07-06 16:33:05", // 服务端时间字符串 (基于设置的时区)
@@ -363,6 +378,7 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK (功能已禁用)
 {
+  "success": true,
   "enabled": false // 是否启用 metrics 功能
 }
 ```
@@ -420,15 +436,23 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK | 成功
 {
-  "success": true,
-  "code": "OK"
+  "success": true
 }
 
 // 400 Bad Request | 失败 - 缺少参数 / 参数类型错误
 {
   "success": false,
-  "code": "bad request",
-  "message": "missing param or wrong param type"
+  "code": 400,
+  "details": "Bad Request",
+  "message": "missing param or wrong param type: ..."
+}
+
+// 405 Method Not Allowed | 失败 - 请求方式错误
+{
+  "success": false,
+  "code": 405,
+  "details": "Method Not Allowed",
+  "message": "/api/device/set only supports GET and POST method!"
 }
 ```
 
@@ -452,15 +476,15 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK | 成功
 {
-  "success": true,
-  "code": "OK"
+  "success": true
 }
 
-// 404 Not Found | 失败 - 不存在 (也不算失败了?)
+// 400 Bad Request | 失败 - 未提供设备 ID
 {
   "success": false,
-  "code": "not found",
-  "message": "cannot find item"
+  "code": 400,
+  "details": "Bad Request",
+  "message": "Missing device id!"
 }
 ```
 
@@ -480,8 +504,7 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK | 成功
 {
-  "success": true,
-  "code": "OK"
+  "success": true
 }
 ```
 
@@ -505,14 +528,14 @@ sleepy-token=MySecretCannotGuess
 ```jsonc
 // 200 OK | 成功
 {
-  "success": true,
-  "code": "OK"
+  "success": true
 }
 
 // 400 Bad Request | 失败 - 请求无效
 {
   "success": false,
-  "code": "invaild request",
-  "message": "\"private\" arg must be boolean"
+  "code": 400,
+  "details": "Bad Request",
+  "message": "'private' arg must be boolean"
 }
 ```

@@ -452,6 +452,7 @@ class Data:
             daily, weekly, monthly, yearly, total = self.metrics_data if enabled else ({}, {}, {}, {}, {})
             now = datetime.now(pytz.timezone(self._c.main.timezone))
             return {
+                'success': True,
                 'enabled': True,
                 'time': now.timestamp(),
                 'time_local': now.strftime('%Y-%m-%d %H:%M:%S'),
@@ -464,6 +465,7 @@ class Data:
             }
         else:
             return {
+                'success': True,
                 'enabled': False
             }
 

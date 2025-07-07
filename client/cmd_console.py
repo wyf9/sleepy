@@ -79,7 +79,7 @@ def main():
 
     print('\n---\nSelect status:')
 
-    stlst = loadjson(f'{SERVER}/status_list')
+    stlst = loadjson(f'{SERVER}/status_list').get('status_list', [])
     for n in stlst:
         print(f'{n["id"]} - {n["name"]} - {n["desc"]}')
 

@@ -22,7 +22,6 @@ try:
     import time
     from urllib.parse import urlparse, parse_qs, urlunparse
     import json
-    import typing as t
 
     # 3rd-party
     import flask
@@ -417,6 +416,7 @@ def metadata():
     获取站点元数据
     '''
     return {
+        'success': True,
         'version': version,
         'timezone': c.main.timezone,
         'page': {
@@ -502,7 +502,7 @@ def query(version: str = '2'):
 
 @app.route('/api/status/set')
 @u.require_secret()
-def set_normal():
+def set_status():
     '''
     设置状态
     - http[s]://<your-domain>[:your-port]/set?status=<a-number>
@@ -521,7 +521,6 @@ def set_normal():
 
     return {
         'success': True,
-        'code': 'OK',
         'set_to': status
     }
 
@@ -533,7 +532,10 @@ def get_status_list():
     - 无需鉴权
     - Method: **GET**
     '''
-    return [i.model_dump() for i in c.status.status_list]
+    return {
+        'success': True,
+        'status_list': [i.model_dump() for i in c.status.status_list]
+    }
 
 @app.route('/api/metrics')
 def metrics():
@@ -595,14 +597,13 @@ def device_set():
     # trigger_event('device_updated', device_id, d.data.device_status[device_id])
 
     return {
-        'success': True,
-        'code': 'OK'
+        'success': True
     }
 
 
 @app.route('/api/device/remove')
 @u.require_secret()
-def remove_device():
+def device_remove():
     '''
     移除单个设备的状态
     - Method: **GET**
@@ -620,14 +621,13 @@ def remove_device():
     #     pass
     # trigger_event('device_removed', device_id, device_info)
     return {
-        'success': True,
-        'code': 'OK'
+        'success': True
     }
 
 
 @app.route('/api/device/clear')
 @u.require_secret()
-def clear_device():
+def device_clear():
     '''
     清除所有设备状态
     - Method: **GET**
@@ -641,21 +641,20 @@ def clear_device():
     # trigger_event('devices_cleared', old_devices)
 
     return {
-        'success': True,
-        'code': 'OK'
+        'success': True
     }
 
 
 @app.route('/api/device/private')
 @u.require_secret()
-def private_mode():
+def device_private_mode():
     '''
     隐私模式, 即不在返回中显示设备状态 (仍可正常更新)
     - Method: **GET**
     '''
     private = u.tobool(flask.request.args.get('private'))
     if private == None:
-        raise u.APIUnsuccessful(400, '"private" arg must be boolean')
+        raise u.APIUnsuccessful(400, '\'private\' arg must be boolean')
     # old_private_mode = d1.private_mode
     else:
         d.private_mode = private
@@ -664,8 +663,7 @@ def private_mode():
     # trigger_event('private_mode_changed', old_private_mode, private)
 
     return {
-        'success': True,
-        'code': 'OK'
+        'success': True
     }
 
 

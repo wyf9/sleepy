@@ -5,6 +5,7 @@
 一个 python 服务器设备，个人状态管理器
 依赖: requests, argparse(传参需选), prettytable(可选)
 by @Claude 3.7 Sonnet Thinking
+因为太过抽象, 停止维护此客户端 -- wyf9
 '''
 #! SECRET出错不会报错，需要鉴权的操作都会失败，但是不显示失败
 # * 传参用法在最后面
@@ -92,7 +93,7 @@ class SleepyManager:
     def status_list(self) -> List[Dict]:
         """获取可用状态列表"""
         result = self._request('GET', 'api/status/list')
-        self._cached_status_list = result
+        self._cached_status_list = result.get('status_list', [])
         return result
 
     def get_cached_devices(self) -> Dict:
