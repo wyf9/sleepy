@@ -1,8 +1,8 @@
 # 配置
 
 > [!TIP]
-> by [kmizmal](https://github.com/kmizmal) <br/>
-> 由 wyf9 小修本文的格式
+> by [kmizmal](https://github.com/kmizmal)
+
 配置文件在`config.cfg`  
 `URL` 和 `SECRET` 自己看着填 ***(必填)***
 

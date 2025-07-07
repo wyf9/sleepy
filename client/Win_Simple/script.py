@@ -186,13 +186,13 @@ class DeviceMonitor:
             return
         try:
             resp = requests.post(
-                url=f'{self.config.server}/device/set',
+                url=f'{self.config.server}/api/device/set',
                 json={
                     'secret': self.config.secret,
                     'id': self.config.device_id,
                     'show_name': self.config.device_show_name,
                     'using': using,
-                    'app_name': window
+                    'status': window
                 },
                 headers={'Content-Type': 'application/json'},
                 timeout=5

@@ -54,7 +54,7 @@ def get_active_window_title():
         return '[FAILED]'
 
 
-Url = f'{SERVER}/device/set'
+Url = f'{SERVER}/api/device/set'
 last_window = ''
 
 
@@ -92,7 +92,7 @@ def do_update():
             'id': DEVICE_ID,
             'show_name': DEVICE_SHOW_NAME,
             'using': using,
-            'app_name': window
+            'status': window
         }, headers={
             'Content-Type': 'application/json'
         })
@@ -112,7 +112,7 @@ def interrupt_req():
             'id': DEVICE_ID,
             'show_name': DEVICE_SHOW_NAME,
             'using': False,
-            'app_name': 'Kill or Shutdown'
+            'status': 'Kill or Shutdown'
         }, headers={
             'Content-Type': 'application/json'
         })

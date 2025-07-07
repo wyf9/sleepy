@@ -18,7 +18,7 @@ from typing import Dict, List, Union, Any, Optional
 
 # 尝试导入 PrettyTable，如果不可用则提供简易替代
 try:
-    from prettytable import PrettyTable # type: ignore - 编辑器忽略未安装警告
+    from prettytable import PrettyTable  # type: ignore - 编辑器忽略未安装警告
     PRETTYTABLE_AVAILABLE = True
 except ImportError:
     PRETTYTABLE_AVAILABLE = False
@@ -85,13 +85,13 @@ class SleepyManager:
 
     def query(self) -> Dict:
         """获取当前状态"""
-        result = self._request('GET', 'query')
+        result = self._request('GET', 'api/status/query')
         self._cached_devices = result.get('device', {})
         return result
 
     def status_list(self) -> List[Dict]:
         """获取可用状态列表"""
-        result = self._request('GET', 'status_list')
+        result = self._request('GET', 'api/status/list')
         self._cached_status_list = result
         return result
 
@@ -109,37 +109,37 @@ class SleepyManager:
 
     def metrics(self) -> Dict:
         """获取统计信息"""
-        return self._request('GET', 'metrics')
+        return self._request('GET', 'api/metrics')
 
     # ------ Status APIs ------
 
     def set_status(self, status: int) -> Dict:
         """设置当前状态"""
-        return self._request('GET', 'set', params={'status': status})
+        return self._request('GET', 'api/status/set', params={'status': status})
 
     # ------ Device APIs ------
 
-    def device_set(self, id: str, show_name: str, using: bool, app_name: str) -> Dict:
+    def device_set(self, id: str, show_name: str, using: bool, status: str) -> Dict:
         """设置单个设备的状态"""
         data = {
             'id': id,
             'show_name': show_name,
             'using': using,
-            'app_name': app_name
+            'status': status
         }
-        result = self._request('POST', 'device/set', json_data=data)
+        result = self._request('POST', 'api/device/set', json_data=data)
         # 更新设备缓存
         if self._cached_devices is not None:
             self._cached_devices[id] = {
                 'show_name': show_name,
                 'using': using,
-                'app_name': app_name
+                'status': status
             }
         return result
 
     def device_remove(self, device_id: str) -> Dict:
         """移除单个设备的状态"""
-        result = self._request('GET', 'device/remove', params={'id': device_id})
+        result = self._request('GET', 'api/device/remove', params={'id': device_id})
         # 更新设备缓存
         if self._cached_devices is not None and device_id in self._cached_devices:
             del self._cached_devices[device_id]
@@ -147,20 +147,14 @@ class SleepyManager:
 
     def device_clear(self) -> Dict:
         """清除所有设备的状态"""
-        result = self._request('GET', 'device/clear')
+        result = self._request('GET', 'api/device/clear')
         # 清空设备缓存
         self._cached_devices = {}
         return result
 
     def device_private_mode(self, is_private: bool) -> Dict:
         """设置隐私模式"""
-        return self._request('GET', 'device/private_mode', params={'private': str(is_private).lower()})
-
-    # ------ Storage APIs ------
-
-    def save_data(self) -> Dict:
-        """保存内存中的状态信息到 data/data.json"""
-        return self._request('GET', 'save_data')
+        return self._request('GET', 'api/device/private_mode', params={'private': str(is_private).lower()})
 
 
 class SimplePrinter:
@@ -212,7 +206,7 @@ class SimplePrinter:
                 'id': device_id,
                 'show_name': info.get('show_name', ''),
                 'using': "使用中" if info.get('using', False) else "空闲",
-                'app_name': info.get('app_name', '')
+                'status': info.get('status', '')
             }
             result.append(row)
         return result
@@ -253,8 +247,8 @@ class SimplePrinter:
         headers = {
             'id': '设备ID',
             'show_name': '显示名称',
-            'using': '状态',
-            'app_name': '应用名称'
+            'using': '是否正在使用',
+            'status': '设备状态文本'
         }
         SimplePrinter.print_table(device_list, headers)
 
@@ -361,9 +355,6 @@ class SleepyManagerCLI:
             'device_clear': self.cmd_device_clear,
             'device_private_mode': self.cmd_device_private_mode,
 
-            # 存储操作命令
-            'save_data': self.cmd_save_data,
-
             # 帮助
             'help': self.cmd_help,
             '?': self.cmd_help,
@@ -443,7 +434,7 @@ class SleepyManagerCLI:
     def cmd_device_set(self, args: List[str]) -> None:
         """设置设备状态"""
         if len(args) < 4 or args[0] in ['-h', '--help']:
-            print("用法: device_set <设备ID> <显示名称> <是否使用中:true|false> <应用名称>")
+            print("用法: device_set <设备ID> <显示名称> <是否使用中:true|false> <状态文本>")
             print("功能: 设置指定设备的状态信息")
             print("\n示例: device_set my_pc \"我的电脑\" true \"VS Code\"")
 
@@ -457,9 +448,9 @@ class SleepyManagerCLI:
             device_id = args[0]
             show_name = args[1]
             using = args[2].lower() == 'true'
-            app_name = args[3]
+            status = args[3]
 
-            result = self.manager.device_set(device_id, show_name, using, app_name)
+            result = self.manager.device_set(device_id, show_name, using, status)
             SimplePrinter.print_api_result(result, f"设备 {device_id} 状态已更新")
         except Exception as e:
             print(f"设置设备状态失败: {e}")
@@ -512,19 +503,6 @@ class SleepyManagerCLI:
         except Exception as e:
             print(f"设置隐私模式失败: {e}")
 
-    def cmd_save_data(self, args: List[str]) -> None:
-        """保存数据"""
-        if args and args[0] in ['-h', '--help']:
-            print("用法: save_data")
-            print("功能: 保存当前状态到 data/data.json")
-            return
-
-        try:
-            result = self.manager.save_data()
-            SimplePrinter.print_api_result(result, "数据已保存")
-        except Exception as e:
-            print(f"保存数据失败: {e}")
-
     def cmd_help(self, args: List[str]) -> None:
         """显示帮助信息"""
         if args:
@@ -550,13 +528,10 @@ class SleepyManagerCLI:
         print("set <状态ID>      - 设置当前状态")
 
         print("\n== 设备管理命令 ==")
-        print("device_set <ID> <显示名称> <使用中> <应用名>  - 设置设备状态")
+        print("device_set <ID> <显示名称> <使用中> <状态信息>  - 设置设备状态")
         print("device_remove <ID>                       - 移除设备")
         print("device_clear                            - 清除所有设备")
         print("device_private_mode <true|false>        - 设置隐私模式")
-
-        print("\n== 存储操作命令 ==")
-        print("save_data         - 保存当前数据")
 
         print("\n== 其他命令 ==")
         print("help              - 显示此帮助信息")

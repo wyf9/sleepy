@@ -371,13 +371,13 @@ sleepy-token=MySecretCannotGuess
 
 [Back to # api](#api)
 
-|                           | 路径                                                                              | 方法   | 作用                          |
-| ------------------------- | --------------------------------------------------------------------------------- | ------ | ----------------------------- |
-| [Jump](#apideviceset)     | `/api/device/set`                                                                 | `POST` | 设置单个设备的状态 (打开应用) |
-|                           | `/api/device/set?id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>` | `GET`  | -                             |
-| [Jump](#apideviceremove)  | `/api/device/remove?name=<device_name>`                                           | `GET`  | 移除单个设备的状态            |
-| [Jump](#apideviceclear)   | `/api/device/clear`                                                               | `GET`  | 清除所有设备的状态            |
-| [Jump](#apideviceprivate) | `/api/device/private?private=<isprivate>`                                         | `GET`  | 设置隐私模式                  |
+|                           | 路径                                                                          | 方法   | 作用                          |
+| ------------------------- | ----------------------------------------------------------------------------- | ------ | ----------------------------- |
+| [Jump](#apideviceset)     | `/api/device/set`                                                             | `POST` | 设置单个设备的状态 (打开应用) |
+|                           | `/api/device/set?id=<id>&show_name=<show_name>&using=<using>&status=<status>` | `GET`  | -                             |
+| [Jump](#apideviceremove)  | `/api/device/remove?name=<device_name>`                                       | `GET`  | 移除单个设备的状态            |
+| [Jump](#apideviceclear)   | `/api/device/clear`                                                           | `GET`  | 清除所有设备的状态            |
+| [Jump](#apideviceprivate) | `/api/device/private?private=<isprivate>`                                     | `GET`  | 设置隐私模式                  |
 
 ### /api/device/set
 
@@ -395,12 +395,12 @@ sleepy-token=MySecretCannotGuess
 > [!WARNING]
 > 使用 url params 传递参数在某些情况下 *(如内容包含特殊符号)* 可能导致非预期行为, 此处更建议使用 POST
 
-> `/api/device/set?id=<id>&show_name=<show_name>&using=<using>&app_name=<app_name>`
+> `/api/device/set?id=<id>&show_name=<show_name>&using=<using>&status=<status>`
 
 - `<id>`: 设备标识符
 - `<show_name>`: 显示名称
 - `<using>`: 是否正在使用
-- `<app_name>`: 正在使用应用的名称
+- `<status>`: 设备状态文本 *(之前为正在使用的应用名称, 即 `app_name`)*
 
 #### Body (POST)
 
@@ -411,7 +411,7 @@ sleepy-token=MySecretCannotGuess
   "id": "device-1", // 设备标识符
   "show_name": "MyDevice1", // 显示名称
   "using": true, // 是否正在使用
-  "app_name": "VSCode" // 正在使用应用的名称
+  "status": "VSCode" // 正在使用应用的名称
 }
 ```
 

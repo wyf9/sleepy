@@ -30,7 +30,7 @@ def log(msg: str, important: bool = False) -> None:
         print(f'[sleepy] {msg}')
 
 
-Url = f'{SERVER}/device/set'
+Url = f'{SERVER}/api/device/set'
 
 try:
     if sys.argv[1].lower() == 'stop':
@@ -52,7 +52,7 @@ try:
                     'id': DEVICE_ID,
                     'show_name': DEVICE_SHOW_NAME,
                     'using': False,
-                    'app_name': '[Stopped]'
+                    'status': '[Stopped]'
                 }, headers={
                     'Content-Type': 'application/json'
                 })
@@ -83,9 +83,9 @@ except:
 
 def get_info():
     '''
-    获取游戏内信息, 拼接为完整 app_name 并返回
+    获取游戏内信息, 拼接为完整 status 并返回
 
-    :return: `app_name` 字符串
+    :return: `status` 字符串
     '''
     _version_info = mc.version_info()
     _world_info = mc.world_info()
@@ -121,11 +121,11 @@ def get_info():
 last_status = ''
 
 
-def do_update(app_name):
+def do_update(status):
     '''
     进行一次更新
 
-    :param app_name: 从 `get_info()` 获取
+    :param status: 从 `get_info()` 获取
     :return 0: 成功
     :return 1: 请求时出错
     :return 2: 返回中 `success` 不为 `true`
@@ -138,7 +138,7 @@ def do_update(app_name):
             'id': DEVICE_ID,
             'show_name': DEVICE_SHOW_NAME,
             'using': True,
-            'app_name': app_name
+            'status': status
         }, headers={
             'Content-Type': 'application/json'
         })
@@ -157,12 +157,12 @@ def do_update(app_name):
 log('Started')
 
 while True:
-    app_name = get_info()
-    if app_name != last_status:
+    status = get_info()
+    if status != last_status:
         # 与上次不同, 更新
-        log(f'App name: {app_name}')
-        ret = do_update(app_name=app_name)
+        log(f'Status: {status}')
+        ret = do_update(status=status)
         if not ret:
             # 失败时不更新上次信息, 以便 interval 后重试
-            last_status = app_name
+            last_status = status
     time.sleep(CHECK_INTERVAL)

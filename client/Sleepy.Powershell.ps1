@@ -54,13 +54,13 @@ function Send-DeviceStatus {
         id = $DEVICE_ID
         show_name = $DEVICE_SHOW_NAME
         using = $Using
-        app_name = $AppName
+        status = $AppName
     } | ConvertTo-Json
     $Headers = @{
         "Content-Type" = "application/json"
     }
     try {
-        $Response = Invoke-RestMethod -Uri "$SERVER/device/set" -Method Post -Headers $Headers -Body $Body
+        $Response = Invoke-RestMethod -Uri "$SERVER/api/device/set" -Method Post -Headers $Headers -Body $Body
         if ($DEBUG) {
             Write-Host "Response: $($Response | ConvertTo-Json)"
         }
@@ -119,7 +119,7 @@ while ($true) {
     }
 
     if (($MouseIdle -ne $IsMouseIdle) -or ($CurrentWindow -ne $LastWindowTitle) -or (-not $BYPASS_SAME_REQUEST)) {
-        Write-Host "Sending update: using = $Using, app_name = '$CurrentWindow'"
+        Write-Host "Sending update: using = $Using, status = '$CurrentWindow'"
         Send-DeviceStatus -Using $Using -AppName $CurrentWindow
         $global:LastWindowTitle = $CurrentWindow
     }

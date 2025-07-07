@@ -16,7 +16,7 @@
     'use strict';
 
     // ===== 参数配置 =====
-    const API_URL = 'https://sleepy.wyf9.top/device/set'; // 完整 API 地址（以 /device/set 结尾）
+    const API_URL = 'https://sleepy.wyf9.top/api/device/set'; // 完整 API 地址（以 /api/device/set 结尾）
     const SECRET = '绝对猜不出来的密码';                // 你的 secret
     const ID = '114514';                               // 设备 id
     const SHOW_NAME = '';                              // 设备名称，若为空则使用浏览器名称
@@ -92,7 +92,7 @@
             id: ID,
             show_name: showName,
             using: using,
-            app_name: appName
+            status: appName
         };
 
         // 发送 POST 请求，上报数据（JSON 格式）

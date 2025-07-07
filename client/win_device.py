@@ -175,11 +175,11 @@ def get_media_info():
 # ----- Part: Send status
 
 
-Url = f'{SERVER}/device/set'
+Url = f'{SERVER}/api/device/set'
 last_window = ''
 
 
-def send_status(using: bool = True, app_name: str = '', id: str = DEVICE_ID, show_name: str = DEVICE_SHOW_NAME, **kwargs):
+def send_status(using: bool = True, status: str = '', id: str = DEVICE_ID, show_name: str = DEVICE_SHOW_NAME, **kwargs):
     '''
     post 发送设备状态信息
     设置了 headers 和 proxies
@@ -189,7 +189,7 @@ def send_status(using: bool = True, app_name: str = '', id: str = DEVICE_ID, sho
         'id': id,
         'show_name': show_name,
         'using': using,
-        'app_name': app_name
+        'status': status
     }
     if PROXY:
         return post(
@@ -225,7 +225,7 @@ def on_shutdown(hwnd, msg, wparam, lparam):
         try:
             resp = send_status(
                 using=False,
-                app_name="要关机了喵",
+                status="要关机了喵",
                 id=DEVICE_ID,
                 show_name=DEVICE_SHOW_NAME
             )
@@ -435,11 +435,11 @@ def do_update():
 
         # 发送状态更新
         print(
-            f'Sending update: using = {using}, app_name = "{window}", idle = {mouse_idle}')
+            f'Sending update: using = {using}, status = "{window}", idle = {mouse_idle}')
         try:
             resp = send_status(
                 using=using,
-                app_name=window,
+                status=window,
                 id=DEVICE_ID,
                 show_name=DEVICE_SHOW_NAME
             )
@@ -471,7 +471,7 @@ def do_update():
                     # 从不播放变为播放或歌曲内容变化
                     media_resp = send_status(
                         using=True,
-                        app_name=standalone_media_info,
+                        status=standalone_media_info,
                         id=MEDIA_DEVICE_ID,
                         show_name=MEDIA_DEVICE_SHOW_NAME
                     )
@@ -479,7 +479,7 @@ def do_update():
                     # 从播放变为不播放
                     media_resp = send_status(
                         using=False,
-                        app_name='没有媒体播放',
+                        status='没有媒体播放',
                         id=MEDIA_DEVICE_ID,
                         show_name=MEDIA_DEVICE_SHOW_NAME
                     )
@@ -503,7 +503,7 @@ if __name__ == '__main__':
         try:
             resp = send_status(
                 using=False,
-                app_name='未在使用',
+                status='未在使用',
                 id=DEVICE_ID,
                 show_name=DEVICE_SHOW_NAME
             )
@@ -513,7 +513,7 @@ if __name__ == '__main__':
             if MEDIA_INFO_ENABLED and MEDIA_INFO_MODE == 'standalone':
                 media_resp = send_status(
                     using=False,
-                    app_name='未在使用',
+                    status='未在使用',
                     id=MEDIA_DEVICE_ID,
                     show_name=MEDIA_DEVICE_SHOW_NAME
                 )

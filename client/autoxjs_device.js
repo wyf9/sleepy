@@ -6,7 +6,7 @@ Co-authored-by: NyaOH-Nahida - 新增捕捉退出事件，将退出脚本状态�
 */
 
 // config start
-const API_URL = 'https://sleepy.wyf9.top/device/set'; // 你的完整 API 地址，以 `/device/set` 结尾
+const API_URL = 'https://sleepy.wyf9.top/api/device/set'; // 你的完整 API 地址，以 `/api/device/set` 结尾
 const SECRET = '绝对猜不出来的密码'; // 你的 secret
 const ID = 'a-device'; // 你的设备 id, 唯一
 const SHOW_NAME = '一个设备'; // 你的设备名称, 将显示在网页上
@@ -99,7 +99,7 @@ function send_status() {
         'id': ID,
         'show_name': SHOW_NAME,
         'using': using,
-        'app_name': app_name
+        'status': app_name
     });
     log(`response: ${r.body.string()}`);
 }
@@ -117,7 +117,7 @@ events.on("exit", function () {
             'id': ID,
             'show_name': SHOW_NAME,
             'using': false,
-            'app_name': '[Client Exited]' // using 为 false 时前端不会显示这个, 而是 '未在使用'
+            'status': '客户端已退出'
         });
         log(`response: ${r.body.string()}`);
         toast("[sleepy] 上报成功");
