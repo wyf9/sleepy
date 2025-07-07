@@ -6,6 +6,7 @@ from datetime import datetime
 from functools import wraps  # 用于修饰器
 
 import flask
+from flask_cors import CORS
 import json5
 import pytz
 from markupsafe import escape
@@ -55,7 +56,6 @@ except:
 def showip():
     '''
     在日志中显示 ip, 并记录 metrics 信息
-    ~~如 Header 中 User-Agent 为 SleepyPlugin/(每次启动使用随机 uuid) 则不进行任何记录~~
 
     :param req: `flask.request` 对象, 用于取 ip
     :param msg: 信息 (一般是路径, 同时作为 metrics 的项名)
@@ -435,8 +435,13 @@ def events():
     response = flask.Response(event_stream(), mimetype="text/event-stream", status=200)
     response.headers["Cache-Control"] = "no-cache"  # 禁用缓存
     response.headers["X-Accel-Buffering"] = "no"  # 禁用 Nginx 缓冲
+    response.headers["Access-Control-Allow-Origin"] = "*"  # 允许跨域访问
     return response
 
+CORS(app, resources={
+    r"/events": {"origins": "*"},
+    r"/query": {"origins": "*"}
+})
 
 # --- Special
 
@@ -472,14 +477,15 @@ if __name__ == '__main__':
     #     pass
     # --- launch
     # 检查是否启用 HTTPS
+    listening = f'{f"[{env.main.host}]" if ":" in env.main.host else env.main.host}:{env.main.port}'
     if env.main.https_enabled:
         ssl_context = (env.main.ssl_cert, env.main.ssl_key)
-        u.info(f'Starting HTTPS server: {env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
+        u.info(f'Starting HTTPS server: https://{listening}{" (debug enabled)" if env.main.debug else ""}')
         u.info(f'Using SSL certificate: {env.main.ssl_cert}')
         u.info(f'Using SSL key: {env.main.ssl_key}')
     else:
         ssl_context = None
-        u.info(f'Starting HTTP server: {env.main.host}:{env.main.port}{" (debug enabled)" if env.main.debug else ""}')
+        u.info(f'Starting HTTP server: http://{listening}{" (debug enabled)" if env.main.debug else ""}')
 
     try:
         app.run(  # 启↗动↘
