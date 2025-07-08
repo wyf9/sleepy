@@ -4,6 +4,7 @@ import typing as t
 from logging import getLogger
 from functools import wraps
 from contextlib import contextmanager
+from uuid import uuid4 as uuid
 
 import flask
 
@@ -12,6 +13,8 @@ from data import Data
 import utils as u
 
 l = getLogger(__name__)
+
+# region plugin-api
 
 
 class Plugin:
@@ -23,7 +26,19 @@ class Plugin:
     config: t.Any
     '''插件配置 (如传入 Model 则为对应 Model 实例, 否则为字典)'''
     _registry = {}
+    '''存放插件实例'''
     _routes = []
+    '''插件注册的路由'''
+    _index_cards = []
+    '''主页卡片'''
+    _index_injects = []
+    '''主页注入'''
+    _webui_cards = []
+    '''管理面板卡片'''
+    _webui_injects = []
+    '''管理面板注入'''
+    _global_injects = []
+    '''前端全局注入'''
 
     def __init__(self, name: str, config={}, data: dict = {}):
         '''
@@ -51,6 +66,8 @@ class Plugin:
             self.config = config.model_validate(config_dict)
 
         self.data = u.deep_merge_dict(data, self.data)
+
+    # region plugin-api-meta
 
     @property
     def data(self):
@@ -86,7 +103,7 @@ class Plugin:
         data[key] = value
         self.data = data
 
-    def get_data(self, key, default = None):
+    def get_data(self, key, default=None):
         '''
         获取数据值
         '''
@@ -113,11 +130,34 @@ class Plugin:
         '''
         return PluginInit.instance.app
 
-    def route(self, rule: str, **options: t.Any):
+    # endregion plugin-api-meta
+
+    # region plugin-api-route
+
+    def add_route(self, func: t.Callable, rule: str, _wrapper: t.Callable | None = None, **options: t.Any):
         '''
         注册插件路由 **(访问: `/plugin/<name>/<rule>`)**
 
+        :param func: 处理路由的视图函数
         :param rule: 路由规则 (路径)
+        :param options: 其他传递给 Flask 的参数 *(`_wrapper` 除外)*
+        '''
+        endpoint = options.pop('endpoint', func.__name__)
+        full_rule = f'/plugin/{self.name}{"" if rule.startswith("/") else "/"}{rule}'
+
+        self._routes.append({
+            'rule': full_rule,
+            'endpoint': f"plugin.{self.name}.{endpoint}",
+            'view_func': _wrapper or func,
+            'options': options
+        })
+
+    def route(self, rule: str, **options: t.Any):
+        '''
+        **[装饰器]** 注册插件路由 **(访问: `/plugin/<name>/<rule>`)**
+
+        :param rule: 路由规则 (路径)
+        :param options: 其他传递给 Flask 的参数
         ```
         @plugin.route('/endpoint')
         def handler():
@@ -125,28 +165,44 @@ class Plugin:
         ```
         '''
         def decorator(f):
-            endpoint = options.pop('endpoint', f.__name__)
-            full_rule = f'/plugin/{self.name}{"" if rule.startswith("/") else "/"}{rule}'
 
             @wraps(f)
             def wrapper(*args, **kwargs):
                 return f(*args, **kwargs)
 
-            # 临时存储理由信息
-            self._routes.append({
-                'rule': full_rule,
-                'endpoint': f"plugin.{self.name}.{endpoint}",
-                'view_func': wrapper,
-                'options': options
-            })
+            self.add_route(
+                func=f,
+                rule=rule,
+                _wrapper=wrapper,
+                **options
+            )
             return wrapper
         return decorator
 
-    def global_route(self, rule: str, **options: t.Any):
+    def add_global_route(self, func: t.Callable, rule: str, _wrapper: t.Callable | None = None, **options: t.Any):
         '''
         注册全局插件路由 **(访问: `/<rule>`)**
 
+        :param func: 处理路由的视图函数
         :param rule: 路由规则 (路径)
+        :param options: 其他传递给 Flask 的参数
+        '''
+        endpoint = options.pop('endpoint', func.__name__)
+        full_rule = f'{"" if rule.startswith("/") else "/"}{rule}'
+
+        self._routes.append({
+            'rule': full_rule,
+            'endpoint': f"plugin_global.{self.name}.{endpoint}",
+            'view_func': _wrapper or func,
+            'options': options
+        })
+
+    def global_route(self, rule: str, **options: t.Any):
+        '''
+        [装饰器] 注册全局插件路由 **(访问: `/<rule>`)**
+
+        :param rule: 路由规则 (路径)
+        :param options: 其他传递给 Flask 的参数
         ```
         @plugin.route('/global-endpoint')
         def handler():
@@ -154,27 +210,29 @@ class Plugin:
         ```
         '''
         def decorator(f):
-            endpoint = options.pop('endpoint', f.__name__)
-            full_rule = f'{"" if rule.startswith("/") else "/"}{rule}'
-
             @wraps(f)
             def wrapper(*args, **kwargs):
                 return f(*args, **kwargs)
 
-            # 临时存储理由信息
-            self._routes.append({
-                'rule': full_rule,
-                'endpoint': f"plugin_global.{self.name}.{endpoint}",
-                'view_func': wrapper,
-                'options': options
-            })
+            self.add_global_route(
+                func=f,
+                rule=rule,
+                _wrapper=wrapper,
+                **options
+            )
             return wrapper
         return decorator
 
+    # endregion plugin-api-route
+
     def init(self):
         '''
-        默认初始化函数 (可重写)
+        初始化时将执行此函数 (可覆盖)
         '''
+
+# endregion plugin-api
+
+# region plugin-init
 
 
 class PluginInit:
@@ -239,3 +297,5 @@ class PluginInit:
                 **route['options']
             )
             l.debug(f'Registered Route: {route["rule"]} -> {route["endpoint"]}')
+
+# endregion plugin-init

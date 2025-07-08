@@ -49,7 +49,9 @@ Import module Failed!
 try:
     # get version info
     with open(u.get_path('pyproject.toml'), 'r', encoding='utf-8') as f:
-        version: str = load_toml(f).get('project', {}).get('version', 'unknown')
+        file: dict = load_toml(f)
+        version_str: str = file.get('project', {}).get('version', 'unknown')
+        version: tuple[int, int, int] = file.get('tool', {}).get('sleepy-plugin', {}).get('version', (0, 0, 0))
         f.close()
 
     # init flask app
@@ -89,7 +91,7 @@ try:
         root_logger.addHandler(fhandler)
 
     l.info(f'{"="*15} Application Startup {"="*15}')
-    l.info(f'Sleepy Server version {version}')
+    l.info(f'Sleepy Server version {version_str} ({".".join(str(i) for i in version)})')
 
     # debug: disable static cache
     if c.main.debug:
@@ -418,6 +420,7 @@ def metadata():
     return {
         'success': True,
         'version': version,
+        'version_str': version_str,
         'timezone': c.main.timezone,
         'page': {
             'name': c.page.name,

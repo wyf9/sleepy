@@ -34,10 +34,18 @@ def hello():
             'calls': d['calls']
         }
 
+def hello2():
+    return 'test2'
+
+p.add_route(hello2, '/hello2')
+# p.add_route(hello2, 'hello3')
 
 @p.global_route('/testplugin')
 def globaltest():
     return 'Hello World!'
+
+# p.add_global_route(globaltest, '/testplugin2')
+# p.add_global_route(globaltest, '/testplugin3')
 
 # @plugin.route('/utils')
 # def utils_demo():

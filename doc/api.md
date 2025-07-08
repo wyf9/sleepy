@@ -94,7 +94,7 @@ sleepy-token=MySecretCannotGuess
 
 > `/api/meta`
 
-获取站点的元数据 (个性化设置, 版本等)
+获取站点的元数据 (页面设置, 版本等)
 
 #### Response
 
@@ -102,7 +102,8 @@ sleepy-token=MySecretCannotGuess
 // 200 OK
 {
   "success": true,
-  "version": "5.0-dev-20250629", // 版本号
+  "version": [5, 0, 0], // 版本号
+  "version_str": "5.0-dev-20250629", // 也是版本号
   "timezone": "Asia/Shanghai", // 服务器时区 (用于 metrics)
   "page": { // 页面设置
     "background": "https://imgapi.siiway.top/image", // 背景
