@@ -1,5 +1,9 @@
 #!/system/bin/sh
 
+# ==========初始化wget别名==========
+WGET_PATH="/data/adb/modules/zmal-sleepy/wget"
+chmod +x $WGET_PATH
+alias wget="$WGET_PATH"
 # ========== 读取配置文件 ==========
 SCRIPT_DIR=${0%/*}
 CONFIG_FILE="${SCRIPT_DIR}/config.cfg"
@@ -8,7 +12,7 @@ CONFIG_FILE="${SCRIPT_DIR}/config.cfg"
 LOG_PATH="${SCRIPT_DIR}/${LOG_NAME}"
 log() {
   message="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-  echo "$message" >> "$LOG_PATH"
+  echo "$message" >>"$LOG_PATH"
 }
 sleepy=0
 # ========== 判断是否为游戏 ==========
@@ -50,7 +54,7 @@ get_app_name() {
 
     if [ -n "$app_name" ]; then
       echo "$app_name"
-      echo "$package_name=$app_name" >> "$CACHE"
+      echo "$package_name=$app_name" >>"$CACHE"
       log "已写入缓存: $package_name=$app_name"
       return
     else
@@ -66,23 +70,27 @@ get_app_name() {
 # ========== 发送状态请求 ==========
 send_status() {
   package_name="$1"
-  app_name=$(get_app_name "$package_name")
-  
+  app_name=$(echo $(get_app_name "$package_name"))
+
   battery_level=$(dumpsys battery | sed -n 's/.*level: \([0-9]*\).*/\1/p')
   dumpsys_charging="$(dumpsys deviceidle get charging)"
-  
+
   if [ "$dumpsys_charging" = "true" ]; then
     res_up="$app_name[${battery_level}%]⚡"
   else
     res_up="$app_name[${battery_level}%]🔋"
   fi
 
+  res_up=$(echo "$res_up" | tr -d '\n')
+
   log "$res_up"
-  
-  http_code=$(curl -s --connect-timeout 35 --max-time 100 -w "%{http_code}" -o ./curl_body "$URL" \
-    -X POST \
-    -H "Content-Type: application/json" \
-    -d '{"secret": "'"${SECRET}"'", "id": 0, "show_name": "'"${device_model}"'", "using": '"${using}"', "app_name": "'"$res_up"'"}')
+
+  full_URL="${URL}?secret=${SECRET}&id=${device_model}&show_name=${device_name}&using=${using}&app_name=${res_up}"
+  final_URL=$(echo "$full_URL" | sed 's/[[:space:]]*//g')
+
+  # wget -q --timeout=100 --output-document=./curl_body ""$final_URL""
+
+  http_code=$(wget --server-response -O ./curl_body "$final_URL" 2>&1 | awk '/HTTP\/[0-9.]+/ {print $2}' | tail -1)
 
   if [ "$http_code" -ne 200 ]; then
     log "警告：请求失败，状态码 $http_code，响应内容：$(cat ./curl_body)"
@@ -91,16 +99,21 @@ send_status() {
 
 # ========== 主流程 ==========
 LAST_PACKAGE=""
-> "$LOG_PATH"
+>"$LOG_PATH"
 log "===== 服务启动 ====="
 
 # 获取设备信息
-device_model=$(getprop ro.product.model)
+device_model=$(getprop ro.product.brand)-$(getprop ro.product.model)
+# device_name=$(settings get global device_name) # 存在问题，弃用
+device_name=$(getprop ro.vendor.oplus.market.enname)
 android_version=$(getprop ro.build.version.release)
-log "设备信息: ${device_model}, Android ${android_version}，等待一分钟"
+log "设备信息: ${device_model} | ${device_name}, Android ${android_version}，等待一分钟"
+
+log "$(settings get global device_name)"
 
 # 可以在这里覆盖设备显示名称
-device_model="OnePlus ACE3"
+# device_model="OnePlus-PKG110"
+# device_name="OnePlus Ace5"
 
 sleep 60
 log "开！"
@@ -108,21 +121,21 @@ log "开！"
 # ========== 核心逻辑 ==========
 while true; do
   isLock=$(dumpsys window policy | sed -n 's/.*showing=\([a-z]*\).*/\1/p')
-  echo "isLock: $isLock"
+  log "isLock: $isLock"
   if [ "$isLock" = "true" ]; then
     log "锁屏了"
     sleepy=$((sleepy + 1))
     log "锁屏计数器: $sleepy"
     PACKAGE_NAME="NotificationShade"
-      # 休眠检测
-      if [ "$sleepy" -ge 60 ]; then
-         using="false"
-         log "睡死了"
-         send_status "$PACKAGE_NAME"
-         sleepy=0
-      else
-        using="true"
-      fi
+    # 休眠检测
+    if [ "$sleepy" -ge 60 ]; then
+      using="false"
+      log "睡死了"
+      send_status "$PACKAGE_NAME"
+      sleepy=0
+    else
+      using="true"
+    fi
   else
     sleepy=0
     using="true"
@@ -136,6 +149,6 @@ while true; do
     send_status "$PACKAGE_NAME"
     LAST_PACKAGE="$PACKAGE_NAME"
   fi
-  
+
   is_game "$PACKAGE_NAME"
 done
