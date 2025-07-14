@@ -32,13 +32,13 @@ From: https://github.com/gamer2810/steam-miniprofile
       }
 
       let searchParams = new URLSearchParams(window.location.search);
-      let corsHost = 'https://steam-miniprofile-cors.glitch.me/'
-      let steamId = searchParams.get('accountId') ? searchParams.get('accountId') : '{{ env.util.steam_ids }}';
-      let interactive = searchParams.get('interactive') ? searchParams.get('interactive') : false;
-      let vanityId = searchParams.get('vanityId') ? searchParams.get('vanityId') : '';
-      let language = searchParams.get('lang') ? searchParams.get('lang') : 'schinese';
-      let featuredGame = searchParams.get('appId') ? searchParams.get('appId') : '';
-      let corsURL = `${corsHost}https%3A%2F%2Fsteamcommunity.com%2Fminiprofile%2F${steamId}?l=${language}&appId=${featuredGame}`;
+      let corsHost = '{{ env.util.steam_api_url }}';
+      let steamId = searchParams.get('accountId') || '{{ env.util.steam_ids }}';
+      let interactive = searchParams.get('interactive') || false;
+      let vanityId = searchParams.get('vanityId') || '';
+      let language = searchParams.get('lang') || 'schinese';
+      let featuredGame = searchParams.get('appId') || '';
+      let corsURL = `${corsHost}${steamId}?l=${language}&appId=${featuredGame}`;
       let steamURL = `https://steamcommunity.com/id/${vanityId}`;
 
       if (steamId === '{{ env.util.steam_ids }}') {
@@ -60,20 +60,20 @@ From: https://github.com/gamer2810/steam-miniprofile
           container.hidden = true;
 
           // if ((container.children && container.children.textContent.length) !== 0) {
-            defaultProfile.classList.add('fade-out');
-            defaultProfile.replaceWith(...container.children);
-            defaultProfile.classList.remove('fade-out');
-            defaultProfile.classList.add('fade-in');
+          defaultProfile.classList.add('fade-out');
+          defaultProfile.replaceWith(...container.children);
+          defaultProfile.classList.remove('fade-out');
+          defaultProfile.classList.add('fade-in');
 
-            if (!loaded) {
-              window.parent.postMessage(
-                {
-                  state: "loaded"
-                }, {
-                targetOrigin: '*',
-              })
-              loaded = true;
-            }
+          if (!loaded) {
+            window.parent.postMessage(
+              {
+                state: "loaded"
+              }, {
+              targetOrigin: '*',
+            })
+            loaded = true;
+          }
           // }
 
           if (interactive && vanityId) {

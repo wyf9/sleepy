@@ -17,13 +17,15 @@ def getenv(key: str, default: Any, typeobj: Callable) -> Any:
     :param default: 默认值 (未读取到此项配置时使用)
     :param typeobj: 类型对象 (str / int / bool)
     '''
-    got_value = os.getenv(key.upper()) or os.getenv(key.lower()) # 全大写 / 全小写皆可
+    got_value = os.getenv(key.lower()) or os.getenv(key.upper()) # 全大写 / 全小写皆可
     if got_value is None:
         return default
     else:
+        print(f'{key} -> {got_value}')
         if typeobj == bool:
             return tobool(got_value)
-        return typeobj(got_value)
+        ret = typeobj(got_value)
+        return ret
 
 
 class _main:
@@ -80,6 +82,7 @@ class _util:
     metrics: bool = getenv('sleepy_util_metrics', True, bool)
     auto_switch_status: bool = getenv('sleepy_util_auto_switch_status', True, bool)
     steam_enabled: bool = getenv('sleepy_util_steam_enabled', False, bool)
+    steam_api_url: str = getenv('sleepy_util_steam_api_url', 'https://steam-miniprofile-proxy.wyf9.top/miniprofile/', str)
     steam_ids: str = getenv('sleepy_util_steam_ids', '', str)
     steam_refresh_interval: int = getenv('sleepy_util_steam_refresh_interval', 20000, int)
 

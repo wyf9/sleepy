@@ -460,9 +460,7 @@ if env.util.steam_enabled:
     def steam():
         return flask.render_template(
             'steam-iframe.html',
-            env=env,
-            steamids=env.util.steam_ids,
-            steam_refresh_interval=env.util.steam_refresh_interval
+            env=env
         ), 200
 
 # --- End

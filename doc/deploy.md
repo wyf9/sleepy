@@ -79,6 +79,11 @@ python3 start.py
 只需三步:
 
 1. 复制 Space `wyf9/sleepy` (**[点击直达](https://huggingface.co/spaces/wyf9/sleepy?duplicate=true&visibility=public)**)
+
+> 如果没有弹出窗口, 请手动点击右上角三点 -> `Duplicate this Space` (如图)
+
+![huggingface-5](https://ghimg.siiway.top/sleepy/deploy/huggingface-5.1.png)
+
 2. 在复制页面设置 secret 和页面信息等环境变量 *[**[配置示例](../.env.example)**]*
 3. 点击部署，等待完成后点击右上角三点 -> `Embed this space`，即可获得你的部署地址 *(类似于: <https://wyf9-sleepy.hf.space>)*
 
