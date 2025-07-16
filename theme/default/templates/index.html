@@ -22,47 +22,28 @@
 
 <body>
     <div class="container">
-        <div class="card" id="user-status">
+        <div class="card" id="main">
             <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
-
-            <!-- {disabled% if c.page.slider %} -->
-            <!-- (slider) 透明度调整 -->
-            <!-- {disabled% include "moonlight.html" %} -->
-            <!-- {disabled% endif %} -->
-
             <h3><i><b>{{ c.page.name }}'s</b></i> Status:<br><a id="status">{{ status['name'] }}</a></h3>
             <p id="additional-info">{{ status['desc'] | safe }}</p>
             <p id="device-status">[设备状态列表]</p>
-
-            <!-- {disabled% if c.util.steam_enabled %} -->
-            <!-- (steam) Steam 状态模块 (iframe) -->
-            <!-- {disabled% include "steam.html" %} -->
-            <!-- {disabled% endif %} -->
-
             <p id="last-updated">最后更新: {{ last_updated }}</p>
+            <script>
+                document.getElementById('status').classList.add("{{ status['color'] }}");
+            </script>
+            <script type="module" src="{{ url_for('static', filename='get.js') }}" defer></script>
+
         </div>
 
-        {% for plugin in plugins %}
-        <div class="card" id="plugin-{{ plugin[0] }}">
-            {{ plugin[1] | safe }}
+        {% for card in cards %}
+        <div class="card" id="{{ card.name }}">
+            {{ card | safe }}
         </div>
         {% endfor %}
 
-        <!-- {disabled% if zhixue %} -->
-        <!-- (zhixue) 智学网分数 -->
-        <!-- {disabled% include "zhixue.html" %} -->
-        <!-- {disabled% endif %} -->
-
-        <div class="card" id="more-text">
-            <!-- {disabled% if c.page.hitokoto %} -->
-            <!-- (hitokoto) 一言 -->
-            <!-- {disabled% include "hitokoto.html" %} -->
-            <!-- {disabled% endif %} -->
-            <!-- more_text START -->
+        <div class="card" id="more-info">
             {{ more_text | safe }}
-            <!-- more_text END -->
             <p>你可以通过这个页面视奸 <b>{{ c.page.name }}</b>。<br>
-                <!-- learn_more START -->
                 <a href="{{ c.page.learn_more_link }}" target="_blank" style="color: rgb(0, 255, 0);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:1em;">
                         <path
@@ -85,30 +66,9 @@
                 endif %}
                 {% endfor %}
             </div>
-            <!-- learn_more END -->
             </p>
         </div>
     </div>
-
-    <!-- {disabled% if c.page.lantern %} -->
-    <!-- (lantern) 节日灯笼 -->
-    <!-- {disabled% include "lantern.html" %} -->
-    <!-- {disabled% endif %} -->
-
-    <!-- {disabled% if c.page.mplayer %} -->
-    <!-- (mplayer) 音乐播放器 -->
-    <!-- {disabled% include "mplayer.html" %} -->
-    <!-- {disabled% endif %} -->
-
-    <!-- {disabled% if c.page.canvas %} -->
-    <!-- (canvas) 粒子效果 -->
-    <!-- <script src="{{ url_for('static', filename='canvas.js') }}" defer></script> -->
-    <!-- {disabled% endif %} -->
-
-    <script>
-        document.getElementById('status').classList.add("{{ status['color'] }}");
-    </script>
-    <script type="module" src="{{ url_for('static', filename='get.js') }}" defer></script>
 
 </body>
 

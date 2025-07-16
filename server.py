@@ -309,8 +309,6 @@ def after_request(resp: flask.Response):
     - 记录 metrics 信息
     - 显示访问日志
     '''
-    # --- oembed
-    resp.headers.add('Link', '</oembed.json>; rel="alternate"; type="application/json+oembed"; title="Sleepy oEmbed Profile"')
     # --- metrics
     path = flask.request.path
     if c.metrics.enabled:
@@ -337,16 +335,7 @@ def index():
     - Method: **GET**
     '''
     # 获取手动状态
-    try:
-        status = c.status.status_list[d.status].model_dump()
-    except:
-        l.warning(f"Index {d.status} out of range!")
-        status = {
-            'id': d.status,
-            'name': 'Unknown',
-            'desc': '未知的标识符，可能是配置问题。',
-            'color': 'error'
-        }
+    status = d.status
     # 获取更多信息 (more_text)
     more_text: str = c.page.more_text
     if c.metrics.enabled:
@@ -455,7 +444,7 @@ def query(version: str = '2'):
     - Method: **GET**
     '''
     # 获取手动状态
-    st: int = d.status
+    st: int = d.status_id
     try:
         stinfo = c.status.status_list[st].model_dump()
     except:
@@ -517,7 +506,7 @@ def set_status():
     except:
         raise u.APIUnsuccessful(400, 'argument \'status\' must be int')
     # old_status = d1.status
-    d.status = status
+    d.status_id = status
 
     # 触发状态更新事件
     # trigger_event('status_updated', old_status, status)
@@ -539,6 +528,7 @@ def get_status_list():
         'success': True,
         'status_list': [i.model_dump() for i in c.status.status_list]
     }
+
 
 @app.route('/api/metrics')
 def metrics():

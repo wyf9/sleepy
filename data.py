@@ -51,20 +51,10 @@ class _DeviceStatusData(db.Model):
     '''[必选] 设备唯一 id'''
     show_name: Mapped[str] = mapped_column(String(LIMIT), nullable=False)
     '''[必选] 设备显示名称'''
-    # desc: Mapped[str] = mapped_column(String(LIMIT), nullable=True)
-    # '''[可选] 设备描述'''
-    # online: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    # '''[可选] 设备是否在线'''
     using: Mapped[bool] = mapped_column(Boolean, nullable=True)
     '''[可选] 设备是否正在使用'''
     status: Mapped[str] = mapped_column(Text, nullable=True)
     '''[可选] 设备状态文本 (如打开的应用名)'''
-    # playing: Mapped[str] = mapped_column(Text, nullable=True)
-    # '''[可选] 设备正在播放的媒体名'''
-    # battery: Mapped[int] = mapped_column(Integer, nullable=True)
-    # '''[可选] 设备电量 (0~100)'''
-    # is_charging: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    # '''[可选] 设备是否正在充电'''
     fields: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     '''[可选] 设备的扩展字段'''
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=u.nowutc, onupdate=u.nowutc)
@@ -168,7 +158,7 @@ class Data:
     # --- 主程序数据访问
 
     @property
-    def status(self) -> int:
+    def status_id(self) -> int:
         '''
         当前的状态 id
         '''
@@ -179,13 +169,39 @@ class Data:
         except SQLAlchemyError as e:
             self._throw(e)
 
-    @status.setter
-    def status(self, value: int):
+    @status_id.setter
+    def status_id(self, value: int):
         try:
             with self._app.app_context():
                 maindata: _MainData = _MainData.query.first()  # type: ignore
                 maindata.status = value
                 db.session.commit()
+        except SQLAlchemyError as e:
+            self._throw(e)
+
+    @property
+    def status(self) -> dict[str, int | str]:
+        '''
+        获取当前状态
+        ```
+        {
+            'id': int,
+            'name': str,
+            'desc': str,
+            'color': str
+        }
+        '''
+        try:
+            model = self._c.status.status_list[self.status_id]
+            if model:
+                return model.model_dump()
+            else:
+                return {
+                    'id': self.status_id,
+                    'name': 'Unknown',
+                    'desc': '未知的标识符，可能是配置问题。',
+                    'color': 'error'
+                }
         except SQLAlchemyError as e:
             self._throw(e)
 

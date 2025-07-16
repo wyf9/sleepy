@@ -25,11 +25,11 @@ class Plugin:
     '''插件名称'''
     config: t.Any
     '''插件配置 (如传入 Model 则为对应 Model 实例, 否则为字典)'''
-    _registry = {}
+    _registry: dict[str, t.Any] = {}
     '''存放插件实例'''
     _routes = []
     '''插件注册的路由'''
-    _index_cards = []
+    _index_cards: dict[str, list[str | t.Callable]] = {}
     '''主页卡片'''
     _index_injects = []
     '''主页注入'''
@@ -40,12 +40,12 @@ class Plugin:
     _global_injects = []
     '''前端全局注入'''
 
-    def __init__(self, name: str, config={}, data: dict = {}):
+    def __init__(self, name: str, config: t.Any = {}, data: dict = {}):
         '''
         初始化插件
 
         :param name: 插件名称 (通常为 `__name__`)
-        :param config: *[Model / dict]* 插件默认配置 (可选)
+        :param config: *(Model / dict)* 插件默认配置 (可选)
         :param data: 插件默认数据 (可选)
         '''
         # 初始化 & 注册插件
@@ -224,6 +224,44 @@ class Plugin:
         return decorator
 
     # endregion plugin-api-route
+
+    # region plugin-api-cards
+
+    def add_index_card(self, card_id: str, content: str | t.Callable):
+        '''
+        注册 index.html 卡片 (如已有则追加到末尾)
+
+        :param card_id: 用于区分不同卡片
+        :param content: 卡片 HTML 内容
+        '''
+        stored = self._index_cards.get(card_id, [])
+        stored.append(content)
+        self._index_cards[card_id] = stored
+
+    def index_card(self, card_id: str):
+        '''
+        [装饰器] 注册 index.html 卡片 (如已有则追加到末尾)
+
+        :param card_id: 用于区分不同卡片
+        '''
+        def decorator(f):
+            @wraps(f)
+            def wrapper(*args, **kwargs):
+                return f(*args, **kwargs)
+            
+            self.add_index_card(
+                card_id=card_id,
+                content=wrapper
+            )
+            return wrapper
+        return decorator
+
+
+    # endregion plugin-api-cards
+
+    # region plugin-api-injects
+
+    # endregion plugin-api-injects
 
     def init(self):
         '''
