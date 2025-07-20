@@ -363,7 +363,7 @@ def get_path(path: str, create_dirs: bool = True, is_dir: bool = False) -> str:
     :param is_dir: 目标是否为目录
     :return: 绝对路径
     '''
-    if current_dir().startswith('/var/task') and path == '/data/data.json':
+    if path == '/data/data.json' and current_dir().startswith('/var/task'):
         # 适配 Vercel 部署 (调整 data/data.json 路径为可写的 /tmp/)
         full_path = '/tmp/sleepy/data/data.json'
     else:

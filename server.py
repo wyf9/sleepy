@@ -462,7 +462,7 @@ def query(version: str = '2'):
         # l.debug('[/query] Using legacy (version 1) response format')
         device_list = d.device_list
         for k in device_list:
-            device_list[k]['app_name'] = device_list[k].pop('status', None)
+            device_list[k]['app_name'] = device_list[k].pop('status', '')
             device_list[k].pop('fields', None)
         return {
             'time': datetime.now(pytz.timezone(c.main.timezone)).strftime('%Y-%m-%d %H:%M:%S'),

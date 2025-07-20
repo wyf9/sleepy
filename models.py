@@ -209,12 +209,6 @@ class _StatusConfigModel(BaseModel):
     锁定设备未在使用时的提示 *(如为空则使用设备提交值)*
     '''
 
-    # offline: str = '设备不在线'
-    # '''
-    # `status.offline`
-    # 锁定设备离线时的提示 *(如为空则使用设备提交值)*
-    # '''
-
     sorted: bool = False
     '''
     `status.sorted`

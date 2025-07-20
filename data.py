@@ -67,10 +67,10 @@ class _MetricsMetaData(db.Model):
     '''
     __tablename__ = 'metrics_meta'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, default=0)
-    today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    week: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    month: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    year: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    today: Mapped[str] = mapped_column(String(LIMIT), nullable=False, default='')
+    week: Mapped[str] = mapped_column(String(LIMIT), nullable=False, default='')
+    month: Mapped[str] = mapped_column(String(LIMIT), nullable=False, default='')
+    year: Mapped[str] = mapped_column(String(LIMIT), nullable=False, default='')
 
 
 class _MetricsData(db.Model):
@@ -497,28 +497,32 @@ class Data:
 
                 # get today
                 now = datetime.now(pytz.timezone(self._c.main.timezone))
-                today = now.day
-                week = now.weekday()
-                month = now.month
-                year = now.year
+                year = f'{now.year}'
+                month = f'{now.year}-{now.month}'
+                today = f'{now.year}-{now.month}-{now.day}'
+                iso = now.isocalendar()
+                week = f'{iso.year}-{iso.week}-{iso.weekday}'
 
-                # compare
                 if today != meta_metrics.today:
+                    l.debug(f'[metrics] today changed: {meta_metrics.today} -> {today}')
                     meta_metrics.today = today
                     for i in raw_metrics:
                         i.daily = 0
 
                 if week != meta_metrics.week:
+                    l.debug(f'[metrics] week changed: {meta_metrics.week} -> {week}')
                     meta_metrics.week = week
                     for i in raw_metrics:
                         i.weekly = 0
 
                 if month != meta_metrics.month:
+                    l.debug(f'[metrics] month changed: {meta_metrics.month} -> {month}')
                     meta_metrics.month = month
                     for i in raw_metrics:
                         i.monthly = 0
 
                 if year != meta_metrics.year:
+                    l.debug(f'[metrics] year changed: {meta_metrics.year} -> {year}')
                     meta_metrics.year = year
                     for i in raw_metrics:
                         i.yearly = 0
