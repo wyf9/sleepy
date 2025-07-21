@@ -1,4 +1,4 @@
-# :odin() utf-8
+# coding: utf-8
 import os
 from logging import getLogger
 

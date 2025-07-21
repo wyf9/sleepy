@@ -500,8 +500,7 @@ class Data:
                 year = f'{now.year}'
                 month = f'{now.year}-{now.month}'
                 today = f'{now.year}-{now.month}-{now.day}'
-                iso = now.isocalendar()
-                week = f'{iso.year}-{iso.week}-{iso.weekday}'
+                week = f'{now.year}-{now.isocalendar().week}'
 
                 if today != meta_metrics.today:
                     l.debug(f'[metrics] today changed: {meta_metrics.today} -> {today}')
