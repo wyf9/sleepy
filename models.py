@@ -126,16 +126,16 @@ class _PageConfigModel(BaseModel):
     '''
     `page.name`
     你的名字
-    - 将显示在网页中 `[User]'s Status:`
+    - 将显示在网页中的 `[User]'s Status:` 处
     '''
 
-    title: str = 'User Alive?'
+    title: str = f'{name} Alive?'
     '''
     `page.title`
     页面标题 (`<title>`)
     '''
 
-    desc: str = 'User \'s Online Status Page'
+    desc: str = f'{name} \'s Online Status Page'
     '''
     `page.desc`
     页面详情 (用于 SEO, 或许吧)
@@ -152,7 +152,7 @@ class _PageConfigModel(BaseModel):
     '''
     `page.background`
     背景图片 url / api
-    - *默认为 imgapi.siiway.top (https://github.com/siiway/imgapi)*
+    - *默认为 `https://imgapi.siiway.top/image` (https://github.com/siiway/imgapi)*
     '''
 
     learn_more_text: str = 'GitHub Repo'

@@ -1,0 +1,11 @@
+<div class="card" id="main">
+    <h1><ruby>似<rt>sǐ</rt></ruby>了吗?</h1>
+    <h3><i><b>{{ c.page.name }}'s</b></i> Status:<br><a id="status">{{ status['name'] }}</a></h3>
+    <p id="additional-info">{{ status['desc'] | safe }}</p>
+    <p id="device-status">[设备状态列表]</p>
+    <p id="last-updated">最后更新: {{ last_updated }}</p>
+    <script>
+        document.getElementById('status').classList.add("{{ status['color'] }}");
+    </script>
+    <script type="module" src="{{ url_for('static', filename='get.js') }}" defer></script>
+</div>

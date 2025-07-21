@@ -63,3 +63,9 @@ def init():
 
 # 设置插件初始化函数
 p.init = init
+
+p.add_index_card('test-1', 'contenttest')
+
+@p.index_card('test-2')
+def testcard():
+    return 'testtest'

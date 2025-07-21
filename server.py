@@ -16,7 +16,7 @@ Security Report: https://wyf9.top/t/sleepy/security
 
 # import modules
 try:
-    # bulit-in
+    # built-in
     import logging
     from datetime import datetime, timedelta
     import time
@@ -27,7 +27,7 @@ try:
     import flask
     import pytz
     from markupsafe import escape
-    from werkzeug.exceptions import NotFound
+    from werkzeug.exceptions import NotFound, HTTPException
     from toml import load as load_toml
 
     # local modules
@@ -224,17 +224,18 @@ def api_unsuccessful_handler(e: u.APIUnsuccessful):
         'message': e.message
     }, e.code
 
-# @app.errorhandler(Exception)
-# def error_handler(e: Exception):
-#     '''
-#     处理未捕获运行时错误
-#     '''
-#     if isinstance(e, HTTPException):
-#         l.warning(f'HTTP Error: {e}')
-#         return e
-#     else:
-#         l.error(f'Unhandled Error: {e}')
-#         return flask.abort(500)
+
+@app.errorhandler(Exception)
+def error_handler(e: Exception):
+    '''
+    处理未捕获运行时错误
+    '''
+    if isinstance(e, HTTPException):
+        l.warning(f'HTTP Error: {e}')
+        return e
+    else:
+        l.error(f'Unhandled Error: {e}')
+        return f'Unhandled Error: {e}'
 
 # endregion errorhandler
 

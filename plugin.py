@@ -29,16 +29,6 @@ class Plugin:
     '''存放插件实例'''
     _routes = []
     '''插件注册的路由'''
-    _index_cards: dict[str, list[str | t.Callable]] = {}
-    '''主页卡片'''
-    _index_injects = []
-    '''主页注入'''
-    _webui_cards = []
-    '''管理面板卡片'''
-    _webui_injects = []
-    '''管理面板注入'''
-    _global_injects = []
-    '''前端全局注入'''
 
     def __init__(self, name: str, config: t.Any = {}, data: dict = {}):
         '''
@@ -234,9 +224,9 @@ class Plugin:
         :param card_id: 用于区分不同卡片
         :param content: 卡片 HTML 内容
         '''
-        stored = self._index_cards.get(card_id, [])
+        stored = PluginInit.instance._index_cards.get(card_id, [])
         stored.append(content)
-        self._index_cards[card_id] = stored
+        PluginInit.instance._index_cards[card_id] = stored
 
     def index_card(self, card_id: str):
         '''
@@ -248,14 +238,13 @@ class Plugin:
             @wraps(f)
             def wrapper(*args, **kwargs):
                 return f(*args, **kwargs)
-            
+
             self.add_index_card(
                 card_id=card_id,
                 content=wrapper
             )
             return wrapper
         return decorator
-
 
     # endregion plugin-api-cards
 
@@ -281,6 +270,19 @@ class PluginInit:
     d: Data
     app: flask.Flask
     plugins_loaded: list[Plugin] = []
+    '''已加载的插件'''
+    _routes = []
+    '''插件注册的路由'''
+    _index_cards: dict[str, list[str | t.Callable]] = {}
+    '''主页卡片'''
+    _index_injects = []
+    '''主页注入'''
+    _webui_cards = []
+    '''管理面板卡片'''
+    _webui_injects = []
+    '''管理面板注入'''
+    _global_injects = []
+    '''前端全局注入'''
 
     def __init__(self, config: ConfigModel, data: Data, app: flask.Flask):
         self.c = config
@@ -292,6 +294,9 @@ class PluginInit:
         '''
         加载插件
         '''
+        # 加载系统自带的卡片
+        self._index_cards['main'] = []
+
         for plugin_name in self.c.plugins_enabled:
             # 加载单个插件
             try:
@@ -312,14 +317,17 @@ class PluginInit:
                         l.debug(f'[plugin] init plugin {plugin_name} took {perf()}ms')
                         break
                 else:
-                    l.warning(f'[plugin] Invaild plugin {plugin_name}! it doesn\'t have a plugin instance')
+                    l.warning(f'[plugin] Invaild plugin {plugin_name}! it doesn\'t have a plugin instance!')
 
             except Exception as e:
                 l.warning(f'[plugin] Error when loading plugin {plugin_name}: {e}')
+                if self.c.main.debug:
+                    raise
 
         loaded_count = len(self.plugins_loaded)
         loaded_names = ", ".join([n.name for n in self.plugins_loaded])
         l.info(f'{loaded_count} plugin{"s" if loaded_count > 1 else ""} enabled: {loaded_names}' if loaded_count > 0 else f'No plugins enabled.')
+        l.debug(f'index cards: {self._index_cards}')
 
     def _register_routes(self, plugin: Plugin):
         '''
