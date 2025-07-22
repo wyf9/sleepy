@@ -9,10 +9,10 @@
 print(f'''
 Welcome to Sleepy Project 2025!
 Give us a Star 🌟 please: https://github.com/sleepy-project/sleepy
-Bug Report: https://wyf9.top/t/sleepy/bug
-Feature Request: https://wyf9.top/t/sleepy/feature
-Security Report: https://wyf9.top/t/sleepy/security
-'''[1:], flush=True)  # 突然想到的
+Bug Report: https://sleepy.siiway.top/t/bug
+Feature Request: https://sleepy.siiway.top/t/feature
+Security Report: https://sleepy.siiway.top/t/security
+'''[1:], flush=True)
 
 # import modules
 try:
@@ -22,6 +22,7 @@ try:
     import time
     from urllib.parse import urlparse, parse_qs, urlunparse
     import json
+    from traceback import format_exc
 
     # 3rd-party
     import flask
@@ -43,7 +44,7 @@ Import module Failed!
  * If you don't know how, see doc/deploy.md
  * If you believe that's our fault, report to us: https://wyf9.top/t/sleepy/bug
  * And provide the logs (below) to us:
-'''[1:-1], flush=True)  # 也是突然想到的
+'''[1:-1], flush=True)
     raise
 
 try:
@@ -139,26 +140,31 @@ except:
 # region theme
 
 
-def render_template(filename: str, **context):
+def render_template(filename: str, _dirname: str = 'templates', _theme: str | None = None, **context) -> str | None:
     '''
-    渲染模板 (从请求参数获取主题)
+    渲染模板 (使用指定主题)
+
+    :param filename: 文件名
+    :param _dirname: `theme/[主题名]/<dirname>/<filename>`
+    :param _theme: 主题 (未指定则从 `flask.g.theme` 读取)
+    :param **context: 将传递给 `flask.render_template_string` 的模板上下文
     '''
-    theme = flask.g.theme
-    content = d.get_cached_file('theme', f'{theme}/templates/{filename}')
+    _theme = _theme or flask.g.theme
+    content = d.get_cached_file('theme', f'{_theme}/{_dirname}/{filename}')
     # 1. 返回主题
     if not content is None:
-        l.debug(f'[theme] return template {filename} from theme {theme}')
-        return u.no_cache_response(flask.render_template_string(content, **context))
+        l.debug(f'[theme] return template {_dirname}/{filename} from theme {_theme}')
+        return flask.render_template_string(content, **context)
 
     # 2. 主题不存在 -> fallback 到默认
-    content = d.get_cached_file('theme', f'default/templates/{filename}')
+    content = d.get_cached_file('theme', f'default/{_dirname}/{filename}')
     if not content is None:
-        l.debug(f'[theme] return template {filename} from default theme')
-        return u.no_cache_response(flask.render_template_string(content, **context))
+        l.debug(f'[theme] return template {_dirname}/{filename} from default theme')
+        return flask.render_template_string(content, **context)
 
     # 3. 默认也不存在 -> 404
-    l.warning(f'[theme] template {filename} not found')
-    return u.no_cache_response(f'Template file {filename} in theme {theme} not found!', 404)
+    l.warning(f'[theme] template {_dirname}/{filename} not found')
+    return None
 
 
 @app.route('/static/<path:filename>', endpoint='static')
@@ -234,7 +240,8 @@ def error_handler(e: Exception):
         l.warning(f'HTTP Error: {e}')
         return e
     else:
-        l.error(f'Unhandled Error: {e}')
+        exc_info = format_exc()
+        l.error(f'Unhandled Error: {e}\n{exc_info}')
         return f'Unhandled Error: {e}'
 
 # endregion errorhandler
@@ -335,43 +342,58 @@ def index():
     根目录返回 html
     - Method: **GET**
     '''
-    # 获取手动状态
-    status = d.status
     # 获取更多信息 (more_text)
     more_text: str = c.page.more_text
     if c.metrics.enabled:
-        today, total = d.metrics_data
+        daily, weekly, monthly, yearly, total = d.metric_data_index
         more_text = more_text.format(
-            visit_today=today.get('/', 0),
-            visit_total=total.get('/', 0)
+            visit_daily=daily,
+            visit_weekly=weekly,
+            visit_monthly=monthly,
+            visit_yearly=yearly,
+            visit_total=total
         )
+    # 加载系统卡片
+    main_card = render_template(
+        'main.index.html',
+        _dirname='cards',
+        username=c.page.name,
+        status=d.status,
+        last_updated=d.last_updated.strftime(f'%Y-%m-%d %H:%M:%S') + ' (UTC+8)'
+    )
+    more_info_card = render_template(
+        'more_info.index.html',
+        _dirname='cards',
+        more_text=more_text,
+        username=c.page.name,
+        learn_more_link=c.page.learn_more_link,
+        learn_more_text=c.page.learn_more_text,
+        available_themes=u.themes_available()
+    )
 
-    # 处理插件注入
-    # plugin_templates: list[tuple[str, str]] = []
-    # for i in p.plugins:
-    #     if i[1]:
-    #         plugin_templates.append((
-    #             i[0],
-    #             flask.render_template_string(
-    #                 i[1],
-    #                 config=i[3].config,
-    #                 global_config=c,
-    #                 data=d.data,
-    #                 utils=u,
-    #                 current_theme=flask.g.theme
-    #             )))
+    # 加载插件卡片
+    cards = {
+        'main': main_card,
+        'more-info': more_info_card
+    }
+    for name, values in p.index_cards.items():
+        value = ''
+        for v in values:
+            if hasattr(v, '__call__'):
+                value += f'{v()}<br/>\n'  # type: ignore - pylance 不太行啊 (?
+            else:
+                value += f'{v}<br/>\n'
+        cards[name] = value
 
     # 返回 html
     return render_template(
         'index.html',
-        c=c,
-        more_text=more_text,
-        status=status,
-        last_updated=d.last_updated.strftime(f'%Y-%m-%d %H:%M:%S') + ' (UTC+8)',
-        # plugins=plugin_templates,
-        current_theme=flask.g.theme,
-        available_themes=u.themes_available()
-    )
+        page_title=c.page.title,
+        page_desc=c.page.desc,
+        page_favicon=c.page.favicon,
+        page_background=c.page.background,
+        cards=cards
+    ) or flask.abort(404)
 
 
 @app.route('/favicon.ico')
@@ -759,7 +781,7 @@ def admin_panel():
         current_theme=flask.g.theme,
         available_themes=u.themes_available(),
         # plugin_admin_cards=rendered_cards
-    )
+    ) or flask.abort(404)
 
 
 @app.route('/webui/login')
@@ -778,7 +800,7 @@ def login():
         'login.html',
         c=c,
         current_theme=flask.g.theme
-    )
+    ) or flask.abort(404)
 
 
 @app.route('/webui/auth', methods=['POST'])

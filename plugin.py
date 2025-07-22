@@ -4,7 +4,6 @@ import typing as t
 from logging import getLogger
 from functools import wraps
 from contextlib import contextmanager
-from uuid import uuid4 as uuid
 
 import flask
 
@@ -224,9 +223,9 @@ class Plugin:
         :param card_id: 用于区分不同卡片
         :param content: 卡片 HTML 内容
         '''
-        stored = PluginInit.instance._index_cards.get(card_id, [])
+        stored = PluginInit.instance.index_cards.get(card_id, [])
         stored.append(content)
-        PluginInit.instance._index_cards[card_id] = stored
+        PluginInit.instance.index_cards[card_id] = stored
 
     def index_card(self, card_id: str):
         '''
@@ -273,15 +272,15 @@ class PluginInit:
     '''已加载的插件'''
     _routes = []
     '''插件注册的路由'''
-    _index_cards: dict[str, list[str | t.Callable]] = {}
+    index_cards: dict[str, list[str | t.Callable]] = {}
     '''主页卡片'''
-    _index_injects = []
+    index_injects = []
     '''主页注入'''
-    _webui_cards = []
+    webui_cards = []
     '''管理面板卡片'''
-    _webui_injects = []
+    webui_injects = []
     '''管理面板注入'''
-    _global_injects = []
+    global_injects = []
     '''前端全局注入'''
 
     def __init__(self, config: ConfigModel, data: Data, app: flask.Flask):
@@ -294,8 +293,6 @@ class PluginInit:
         '''
         加载插件
         '''
-        # 加载系统自带的卡片
-        self._index_cards['main'] = []
 
         for plugin_name in self.c.plugins_enabled:
             # 加载单个插件
@@ -327,7 +324,7 @@ class PluginInit:
         loaded_count = len(self.plugins_loaded)
         loaded_names = ", ".join([n.name for n in self.plugins_loaded])
         l.info(f'{loaded_count} plugin{"s" if loaded_count > 1 else ""} enabled: {loaded_names}' if loaded_count > 0 else f'No plugins enabled.')
-        l.debug(f'index cards: {self._index_cards}')
+        l.debug(f'index cards: {self.index_cards}')
 
     def _register_routes(self, plugin: Plugin):
         '''

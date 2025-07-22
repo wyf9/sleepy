@@ -435,11 +435,11 @@ class Data:
             self._throw(e)
 
     @property
-    def metrics_data(self) -> list[dict[str, str]]:
+    def metrics_data(self) -> tuple[dict[str, int], dict[str, int], dict[str, int], dict[str, int], dict[str, int]]:
         '''
         获取 metrics 数据
 
-        :return: (今日, 全部)
+        :return: (今日, 本周, 本月, 今年, 全部)
         '''
         try:
             raw_metrics: list[_MetricsData] = _MetricsData.query.all()
@@ -454,7 +454,23 @@ class Data:
                 monthly[i.path] = i.monthly
                 yearly[i.path] = i.yearly
                 total[i.path] = i.total
-            return [daily, weekly, monthly, yearly, total]
+            return (daily, weekly, monthly, yearly, total)
+        except SQLAlchemyError as e:
+            self._throw(e)
+
+    @property
+    def metric_data_index(self) -> tuple[int, int, int, int, int]:
+        '''
+        获取主页 (/) 的 metric 数据
+
+        :return: (今日, 本周, 本月, 今年, 全部)
+        '''
+        try:
+            raw_metric: _MetricsData | None = _MetricsData.query.filter_by(path='/').first()
+            if raw_metric:
+                return (raw_metric.daily, raw_metric.weekly, raw_metric.monthly, raw_metric.yearly, raw_metric.total)
+            else:
+                return (0, 0, 0, 0, 0)
         except SQLAlchemyError as e:
             self._throw(e)
 
