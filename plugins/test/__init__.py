@@ -21,6 +21,13 @@ p = Plugin(
 )
 c: Config = p.config
 
+# Config Way 2: 自行处理配置字典
+# p = Plugin(
+#     __name__,
+#     config={}
+# )
+# c = Config.model_validate(p.config)
+
 
 @p.route('/hello')
 def hello():
@@ -28,17 +35,20 @@ def hello():
         d['calls'] += 1
         return {
             'message': f'Hello from {p.name} plugin',
-            'username': p.global_config.page.name,  # Config Way 2: 直接读取全局配置
+            'username': p.global_config.page.name,  # Config Way 3: 直接读取全局配置
             'test': c.test,
             'debug': c.debug,
             'calls': d['calls']
         }
 
+
 def hello2():
     return 'test2'
 
+
 p.add_route(hello2, '/hello2')
 # p.add_route(hello2, 'hello3')
+
 
 @p.global_route('/testplugin')
 def globaltest():
@@ -70,9 +80,19 @@ p.add_index_card('test-1', 'contenttest')
 def testcard():
     return 'testtest'
 
-p.add_index_inject('<script>alert(\'index inject test ok\')</script>')
+# p.add_index_inject('<script>alert(\'index inject test ok\')</script>')
+
+
 @p.index_inject()
 @p.panel_inject()
 def index_inject_1():
     return f'<script>alert(\'views today: {p.global_data.metric_data_index[0]}\')</script>'
-p.add_panel_inject('<script>alert(\'panel inject test ok\')</script>')
+# p.add_panel_inject('<script>alert(\'panel inject test ok\')</script>')
+
+
+@p.panel_card(card_id='test-card-1', card_title='Test Card 1')
+def panel_card_1():
+    return f'views data: {" / ".join([str(i) for i in p.global_data.metric_data_index])}'
+
+
+p.add_panel_card(card_id='test-card-2', card_title='Test Card 2', content='TestTestTest114514')

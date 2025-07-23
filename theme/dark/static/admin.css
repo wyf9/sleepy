@@ -332,3 +332,13 @@ input:checked + .toggle-slider:before {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
 }
+
+.plugin-badge {
+    font-size: 12px;
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 10px;
+    vertical-align: middle;
+}

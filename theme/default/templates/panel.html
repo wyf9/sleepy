@@ -73,8 +73,8 @@
                         <tr>
                             <th>设备ID</th>
                             <th>显示名称</th>
-                            <th>使用状态</th>
-                            <th>应用名称</th>
+                            <th>正在使用</th>
+                            <th>设备状态</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -97,21 +97,18 @@
         {% endif %}
 
         <!-- 插件管理后台卡片 -->
-        {% if plugin_admin_cards %}
-        {% for card in plugin_admin_cards %}
-        <div class="panel-card plugin-card" id="{{ card.id }}">
+        {% for id, card in cards.items() %}
+        <div class="panel-card plugin-card" id="{{ id }}">
             <div class="panel-section">
                 <h2 class="panel-section-title">{{ card.title }} <span
-                        class="plugin-badge">{{ card.plugin_name }}</span></h2>
+                        class="plugin-badge">{{ card.plugin }}</span></h2>
                 <div class="plugin-card-content">
-                    {{ card.content|safe }}
+                    {{ card.content | safe }}
                 </div>
             </div>
         </div>
         {% endfor %}
-        {% endif %}
     </div>
-
 
 </body>
 

@@ -32,7 +32,7 @@ async function initPage() {
         }
     } catch (error) {
         console.error('初始化失败:', error);
-        alert('加载数据失败，请检查网络连接或重新登录');
+        alert(`加载数据失败，请检查网络连接或重新登录\n${error}`);
     }
 }
 

@@ -1,12 +1,15 @@
 [project]
 name = "sleepy"
-version = "5.0-dev-20250722"
+version = "5.0-dev-20250724"
 description = "A Flask application to see if you're online or not."
 license = { text = "MIT" }
 
 [project.urls]
 homepage = "https://sleepy.siiway.top"
-repository = "https://github.com/sleepy-project/sleepy"
+documentation = "https://sleepy.siiway.top"
+github = "https://github.com/sleepy-project/sleepy"
+releasenotes = "https://github.com/sleepy-project/sleepy/releases"
+issues = "https://github.com/sleepy-project/sleepy/issues"
 
 [tool.sleepy-plugin]
 version = [5, 0, 0]

@@ -128,10 +128,10 @@ except KeyboardInterrupt:
     exit(0)
 except u.SleepyException as e:
     l.critical(e)
-    exit(1)
+    exit(2)
 except:
-    l.critical('Unexpected Error!')
-    raise
+    l.critical(f'Unexpected Error!\n{format_exc()}')
+    exit(3)
 
 # endregion init
 
@@ -240,8 +240,7 @@ def error_handler(e: Exception):
         l.warning(f'HTTP Error: {e}')
         return e
     else:
-        exc_info = format_exc()
-        l.error(f'Unhandled Error: {e}\n{exc_info}')
+        l.error(f'Unhandled Error: {e}\n{format_exc()}')
         return f'Unhandled Error: {e}'
 
 # endregion errorhandler
@@ -755,35 +754,17 @@ def admin_panel():
     管理面板
     - Method: **GET**
     '''
-    # # 获取插件注册的管理后台卡片
-    # plugin_admin_cards = p.get_admin_cards()
 
-    # # 渲染插件卡片内容
-    # rendered_cards = []
-    # for card in plugin_admin_cards:
-    #     try:
-    #         # 渲染卡片内容（如果是模板字符串）
-    #         if isinstance(card['content'], str) and '{{' in card['content']:
-    #             card_content = flask.render_template_string(
-    #                 card['content'],
-    #                 c=c,
-    #                 d=d.data,
-    #                 u=u,
-    #                 current_theme=flask.g.theme
-    #             )
-    #         else:
-    #             card_content = card['content']
+    # 加载管理面板卡片
+    cards = {}
+    for name, card in p.panel_cards.items():
+        if hasattr(card['content'], '__call__'):
+            cards[name] = card.copy()
+            cards[name]['content'] = card['content']() # type: ignore
+        else:
+            cards[name] = card
 
-    #         rendered_cards.append({
-    #             'id': card['id'],
-    #             'plugin_name': card['plugin_name'],
-    #             'title': card['title'],
-    #             'content': card_content
-    #         })
-    #     except Exception as e:
-    #         l.error(f"Error rendering admin card '{card['title']}' for plugin '{card['plugin_name']}': {e}")
-
-    # 处理 panel 注入
+    # 处理管理面板注入
     inject = ''
     for i in p.panel_injects:
         if hasattr(i, '__call__'):
@@ -797,6 +778,7 @@ def admin_panel():
         # d=d1.data, TODO: admin card
         current_theme=flask.g.theme,
         available_themes=u.themes_available(),
+        cards=cards,
         inject=inject
         # plugin_admin_cards=rendered_cards
     ) or flask.abort(404)
@@ -905,10 +887,11 @@ if __name__ == '__main__':
             threaded=True
         )
     except Exception as e:
-        l.critical(f"Ctitical error when running server: {e}")
-        raise
+        l.critical(f'Critical error when running server: {e}\n{format_exc()}')
+        exit(1)
     else:
         print()
         l.info('Bye.')
+        exit(0)
 
 # endregion end

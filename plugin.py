@@ -4,6 +4,7 @@ import typing as t
 from logging import getLogger
 from functools import wraps
 from contextlib import contextmanager
+from traceback import format_exc
 
 import flask
 
@@ -245,6 +246,39 @@ class Plugin:
             return wrapper
         return decorator
 
+    def add_panel_card(self, card_id: str, card_title: str, content: str | t.Callable):
+        '''
+        注册管理面板卡片 (唯一, 不可追加)
+
+        :param card_id: 用于区分不同卡片
+        :param content: 卡片 HTML 内容
+        '''
+        PluginInit.instance.panel_cards[card_id] = {
+            'title': card_title,
+            'plugin': self.name,
+            'content': content
+        }
+        return card_id
+
+    def panel_card(self, card_id: str, card_title: str):
+        '''
+        [装饰器] 注册管理面板卡片 (唯一, 不可追加)
+
+        :param card_id: 用于区分不同卡片
+        '''
+        def decorator(f):
+            @wraps(f)
+            def wrapper(*args, **kwargs):
+                return f(*args, **kwargs)
+
+            self.add_panel_card(
+                card_id=card_id,
+                card_title=card_title,
+                content=wrapper
+            )
+            return wrapper
+        return decorator
+
     # endregion plugin-api-cards
 
     # region plugin-api-injects
@@ -318,12 +352,10 @@ class PluginInit:
     '''主页卡片'''
     index_injects: list[str | t.Callable] = []
     '''主页注入'''
-    panel_cards: dict[str, list[str | t.Callable]] = {}
+    panel_cards: dict[str, dict[str, str | t.Callable]] = {}
     '''管理面板卡片'''
     panel_injects: list[str | t.Callable] = []
     '''管理面板注入'''
-    global_injects: list[str | t.Callable] = []
-    '''前端全局注入'''
 
     def __init__(self, config: ConfigModel, data: Data, app: flask.Flask):
         self.c = config
@@ -358,9 +390,7 @@ class PluginInit:
                     l.warning(f'[plugin] Invaild plugin {plugin_name}! it doesn\'t have a plugin instance!')
 
             except Exception as e:
-                l.warning(f'[plugin] Error when loading plugin {plugin_name}: {e}')
-                if self.c.main.debug:
-                    raise
+                l.warning(f'[plugin] Error when loading plugin {plugin_name}: {e}\n{format_exc()}')
 
         loaded_count = len(self.plugins_loaded)
         loaded_names = ", ".join([n.name for n in self.plugins_loaded])
