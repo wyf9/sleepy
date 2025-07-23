@@ -385,6 +385,14 @@ def index():
                 value += f'{v}<br/>\n'
         cards[name] = value
 
+    # 处理主页注入
+    inject = ''
+    for i in p.index_injects:
+        if hasattr(i, '__call__'):
+            inject += str(i()) + '\n'  # type: ignore
+        else:
+            inject += str(i) + '\n'
+
     # 返回 html
     return render_template(
         'index.html',
@@ -392,7 +400,8 @@ def index():
         page_desc=c.page.desc,
         page_favicon=c.page.favicon,
         page_background=c.page.background,
-        cards=cards
+        cards=cards,
+        inject=inject
     ) or flask.abort(404)
 
 
@@ -734,13 +743,13 @@ def events():
 
 # endregion routes-status
 
-# ----- WebUI (Admin) -----
+# ----- Panel (Admin) -----
 
-# region routes-webui
+# region routes-panel
 
 
-@app.route('/webui/panel')
-@u.require_secret(redirect_to='/webui/login')
+@app.route('/panel/panel')
+@u.require_secret(redirect_to='/panel/login')
 def admin_panel():
     '''
     管理面板
@@ -774,27 +783,36 @@ def admin_panel():
     #     except Exception as e:
     #         l.error(f"Error rendering admin card '{card['title']}' for plugin '{card['plugin_name']}': {e}")
 
+    # 处理 panel 注入
+    inject = ''
+    for i in p.panel_injects:
+        if hasattr(i, '__call__'):
+            inject += str(i()) + '\n'  # type: ignore
+        else:
+            inject += str(i) + '\n'
+
     return render_template(
         'panel.html',
         c=c,
         # d=d1.data, TODO: admin card
         current_theme=flask.g.theme,
         available_themes=u.themes_available(),
+        inject=inject
         # plugin_admin_cards=rendered_cards
     ) or flask.abort(404)
 
 
-@app.route('/webui/login')
+@app.route('/panel/login')
 def login():
     '''
     登录页面
     - Method: **GET**
     '''
-    # 检查是否已经登录（cookie 中是否有有效的 sleepy-token）
-    cookie_token = flask.request.cookies.get('sleepy-token')
+    # 检查是否已经登录（cookie 中是否有有效的 sleepy-secret）
+    cookie_token = flask.request.cookies.get('sleepy-secret')
     if cookie_token == c.main.secret:
         # 如果 cookie 有效，直接重定向到管理面板
-        return flask.redirect('/webui/panel')
+        return flask.redirect('/panel/panel')
 
     return render_template(
         'login.html',
@@ -803,7 +821,7 @@ def login():
     ) or flask.abort(404)
 
 
-@app.route('/webui/auth', methods=['POST'])
+@app.route('/panel/auth', methods=['POST'])
 @u.require_secret()
 def auth():
     '''
@@ -819,43 +837,43 @@ def auth():
 
     # 设置 cookie，有效期为 30 天
     max_age = 30 * 24 * 60 * 60  # 30 days in seconds
-    response.set_cookie('sleepy-token', c.main.secret, max_age=max_age, httponly=True, samesite='Lax')
+    response.set_cookie('sleepy-secret', c.main.secret, max_age=max_age, httponly=True, samesite='Lax')
 
-    l.debug('[WebUI] Login successful, cookie set')
+    l.debug('[Panel] Login successful, cookie set')
     return response
 
 
-@app.route('/webui/logout')
+@app.route('/panel/logout')
 def logout():
     '''
     处理退出登录请求，清除 cookie
     - Method: **GET**
     '''
     # 创建响应
-    response = flask.make_response(flask.redirect('/webui/login'))
+    response = flask.make_response(flask.redirect('/panel/login'))
 
     # 清除认证 cookie
-    response.delete_cookie('sleepy-token')
+    response.delete_cookie('sleepy-secret')
 
-    l.debug('[WebUI] Logout successful')
+    l.debug('[Panel] Logout successful')
     return response
 
 
-@app.route('/webui/verify', methods=['GET', 'POST'])
+@app.route('/panel/verify', methods=['GET', 'POST'])
 @u.require_secret()
 def verify_secret():
     '''
     验证密钥是否有效
     - Method: **GET / POST**
     '''
-    l.debug('[WebUI] Secret verified')
+    l.debug('[Panel] Secret verified')
     return {
         'success': True,
         'code': 'OK',
         'message': 'Secret verified'
     }
 
-# endregion routes-webui
+# endregion routes-panel
 
 # if c.util.steam_enabled:
 #     @app.route('/steam-iframe')

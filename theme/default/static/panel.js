@@ -1,6 +1,6 @@
 // 全局变量
 let statusList = [];
-let currentStatus = {'color': 'sleeping', 'desc': '', 'id': -1, 'name': '未知'};
+let currentStatus = { 'color': 'sleeping', 'desc': '', 'id': -1, 'name': '未知' };
 let deviceData = {};
 let privateMode = false;
 
@@ -9,7 +9,9 @@ async function initPage() {
     try {
         // 获取状态列表
         const statusResponse = await fetch('/api/status/list');
-        statusList = await statusResponse.json();
+        statusListResp = await statusResponse.json();
+        statusList = statusListResp.status_list;
+        console.debug(`got statusList: ${statusList}`);
         renderStatusSelector();
 
         // 获取当前状态和设备信息
@@ -39,17 +41,19 @@ function renderStatusSelector() {
     const container = document.getElementById('status-selector');
     container.innerHTML = '';
 
-    statusList.forEach((status, index) => {
+    let status;
+    for (let index = 0; index < statusList.length; index++) {
+        status = statusList[index];
         const statusItem = document.createElement('div');
         statusItem.className = `status-item ${currentStatus.id === index ? 'active' : ''}`;
         statusItem.style.backgroundColor = getStatusColor(status.color);
         statusItem.textContent = status.name;
         statusItem.dataset.index = index;
-        statusItem.addEventListener('click', function() {
+        statusItem.addEventListener('click', function () {
             setStatus(parseInt(this.dataset.index));
         });
         container.appendChild(statusItem);
-    });
+    };
 }
 
 // 获取状态颜色
@@ -117,7 +121,7 @@ function renderDeviceList() {
         deleteButton.className = 'btn btn-danger';
         deleteButton.textContent = '删除';
         deleteButton.dataset.deviceId = deviceId;
-        deleteButton.addEventListener('click', function() {
+        deleteButton.addEventListener('click', function () {
             removeDevice(this.dataset.deviceId);
         });
 
@@ -193,7 +197,7 @@ async function clearAllDevices() {
 // 切换隐私模式
 async function togglePrivateMode(isPrivate) {
     try {
-        const response = await fetch(`/api/device/private_mode?private=${isPrivate}`);
+        const response = await fetch(`/api/device/private?private=${isPrivate}`);
         const data = await response.json();
 
         if (data.success) {
@@ -297,11 +301,11 @@ function logout() {
     // 清除本地存储的密钥
     localStorage.removeItem('sleepy_secret');
     // 重定向到退出登录路由，该路由会清除 cookie
-    window.location.href = '/webui/logout';
+    window.location.href = '/panel/logout';
 }
 
 // 初始化事件监听器
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // 添加事件监听器
     const clearDevicesBtn = document.getElementById('clear-devices-btn');
     if (clearDevicesBtn) {
@@ -323,13 +327,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // 切换隐私模式按钮
     const privateModeToggle = document.getElementById('private-mode-toggle');
     if (privateModeToggle) {
-        privateModeToggle.addEventListener('change', function() {
+        privateModeToggle.addEventListener('change', function () {
             togglePrivateMode(this.checked);
         });
     }
 
     // 设备删除按钮
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         const target = event.target;
         if (target.matches('button[onclick^="removeDevice"]')) {
             event.preventDefault();

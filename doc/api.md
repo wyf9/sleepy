@@ -62,10 +62,10 @@ Sleepy-Secret: MySecretCannotGuess
 Authorization: Bearer MySecretCannotGuess
 ```
 
-5. Cookie *(`Cookie`)* 的 `sleepy-token`
+5. Cookie *(`Cookie`)* 的 `sleepy-secret`
 
 ```
-sleepy-token=MySecretCannotGuess
+sleepy-secret=MySecretCannotGuess
 ```
 
 > 服务端的 `secret` 即为在环境变量中配置的 `SLEEPY_SECRET`

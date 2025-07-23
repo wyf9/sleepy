@@ -15,7 +15,7 @@ async function login() {
     if (useModernAuth) {
         try {
             // 现代方式：使用fetch API发送登录请求
-            const response = await fetch('/webui/auth', {
+            const response = await fetch('/panel/auth', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -27,7 +27,7 @@ async function login() {
                 // 登录成功，重定向到管理面板
                 // 构建重定向URL，保留主题参数
 
-                window.location.href = '/webui/panel';
+                window.location.href = '/panel/panel';
             } else {
                 // 登录失败
                 const data = await response.json();
@@ -41,10 +41,10 @@ async function login() {
         }
     } else {
         // 传统方式：使用 cookie 进行身份验证，不再在 URL 中传递密钥
-        // 由于没有 /webui/auth 接口，我们需要手动设置 cookie
-        document.cookie = `sleepy-token=${encodeURIComponent(secret)}; max-age=${30 * 24 * 60 * 60}; path=/; samesite=Lax`;
+        // 由于没有 /panel/auth 接口，我们需要手动设置 cookie
+        document.cookie = `sleepy-secret=${encodeURIComponent(secret)}; max-age=${30 * 24 * 60 * 60}; path=/; samesite=Lax`;
 
-        window.location.href = '/webui/panel';
+        window.location.href = '/panel/panel';
     }
 }
 
@@ -61,7 +61,7 @@ async function validateCookie() {
         if (response.ok) {
             // cookie 有效，重定向到管理面板
             console.log('Cookie 验证成功，正在重定向到管理面板...');
-            window.location.href = '/webui/panel';
+            window.location.href = '/panel/panel';
             return true;
         } else {
             // cookie 无效，显示登录表单

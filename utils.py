@@ -116,9 +116,9 @@ def require_secret(redirect_to: str | None = None):
                 l.debug('[Auth] Verify secret Success from Header (Authorization)')
                 return view_func(*args, **kwargs)
 
-            # 5. cookie (sleepy-token)
-            elif flask.request.cookies.get('sleepy-token') == flask.g.secret:
-                l.debug('[Auth] Verify secret Success from Cookie (sleepy-token)')
+            # 5. cookie (sleepy-secret)
+            elif flask.request.cookies.get('sleepy-secret') == flask.g.secret:
+                l.debug('[Auth] Verify secret Success from Cookie (sleepy-secret)')
                 return view_func(*args, **kwargs)
 
             # -1. no any secret

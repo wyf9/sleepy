@@ -69,3 +69,10 @@ p.add_index_card('test-1', 'contenttest')
 @p.index_card('test-2')
 def testcard():
     return 'testtest'
+
+p.add_index_inject('<script>alert(\'index inject test ok\')</script>')
+@p.index_inject()
+@p.panel_inject()
+def index_inject_1():
+    return f'<script>alert(\'views today: {p.global_data.metric_data_index[0]}\')</script>'
+p.add_panel_inject('<script>alert(\'panel inject test ok\')</script>')

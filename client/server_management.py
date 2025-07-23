@@ -155,7 +155,7 @@ class SleepyManager:
 
     def device_private_mode(self, is_private: bool) -> Dict:
         """设置隐私模式"""
-        return self._request('GET', 'api/device/private_mode', params={'private': str(is_private).lower()})
+        return self._request('GET', 'api/device/private', params={'private': str(is_private).lower()})
 
 
 class SimplePrinter:

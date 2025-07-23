@@ -80,8 +80,10 @@
             <p>当前主题: <span id="current-theme">{{ current_theme }}</span></p>
             <div id="theme-selector">
                 {% for theme in available_themes %}
-                <a href="/webui/panel?theme={{ theme }}">
-                <div class="status-item {% if current_theme == theme %}active{% endif %}" style="color: black;">{{ theme }} 主题</div></a>
+                <a href="/panel/panel?theme={{ theme }}">
+                    <div class="status-item {% if current_theme == theme %}active{% endif %}" style="color: black;">
+                        {{ theme }} 主题</div>
+                </a>
                 {% endfor %}
             </div>
         </div>

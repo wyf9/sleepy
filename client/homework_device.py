@@ -175,10 +175,10 @@ def device_clear():
 
 def private_mode(private: bool):
     '''
-    /device/private_mode using GET
+    /device/private using GET
     - open / close private mode *(don't show device status)*
     '''
-    resp = get(f'{SERVER}/device/private_mode?secret={SECRET}&private={private}')
+    resp = get(f'{SERVER}/device/private?secret={SECRET}&private={private}')
     print(f'[/device/private] Response: {resp.status_code} - {resp.json()}')
 
 # - custom

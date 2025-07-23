@@ -109,11 +109,11 @@ class _MainConfigModel(BaseModel):
     **请勿泄露, 相当于密码!!!**
     '''
 
-    cache_age: int = 600
+    cache_age: int = 1200
     '''
     `main.cache_age`
     静态资源缓存时间 (秒)
-    - *建议设置为 10 分钟 (60s)*
+    - *建议设置为 20 分钟 (1200s)*
     '''
 
 
@@ -317,7 +317,7 @@ redirect_map = {
     '/device/clear': '/api/device/clear',
     '/device/private_mode': '/api/device/private',
     '/metadata': '/api/meta',
-    '/verify-secret': '/webui/verify',
+    '/verify-secret': '/panel/verify',
     '/events': '/api/status/events'
 }
 '''

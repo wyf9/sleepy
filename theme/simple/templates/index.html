@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="icon" href="{{ c.page.favicon }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
+
 <body>
     <div class="container">
         <div class="card" id="user-status">
@@ -30,7 +32,7 @@
                 你可以通过这个页面视奸 <b>{{ c.page.name }}</b>。<br>
                 <a href="{{ c.page.learn_more_link }}" target="_blank">{{ c.page.learn_more_text | safe }}</a>
                 |
-                <a href="/webui/login">管理面板</a>
+                <a href="/panel/login">管理面板</a>
                 <!-- <div style="margin-top: 10px;">
                     主题:
                     {% for theme in available_themes %}
@@ -46,4 +48,5 @@
     </script>
     <script type="module" src="{{ url_for('static', filename='get.js') }}" defer></script>
 </body>
+
 </html>

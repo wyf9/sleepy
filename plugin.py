@@ -249,6 +249,48 @@ class Plugin:
 
     # region plugin-api-injects
 
+    def add_index_inject(self, content: str | t.Callable):
+        '''
+        主页注入 (不显示卡片)
+
+        :param content: 注入 HTML 内容
+        '''
+        PluginInit.instance.index_injects.append(content)
+
+    def index_inject(self):
+        '''
+        [装饰器] 主页注入 (不显示卡片)
+        '''
+        def decorator(f):
+            @wraps(f)
+            def wrapper(*args, **kwargs):
+                return f(*args, **kwargs)
+
+            self.add_index_inject(wrapper)
+            return wrapper
+        return decorator
+
+    def add_panel_inject(self, content: str | t.Callable):
+        '''
+        管理面板注入 (不显示卡片)
+
+        :param content: 注入 HTML 内容
+        '''
+        PluginInit.instance.panel_injects.append(content)
+
+    def panel_inject(self):
+        '''
+        [装饰器] 管理面板注入 (不显示卡片)
+        '''
+        def decorator(f):
+            @wraps(f)
+            def wrapper(*args, **kwargs):
+                return f(*args, **kwargs)
+
+            self.add_panel_inject(wrapper)
+            return wrapper
+        return decorator
+
     # endregion plugin-api-injects
 
     def init(self):
@@ -274,13 +316,13 @@ class PluginInit:
     '''插件注册的路由'''
     index_cards: dict[str, list[str | t.Callable]] = {}
     '''主页卡片'''
-    index_injects = []
+    index_injects: list[str | t.Callable] = []
     '''主页注入'''
-    webui_cards = []
+    panel_cards: dict[str, list[str | t.Callable]] = {}
     '''管理面板卡片'''
-    webui_injects = []
+    panel_injects: list[str | t.Callable] = []
     '''管理面板注入'''
-    global_injects = []
+    global_injects: list[str | t.Callable] = []
     '''前端全局注入'''
 
     def __init__(self, config: ConfigModel, data: Data, app: flask.Flask):
@@ -293,7 +335,6 @@ class PluginInit:
         '''
         加载插件
         '''
-
         for plugin_name in self.c.plugins_enabled:
             # 加载单个插件
             try:

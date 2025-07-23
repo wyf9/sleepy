@@ -48,7 +48,7 @@
                 <div style="margin-top: 10px;">
                     主题:
                     {% for theme in available_themes %}
-                    <a href="/webui/panel?theme={{ theme }}" style="color: rgb(0, 255, 0);">{{ theme }}</a>{% if not
+                    <a href="/panel/panel?theme={{ theme }}" style="color: rgb(0, 255, 0);">{{ theme }}</a>{% if not
                     loop.last %} | {% endif %}
                     {% endfor %}
                 </div>
@@ -114,5 +114,7 @@
 
 
 </body>
+
+{{ inject | safe }}
 
 </html>
