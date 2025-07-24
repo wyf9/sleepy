@@ -141,10 +141,10 @@ class _PageConfigModel(BaseModel):
     页面详情 (用于 SEO, 或许吧)
     - *`<meta name="description">`*
     '''
-    favicon: str = '/static/favicon.ico'
+    favicon: str = '/favicon.ico'
     '''
     `page.favicon`
-    页面图标 (favicon) url, 默认为 /static/favicon.ico
+    页面图标 (favicon) url, 默认为 /favicon.ico
     - *可为绝对路径 / 相对路径 url*
     '''
 

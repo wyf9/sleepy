@@ -23,6 +23,7 @@ try:
     from urllib.parse import urlparse, parse_qs, urlunparse
     import json
     from traceback import format_exc
+    from mimetypes import guess_type
 
     # 3rd-party
     import flask
@@ -150,14 +151,14 @@ def render_template(filename: str, _dirname: str = 'templates', _theme: str | No
     :param **context: 将传递给 `flask.render_template_string` 的模板上下文
     '''
     _theme = _theme or flask.g.theme
-    content = d.get_cached_file('theme', f'{_theme}/{_dirname}/{filename}')
+    content = d.get_cached_text('theme', f'{_theme}/{_dirname}/{filename}')
     # 1. 返回主题
     if not content is None:
         l.debug(f'[theme] return template {_dirname}/{filename} from theme {_theme}')
         return flask.render_template_string(content, **context)
 
     # 2. 主题不存在 -> fallback 到默认
-    content = d.get_cached_file('theme', f'default/{_dirname}/{filename}')
+    content = d.get_cached_text('theme', f'default/{_dirname}/{filename}')
     if not content is None:
         l.debug(f'[theme] return template {_dirname}/{filename} from default theme')
         return flask.render_template_string(content, **context)
@@ -409,7 +410,10 @@ def favicon():
     '''
     重定向 /favicon.ico 到用户自定义的 favicon
     '''
-    return flask.redirect(c.page.favicon, 302)
+    if c.page.favicon == '/favicon.ico':
+        return serve_public('favicon.ico')
+    else:
+        return flask.redirect(c.page.favicon, 302)
 
 
 @app.route('/'+'git'+'hub')
@@ -760,7 +764,7 @@ def admin_panel():
     for name, card in p.panel_cards.items():
         if hasattr(card['content'], '__call__'):
             cards[name] = card.copy()
-            cards[name]['content'] = card['content']() # type: ignore
+            cards[name]['content'] = card['content']()  # type: ignore
         else:
             cards[name] = card
 
@@ -866,6 +870,25 @@ def verify_secret():
 #             steamids=c.util.steam_ids,
 #             steam_refresh_interval=c.util.steam_refresh_interval
 #         )
+
+# ----- Public -----
+
+# region routes-public
+
+
+@app.route('/<path:path_name>')
+def serve_public(path_name: str):
+    '''
+    服务 `/data/public` / `/public` 文件夹下文件
+    '''
+    l.debug(f'Serving static file: {path_name}')
+    file = d.get_cached_file('data/public', path_name) or d.get_cached_file('public', path_name)
+    if file:
+        mime = guess_type(path_name)[0] or 'text/plain'
+        resp = flask.send_file(file, mimetype=mime)
+    return resp
+
+# endregion routes-public
 
 # endregion routes
 

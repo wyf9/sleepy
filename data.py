@@ -1,11 +1,11 @@
 # coding: utf-8
 
-import os
 from datetime import datetime
 from logging import getLogger
 from threading import Thread
 from time import sleep, time
 from typing import Any
+from io import BytesIO
 
 from werkzeug.security import safe_join
 from flask import Flask
@@ -584,15 +584,15 @@ class Data:
 
     # --- 缓存系统
 
-    _cache: dict[str, tuple[float, str]] = {}
+    _cache: dict[str, tuple[float, BytesIO]] = {}
 
-    def get_cached_file(self, dirname: str, filename: str) -> str | None:
+    def get_cached_file(self, dirname: str, filename: str) -> BytesIO | None:
         '''
-        加载文本文件 (经过缓存)
+        加载文件 (经过缓存)
 
         :param dirname: 路径
         :param filename: 文件名
-        :return str: (加载成功) 文件内容
+        :return bytesIO: (加载成功) 文件内容 **(字节流)**
         :return None: (加载失败) 空
         '''
         filepath = safe_join(u.get_path(dirname), filename)
@@ -602,26 +602,42 @@ class Data:
         try:
             if self._c.main.debug:
                 # debug -> load directly
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    ret = f.read()
-                    f.close()
-                return ret
+                with open(filepath, 'rb') as f:
+                    return BytesIO(f.read())
             else:
+                cache_key = f'f-{dirname}/{filename}'
                 # check cache & expire
                 now = time()
-                cached = self._cache.get(f'file-{filename}')
+                cached = self._cache.get(cache_key)
                 if cached and now - cached[0] < self._c.main.cache_age:
                     # has cache, and not expired
                     return cached[1]
                 else:
                     # no cache, or expired
-                    with open(filepath, 'r', encoding='utf-8') as f:
-                        ret = f.read()
-                        f.close()
-                    self._cache[f'file-{filename}'] = (now, ret)
+                    with open(filepath, 'rb') as f:
+                        ret = BytesIO(f.read())
+                    self._cache[cache_key] = (now, ret)
                     return ret
         except FileNotFoundError or IsADirectoryError:
             # not found / isn't file -> none
+            return None
+
+    def get_cached_text(self, dirname: str, filename: str) -> str | None:
+        '''
+        加载文本文件 (经过缓存)
+
+        :param dirname: 路径
+        :param filename: 文件名
+        :return bytes: (加载成功) 文件内容 **(字符串)**
+        :return None: (加载失败) 空
+        '''
+        raw = self.get_cached_file(dirname, filename)
+        if raw:
+            try:
+                return str(raw.getvalue(), encoding='utf-8')
+            except UnicodeDecodeError:
+                return None
+        else:
             return None
 
     def _clean_cache(self):
@@ -633,4 +649,6 @@ class Data:
         now = time()
         for name in self._cache.keys():
             if now - self._cache.get(name, (now, ''))[0] > self._c.main.cache_age:
-                self._cache.pop(name, None)
+                f = self._cache.pop(name, (0, None))[1]
+                if f:
+                    f.close()
