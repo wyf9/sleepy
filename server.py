@@ -51,9 +51,9 @@ Import module Failed!
 try:
     # get version info
     with open(u.get_path('pyproject.toml'), 'r', encoding='utf-8') as f:
-        file: dict = load_toml(f)
-        version_str: str = file.get('project', {}).get('version', 'unknown')
-        version: tuple[int, int, int] = file.get('tool', {}).get('sleepy-plugin', {}).get('version', (0, 0, 0))
+        file: dict = load_toml(f).get('tool', {}).get('sleepy-plugin', {})
+        version_str: str = file.get('version-str', 'unknown')
+        version: tuple[int, int, int] = file.get('version-num', (0, 0, 0))
         f.close()
 
     # init flask app
@@ -313,7 +313,6 @@ def before_request():
 def after_request(resp: flask.Response):
     '''
     after_request:
-    - 插入 oEmbed
     - 记录 metrics 信息
     - 显示访问日志
     '''

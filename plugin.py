@@ -14,6 +14,42 @@ import utils as u
 
 l = getLogger(__name__)
 
+# region plugin-events
+
+# TODO undone
+
+# class BaseEvent:
+#     '''
+#     事件基类
+#     '''
+#     id: str
+
+
+# class AppStartedEvent(BaseEvent):
+#     '''
+#     应用启动事件
+#     '''
+#     id = 'app_started'
+
+#     def __init__(self):
+#         pass
+
+
+# class StatusUpdatedEvent(BaseEvent):
+#     '''
+#     手动状态更新事件
+#     '''
+#     id = 'status_updated'
+
+#     def __init__(self, old_status, new_status):
+#         self.old_status = old_status
+#         self.new_status = new_status
+
+# class 
+
+# endregion plugin-events
+
+
 # region plugin-api
 
 
@@ -356,6 +392,7 @@ class PluginInit:
     '''管理面板卡片'''
     panel_injects: list[str | t.Callable] = []
     '''管理面板注入'''
+    # events: dict[]
 
     def __init__(self, config: ConfigModel, data: Data, app: flask.Flask):
         self.c = config
