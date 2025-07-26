@@ -21,7 +21,6 @@ def getenv(key: str, default: Any, typeobj: Callable) -> Any:
     if got_value is None:
         return default
     else:
-        print(f'{key} -> {got_value}')
         if typeobj == bool:
             return tobool(got_value)
         ret = typeobj(got_value)
